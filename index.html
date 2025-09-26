@@ -28,7 +28,6 @@
     .ok { color: #0b7a0b; font-weight: bold; }
     .no { color: #b30000; font-weight: bold; }
 
-    /* Summary rows aligned inline (checkbox | study | status | reasons) */
     .summary-list { text-align:left; padding-left:0; list-style:none; }
     .summary-list li {
       display: grid;
@@ -45,13 +44,14 @@
     .actions-bottom { display:flex; gap:10px; justify-content:space-between; }
     .small { font-size: 13px; color:#555; }
 
-    /* Share page - per-study outcome rows */
     .study-outcomes { display: grid; grid-template-columns: 1fr 140px; gap: 8px; align-items:center; }
     .study-outcomes .study-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   </style>
 </head>
 <body>
 <div class="container">
+
+  <!-- SCRIPT DI CONFIG E HELPER -->
   <script>
     const infoMessages = {
       weTrust: "", athena: "", hemorrhagic: "",
@@ -59,7 +59,7 @@
       twin2win2: "", artemis: "", hybernia: "", doneSymple: ""
     };
 
-    /* Randomization links */
+    // Link randomizzazione (opzionali)
     const randomizationLinks = {
       "ATHENA": "https://www.randomize.net/Randomize/Set.aspx?id=ba510dbb-ab7d-42ee-ae95-d8a46394d6ec&token=0d0bff39-455b-4f60-a95a-154476064f2e",
       "VANISH": "https://app.studyrandomizer.com/dashboard/",
@@ -67,11 +67,10 @@
       "TWIN-2-WIN 2": "https://www.studyrandomizer.com/",
       "DONE SYMPLE": "https://www.studyrandomizer.com/"
     };
-      <!-- === GOOGLE APPS SCRIPT CONFIG + HELPERS === -->
-    // ⬇️ Incolla l'URL della tua Web App (termina con /exec)
+
+    // === GOOGLE APPS SCRIPT CONFIG + HELPERS ===
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzuAaVYAUvb8KdPTn_83LMV_hfVUsAP0IRYsNxG4sHPl2Vk5tgJOO2bOjHUPnVdRePb/exec";
 
-    // Invia al Google Sheet (no preflight CORS)
     function sendToSheet(payload){
       try {
         const body = new URLSearchParams({ payload: JSON.stringify(payload) });
@@ -86,18 +85,15 @@
       }
     }
 
-    // Mappa i nomi visualizzati -> chiavi colonna del foglio
+    // Colonne dei trial sullo Sheet
     const SHEET_TRIAL_KEYS = [
       "WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST","TICH3","LIBREXIA",
       "TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE"
     ];
 
-    // Costruisce l'oggetto trials per lo Sheet: default = "no", selezionati = outcome scelto
+    // Mappa nomi UI -> chiave colonna dello Sheet
     function buildTrialsForSheet(selectedStudies, studyOutcomes){
-      // default "no" per tutte le colonne (anche se non presenti a UI)
       const t = Object.fromEntries(SHEET_TRIAL_KEYS.map(k => [k, "no"]));
-
-      // mappa dai nomi mostrati a UI -> chiave colonna
       const nameToKey = {
         "WeTrust":"WeTrust",
         "MARSS":"MARSS",
@@ -113,19 +109,15 @@
         "HYBERNIA":"HYBERNIA",
         "DONE SYMPLE":"DONESYMPLE"
       };
-
       (selectedStudies || []).forEach(displayName => {
         const key = nameToKey[displayName];
         if (!key) return;
-        const outcome = studyOutcomes?.[displayName] || "intervention"; // default se non toccato
+        const outcome = studyOutcomes?.[displayName] || "intervention";
         t[key] = outcome; // "intervention" | "control"
       });
-
-      // NB: per studi non selezionati o non eleggibili resta "no"
       return t;
     }
   </script>
-
 
   <!-- PAGE 1: Main Menu -->
   <div id="mainMenu" class="page visible">
@@ -510,7 +502,6 @@
       <label for="patientNumber">Numero di storia (patient number)</label>
       <input type="text" id="patientNumber" placeholder="es. 2025-00123" required>
 
-      <!-- Per-study outcomes (generated dynamically) -->
       <label>Randomization outcome for each selected study</label>
       <div id="studyOutcomesContainer" class="study-outcomes"></div>
 
@@ -519,13 +510,12 @@
 
       <button type="button" onclick="copyMessage()">Copy</button>
       <button type="button" onclick="shareWhatsApp()">Share via WhatsApp</button>
-       <button type="button" onclick="saveToSheet()">Salva su Google Sheet</button>
+      <button type="button" onclick="saveToSheet()">Salva su Google Sheet</button>
       <button type="button" onclick="showPage('summaryPage')">Back</button>
-
-   
     </form>
   </div>
 
+  <!-- SCRIPT PRINCIPALE APP -->
   <script>
     let preData = {}, postData = {}, evtData = {}, hemData = {};
     let lixData = { criteria: {} };
@@ -549,42 +539,18 @@
     }
 
     const trialCriteria = {
-      "WeTrust": `
-        <ul><li>Age ≥ 18 years</li><li>NIHSS ≥ 10</li><li>pre-mRS 0–2</li><li>Last Seen Well ≤ 6 hours</li><li>Philips angiograph available</li></ul>
-      `,
-      "TICH3": `
-        <ul><li>Onset &lt; 4.5h</li><li>Hemorrhage volume &lt; 60 mL</li><li>Not isolated IVH</li><li>GCS ≥ 5</li><li>No acute venous thrombosis/hypersensitivity, etc.</li></ul>
-      `,
-      "ATHENA": `
-        <ul><li>Age 22–85</li><li>NIHSS ≥ 8</li><li>pre-mRS 0–2</li><li>LTSW ≤ 24h</li><li>LVO = yes, tandem = no, tortuosity = no</li></ul>
-      `,
-      "FASTEST": `
-        <ul><li>Age 18–80</li><li>Onset ≤ 2h</li><li>GCS ≥ 8</li><li>Hemorrhage volume 2–60 cc</li><li>Acceptable IVH score, no procoagulant drugs, etc.</li></ul>
-      `,
-      "Librexia": `
-        <ul><li>Age ≥ 40 years</li><li>Within 48 hours from LTSW</li><li>Ischemic stroke with NIHSS ≤ 7 and suspected atherothrombotic cause</li><li>ABCD2 score ≥ 6 (if TIA)</li><li>INR ≤ 1.5, aPTT ≤ 1.4, not pregnant</li><li>Exclusions: pre-mRS ≥ 3, intracranial hemorrhage history, GFR &lt; 15, etc.</li></ul>
-      `,
-      "Vanish": `
-        <ul><li>Age ≥ 18 years</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 6</li><li>Target vessel: Terminal ICA (ICA-T) or M1</li><li>No contraindications to thrombolysis</li></ul>
-      `,
-      "Pivotal": `
-        <ul><li>LTSW &lt; 8 hours</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 6</li><li>Occlusion: Terminal ICA (ICA-T), M1 (prox–distal) or Basilar artery</li></ul>
-      `,
-      "Moste": `
-        <ul><li>LTSW &lt; 23 hours</li><li>pre-mRS 0–1</li><li>NIHSS &lt; 6</li><li>Occlusion: Terminal ICA (ICA-T), M1 or M2</li></ul>
-      `,
-      "Twin2Win2": `
-        <ul><li>LTSW &lt; 24h</li><li>Age &gt;18</li><li>pre-mRS 0–2</li><li>NIHSS ≥ 6</li><li>Occlusion: Terminal ICA (ICA-T), M1 (distal included), Basilar artery</li></ul>
-      `,
-      "Artemis": `
-        <ul><li>LTSW &lt; 24h</li><li>Age 18–85</li><li>pre-mRS 0–2</li><li>NIHSS 6–25</li><li>Occlusion: Intracranial ICA, M1, M2 proximal/dominant</li><li>ASPECTS &gt; 5</li></ul>
-      `,
-      "Hybernia": `
-        <ul><li>LTSW &lt; 24h</li><li>Age 18–89</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 6</li><li>Occlusion: Intracranial ICA, M1, Any M2</li><li>ASPECTS &gt; 4</li></ul>
-      `,
-      "DoneSymple": `
-        <ul><li>Window 24–72h</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 8</li><li>Occlusion: any vessel</li></ul>
-      `
+      "WeTrust": `<ul><li>Age ≥ 18 years</li><li>NIHSS ≥ 10</li><li>pre-mRS 0–2</li><li>Last Seen Well ≤ 6 hours</li><li>Philips angiograph available</li></ul>`,
+      "TICH3": `<ul><li>Onset &lt; 4.5h</li><li>Hemorrhage volume &lt; 60 mL</li><li>Not isolated IVH</li><li>GCS ≥ 5</li><li>No acute venous thrombosis/hypersensitivity, etc.</li></ul>`,
+      "ATHENA": `<ul><li>Age 22–85</li><li>NIHSS ≥ 8</li><li>pre-mRS 0–2</li><li>LTSW ≤ 24h</li><li>LVO = yes, tandem = no, tortuosity = no</li></ul>`,
+      "FASTEST": `<ul><li>Age 18–80</li><li>Onset ≤ 2h</li><li>GCS ≥ 8</li><li>Hemorrhage volume 2–60 cc</li><li>Acceptable IVH score, no procoagulant drugs, etc.</li></ul>`,
+      "Librexia": `<ul><li>Age ≥ 40 years</li><li>Within 48 hours from LTSW</li><li>Ischemic stroke with NIHSS ≤ 7 and suspected atherothrombotic cause</li><li>ABCD2 score ≥ 6 (if TIA)</li><li>INR ≤ 1.5, aPTT ≤ 1.4, not pregnant</li><li>Exclusions: pre-mRS ≥ 3, intracranial hemorrhage history, GFR &lt; 15, etc.</li></ul>`,
+      "Vanish": `<ul><li>Age ≥ 18 years</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 6</li><li>Target vessel: Terminal ICA (ICA-T) or M1</li><li>No contraindications to thrombolysis</li></ul>`,
+      "Pivotal": `<ul><li>LTSW &lt; 8 hours</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 6</li><li>Occlusion: Terminal ICA (ICA-T), M1 (prox–distal) or Basilar artery</li></ul>`,
+      "Moste": `<ul><li>LTSW &lt; 23 hours</li><li>pre-mRS 0–1</li><li>NIHSS &lt; 6</li><li>Occlusion: Terminal ICA (ICA-T), M1 or M2</li></ul>`,
+      "Twin2Win2": `<ul><li>LTSW &lt; 24h</li><li>Age &gt;18</li><li>pre-mRS 0–2</li><li>NIHSS ≥ 6</li><li>Occlusion: Terminal ICA (ICA-T), M1 (distal included), Basilar artery</li></ul>`,
+      "Artemis": `<ul><li>LTSW &lt; 24h</li><li>Age 18–85</li><li>pre-mRS 0–2</li><li>NIHSS 6–25</li><li>Occlusion: Intracranial ICA, M1, M2 proximal/dominant</li><li>ASPECTS &gt; 5</li></ul>`,
+      "Hybernia": `<ul><li>LTSW &lt; 24h</li><li>Age 18–89</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 6</li><li>Occlusion: Intracranial ICA, M1, Any M2</li><li>ASPECTS &gt; 4</li></ul>`,
+      "DoneSymple": `<ul><li>Window 24–72h</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 8</li><li>Occlusion: any vessel</li></ul>`
     };
 
     /* PRE-IMAGING / WETRUST */
@@ -618,7 +584,7 @@
     function continueAfterWeTrust(){ showPage('postImaging'); }
     function openWeTrustRandomization(){ window.open('https://wetrust.eu1.phsdp.com/login', '_blank'); }
 
-    /* POST-IMAGING (unchanged eligibility logic) */
+    /* POST-IMAGING */
     function selectStrokeType(value){
       postData.strokeType = value;
       document.querySelectorAll('#strokeTypeGroup .toggle-button').forEach(btn => btn.classList.remove('selected'));
@@ -664,35 +630,22 @@
           const contraTpa = document.getElementById('contraTpa').value;
           const aspects = parseInt(document.getElementById('aspects').value);
 
-          /* --- eligibility calculations unchanged --- */
-          eligibility.athena = (preData.age >= 22 && preData.age <= 85 && preData.nihss >= 8 && preData.premrs <= 2 && preData.ltsw <= 24 && lvo === "yes" && tandem === "no" && tortuosity === "no");
-
           const vanishVesselOk = (targetVessel === "ica-terminal" || targetVessel === "m1");
-          eligibility.vanish = (preData.age >= 18 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && vanishVesselOk && contraTpa === "no");
-
           const pivotalVesselOk = (targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "basilar");
-          eligibility.pivotal = (preData.ltsw < 8 && preData.age >= 18 && preData.age <= 80 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && pivotalVesselOk);
-
           const mosteVesselOk = (targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "m2-any" || targetVessel === "m2-proxdom");
-          eligibility.moste = (preData.ltsw < 23 && preData.premrs <= 1 && preData.nihss < 6 && lvo === "yes" && mosteVesselOk);
-
           const twinVesselOk = (targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "basilar");
-          eligibility.twin2win2 = (preData.ltsw < 24 && preData.age > 18 && preData.premrs <= 2 && preData.nihss >= 6 && lvo === "yes" && twinVesselOk);
-
           const artemisVesselOk = (targetVessel === "ica-intracranial" || targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "m2-proxdom");
-          eligibility.artemis = (preData.ltsw < 24 && preData.age >= 18 && preData.age <= 85 && preData.premrs <= 2 &&
-                                 preData.nihss >= 6 && preData.nihss <= 25 && lvo === "yes" &&
-                                 artemisVesselOk && !isNaN(aspects) && aspects > 5);
-
           const hyberniaVesselOk = (targetVessel === "ica-intracranial" || targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "m2-any" || targetVessel === "m2-proxdom");
-          eligibility.hybernia = (preData.ltsw < 24 && preData.age >= 18 && preData.age <= 89 && preData.premrs <= 1 &&
-                                  preData.nihss >= 6 && lvo === "yes" && hyberniaVesselOk &&
-                                  !isNaN(aspects) && aspects > 4);
 
-          eligibility.doneSymple = (preData.ltsw >= 24 && preData.ltsw <= 72 && preData.age >= 18 && preData.age <= 80 &&
-                                    preData.premrs <= 1 && preData.nihss >= 8 && lvo === "yes");
+          eligibility.athena = (preData.age >= 22 && preData.age <= 85 && preData.nihss >= 8 && preData.premrs <= 2 && preData.ltsw <= 24 && lvo === "yes" && tandem === "no" && tortuosity === "no");
+          eligibility.vanish = (preData.age >= 18 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && vanishVesselOk && contraTpa === "no");
+          eligibility.pivotal = (preData.ltsw < 8 && preData.age >= 18 && preData.age <= 80 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && pivotalVesselOk);
+          eligibility.moste = (preData.ltsw < 23 && preData.premrs <= 1 && preData.nihss < 6 && lvo === "yes" && mosteVesselOk);
+          eligibility.twin2win2 = (preData.ltsw < 24 && preData.age > 18 && preData.premrs <= 2 && preData.nihss >= 6 && lvo === "yes" && twinVesselOk);
+          eligibility.artemis = (preData.ltsw < 24 && preData.age >= 18 && preData.age <= 85 && preData.premrs <= 2 && preData.nihss >= 6 && preData.nihss <= 25 && lvo === "yes" && artemisVesselOk && !isNaN(aspects) && aspects > 5);
+          eligibility.hybernia = (preData.ltsw < 24 && preData.age >= 18 && preData.age <= 89 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && hyberniaVesselOk && !isNaN(aspects) && aspects > 4);
+          eligibility.doneSymple = (preData.ltsw >= 24 && preData.ltsw <= 72 && preData.age >= 18 && preData.age <= 80 && preData.premrs <= 1 && preData.nihss >= 8 && lvo === "yes");
 
-          /* reasons (unchanged) */
           let athenaErrors = [];
           if (preData.nihss < 8) athenaErrors.push("NIHSS <8");
           if (preData.ltsw > 24) athenaErrors.push("LTSW >24h");
@@ -735,17 +688,6 @@
           if (lvo !== "yes") twinErrors.push("LVO = no");
           if (!twinVesselOk) twinErrors.push("Vessel not Terminal ICA/M1/Basilar");
           infoMessages.twin2win2 = twinErrors.join(", ");
-
-          let artemisErrors = [];
-          if (preData.ltsw >= 24) artemisErrors.push("LTSW ≥24h");
-          if (preData.age < 18 || preData.age > 85) artemisErrors.push("Age not 18–85");
-          if (preData.premrs > 2) artemisErrors.push("pre-mRS >2");
-          if (preData.nihss < 6 || preData.nihss > 25) artemisErrors.push("NIHSS not 6–25");
-          if (lvo !== "yes") artemisErrors.push("LVO = no");
-          if (!artemisVesselOk) artemisErrors.push("Vessel not Intracranial ICA/M1/M2 prox/dom");
-          if (isNaN(aspects)) artemisErrors.push("ASPECTS not provided");
-          else if (!(aspects > 5)) artemisErrors.push("ASPECTS ≤5");
-          infoMessages.artemis = artemisErrors.join(", ");
 
           let hyberniaErrors = [];
           if (preData.ltsw >= 24) hyberniaErrors.push("LTSW ≥24h");
@@ -909,16 +851,14 @@
       showPage('summaryPage');
     }
 
-    /* SHARE FLOW (per-study outcomes) */
+    /* SHARE FLOW */
     function proceedToShare(){
       const checks = Array.from(document.querySelectorAll('.study-checkbox')).filter(c => c.checked).map(c => c.value);
       if (!checks.length) { alert("Please select at least one eligible study to include in the summary."); return; }
       selectedStudies = checks;
-      // init outcomes (default intervention)
       studyOutcomes = {};
       selectedStudies.forEach(s => studyOutcomes[s] = "intervention");
 
-      // render per-study controls
       const container = document.getElementById('studyOutcomesContainer');
       container.innerHTML = "";
       selectedStudies.forEach(s => {
@@ -932,38 +872,6 @@
         sel.addEventListener('change', (e)=>{
           studyOutcomes[e.target.dataset.study] = e.target.value;
           buildShareMessage();
-          // Costruisce il payload e lo invia al Google Sheet
-function saveToSheet(){
-  const Npatient = (document.getElementById('patientNumber')?.value || "").trim();
-  if (!Npatient) {
-    alert("Inserisci il Numero di storia (N patient) prima di salvare.");
-    return;
-  }
-  // Validazione minima campi clinici
-  if (typeof preData.age === "undefined" || typeof preData.nihss === "undefined" ||
-      typeof preData.ltsw === "undefined" || typeof preData.premrs === "undefined") {
-    alert("Compila prima Pre-Imaging (Age, NIHSS, LTSW, pre-mRS).");
-    return;
-  }
-
-  // Trials: default "no", i selezionati assumono "intervention"/"control"
-  const trialsForSheet = buildTrialsForSheet(selectedStudies, studyOutcomes);
-
-  const payload = {
-    N_patient: Npatient,
-    pre: {
-      age: preData.age,          // Age
-      nihss: preData.nihss,      // NIHSS
-      ltsw: preData.ltsw,        // ore da LTSW
-      premrs: preData.premrs     // mRS pre
-    },
-    trials: trialsForSheet       // "no" | "intervention" | "control"
-  };
-
-  sendToSheet(payload);
-  alert("Salvato su Google Sheet ✅");
-}
-
         });
         container.appendChild(label);
         container.appendChild(sel);
@@ -982,7 +890,26 @@ function saveToSheet(){
       document.getElementById('shareMessage').value = lines.join('\n');
     }
 
-    // Update preview when patient number changes
+    // === SALVATAGGIO SU GOOGLE SHEET (GLOBALE) ===
+    function saveToSheet(){
+      const Npatient = (document.getElementById('patientNumber')?.value || "").trim();
+      if (!Npatient) { alert("Inserisci il Numero di storia (N patient) prima di salvare."); return; }
+      if (typeof preData.age === "undefined" || typeof preData.nihss === "undefined" ||
+          typeof preData.ltsw === "undefined" || typeof preData.premrs === "undefined") {
+        alert("Compila prima Pre-Imaging (Age, NIHSS, LTSW, pre-mRS).");
+        return;
+      }
+      const trialsForSheet = buildTrialsForSheet(selectedStudies, studyOutcomes);
+      const payload = {
+        N_patient: Npatient,
+        pre: { age: preData.age, nihss: preData.nihss, ltsw: preData.ltsw, premrs: preData.premrs },
+        trials: trialsForSheet
+      };
+      sendToSheet(payload);
+      alert("Salvato su Google Sheet ✅");
+    }
+
+    // Aggiorna il preview quando cambia il patient number
     document.addEventListener('input', (e)=>{
       if (e.target && e.target.id === 'patientNumber') buildShareMessage();
     });
@@ -1024,3 +951,4 @@ function saveToSheet(){
 </body>
 </html>
 
+  
