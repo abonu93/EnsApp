@@ -67,7 +67,65 @@
       "TWIN-2-WIN 2": "https://www.studyrandomizer.com/",
       "DONE SYMPLE": "https://www.studyrandomizer.com/"
     };
+      <!-- === GOOGLE APPS SCRIPT CONFIG + HELPERS === -->
+    // ⬇️ Incolla l'URL della tua Web App (termina con /exec)
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzuAaVYAUvb8KdPTn_83LMV_hfVUsAP0IRYsNxG4sHPl2Vk5tgJOO2bOjHUPnVdRePb/exec";
+
+    // Invia al Google Sheet (no preflight CORS)
+    function sendToSheet(payload){
+      try {
+        const body = new URLSearchParams({ payload: JSON.stringify(payload) });
+        fetch(GAS_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+          body
+        });
+      } catch(e) {
+        console.warn("sendToSheet error:", e);
+      }
+    }
+
+    // Mappa i nomi visualizzati -> chiavi colonna del foglio
+    const SHEET_TRIAL_KEYS = [
+      "WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST","TICH3","LIBREXIA",
+      "TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE"
+    ];
+
+    // Costruisce l'oggetto trials per lo Sheet: default = "no", selezionati = outcome scelto
+    function buildTrialsForSheet(selectedStudies, studyOutcomes){
+      // default "no" per tutte le colonne (anche se non presenti a UI)
+      const t = Object.fromEntries(SHEET_TRIAL_KEYS.map(k => [k, "no"]));
+
+      // mappa dai nomi mostrati a UI -> chiave colonna
+      const nameToKey = {
+        "WeTrust":"WeTrust",
+        "MARSS":"MARSS",
+        "ATHENA":"ATHENA",
+        "VANISH":"VANISH",
+        "PIVOTAL":"PIVOTAL",
+        "MOSTE":"MOSTE",
+        "FASTEST":"FASTEST",
+        "TICH-3":"TICH3",
+        "Librexia":"LIBREXIA",
+        "TWIN-2-WIN 2":"TWIN2WIN",
+        "ARTEMIS":"ARTEMIS",
+        "HYBERNIA":"HYBERNIA",
+        "DONE SYMPLE":"DONESYMPLE"
+      };
+
+      (selectedStudies || []).forEach(displayName => {
+        const key = nameToKey[displayName];
+        if (!key) return;
+        const outcome = studyOutcomes?.[displayName] || "intervention"; // default se non toccato
+        t[key] = outcome; // "intervention" | "control"
+      });
+
+      // NB: per studi non selezionati o non eleggibili resta "no"
+      return t;
+    }
   </script>
+
 
   <!-- PAGE 1: Main Menu -->
   <div id="mainMenu" class="page visible">
@@ -461,7 +519,10 @@
 
       <button type="button" onclick="copyMessage()">Copy</button>
       <button type="button" onclick="shareWhatsApp()">Share via WhatsApp</button>
+       <button type="button" onclick="saveToSheet()">Salva su Google Sheet</button>
       <button type="button" onclick="showPage('summaryPage')">Back</button>
+
+   
     </form>
   </div>
 
@@ -871,6 +932,38 @@
         sel.addEventListener('change', (e)=>{
           studyOutcomes[e.target.dataset.study] = e.target.value;
           buildShareMessage();
+          // Costruisce il payload e lo invia al Google Sheet
+function saveToSheet(){
+  const Npatient = (document.getElementById('patientNumber')?.value || "").trim();
+  if (!Npatient) {
+    alert("Inserisci il Numero di storia (N patient) prima di salvare.");
+    return;
+  }
+  // Validazione minima campi clinici
+  if (typeof preData.age === "undefined" || typeof preData.nihss === "undefined" ||
+      typeof preData.ltsw === "undefined" || typeof preData.premrs === "undefined") {
+    alert("Compila prima Pre-Imaging (Age, NIHSS, LTSW, pre-mRS).");
+    return;
+  }
+
+  // Trials: default "no", i selezionati assumono "intervention"/"control"
+  const trialsForSheet = buildTrialsForSheet(selectedStudies, studyOutcomes);
+
+  const payload = {
+    N_patient: Npatient,
+    pre: {
+      age: preData.age,          // Age
+      nihss: preData.nihss,      // NIHSS
+      ltsw: preData.ltsw,        // ore da LTSW
+      premrs: preData.premrs     // mRS pre
+    },
+    trials: trialsForSheet       // "no" | "intervention" | "control"
+  };
+
+  sendToSheet(payload);
+  alert("Salvato su Google Sheet ✅");
+}
+
         });
         container.appendChild(label);
         container.appendChild(sel);
@@ -930,3 +1023,4 @@
 </div>
 </body>
 </html>
+
