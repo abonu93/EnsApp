@@ -27,28 +27,32 @@
     .ok { color: #0b7a0b; font-weight: bold; }
     .no { color: #b30000; font-weight: bold; }
     .summary-list { text-align:left; padding-left:0; list-style:none; }
-    .summary-list li { display: grid; grid-template-columns: 28px 1fr 90px 1fr; align-items: center; column-gap: 10px; margin-bottom: 8px; min-height: 28px; }
+    .summary-list li { display: grid; grid-template-columns: 28px 1fr 110px 1fr; align-items: center; column-gap: 10px; margin-bottom: 8px; min-height: 28px; }
     .summary-list .study-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .summary-list .reason { color:#555; font-size: 13px; }
-    .row-actions { display:flex; gap:6px; align-items:center; }
-    .actions-bottom { display:flex; gap:10px; justify-content:space-between; }
+    .actions-bottom { display:flex; gap:10px; justify-content:flex-end; }
     .small { font-size: 13px; color:#555; }
     .study-outcomes { display: grid; grid-template-columns: 1fr 140px; gap: 8px; align-items:center; }
     .study-outcomes .study-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .muted { color:#666; font-size:13px; margin-top:-10px; margin-bottom:15px; }
+    .tag { display:inline-block; padding:2px 6px; border-radius:6px; font-size:12px; line-height:1; }
+    .tag-ni { background:#eee; color:#333; border:1px solid #ccc; }
+    .alert { background:#fff6d6; border:1px solid #ffd36a; color:#7a5b00; border-radius:8px; padding:10px; text-align:left; }
   </style>
 </head>
 <body>
 <div class="container">
 
-  <!-- SCRIPT DI CONFIG E HELPER -->
+  <!-- CONFIG & HELPERS -->
   <script>
     const infoMessages = {
       weTrust: "", athena: "", hemorrhagic: "",
       librexia: "", vanish: "", pivotal: "", moste: "",
-      twin2win2: "", artemis: "", hybernia: "", doneSymple: ""
+      twin2win2: "", artemis: "", hybernia: "", doneSymple: "",
+      saferdoac: ""
     };
 
-    // Link randomizzazione (opzionali)
+    // Optional randomization links
     const randomizationLinks = {
       "ATHENA": "https://www.randomize.net/Randomize/Set.aspx?id=ba510dbb-ab7d-42ee-ae95-d8a46394d6ec&token=0d0bff39-455b-4f60-a95a-154476064f2e",
       "VANISH": "https://app.studyrandomizer.com/dashboard/",
@@ -58,9 +62,7 @@
     };
 
     // === GOOGLE APPS SCRIPT CONFIG + HELPERS ===
-    // SOSTITUISCI con il tuo URL /exec
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyGMj9q7mpYC-r_xkApymCJ7OSy-CjxghI-S6anTgc7WTy8sStDTVidDFXyhEEyss0x/exec";
-
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxH-DomDh7SiZgjCqjhSeViU954KQSc6OeJtNZHREajZNofv6I7O7D5bWKS7Dv6nY8d/exec";
     function sendToSheet(payload){
       try {
         const body = new URLSearchParams({ payload: JSON.stringify(payload) });
@@ -73,13 +75,13 @@
       } catch(e) { console.warn("sendToSheet error:", e); }
     }
 
-    // Colonne dei trial sullo Sheet
+    // Trial columns for the Sheet
     const SHEET_TRIAL_KEYS = [
       "WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST","TICH3","LIBREXIA",
-      "TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE"
+      "TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE","SAFERDOAC"
     ];
 
-    // Mappa nomi UI -> chiave colonna dello Sheet
+    // UI name -> Sheet key
     function buildTrialsForSheet(selectedStudies, studyOutcomes){
       const t = Object.fromEntries(SHEET_TRIAL_KEYS.map(k => [k, "no"]));
       const nameToKey = {
@@ -95,16 +97,35 @@
         "TWIN-2-WIN 2":"TWIN2WIN",
         "ARTEMIS":"ARTEMIS",
         "HYBERNIA":"HYBERNIA",
-        "DONE SYMPLE":"DONESYMPLE"
+        "DONE SYMPLE":"DONESYMPLE",
+        "SAFER-DOAC":"SAFERDOAC"
       };
+
       (selectedStudies || []).forEach(displayName => {
         const key = nameToKey[displayName];
         if (!key) return;
-        const outcome = studyOutcomes?.[displayName] || "intervention";
-        t[key] = outcome; // "intervention" | "control"
+
+        if (key === "SAFERDOAC") {
+          // SAFER-DOAC is intervention-only -> save as "si"
+          t[key] = "si";
+        } else {
+          // Other trials keep "intervention"/"control"
+          const outcome = studyOutcomes?.[displayName] || "intervention";
+          t[key] = outcome;
+        }
       });
+
+      // Ensure SAFERDOAC is "no" when not selected (already default), but keep explicit:
+      if (!selectedStudies?.includes("SAFER-DOAC")) t.SAFERDOAC = "no";
+
       return t;
     }
+
+    // "Not indicated" state for trials requiring optional fields not provided
+    const notIndicated = {
+      athena:false, vanish:false, pivotal:false, moste:false,
+      twin2win2:false, artemis:false, hybernia:false, doneSymple:false
+    };
   </script>
 
   <!-- PAGE 1: Main Menu -->
@@ -132,6 +153,7 @@
       <button onclick="showTrialCriteria('Artemis')">ARTEMIS &gt;</button>
       <button onclick="showTrialCriteria('Hybernia')">HYBERNIA &gt;</button>
       <button onclick="showTrialCriteria('DoneSymple')">DONE SYMPLE &gt;</button>
+      <button onclick="showTrialCriteria('SaferDoac')">SAFER-DOAC &gt;</button>
     </div>
     <button type="button" onclick="goBackToMain()">Back</button>
   </div>
@@ -162,6 +184,13 @@
       <select id="angiograph" required>
         <option value="yes">Yes</option><option value="no">No</option>
       </select>
+
+      <!-- DOAC question -->
+      <label for="doac">Is the patient on DOAC (NOAC)?</label>
+      <select id="doac" required>
+        <option value="no">No</option><option value="yes">Yes</option>
+      </select>
+
       <button type="button" onclick="submitPreImaging()">Next</button>
     </form>
   </div>
@@ -170,6 +199,10 @@
   <div id="preResult" class="page">
     <h1>Pre-Imaging</h1>
     <p id="weTrustResultMessage"></p>
+    <!-- DOAC advisory -->
+    <div id="doacAlert" class="alert" style="display:none;">
+      Patient on DOAC (NOAC): perform Chest CTA and obtain blood tests for anticoagulant levels.
+    </div>
     <button type="button" class="info-btn" onclick="showInfo('weTrust')" id="weTrustInfoBtn" style="display:none;">Info</button>
     <button type="button" onclick="openWeTrustRandomization()" id="weTrustRandomizeBtn" style="display:none;">Randomization</button>
     <button type="button" onclick="continueAfterWeTrust()">Next</button>
@@ -206,16 +239,20 @@
           <select id="lvo" required>
             <option value="yes">Yes</option><option value="no">No</option>
           </select>
-          <label>Vessel diameter (mm)</label>
-          <input type="number" step="0.1" id="vesselDimension" required>
+
           <label>Tandem occlusion present?</label>
           <select id="tandem" required>
             <option value="no">No</option><option value="yes">Yes</option>
           </select>
-          <label>Vessel tortuosity present?</label>
-          <select id="tortuosity" required>
+
+          <label>Vessel tortuosity present? <span class="small">(optional)</span></label>
+          <select id="tortuosity">
+            <option value="">-- Select (optional) --</option>
             <option value="no">No</option><option value="yes">Yes</option>
           </select>
+
+          <div class="muted">To assess eligibility for some studies, tortuosity is required. If not provided, those studies will be marked as “Not indicated”.</div>
+
           <label>Target vessel</label>
           <select id="targetVessel" required>
             <option value="ica-intracranial">Intracranial ICA</option>
@@ -226,10 +263,12 @@
             <option value="basilar">Basilar artery</option>
             <option value="other">Other</option>
           </select>
+
           <label>Contraindications to thrombolysis?</label>
           <select id="contraTpa" required>
             <option value="no">No</option><option value="yes">Yes</option>
           </select>
+
           <label for="aspects">ASPECTS</label>
           <input type="number" id="aspects" min="0" max="10">
         </div>
@@ -453,11 +492,11 @@
   <!-- PAGE 11: Final Summary -->
   <div id="summaryPage" class="page">
     <h1>Summary</h1>
-    <p class="small">Select one or more eligible studies to include in the patient summary. Study names remain clickable (when available) to open the randomization portal.</p>
+    <p class="small">Select one or more eligible studies to include in the patient summary. Trial names remain clickable (when available) to open the randomization portal.</p>
     <ul id="summaryContent" class="summary-list"></ul>
     <div class="actions-bottom">
       <button type="button" onclick="proceedToShare()">Next</button>
-      <button type="button" onclick="restart()">New Evaluation</button>
+      <!-- "New Evaluation" button intentionally removed -->
     </div>
   </div>
 
@@ -465,8 +504,8 @@
   <div id="sharePage" class="page">
     <h1>Patient Summary & Share</h1>
     <form id="shareForm">
-      <label for="patientNumber">Numero di storia (patient number)</label>
-      <input type="text" id="patientNumber" placeholder="es. 2025-00123" required>
+      <label for="patientNumber">Patient record number</label>
+      <input type="text" id="patientNumber" placeholder="e.g., 2025-00123" required>
 
       <label>Randomization outcome for each selected study</label>
       <div id="studyOutcomesContainer" class="study-outcomes"></div>
@@ -476,22 +515,23 @@
 
       <button type="button" onclick="copyMessage()">Copy</button>
       <button type="button" onclick="shareWhatsApp()">Share via WhatsApp</button>
-      <button type="button" onclick="saveToSheet()">Salva su Google Sheet</button>
+      <button type="button" onclick="saveToSheet()">Save to Google Sheet</button>
       <button type="button" onclick="showPage('summaryPage')">Back</button>
     </form>
   </div>
 
-  <!-- SCRIPT PRINCIPALE APP -->
+  <!-- MAIN APP SCRIPT -->
   <script>
     let preData = {}, postData = {}, evtData = {}, hemData = {};
     let lixData = { criteria: {} };
     let eligibility = {
       weTrust:false, athena:false, fastest:false, tich3:false,
       librexia:false, vanish:false, pivotal:false, moste:false,
-      twin2win2:false, artemis:false, hybernia:false, doneSymple:false
+      twin2win2:false, artemis:false, hybernia:false, doneSymple:false,
+      saferdoac:false
     };
     let selectedStudies = [];
-    let studyOutcomes = {}; // { studyName: "intervention" | "control" }
+    let studyOutcomes = {}; // { studyName: "intervention" | "control" } (not for SAFER-DOAC)
 
     function showPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('visible')); document.getElementById(id).classList.add('visible'); }
     function goToTrialsCriteria(){ showPage('trialsList'); }
@@ -499,7 +539,7 @@
     function goBackToMain(){ showPage('mainMenu'); }
 
     function showTrialCriteria(name){
-      document.getElementById('trialTitle').innerText = name;
+      document.getElementById('trialTitle').innerText = name === 'SaferDoac' ? 'SAFER-DOAC' : name;
       document.getElementById('trialCriteriaText').innerHTML = trialCriteria[name] || "<p>No criteria found.</p>";
       showPage('trialDetail');
     }
@@ -516,7 +556,8 @@
       "Twin2Win2": `<ul><li>LTSW &lt; 24h</li><li>Age &gt;18</li><li>pre-mRS 0–2</li><li>NIHSS ≥ 6</li><li>Occlusion: Terminal ICA (ICA-T), M1 (distal included), Basilar artery</li></ul>`,
       "Artemis": `<ul><li>LTSW &lt; 24h</li><li>Age 18–85</li><li>pre-mRS 0–2</li><li>NIHSS 6–25</li><li>Occlusion: Intracranial ICA, M1, M2 proximal/dominant</li><li>ASPECTS &gt; 5</li></ul>`,
       "Hybernia": `<ul><li>LTSW &lt; 24h</li><li>Age 18–89</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 6</li><li>Occlusion: Intracranial ICA, M1, Any M2</li><li>ASPECTS &gt; 4</li></ul>`,
-      "DoneSymple": `<ul><li>Window 24–72h</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 8</li><li>Occlusion: any vessel</li></ul>`
+      "DoneSymple": `<ul><li>Window 24–72h</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 8</li><li>Occlusion: any vessel</li></ul>`,
+      "SaferDoac": `<ul><li>Patients on DOAC (NOAC)</li><li>Perform Chest CTA</li><li>Obtain blood tests for anticoagulant levels</li></ul>`
     };
 
     /* PRE-IMAGING / WETRUST */
@@ -530,6 +571,7 @@
       if (lastSeen > now) { alert("Last Seen Well time cannot be in the future."); return; }
       preData.ltsw = (now - lastSeen) / (1000 * 60 * 60);
       preData.angiograph = document.getElementById('angiograph').value;
+      preData.doac = document.getElementById('doac').value; // "yes" | "no"
 
       eligibility.weTrust = (preData.age >= 18 && preData.nihss >= 10 && preData.premrs <= 2 && preData.ltsw <= 6 && preData.angiograph === 'yes');
 
@@ -542,6 +584,11 @@
       infoMessages.weTrust = errors.join(", ");
 
       document.getElementById('weTrustResultMessage').innerHTML = eligibility.weTrust ? "Eligible for WeTrust." : "Not eligible for WeTrust.";
+
+      // DOAC advisory
+      const doacAlert = document.getElementById('doacAlert');
+      doacAlert.style.display = (preData.doac === 'yes') ? 'block' : 'none';
+
       document.getElementById('weTrustInfoBtn').style.display = eligibility.weTrust ? "none" : "inline-block";
       document.getElementById('weTrustRandomizeBtn').style.display = eligibility.weTrust ? "inline-block" : "none";
 
@@ -589,12 +636,14 @@
 
         if (postData.candidate === "eligible") {
           const lvo = document.getElementById('lvo').value;
-          const vesselDimension = parseFloat(document.getElementById('vesselDimension').value);
           const tandem = document.getElementById('tandem').value;
-          const tortuosity = document.getElementById('tortuosity').value;
+          const tortuosity = document.getElementById('tortuosity').value; // "" if not selected (optional)
           const targetVessel = document.getElementById('targetVessel').value;
           const contraTpa = document.getElementById('contraTpa').value;
           const aspects = parseInt(document.getElementById('aspects').value);
+
+          // Reset "not indicated" flags
+          for (const k of Object.keys(notIndicated)) notIndicated[k] = false;
 
           const vanishVesselOk  = (targetVessel === "ica-terminal" || targetVessel === "m1");
           const pivotalVesselOk = (targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "basilar");
@@ -603,7 +652,23 @@
           const artemisVesselOk = (targetVessel === "ica-intracranial" || targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "m2-proxdom");
           const hyberniaVesselOk= (targetVessel === "ica-intracranial" || targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "m2-any" || targetVessel === "m2-proxdom");
 
-          eligibility.athena     = (preData.age >= 22 && preData.age <= 85 && preData.nihss >= 8 && preData.premrs <= 2 && preData.ltsw <= 24 && lvo === "yes" && tandem === "no" && tortuosity === "no");
+          // ATHENA requires tortuosity == "no". If tortuosity not provided, mark as Not indicated.
+          if (tortuosity === "") {
+            eligibility.athena = false;
+            notIndicated.athena = true;
+            infoMessages.athena = "Enter tortuosity to assess eligibility (ATHENA requires tortuosity = no).";
+          } else {
+            eligibility.athena = (preData.age >= 22 && preData.age <= 85 && preData.nihss >= 8 && preData.premrs <= 2 && preData.ltsw <= 24 && lvo === "yes" && tandem === "no" && tortuosity === "no");
+            let athenaErrors = [];
+            if (preData.nihss < 8) athenaErrors.push("NIHSS <8");
+            if (preData.ltsw > 24) athenaErrors.push("LTSW >24h");
+            if (tandem !== "no") athenaErrors.push("Tandem = yes");
+            if (tortuosity !== "no") athenaErrors.push("Tortuosity = yes");
+            if (lvo !== "yes") athenaErrors.push("LVO = no");
+            infoMessages.athena = athenaErrors.join(", ");
+          }
+
+          // Other trials unchanged
           eligibility.vanish     = (preData.age >= 18 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && vanishVesselOk && contraTpa === "no");
           eligibility.pivotal    = (preData.ltsw < 8 && preData.age >= 18 && preData.age <= 80 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && pivotalVesselOk);
           eligibility.moste      = (preData.ltsw < 23 && preData.premrs <= 1 && preData.nihss < 6 && lvo === "yes" && mosteVesselOk);
@@ -612,25 +677,57 @@
           eligibility.hybernia   = (preData.ltsw < 24 && preData.age >= 18 && preData.age <= 89 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && hyberniaVesselOk && !isNaN(aspects) && aspects > 4);
           eligibility.doneSymple = (preData.ltsw >= 24 && preData.ltsw <= 72 && preData.age >= 18 && preData.age <= 80 && preData.premrs <= 1 && preData.nihss >= 8 && lvo === "yes");
 
-          // messaggi info...
-          // (come nel tuo codice)
-          document.getElementById('athenaResult').innerHTML     = eligibility.athena      ? "Eligible for ATHENA."       : "Not eligible for ATHENA.";
-          document.getElementById('vanishResult').innerHTML     = eligibility.vanish      ? "Eligible for VANISH."       : "Not eligible for VANISH.";
-          document.getElementById('pivotalResult').innerHTML    = eligibility.pivotal     ? "Eligible for PIVOTAL."      : "Not eligible for PIVOTAL.";
-          document.getElementById('mosteResult').innerHTML      = eligibility.moste       ? "Eligible for MOSTE."        : "Not eligible for MOSTE.";
-          document.getElementById('twin2winResult').innerHTML   = eligibility.twin2win2   ? "Eligible for TWIN-2-WIN 2." : "Not eligible for TWIN-2-WIN 2.";
-          document.getElementById('artemisResult').innerHTML    = eligibility.artemis     ? "Eligible for ARTEMIS."      : "Not eligible for ARTEMIS.";
-          document.getElementById('hyberniaResult').innerHTML   = eligibility.hybernia    ? "Eligible for HYBERNIA."     : "Not eligible for HYBERNIA.";
-          document.getElementById('doneSympleResult').innerHTML = eligibility.doneSymple  ? "Eligible for DONE SYMPLE."  : "Not eligible for DONE SYMPLE.";
+          // SAFER-DOAC eligibility (based on DOAC at Pre-Imaging)
+          eligibility.saferdoac = (preData.doac === 'yes');
+          if (!eligibility.saferdoac) infoMessages.saferdoac = "Trial targets patients on DOAC (NOAC).";
 
-          document.getElementById('athenaInfoBtn').style.display     = eligibility.athena     ? "none" : "inline-block";
-          document.getElementById('vanishInfoBtn').style.display     = eligibility.vanish     ? "none" : "inline-block";
-          document.getElementById('pivotalInfoBtn').style.display    = eligibility.pivotal    ? "none" : "inline-block";
-          document.getElementById('mosteInfoBtn').style.display      = eligibility.moste      ? "none" : "inline-block";
-          document.getElementById('twin2winInfoBtn').style.display   = eligibility.twin2win2  ? "none" : "inline-block";
-          document.getElementById('artemisInfoBtn').style.display    = eligibility.artemis    ? "none" : "inline-block";
-          document.getElementById('hyberniaInfoBtn').style.display   = eligibility.hybernia   ? "none" : "inline-block";
-          document.getElementById('doneSympleInfoBtn').style.display = eligibility.doneSymple ? "none" : "inline-block";
+          // VANISH info
+          let vanishErrors = [];
+          if (preData.age < 18) vanishErrors.push("Age <18");
+          if (preData.premrs > 1) vanishErrors.push("pre-mRS >1");
+          if (preData.nihss < 6) vanishErrors.push("NIHSS <6");
+          if (lvo !== "yes") vanishErrors.push("LVO = no");
+          if (!vanishVesselOk) vanishErrors.push("Vessel not ICA-T/M1");
+          if (contraTpa !== "no") vanishErrors.push("Contraindications to thrombolysis present");
+          infoMessages.vanish = vanishErrors.join(", ");
+
+          // PIVOTAL info
+          let pivotalErrors = [];
+          if (preData.ltsw >= 8) pivotalErrors.push("LTSW ≥8h");
+          if (preData.age < 18 || preData.age > 80) pivotalErrors.push("Age not in 18–80");
+          if (preData.premrs > 1) pivotalErrors.push("pre-mRS >1");
+          if (preData.nihss < 6) pivotalErrors.push("NIHSS <6");
+          if (lvo !== "yes") pivotalErrors.push("LVO = no");
+          if (!pivotalVesselOk) pivotalErrors.push("Vessel not ICA-T/M1/Basilar");
+          infoMessages.pivotal = pivotalErrors.join(", ");
+
+          // MOSTE info
+          let mosteErrors = [];
+          if (preData.ltsw >= 23) mosteErrors.push("LTSW ≥23h");
+          if (preData.premrs > 1) mosteErrors.push("pre-mRS >1");
+          if (!(preData.nihss < 6)) mosteErrors.push("NIHSS ≥6");
+          if (lvo !== "yes") mosteErrors.push("LVO = no");
+          if (!mosteVesselOk) mosteErrors.push("Vessel not ICA-T/M1/M2");
+          infoMessages.moste = mosteErrors.join(", ");
+
+          // RESULTS
+          const setResult = (id, ok, niFlag, name, extra) => {
+            const el = document.getElementById(id);
+            if (niFlag) {
+              el.innerHTML = `${name}: <span class="tag tag-ni">Not indicated</span>${extra ? " – " + extra : ""}`;
+              return;
+            }
+            el.innerHTML = ok ? `Eligible for ${name}.` : `Not eligible for ${name}.`;
+          };
+
+          setResult('athenaResult',     eligibility.athena,    notIndicated.athena,    'ATHENA', infoMessages.athena);
+          setResult('vanishResult',     eligibility.vanish,    notIndicated.vanish,    'VANISH', infoMessages.vanish);
+          setResult('pivotalResult',    eligibility.pivotal,   notIndicated.pivotal,   'PIVOTAL', infoMessages.pivotal);
+          setResult('mosteResult',      eligibility.moste,     notIndicated.moste,     'MOSTE', infoMessages.moste);
+          setResult('twin2winResult',   eligibility.twin2win2, notIndicated.twin2win2, 'TWIN-2-WIN 2', infoMessages.twin2win2);
+          setResult('artemisResult',    eligibility.artemis,   notIndicated.artemis,   'ARTEMIS', infoMessages.artemis);
+          setResult('hyberniaResult',   eligibility.hybernia,  notIndicated.hybernia,  'HYBERNIA', infoMessages.hybernia);
+          setResult('doneSympleResult', eligibility.doneSymple,notIndicated.doneSymple,'DONE SYMPLE', infoMessages.doneSymple);
 
           showPage('marssAthenaResults');
           return;
@@ -658,13 +755,19 @@
         if (gcs < 5) hemorrErrors.push("GCS <5");
         infoMessages.hemorrhagic = hemorrErrors.join(", ");
 
+        // SAFER-DOAC applies globally to DOAC patients
+        eligibility.saferdoac = (preData.doac === 'yes');
+        if (!eligibility.saferdoac) infoMessages.saferdoac = "Trial targets patients on DOAC (NOAC).";
+
         showSummary();
       }
     }
 
     function handleMarssAthena(){
-      if (eligibility.athena || eligibility.vanish || eligibility.pivotal || eligibility.moste ||
-          eligibility.twin2win2 || eligibility.artemis || eligibility.hybernia || eligibility.doneSymple) showSummary();
+      if (
+        eligibility.athena || eligibility.vanish || eligibility.pivotal || eligibility.moste ||
+        eligibility.twin2win2 || eligibility.artemis || eligibility.hybernia || eligibility.doneSymple
+      ) showSummary();
       else showPage('librexiaPage');
     }
 
@@ -727,31 +830,30 @@
 
     function showSummary(){
       const items = [
-        ["WeTrust",  eligibility.weTrust,  infoMessages.weTrust,  "weTrust"],
-        ["ATHENA",   eligibility.athena,   infoMessages.athena,   "athena"],
-        ["VANISH",   eligibility.vanish,   infoMessages.vanish,   "vanish"],
-        ["PIVOTAL",  eligibility.pivotal,  infoMessages.pivotal,  "pivotal"],
-        ["MOSTE",    eligibility.moste,    infoMessages.moste,    "moste"],
-        ["TWIN-2-WIN 2", eligibility.twin2win2, infoMessages.twin2win2, "twin2win2"],
-        ["ARTEMIS",  eligibility.artemis,  infoMessages.artemis,  "artemis"],
-        ["HYBERNIA", eligibility.hybernia, infoMessages.hybernia, "hybernia"],
-        ["DONE SYMPLE", eligibility.doneSymple, infoMessages.doneSymple, "doneSymple"],
-        ["FASTEST",  eligibility.fastest,  infoMessages.hemorrhagic, "hemorrhagic"],
-        ["TICH-3",   eligibility.tich3,    infoMessages.hemorrhagic, "hemorrhagic"],
-        ["Librexia", eligibility.librexia, infoMessages.librexia, "librexia"]
+        ["WeTrust",  eligibility.weTrust,  infoMessages.weTrust,  "weTrust", false],
+        ["ATHENA",   eligibility.athena,   infoMessages.athena,   "athena", notIndicated.athena],
+        ["VANISH",   eligibility.vanish,   infoMessages.vanish,   "vanish", notIndicated.vanish],
+        ["PIVOTAL",  eligibility.pivotal,  infoMessages.pivotal,  "pivotal", notIndicated.pivotal],
+        ["MOSTE",    eligibility.moste,    infoMessages.moste,    "moste", notIndicated.moste],
+        ["TWIN-2-WIN 2", eligibility.twin2win2, infoMessages.twin2win2, "twin2win2", notIndicated.twin2win2],
+        ["ARTEMIS",  eligibility.artemis,  infoMessages.artemis,  "artemis", notIndicated.artemis],
+        ["HYBERNIA", eligibility.hybernia, infoMessages.hybernia, "hybernia", notIndicated.hybernia],
+        ["DONE SYMPLE", eligibility.doneSymple, infoMessages.doneSymple, "doneSymple", notIndicated.doneSymple],
+        ["FASTEST",  eligibility.fastest,  infoMessages.hemorrhagic, "hemorrhagic", false],
+        ["TICH-3",   eligibility.tich3,    infoMessages.hemorrhagic, "hemorrhagic", false],
+        ["Librexia", eligibility.librexia, infoMessages.librexia, "librexia", false],
+        ["SAFER-DOAC", eligibility.saferdoac, infoMessages.saferdoac, "saferdoac", false]
       ];
       const ul = document.getElementById('summaryContent');
       ul.innerHTML = "";
-      items.forEach(([name, ok, reason])=>{
+      items.forEach(([name, ok, reason, key, ni])=>{
         const link = randomizationLinks[name];
         const nameHtml = (ok && link) ? `<a class="study-name" href="${link}" target="_blank">${name}</a>` : `<span class="study-name">${name}</span>`;
-        const checkboxHtml = ok ? `<input type="checkbox" class="study-checkbox" value="${name}" title="Select ${name}">` : `<input type="checkbox" disabled title="Not eligible">`;
+        const checkboxHtml = ok ? `<input type="checkbox" class="study-checkbox" value="${name}" title="Select ${name}">` : `<input type="checkbox" disabled title="${ni ? 'Not indicated' : 'Not eligible'}">`;
+        const statusHtml = ni ? `<span class="tag tag-ni">Not indicated</span>` : `<span class="${ok ? 'ok' : 'no'}">${ok ? 'Eligible' : 'Not eligible'}</span>`;
+        const reasonHtml = (!ok && reason) ? `<span class="reason">${ni ? 'Note: ' : 'Reasons: '}${reason}</span>` : `<span></span>`;
         const li = document.createElement('li');
-        li.innerHTML =
-          `${checkboxHtml}` +
-          `${nameHtml}` +
-          `<span class="${ok ? 'ok' : 'no'}">${ok ? 'Eligible' : 'Not eligible'}</span>` +
-          `${ok ? '' : (reason ? `<span class="reason">Reasons: ${reason}</span>` : `<span></span>`)}`;
+        li.innerHTML = `${checkboxHtml}${nameHtml}${statusHtml}${reasonHtml}`;
         ul.appendChild(li);
       });
       showPage('summaryPage');
@@ -759,15 +861,33 @@
 
     /* SHARE FLOW */
     function proceedToShare(){
+      // Allows zero selected studies
       const checks = Array.from(document.querySelectorAll('.study-checkbox')).filter(c => c.checked).map(c => c.value);
-      if (!checks.length) { alert("Please select at least one eligible study to include in the summary."); return; }
       selectedStudies = checks;
       studyOutcomes = {};
-      selectedStudies.forEach(s => studyOutcomes[s] = "intervention");
+
+      // Default outcomes for non-SAFER studies; SAFER has no outcome selector
+      selectedStudies.forEach(s => {
+        if (s !== "SAFER-DOAC") {
+          studyOutcomes[s] = "intervention";
+        }
+      });
 
       const container = document.getElementById('studyOutcomesContainer');
       container.innerHTML = "";
+
       selectedStudies.forEach(s => {
+        if (s === "SAFER-DOAC") {
+          // No outcome dropdown for SAFER-DOAC (intervention-only)
+          const label = document.createElement('div');
+          label.className = 'study-label';
+          label.textContent = `${s} (intervention-only)`;
+          const placeholder = document.createElement('div');
+          container.appendChild(label);
+          container.appendChild(placeholder);
+          return;
+        }
+
         const label = document.createElement('div');
         label.className = 'study-label';
         label.textContent = s;
@@ -788,21 +908,24 @@
     }
 
     function buildShareMessage(){
-      const pn = (document.getElementById('patientNumber')?.value || "").trim() || "Clinic history number";
+      const pn = (document.getElementById('patientNumber')?.value || "").trim() || "Patient record number";
       const lines = selectedStudies.map(study => {
+        if (study === "SAFER-DOAC") {
+          return `${pn}, age ${isFinite(preData.age) ? preData.age : "?"}, NIHSS ${isFinite(preData.nihss) ? preData.nihss : "?"}, mRS ${isFinite(preData.premrs) ? preData.premrs : "?"}, SAFER-DOAC`;
+        }
         const outcome = studyOutcomes[study] || "intervention";
-        return `${pn}, età ${isFinite(preData.age) ? preData.age : "?"}, NIHSS ${isFinite(preData.nihss) ? preData.nihss : "?"}, mRS ${isFinite(preData.premrs) ? preData.premrs : "?"}, ${study} (${outcome})`;
+        return `${pn}, age ${isFinite(preData.age) ? preData.age : "?"}, NIHSS ${isFinite(preData.nihss) ? preData.nihss : "?"}, mRS ${isFinite(preData.premrs) ? preData.premrs : "?"}, ${study} (${outcome})`;
       });
       document.getElementById('shareMessage').value = lines.join('\n');
     }
 
-    // === SALVATAGGIO SU GOOGLE SHEET (GLOBALE) ===
+    // === SAVE TO GOOGLE SHEET (GLOBAL) ===
     function saveToSheet(){
       const Npatient = (document.getElementById('patientNumber')?.value || "").trim();
-      if (!Npatient) { alert("Inserisci il Numero di storia (N patient) prima di salvare."); return; }
+      if (!Npatient) { alert("Enter the patient record number before saving."); return; }
       if (typeof preData.age === "undefined" || typeof preData.nihss === "undefined" ||
           typeof preData.ltsw === "undefined" || typeof preData.premrs === "undefined") {
-        alert("Compila prima Pre-Imaging (Age, NIHSS, LTSW, pre-mRS).");
+        alert("Complete Pre-Imaging first (Age, NIHSS, LTSW, pre-mRS).");
         return;
       }
       const trialsForSheet = buildTrialsForSheet(selectedStudies, studyOutcomes);
@@ -812,10 +935,10 @@
         trials: trialsForSheet
       };
       sendToSheet(payload);
-      alert("Salvato su Google Sheet ✅");
+      alert("Saved to Google Sheet ✅");
     }
 
-    // Aggiorna il preview quando cambia il patient number
+    // Update preview when patient number changes
     document.addEventListener('input', (e)=>{
       if (e.target && e.target.id === 'patientNumber') buildShareMessage();
     });
@@ -829,10 +952,6 @@
 
     function shareWhatsApp(){
       const msg = document.getElementById('shareMessage').value;
-      if (!msg || msg.includes("numero paziente")) {
-        const ok = confirm("Patient number seems empty. Share anyway?");
-        if (!ok) return;
-      }
       const url = "https://wa.me/?text=" + encodeURIComponent(msg);
       window.open(url, "_blank");
     }
@@ -841,9 +960,11 @@
       preData = {}; postData = {}; evtData = {}; hemData = {}; lixData = { criteria: {} };
       eligibility = { weTrust:false, athena:false, fastest:false, tich3:false,
                       librexia:false, vanish:false, pivotal:false, moste:false,
-                      twin2win2:false, artemis:false, hybernia:false, doneSymple:false };
+                      twin2win2:false, artemis:false, hybernia:false, doneSymple:false,
+                      saferdoac:false };
       selectedStudies = []; studyOutcomes = {};
       for (const k of Object.keys(infoMessages)) infoMessages[k] = "";
+      for (const k of Object.keys(notIndicated)) notIndicated[k] = false;
       const formPre = document.getElementById('formPreImaging'); if (formPre) formPre.reset();
       const formLib = document.getElementById('formLibrexia'); if (formLib) formLib.reset();
       const shareForm = document.getElementById('shareForm'); if (shareForm) shareForm.reset();
@@ -856,4 +977,3 @@
 </div>
 </body>
 </html>
-
