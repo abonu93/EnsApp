@@ -1,979 +1,1305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Clinical Trial Eligibility</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ENS-APP — Clinical Trial Eligibility</title>
   <style>
-    body { font-family: Arial, sans-serif; background-color: #f0f8ff; margin: 0; padding: 0; text-align: center; }
-    .container { width: 90%; max-width: 500px; margin: 30px auto; padding: 20px; background-color: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-radius: 12px; }
-    h1, h2 { color: #007acc; margin-bottom: 20px; }
-    label { display: block; margin-bottom: 5px; color: #333; text-align: left; font-weight: bold; }
-    input, select, button, textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
-    button { background-color: #007acc; color: #fff; border: none; cursor: pointer; }
-    button:hover { background-color: #005f99; }
-    .page { display: none; } .visible { display: block; }
-    .toggle-group { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
-    .toggle-button { padding: 10px 20px; border: 1px solid #007acc; border-radius: 8px; background-color: #fff; color: #007acc; cursor: pointer; font-size: 16px; flex: 1 1 45%; max-width: 45%; }
-    .toggle-button.selected { background-color: #007acc; color: #fff; }
-    form { text-align: left; }
-    .info-btn { background-color: #aaa; margin-top: -10px; margin-bottom: 15px; font-size: 14px; }
-    .menu-container { display: flex; flex-direction: column; align-items: center; gap: 30px; margin-top: 40px; }
-    .menu-item { width: 180px; height: 180px; border: 2px solid #ccc; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #333; cursor: pointer; }
-    .menu-item:hover { background-color: #e6f0ff; }
-    .trial-list button { width: 100%; margin-bottom: 10px; text-align: left; background-color: #e6f0ff; border: none; color: #007acc; font-size: 18px; }
-    .trial-list button:hover { background-color: #cce0ff; }
-    .trial-criteria { text-align: left; margin-top: 20px; color: #333; }
-    .ok { color: #0b7a0b; font-weight: bold; }
-    .no { color: #b30000; font-weight: bold; }
-    .summary-list { text-align:left; padding-left:0; list-style:none; }
-    .summary-list li { display: grid; grid-template-columns: 28px 1fr 110px 1fr; align-items: center; column-gap: 10px; margin-bottom: 8px; min-height: 28px; }
-    .summary-list .study-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .summary-list .reason { color:#555; font-size: 13px; }
-    .actions-bottom { display:flex; gap:10px; justify-content:flex-end; }
-    .small { font-size: 13px; color:#555; }
-    .study-outcomes { display: grid; grid-template-columns: 1fr 140px; gap: 8px; align-items:center; }
-    .study-outcomes .study-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .muted { color:#666; font-size:13px; margin-top:-10px; margin-bottom:15px; }
-    .tag { display:inline-block; padding:2px 6px; border-radius:6px; font-size:12px; line-height:1; }
-    .tag-ni { background:#eee; color:#333; border:1px solid #ccc; }
-    .alert { background:#fff6d6; border:1px solid #ffd36a; color:#7a5b00; border-radius:8px; padding:10px; text-align:left; }
+    :root{
+      --bg:#ffffff; --text:#0f172a; --muted:#475569; --border:#e5e7eb;
+      --tile-sky:#45B3CB; --tile-pink:#ED7390; --ring:#e2e8f0;
+      --ok:#0b7a0b; --no:#b30000; --ni-bg:#f4f4f5; --ni-bd:#d4d4d8;
+      --info:#1f2937; --primary:#0ea5e9;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+    .app{min-height:100dvh;display:flex;flex-direction:column}
+    .shell{max-width:760px;width:100%;margin:0 auto}
+    .header{position:sticky;top:0;z-index:20;backdrop-filter:blur(6px);background:rgba(255,255,255,.85);border-bottom:1px solid var(--border)}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem}
+    .brand{display:flex;align-items:center;gap:.6rem}
+    .brand-badge{width:32px;height:32px;border-radius:12px;background:var(--tile-sky)}
+    .brand h1{margin:0;font-size:1.1rem;font-weight:700;letter-spacing:.2px}
+    .content{flex:1}
+    .page-wrap{padding:1rem;padding-bottom:6.5rem}
+    .page{display:none}
+    .visible{display:block}
+
+    /* Tiles */
+    .tiles{margin-top:.75rem;display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem}
+    .tile{aspect-ratio:1/1;border-radius:22px;padding:1rem;color:#fff;text-align:left;display:flex;flex-direction:column;justify-content:space-between;transition:.08s;box-shadow:0 2px 0 rgba(17,24,39,.05);border:1px solid rgba(255,255,255,.2);cursor:pointer}
+    .tile:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(2,6,23,.18)}
+    .t-label{font-size:.78rem;opacity:.9}.t-title{margin:.15rem 0 0 0;font-size:1rem;font-weight:700;line-height:1.1}.t-cta{align-self:flex-end;font-size:.75rem;opacity:.85}
+
+    /* Cards & text */
+    .card{border:1px solid var(--border);border-radius:18px;background:#fff;padding:1rem}
+    .stack{display:grid;gap:.8rem}.stack-lg{display:grid;gap:1rem}
+    .muted{color:var(--muted);font-size:.9rem}
+    h2{margin:.2rem 0 .6rem 0;font-size:1.05rem;font-weight:700}
+
+    /* Form / buttons */
+    form{text-align:left}
+    label{display:block;font-size:.8rem;font-weight:600;color:#475569;margin-bottom:.25rem}
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 12px;
+      padding: .55rem .7rem;
+      font-size: .92rem;
+      outline: none;
+    }
+    input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px var(--ring)}
+    .btn-row{display:flex;gap:.5rem;flex-wrap:wrap}
+    .btn{border:1px solid var(--border);background:#fff;color:#0f172a;padding:.55rem .9rem;border-radius:12px;cursor:pointer;font-weight:600;font-size:.9rem}
+    .btn:hover{filter:brightness(.98)}
+    .btn-primary{border:none;background:var(--tile-sky);color:#fff}
+    .btn-accent{background:var(--tile-pink);color:#fff;border:none}
+    .btn-small{font-size:.8rem;padding:.4rem .6rem;border-radius:10px}
+
+    /* Radio groups */
+    .radio-group{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem}
+    .radio{display:flex;align-items:center;gap:.55rem;border:1px solid var(--border);border-radius:12px;padding:.55rem .7rem;background:#fff;cursor:pointer}
+    .radio input{accent-color:var(--primary);width:18px;height:18px}
+    .radio.selected{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
+    .radio.full{grid-column:1/-1}
+
+    /* Trials / summary */
+    .trial-list{display:grid;gap:.7rem}
+    .trial-item{border:1px solid var(--border);border-radius:16px;background:#fff;padding:.8rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+    .trial-title{font-weight:700}
+
+    .summary-list{list-style:none;padding:0;margin:0}
+    .summary-list li{display:grid;grid-template-columns:28px 1fr 110px 90px;align-items:center;column-gap:10px;border:1px solid var(--border);border-radius:12px;padding:.55rem .6rem;margin-bottom:.5rem;min-height:42px}
+    .study-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ok{color:var(--ok);font-weight:700}.no{color:var(--no);font-weight:700}
+    .tag{display:inline-block;padding:2px 6px;border-radius:6px;font-size:12px;line-height:1}
+    .tag-ni{background:var(--ni-bg);border:1px solid var(--ni-bd);color:#333}
+
+    /* Bottom nav */
+    .bottom-nav{position:fixed;bottom:0;inset-inline:0;z-index:20;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-top:1px solid var(--border)}
+    .bottom-inner{max-width:760px;margin:0 auto}
+    .bottom-grid{display:grid;grid-template-columns:repeat(3,1fr)}
+    .navbtn{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.85rem .5rem;font-weight:600;font-size:.9rem;color:#475569;background:transparent;border:0;cursor:pointer}
+    .navdot{width:6px;height:6px;border-radius:999px;background:#cbd5e1}.navbtn.active{color:var(--primary)}.navbtn.active .navdot{background:var(--primary)}
+
+    /* Modal */
+    .modal-backdrop{
+      position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+      background:rgba(15,23,42,.42);backdrop-filter:blur(2px);z-index:50;padding:1rem;
+    }
+    .modal-backdrop.show{display:flex}
+    .modal{
+      width:min(680px,100%); background:#fff; border:1px solid var(--border);
+      border-radius:16px; box-shadow:0 30px 80px rgba(2,6,23,.25); overflow:hidden;
+      animation:pop .12s ease-out;
+    }
+    @keyframes pop{from{transform:scale(.98);opacity:.7}to{transform:scale(1);opacity:1}}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1rem;border-bottom:1px solid var(--border)}
+    .modal-title{margin:0;font-size:1rem;font-weight:700}
+    .modal-body{padding:1rem}
+    .modal-body h4{margin:.2rem 0;font-size:.95rem}
+    .k-list{margin:.25rem 0 .75rem 0;padding-left:1rem}
+    .k-list li{margin:.18rem 0}
+    .modal-foot{display:flex;justify-content:flex-end;gap:.5rem;padding:.85rem 1rem;border-top:1px solid var(--border)}
+    .btn-ghost{background:#f8fafc}
   </style>
 </head>
 <body>
-<div class="container">
+<div class="app">
+  <header class="header">
+    <div class="shell header-inner">
+      <div class="brand"><div class="brand-badge"></div><h1>ENS-APP</h1></div>
+      <div></div>
+    </div>
+  </header>
 
-  <!-- CONFIG & HELPERS -->
-  <script>
-    const infoMessages = {
-      weTrust: "", athena: "", hemorrhagic: "",
-      librexia: "", vanish: "", pivotal: "", moste: "",
-      twin2win2: "", artemis: "", hybernia: "", doneSymple: "",
-      saferdoac: ""
-    };
+  <div class="content">
+    <div class="shell page-wrap">
 
-    // Optional randomization links
-    const randomizationLinks = {
-      "ATHENA": "https://www.randomize.net/Randomize/Set.aspx?id=ba510dbb-ab7d-42ee-ae95-d8a46394d6ec&token=0d0bff39-455b-4f60-a95a-154476064f2e",
-      "VANISH": "https://app.studyrandomizer.com/dashboard/",
-      "MOSTE": "https://ecrf.chru-lille.fr/EnnovClinical/login?lang=EN",
-      "TWIN-2-WIN 2": "https://www.studyrandomizer.com/",
-      "DONE SYMPLE": "https://www.studyrandomizer.com/"
-    };
+      <!-- MAIN MENU -->
+      <div id="mainMenu" class="page visible">
+        <div class="tiles">
+          <button class="tile" style="background:var(--tile-sky)" onclick="goToNewPatient()">
+            <div><div class="t-label">Clinical intake</div><div class="t-title">Pre-Imaging</div></div><div class="t-cta">Open</div>
+          </button>
+          <button class="tile" style="background:var(--tile-pink)" onclick="goToTrialsCriteria()">
+            <div><div class="t-label">Eligibility</div><div class="t-title">Trials</div></div><div class="t-cta">Open</div>
+          </button>
+        </div>
+      </div>
 
-    // === GOOGLE APPS SCRIPT CONFIG + HELPERS ===
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxH-DomDh7SiZgjCqjhSeViU954KQSc6OeJtNZHREajZNofv6I7O7D5bWKS7Dv6nY8d/exec";
-    function sendToSheet(payload){
-      try {
-        const body = new URLSearchParams({ payload: JSON.stringify(payload) });
-        fetch(GAS_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-          body
-        });
-      } catch(e) { console.warn("sendToSheet error:", e); }
-    }
+      <!-- TRIALS LIST (same UI) -->
+      <div id="trialsList" class="page">
+        <h2>Trials</h2>
+        <div class="trial-list">
+          <div class="trial-item"><span class="trial-title">WeTrust</span><button class="btn" onclick="showTrialCriteria('WeTrust')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">TICH-3</span><button class="btn" onclick="showTrialCriteria('TICH3')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">ATHENA</span><button class="btn" onclick="showTrialCriteria('ATHENA')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">FASTEST</span><button class="btn" onclick="showTrialCriteria('FASTEST')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">Librexia</span><button class="btn" onclick="showTrialCriteria('Librexia')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">VANISH</span><button class="btn" onclick="showTrialCriteria('Vanish')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">PIVOTAL</span><button class="btn" onclick="showTrialCriteria('Pivotal')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">MOSTE</span><button class="btn" onclick="showTrialCriteria('Moste')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">TWIN-2-WIN 2</span><button class="btn" onclick="showTrialCriteria('Twin2Win2')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">ARTEMIS</span><button class="btn" onclick="showTrialCriteria('Artemis')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">HYBERNIA</span><button class="btn" onclick="showTrialCriteria('Hybernia')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">DONE SYMPLE</span><button class="btn" onclick="showTrialCriteria('DoneSymple')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">SAFER-DOAC</span><button class="btn" onclick="showTrialCriteria('SaferDoac')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">SHIONOGI</span><button class="btn" onclick="showTrialCriteria('Shionogi')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">SOVATELTIDE</span><button class="btn" onclick="showTrialCriteria('Sovateltide')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">ORION</span><button class="btn" onclick="showTrialCriteria('Orion')">Open</button></div>
+        </div>
+        <div class="btn-row" style="margin-top:.9rem"><button class="btn" type="button" onclick="goBackToMain()">Back</button></div>
+      </div>
 
-    // Trial columns for the Sheet
-    const SHEET_TRIAL_KEYS = [
-      "WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST","TICH3","LIBREXIA",
-      "TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE","SAFERDOAC"
-    ];
+      <!-- TRIAL DETAIL -->
+      <div id="trialDetail" class="page">
+        <h2 id="trialTitle"></h2>
+        <div class="card"><div id="trialCriteriaText"></div></div>
+        <div class="btn-row" style="margin-top:.9rem"><button class="btn" type="button" onclick="showPage('trialsList')">Back</button></div>
+      </div>
 
-    // UI name -> Sheet key
-    function buildTrialsForSheet(selectedStudies, studyOutcomes){
-      const t = Object.fromEntries(SHEET_TRIAL_KEYS.map(k => [k, "no"]));
-      const nameToKey = {
-        "WeTrust":"WeTrust",
-        "MARSS":"MARSS",
-        "ATHENA":"ATHENA",
-        "VANISH":"VANISH",
-        "PIVOTAL":"PIVOTAL",
-        "MOSTE":"MOSTE",
-        "FASTEST":"FASTEST",
-        "TICH-3":"TICH3",
-        "Librexia":"LIBREXIA",
-        "TWIN-2-WIN 2":"TWIN2WIN",
-        "ARTEMIS":"ARTEMIS",
-        "HYBERNIA":"HYBERNIA",
-        "DONE SYMPLE":"DONESYMPLE",
-        "SAFER-DOAC":"SAFERDOAC"
-      };
+      <!-- PRE-IMAGING -->
+      <div id="preImaging" class="page">
+        <h2>Pre-Imaging</h2>
+        <div class="card stack">
+          <form id="formPreImaging" class="stack">
+            <div class="stack-lg">
+              <div class="stack"><label for="age">Age</label><input type="number" id="age" required /></div>
+              <div class="stack"><label for="nihss">NIHSS</label><input type="number" id="nihss" required /></div>
+              <div class="stack">
+                <label for="premrs">pre-mRS</label>
+                <select id="premrs" required>
+                  <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+                  <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                </select>
+              </div>
+              <div class="stack"><label for="ltsw">Last Seen Well (Date & Time)</label><input type="datetime-local" id="ltsw" required /></div>
+              <div class="stack"><label for="angiograph">Philips angiograph available?</label>
+                <select id="angiograph" required><option value="yes">Yes</option><option value="no">No</option></select>
+              </div>
+              <div class="stack"><label for="doac">Is the patient on DOAC (NOAC)?</label>
+                <select id="doac" required><option value="no">No</option><option value="yes">Yes</option></select>
+              </div>
+            </div>
+            <div class="btn-row" style="margin-top:.5rem"><button class="btn btn-primary" type="button" onclick="submitPreImaging()">Next</button></div>
+          </form>
+        </div>
+      </div>
 
-      (selectedStudies || []).forEach(displayName => {
-        const key = nameToKey[displayName];
-        if (!key) return;
+      <!-- PRE-IMAGING RESULT -->
+      <div id="preResult" class="page">
+        <h2>Pre-Imaging</h2>
+        <div class="card stack">
+          <p id="weTrustResultMessage" class="muted"></p>
+          <div id="doacAlert" class="card" style="display:none;background:#fff6d6;border-color:#ffd36a;color:#7a5b00;">Patient on DOAC (NOAC): perform Chest CTA and obtain drug levels.</div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-small" onclick="showInfo('weTrust')" id="weTrustInfoBtn">Info</button>
+            <button type="button" class="btn" onclick="openWeTrustRandomization()" id="weTrustRandomizeBtn" style="display:none;">Randomization</button>
+            <button type="button" class="btn btn-primary" onclick="continueAfterWeTrust()">Next</button>
+          </div>
+        </div>
+      </div>
 
-        if (key === "SAFERDOAC") {
-          // SAFER-DOAC is intervention-only -> save as "si"
-          t[key] = "si";
-        } else {
-          // Other trials keep "intervention"/"control"
-          const outcome = studyOutcomes?.[displayName] || "intervention";
-          t[key] = outcome;
+      <!-- POST-IMAGING -->
+      <div id="postImaging" class="page">
+        <h2>Post-Imaging</h2>
+
+        <div id="postExclusion" class="card stack" style="display:none;">
+          <h3 style="margin:0 0 .25rem 0">Exclusion criteria detected</h3>
+          <p id="exclusionMessage" class="muted"></p>
+          <div><button type="button" class="btn" onclick="restart()">New evaluation</button></div>
+        </div>
+
+        <div id="postImagingContent" class="stack">
+
+          <!-- Stroke Type (RADIO) -->
+          <div class="card">
+            <label>Stroke type</label>
+            <div id="strokeTypeGroup" class="radio-group">
+              <label class="radio"><input type="radio" name="strokeType" value="ischemic" onchange="selectStrokeType('ischemic')"> Ischemic</label>
+              <label class="radio"><input type="radio" name="strokeType" value="hemorrhagic" onchange="selectStrokeType('hemorrhagic')"> Hemorrhagic</label>
+            </div>
+          </div>
+
+          <!-- Ischemic -->
+          <div id="ischemicSection" class="stack" style="display:none;">
+            <div class="card">
+              <label>Candidate for thrombectomy?</label>
+              <div id="candidateGroup" class="radio-group">
+                <label class="radio"><input type="radio" name="candidate" value="not eligible" onchange="selectCandidate('not eligible')"> Not eligible</label>
+                <label class="radio"><input type="radio" name="candidate" value="eligible" onchange="selectCandidate('eligible')"> Eligible</label>
+              </div>
+            </div>
+
+            <div id="evtSection" class="card stack" style="display:none;">
+              <!-- LVO question removed per spec; when 'eligible' => LVO = yes -->
+              <div class="stack"><label>Tandem occlusion?</label>
+                <select id="tandem" required><option value="no">No</option><option value="yes">Yes</option></select>
+              </div>
+              <div class="stack"><label>Vessel tortuosity present? <span class="muted">(optional)</span></label>
+                <select id="tortuosity"><option value="">-- Select (optional) --</option><option value="no">No</option><option value="yes">Yes</option></select>
+                <div class="muted">For some trials, tortuosity is required; if missing those trials will be “Not indicated”.</div>
+              </div>
+              <div class="stack"><label>Target vessel</label>
+                <select id="targetVessel" required>
+                  <option value="ica-intracranial">Intracranial ICA</option>
+                  <option value="ica-terminal">Terminal ICA (ICA-T)</option>
+                  <option value="m1">M1</option>
+                  <option value="m2-proxdom">M2 proximal/dominant</option>
+                  <option value="m2-any">Any M2</option>
+                  <option value="basilar">Basilar artery</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="stack"><label>Contraindications to thrombolysis?</label>
+                <select id="contraTpa" required><option value="no">No</option><option value="yes">Yes</option></select>
+              </div>
+              <div class="stack"><label for="aspects">ASPECTS</label><input type="number" id="aspects" min="0" max="10" /></div>
+            </div>
+
+            <!-- Non-EVT ischemic confirmation used by Shionogi / Sovateltide / Orion NE branch -->
+            <div id="nonEvtConfirm" class="card stack" style="display:none;">
+              <div class="stack"><label>Imaging lesion confirmed (CT / CTP / MRI)?</label>
+                <select id="lesionConfirmed">
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hemorrhagic -->
+          <div id="hemorrhagicSection" class="stack" style="display:none;">
+            <div class="card stack">
+              <div class="stack"><label>Hemorrhage volume (mL)</label><input type="number" step="0.1" id="hemVolume" required /></div>
+              <div class="stack"><label>GCS</label><input type="number" id="gcs" required /></div>
+
+              <label>Is hemorrhage isolated to IVH?</label>
+              <div id="ivhGroup" class="radio-group">
+                <label class="radio"><input type="radio" name="ivh" value="yes" onchange="selectHem('ivh','yes')"> Yes</label>
+                <label class="radio"><input type="radio" name="ivh" value="no" onchange="selectHem('ivh','no')"> No</label>
+              </div>
+
+              <div class="stack"><label>Secondary cause</label>
+                <select id="secondaryCause" required>
+                  <option value="None">None</option><option value="Traumatic">Traumatic</option>
+                  <option value="AVM">AVM</option><option value="Aneurysm">Aneurysm</option>
+                  <option value="Tumor">Tumor</option><option value="Other">Other</option>
+                </select>
+              </div>
+
+              <label>Active seizures / acute thrombosis / hypersensitivity to TXA?</label>
+              <div id="seizureGroup" class="radio-group">
+                <label class="radio"><input type="radio" name="seizure" value="yes" onchange="selectHem('seizure','yes')"> Yes</label>
+                <label class="radio"><input type="radio" name="seizure" value="no" onchange="selectHem('seizure','no')"> No</label>
+              </div>
+
+              <div class="stack"><label>Anticoagulant therapy</label>
+                <select id="anticoagulantTherapy" required>
+                  <option value="none">None</option><option value="warfarin">Warfarin</option>
+                  <option value="heparin">Heparin &lt;24h</option><option value="doac">DOAC</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="fastestSection" class="card stack" style="display:none;">
+              <h3 style="margin:0">FASTEST — Additional questions</h3>
+
+              <label>Brainstem hemorrhage?</label>
+              <div id="brainstemGroup" class="radio-group">
+                <label class="radio"><input type="radio" name="brainstem" value="yes" onchange="selectHem('brainstem','yes')"> Yes</label>
+                <label class="radio"><input type="radio" name="brainstem" value="no" onchange="selectHem('brainstem','no')"> No</label>
+              </div>
+
+              <label>Procoagulant drugs in last 24h?</label>
+              <div id="procoagulantGroup" class="radio-group">
+                <label class="radio"><input type="radio" name="procoagulant" value="yes" onchange="selectHem('procoagulant','yes')"> Yes</label>
+                <label class="radio"><input type="radio" name="procoagulant" value="no" onchange="selectHem('procoagulant','no')"> No</label>
+              </div>
+
+              <label>ECG infarction or ST elevation?</label>
+              <div id="ecgGroup" class="radio-group">
+                <label class="radio"><input type="radio" name="ecg" value="yes" onchange="selectHem('ecg','yes')"> Yes</label>
+                <label class="radio"><input type="radio" name="ecg" value="no" onchange="selectHem('ecg','no')"> No</label>
+              </div>
+
+              <label>Thrombosis in last 90 days?</label>
+              <div id="thrombosisGroup" class="radio-group">
+                <label class="radio"><input type="radio" name="thrombosis" value="yes" onchange="selectHem('thrombosis','yes')"> Yes</label>
+                <label class="radio"><input type="radio" name="thrombosis" value="no" onchange="selectHem('thrombosis','no')"> No</label>
+              </div>
+
+              <label>Pregnancy/gestation?</label>
+              <div id="pregnancyGroup" class="radio-group">
+                <label class="radio"><input type="radio" name="pregnancy" value="yes" onchange="selectHem('pregnancy','yes')"> Yes</label>
+                <label class="radio"><input type="radio" name="pregnancy" value="no" onchange="selectHem('pregnancy','no')"> No</label>
+              </div>
+
+              <label>Angioplasty/stenting in last 90 days?</label>
+              <div id="angioplastyGroup" class="radio-group">
+                <label class="radio"><input type="radio" name="angioplasty" value="yes" onchange="selectHem('angioplasty','yes')"> Yes</label>
+                <label class="radio"><input type="radio" name="angioplasty" value="no" onchange="selectHem('angioplasty','no')"> No</label>
+              </div>
+
+              <label>IVH score acceptable?</label>
+              <div id="ivhScoreGroup" class="radio-group">
+                <label class="radio"><input type="radio" name="ivhScore" value="yes" onchange="selectHem('ivhScore','yes')"> Yes</label>
+                <label class="radio"><input type="radio" name="ivhScore" value="no" onchange="selectHem('ivhScore','no')"> No</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="btn-row"><button type="button" class="btn btn-primary" onclick="submitPostImaging()">Next</button></div>
+        </div>
+      </div>
+
+      <!-- SUMMARY (ACUTE) -->
+      <div id="summaryPage" class="page">
+        <h2>Summary</h2>
+        <p class="muted">Select eligible trials to include. Use <em>Info</em> to see the reasons (both for eligible and not eligible).</p>
+        <div class="card"><ul id="summaryContent" class="summary-list"></ul></div>
+
+        <div class="card" style="margin-top:1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+            <div>
+              <div style="font-weight:700;margin-bottom:.25rem;">Post-acute studies</div>
+              <div class="muted">Evaluate trials like <strong>Librexia</strong> after acute screening.</div>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn" onclick="goToPostAcute()">Evaluate post-acute studies</button>
+              <button type="button" class="btn btn-primary" onclick="proceedToShare()">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST-ACUTE: LIBREXIA FORM -->
+      <div id="postAcutePage" class="page">
+        <h2>Post-acute studies</h2>
+        <div class="card stack">
+          <div class="muted">Librexia screening.</div>
+
+          <div class="stack"><label>Atherothrombotic cause suspected?</label>
+            <div id="lixSuspect" class="radio-group">
+              <label class="radio"><input type="radio" name="lix_suspect" value="yes"> Yes</label>
+              <label class="radio"><input type="radio" name="lix_suspect" value="no"> No</label>
+            </div>
+          </div>
+
+          <div class="stack"><label>Clinical criteria (at least one)</label>
+            <div class="radio-group" style="grid-template-columns:1fr;">
+              <label class="radio full"><input type="checkbox" id="lix_persistent"> Persistent symptoms</label>
+              <label class="radio full"><input type="checkbox" id="lix_imaging"> Imaging lesion</label>
+              <label class="radio full"><input type="checkbox" id="lix_treatment"> Thrombolysis/Thrombectomy (after 24h, no hemorrhage)</label>
+            </div>
+          </div>
+
+          <div class="stack">
+            <label for="abcd2">ABCD2 score</label>
+            <input type="number" id="abcd2" min="0" max="10" />
+          </div>
+
+          <div class="stack"><label>Antiplatelet therapy in use/planned?</label>
+            <div id="lixAnti" class="radio-group">
+              <label class="radio"><input type="radio" name="lix_anti" value="yes"> Yes</label>
+              <label class="radio"><input type="radio" name="lix_anti" value="no"> No</label>
+            </div>
+          </div>
+
+          <div class="radio-group">
+            <label class="radio"><input type="checkbox" id="lix_alt"> ALT normal</label>
+            <label class="radio"><input type="checkbox" id="lix_platelets"> Platelets adequate</label>
+            <label class="radio"><input type="checkbox" id="lix_bilirubin"> Bilirubin normal</label>
+            <label class="radio"><input type="checkbox" id="lix_hb"> Hemoglobin adequate</label>
+          </div>
+
+          <div class="stack"><label for="inr">INR</label><input type="number" step="0.1" id="inr" /></div>
+          <div class="stack"><label for="aptt">aPTT (ratio)</label><input type="number" step="0.1" id="aptt" /></div>
+          <div class="stack"><label for="gfr">GFR (mL/min/1.73m²)</label><input type="number" step="0.1" id="gfr" /></div>
+
+          <div class="radio-group">
+            <label class="radio"><input type="checkbox" id="lix_chronic"> Requires chronic anticoagulation</label>
+            <label class="radio"><input type="checkbox" id="lix_bleed"> Bleeding risk disorder</label>
+            <label class="radio"><input type="checkbox" id="lix_hepatic"> Hepatic disease</label>
+            <label class="radio"><input type="checkbox" id="lix_inhibitors"> On CYP3A4/P-gp inhibitors</label>
+          </div>
+
+          <div class="stack"><label>Pregnant?</label>
+            <div id="lixPregnant" class="radio-group">
+              <label class="radio"><input type="radio" name="lix_preg" value="no"> No</label>
+              <label class="radio"><input type="radio" name="lix_preg" value="yes"> Yes</label>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn" type="button" onclick="cancelPostAcute()">Back</button>
+            <button class="btn btn-primary" type="button" onclick="submitLibrexia()">Evaluate Librexia</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUMMARY (POST-ACUTE) -->
+      <div id="summaryChronicPage" class="page">
+        <h2>Post-acute Summary</h2>
+        <p class="muted">This page lists only post-acute studies.</p>
+        <div class="card"><ul id="summaryChronicContent" class="summary-list"></ul></div>
+        <div class="btn-row" style="margin-top:.9rem">
+          <button type="button" class="btn" onclick="showPage('summaryPage')">Back</button>
+          <button type="button" class="btn btn-primary" onclick="proceedToShareChronic()">Next</button>
+        </div>
+      </div>
+
+      <!-- SHARE (ACUTE) -->
+      <div id="sharePage" class="page">
+        <h2>Patient Summary & Share</h2>
+        <div class="card stack">
+          <form id="shareForm" class="stack">
+            <div class="stack"><label for="patientNumber">Patient record number</label><input type="text" id="patientNumber" placeholder="e.g., 2025-00123" required /></div>
+
+            <div class="stack">
+              <label>Randomization outcome for each selected study</label>
+              <div id="studyOutcomesContainer" style="display:grid;grid-template-columns:1fr 150px;gap:.5rem;align-items:center;"></div>
+            </div>
+
+            <!-- Acute reperfusion summary (already present in previous version) -->
+            <div class="card stack">
+              <h3 style="margin:0">Acute treatments</h3>
+              <div class="stack">
+                <label>Thrombectomy performed (TEV)?</label>
+                <div class="radio-group">
+                  <label class="radio"><input type="radio" name="tev" value="Yes"> Yes</label>
+                  <label class="radio"><input type="radio" name="tev" value="No"> No</label>
+                </div>
+              </div>
+              <div class="stack">
+                <label>mTICI</label>
+                <select id="mtici">
+                  <option value=""></option>
+                  <option value="0">0</option><option value="1">1</option>
+                  <option value="2a">2a</option><option value="2b">2b</option>
+                  <option value="2b67">2b67</option><option value="3">3</option>
+                </select>
+              </div>
+              <div class="stack">
+                <label>Thrombolysis (TIV)?</label>
+                <div class="radio-group">
+                  <label class="radio"><input type="radio" name="tiv" value="Yes"> Yes</label>
+                  <label class="radio"><input type="radio" name="tiv" value="No"> No</label>
+                </div>
+              </div>
+              <div class="stack">
+                <label for="notesField">Notes</label>
+                <textarea id="notesField" rows="3" placeholder="Notes to append in the message and save to Google Sheet"></textarea>
+              </div>
+            </div>
+
+            <div class="stack"><label>Message (preview)</label><textarea id="shareMessage" rows="6" readonly></textarea></div>
+            <div class="btn-row">
+              <button type="button" class="btn" onclick="copyMessage()">Copy</button>
+              <button type="button" class="btn" onclick="shareWhatsApp()">Share via WhatsApp</button>
+              <button type="button" class="btn btn-accent" onclick="saveToSheet()">Save to Google Sheet</button>
+              <button type="button" class="btn" onclick="showPage('summaryPage')">Back</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- SHARE (POST-ACUTE) -->
+      <div id="shareChronicPage" class="page">
+        <h2>Post-acute Summary & Share</h2>
+        <div class="card stack">
+          <form id="shareChronicForm" class="stack">
+            <div class="stack"><label for="patientNumber2">Patient record number</label><input type="text" id="patientNumber2" placeholder="e.g., 2025-00123" required /></div>
+            <div class="stack">
+              <label>Randomization outcome</label>
+              <div id="studyChronicOutcomesContainer" style="display:grid;grid-template-columns:1fr 150px;gap:.5rem;align-items:center;"></div>
+            </div>
+            <div class="stack"><label>Message (preview)</label><textarea id="shareMessage2" rows="4" readonly></textarea></div>
+            <div class="btn-row">
+              <button type="button" class="btn" onclick="copyMessageChronic()">Copy</button>
+              <button type="button" class="btn" onclick="shareWhatsAppChronic()">Share via WhatsApp</button>
+              <button type="button" class="btn btn-accent" onclick="saveToSheetChronic()">Save to Google Sheet</button>
+              <button type="button" class="btn" onclick="showPage('summaryChronicPage')">Back</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- MODAL (for reasons) -->
+      <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal" role="document">
+          <div class="modal-head">
+            <h3 class="modal-title" id="modalTitle">Details</h3>
+            <button class="btn btn-ghost btn-small" onclick="closeModal()" aria-label="Close">✕</button>
+          </div>
+          <div class="modal-body" id="modalBody"></div>
+          <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCRIPTS -->
+      <script>
+        /* ======= CONFIG ======= */
+        const infoMessages = {
+          weTrust: "", athena: "", hemorrhagic: "",
+          vanish: "", pivotal: "", moste: "",
+          twin2win2: "", artemis: "", hybernia: "", doneSymple: "",
+          fastest: "", tich3: "", librexia: "", saferdoac:"",
+          shionogi:"", sovateltide:"", orion:""
+        };
+
+        // Reasons store: meet (met criteria), fail (unmet criteria)
+        const reasons = {
+          weTrust:{meet:[],fail:[]}, athena:{meet:[],fail:[]}, vanish:{meet:[],fail:[]},
+          pivotal:{meet:[],fail:[]}, moste:{meet:[],fail:[]}, twin2win2:{meet:[],fail:[]},
+          artemis:{meet:[],fail:[]}, hybernia:{meet:[],fail:[]}, doneSymple:{meet:[],fail:[]},
+          fastest:{meet:[],fail:[]}, tich3:{meet:[],fail:[]}, librexia:{meet:[],fail:[]},
+          saferdoac:{meet:[],fail:[]}, shionogi:{meet:[],fail:[]}, sovateltide:{meet:[],fail:[]}, orion:{meet:[],fail:[]}
+        };
+
+        const randomizationLinks = {
+          "ATHENA":"https://www.randomize.net/Randomize/Set.aspx?id=ba510dbb-ab7d-42ee-ae95-d8a46394d6ec&token=0d0bff39-455b-4f60-a95a-154476064f2e",
+          "VANISH":"https://app.studyrandomizer.com/dashboard/",
+          "MOSTE":"https://ecrf.chru-lille.fr/EnnovClinical/login?lang=EN",
+          "TWIN-2-WIN 2":"https://www.studyrandomizer.com/",
+          "DONE SYMPLE":"https://www.studyrandomizer.com/"
+        };
+
+        /* ======= GOOGLE SHEETS SEND (UPDATED ONLY HERE) ======= */
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwBu7TNgohiiFKXASSlCneWfVQh6NZGCEQ65Mf01LjeWFszUWv0AitvQqjhB9Vnp32g/exec";
+        function sendToSheet(payload){
+          try{
+            const body = new URLSearchParams({ payload: JSON.stringify(payload) });
+            fetch(GAS_URL,{method:"POST",mode:"no-cors",headers:{ "Content-Type":"application/x-www-form-urlencoded;charset=UTF-8" },body});
+          }catch(e){ console.warn("sendToSheet error:", e); }
         }
-      });
 
-      // Ensure SAFERDOAC is "no" when not selected (already default), but keep explicit:
-      if (!selectedStudies?.includes("SAFER-DOAC")) t.SAFERDOAC = "no";
-
-      return t;
-    }
-
-    // "Not indicated" state for trials requiring optional fields not provided
-    const notIndicated = {
-      athena:false, vanish:false, pivotal:false, moste:false,
-      twin2win2:false, artemis:false, hybernia:false, doneSymple:false
-    };
-  </script>
-
-  <!-- PAGE 1: Main Menu -->
-  <div id="mainMenu" class="page visible">
-    <h1>ENS-APP</h1>
-    <div class="menu-container">
-      <div class="menu-item" onclick="goToTrialsCriteria()">Trials Criteria</div>
-      <div class="menu-item" onclick="goToNewPatient()">New Patient</div>
-    </div>
-  </div>
-
-  <!-- PAGE 2: Trials List -->
-  <div id="trialsList" class="page">
-    <h1>Trials</h1>
-    <div class="trial-list">
-      <button onclick="showTrialCriteria('WeTrust')">WeTrust &gt;</button>
-      <button onclick="showTrialCriteria('TICH3')">TICH-3 &gt;</button>
-      <button onclick="showTrialCriteria('ATHENA')">ATHENA &gt;</button>
-      <button onclick="showTrialCriteria('FASTEST')">FASTEST &gt;</button>
-      <button onclick="showTrialCriteria('Librexia')">Librexia &gt;</button>
-      <button onclick="showTrialCriteria('Vanish')">VANISH &gt;</button>
-      <button onclick="showTrialCriteria('Pivotal')">PIVOTAL &gt;</button>
-      <button onclick="showTrialCriteria('Moste')">MOSTE &gt;</button>
-      <button onclick="showTrialCriteria('Twin2Win2')">TWIN-2-WIN 2 &gt;</button>
-      <button onclick="showTrialCriteria('Artemis')">ARTEMIS &gt;</button>
-      <button onclick="showTrialCriteria('Hybernia')">HYBERNIA &gt;</button>
-      <button onclick="showTrialCriteria('DoneSymple')">DONE SYMPLE &gt;</button>
-      <button onclick="showTrialCriteria('SaferDoac')">SAFER-DOAC &gt;</button>
-    </div>
-    <button type="button" onclick="goBackToMain()">Back</button>
-  </div>
-
-  <!-- PAGE 3: Trial Detail -->
-  <div id="trialDetail" class="page">
-    <h1 id="trialTitle"></h1>
-    <div class="trial-criteria" id="trialCriteriaText"></div>
-    <button type="button" onclick="showPage('trialsList')">Back</button>
-  </div>
-
-  <!-- PAGE 4: Pre-Imaging -->
-  <div id="preImaging" class="page">
-    <h1>Pre-Imaging</h1>
-    <form id="formPreImaging">
-      <label for="age">Age</label>
-      <input type="number" id="age" required>
-      <label for="nihss">NIHSS</label>
-      <input type="number" id="nihss" required>
-      <label for="premrs">pre-mRS</label>
-      <select id="premrs" required>
-        <option value="0">0</option><option value="1">1</option><option value="2">2</option>
-        <option value="3">3</option><option value="4">4</option><option value="5">5</option>
-      </select>
-      <label for="ltsw">Last Seen Well (Date & Time)</label>
-      <input type="datetime-local" id="ltsw" required>
-      <label for="angiograph">Philips angiograph available?</label>
-      <select id="angiograph" required>
-        <option value="yes">Yes</option><option value="no">No</option>
-      </select>
-
-      <!-- DOAC question -->
-      <label for="doac">Is the patient on DOAC (NOAC)?</label>
-      <select id="doac" required>
-        <option value="no">No</option><option value="yes">Yes</option>
-      </select>
-
-      <button type="button" onclick="submitPreImaging()">Next</button>
-    </form>
-  </div>
-
-  <!-- PAGE 5: Pre-Imaging Result -->
-  <div id="preResult" class="page">
-    <h1>Pre-Imaging</h1>
-    <p id="weTrustResultMessage"></p>
-    <!-- DOAC advisory -->
-    <div id="doacAlert" class="alert" style="display:none;">
-      Patient on DOAC (NOAC): perform Chest CTA and obtain blood tests for anticoagulant levels.
-    </div>
-    <button type="button" class="info-btn" onclick="showInfo('weTrust')" id="weTrustInfoBtn" style="display:none;">Info</button>
-    <button type="button" onclick="openWeTrustRandomization()" id="weTrustRandomizeBtn" style="display:none;">Randomization</button>
-    <button type="button" onclick="continueAfterWeTrust()">Next</button>
-  </div>
-
-  <!-- PAGE 6: Post-Imaging -->
-  <div id="postImaging" class="page">
-    <h1>Post-Imaging</h1>
-    <div id="postExclusion" style="display:none;">
-      <h2>Exclusion Criteria Detected</h2>
-      <p id="exclusionMessage"></p>
-      <button type="button" onclick="restart()">New Evaluation</button>
-    </div>
-    <div id="postImagingContent">
-      <div>
-        <label>Stroke Type</label>
-        <div id="strokeTypeGroup" class="toggle-group">
-          <button type="button" class="toggle-button" onclick="selectStrokeType('ischemic')">Ischemic</button>
-          <button type="button" class="toggle-button" onclick="selectStrokeType('hemorrhagic')">Hemorrhagic</button>
-        </div>
-      </div>
-
-      <!-- Ischemic branch -->
-      <div id="ischemicSection" style="display:none;">
-        <div id="candidateSection">
-          <label>Candidate for thrombectomy?</label>
-          <div id="candidateGroup" class="toggle-group">
-            <button type="button" class="toggle-button" onclick="selectCandidate('not')">Not eligible</button>
-            <button type="button" class="toggle-button" onclick="selectCandidate('eligible')">Eligible</button>
-          </div>
-        </div>
-        <div id="evtSection" style="display:none;">
-          <label>LVO</label>
-          <select id="lvo" required>
-            <option value="yes">Yes</option><option value="no">No</option>
-          </select>
-
-          <label>Tandem occlusion present?</label>
-          <select id="tandem" required>
-            <option value="no">No</option><option value="yes">Yes</option>
-          </select>
-
-          <label>Vessel tortuosity present? <span class="small">(optional)</span></label>
-          <select id="tortuosity">
-            <option value="">-- Select (optional) --</option>
-            <option value="no">No</option><option value="yes">Yes</option>
-          </select>
-
-          <div class="muted">To assess eligibility for some studies, tortuosity is required. If not provided, those studies will be marked as “Not indicated”.</div>
-
-          <label>Target vessel</label>
-          <select id="targetVessel" required>
-            <option value="ica-intracranial">Intracranial ICA</option>
-            <option value="ica-terminal">Terminal ICA (ICA-T)</option>
-            <option value="m1">M1</option>
-            <option value="m2-proxdom">M2 proximal/dominant</option>
-            <option value="m2-any">Any M2</option>
-            <option value="basilar">Basilar artery</option>
-            <option value="other">Other</option>
-          </select>
-
-          <label>Contraindications to thrombolysis?</label>
-          <select id="contraTpa" required>
-            <option value="no">No</option><option value="yes">Yes</option>
-          </select>
-
-          <label for="aspects">ASPECTS</label>
-          <input type="number" id="aspects" min="0" max="10">
-        </div>
-      </div>
-
-      <!-- Hemorrhagic branch -->
-      <div id="hemorrhagicSection" style="display:none;">
-        <h2>Hemorrhagic Study Questions</h2>
-        <label>Hemorrhage Volume (mL)</label>
-        <input type="number" step="0.1" id="hemVolume" required>
-        <label>GCS</label>
-        <input type="number" id="gcs" required>
-        <label>Is the hemorrhage isolated to IVH only?</label>
-        <div id="ivhGroup" class="toggle-group">
-          <button type="button" class="toggle-button" onclick="selectHem('ivh','yes')">Yes</button>
-          <button type="button" class="toggle-button" onclick="selectHem('ivh','no')">No</button>
-        </div>
-        <label>Secondary Cause</label>
-        <select id="secondaryCause" required>
-          <option value="None">None</option><option value="Traumatic">Traumatic</option>
-          <option value="AVM">AVM</option><option value="Aneurysm">Aneurysm</option>
-          <option value="Tumor">Tumor</option><option value="Other">Other</option>
-        </select>
-        <label>Active seizures / acute thrombosis / hypersensitivity to tranexamic acid present?</label>
-        <div id="seizureGroup" class="toggle-group">
-          <button type="button" class="toggle-button" onclick="selectHem('seizure','yes')">Yes</button>
-          <button type="button" class="toggle-button" onclick="selectHem('seizure','no')">No</button>
-        </div>
-        <label>Anticoagulant therapy in use</label>
-        <select id="anticoagulantTherapy" required>
-          <option value="none">None</option><option value="warfarin">Warfarin</option>
-          <option value="heparin">Heparin &lt;24h</option><option value="doac">DOAC</option>
-        </select>
-
-        <div id="fastestSection" style="display:none;">
-          <h2>FASTEST Additional Questions</h2>
-          <label>Brainstem hemorrhage?</label>
-          <div id="brainstemGroup" class="toggle-group">
-            <button type="button" class="toggle-button" onclick="selectHem('brainstem','yes')">Yes</button>
-            <button type="button" class="toggle-button" onclick="selectHem('brainstem','no')">No</button>
-          </div>
-          <label>Procoagulant drugs used in last 24h?</label>
-          <div id="procoagulantGroup" class="toggle-group">
-            <button type="button" class="toggle-button" onclick="selectHem('procoagulant','yes')">Yes</button>
-            <button type="button" class="toggle-button" onclick="selectHem('procoagulant','no')">No</button>
-          </div>
-          <label>ECG infarction or ST elevation?</label>
-          <div id="ecgGroup" class="toggle-group">
-            <button type="button" class="toggle-button" onclick="selectHem('ecg','yes')">Yes</button>
-            <button type="button" class="toggle-button" onclick="selectHem('ecg','no')">No</button>
-          </div>
-          <label>Thrombosis in last 90 days?</label>
-          <div id="thrombosisGroup" class="toggle-group">
-            <button type="button" class="toggle-button" onclick="selectHem('thrombosis','yes')">Yes</button>
-            <button type="button" class="toggle-button" onclick="selectHem('thrombosis','no')">No</button>
-          </div>
-          <label>Pregnancy or gestation?</label>
-          <div id="pregnancyGroup" class="toggle-group">
-            <button type="button" class="toggle-button" onclick="selectHem('pregnancy','yes')">Yes</button>
-            <button type="button" class="toggle-button" onclick="selectHem('pregnancy','no')">No</button>
-          </div>
-          <label>Angioplasty or stenting in last 90 days?</label>
-          <div id="angioplastyGroup" class="toggle-group">
-            <button type="button" class="toggle-button" onclick="selectHem('angioplasty','yes')">Yes</button>
-            <button type="button" class="toggle-button" onclick="selectHem('angioplasty','no')">No</button>
-          </div>
-          <label>IVH score acceptable?</label>
-          <div id="ivhScoreGroup" class="toggle-group">
-            <button type="button" class="toggle-button" onclick="selectHem('ivhScore','yes')">Yes</button>
-            <button type="button" class="toggle-button" onclick="selectHem('ivhScore','no')">No</button>
-          </div>
-        </div>
-      </div>
-
-      <button type="button" onclick="submitPostImaging()">Next</button>
-    </div>
-  </div>
-
-  <!-- PAGE 7: Post-Imaging Exclusion Page -->
-  <div id="postExclusionPage" class="page">
-    <h1>Exclusion Detected</h1>
-    <p id="exclusionMessage"></p>
-    <button type="button" onclick="restart()">New Evaluation</button>
-  </div>
-
-  <!-- PAGE 8: Ischemic Results -->
-  <div id="marssAthenaResults" class="page">
-    <h1>Ischemic Study Check</h1>
-    <p id="athenaResult"></p>
-    <p id="vanishResult"></p>
-    <p id="pivotalResult"></p>
-    <p id="mosteResult"></p>
-    <p id="twin2winResult"></p>
-    <p id="artemisResult"></p>
-    <p id="hyberniaResult"></p>
-    <p id="doneSympleResult"></p>
-    <button type="button" class="info-btn" onclick="showInfo('athena')" id="athenaInfoBtn" style="display:none;">ATHENA Info</button>
-    <button type="button" class="info-btn" onclick="showInfo('vanish')" id="vanishInfoBtn" style="display:none;">VANISH Info</button>
-    <button type="button" class="info-btn" onclick="showInfo('pivotal')" id="pivotalInfoBtn" style="display:none;">PIVOTAL Info</button>
-    <button type="button" class="info-btn" onclick="showInfo('moste')" id="mosteInfoBtn" style="display:none;">MOSTE Info</button>
-    <button type="button" class="info-btn" onclick="showInfo('twin2win2')" id="twin2winInfoBtn" style="display:none;">TWIN-2-WIN 2 Info</button>
-    <button type="button" class="info-btn" onclick="showInfo('artemis')" id="artemisInfoBtn" style="display:none;">ARTEMIS Info</button>
-    <button type="button" class="info-btn" onclick="showInfo('hybernia')" id="hyberniaInfoBtn" style="display:none;">HYBERNIA Info</button>
-    <button type="button" class="info-btn" onclick="showInfo('doneSymple')" id="doneSympleInfoBtn" style="display:none;">DONE SYMPLE Info</button>
-    <button type="button" onclick="handleMarssAthena()">Next</button>
-  </div>
-
-  <!-- PAGE 9: Librexia (Milvexian) Questions -->
-  <div id="librexiaPage" class="page">
-    <h1>Librexia Study Questions</h1>
-    <form id="formLibrexia">
-      <label>Suspected atherothrombotic cause?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('suspect','yes')">Yes</button>
-        <button type="button" class="toggle-button" onclick="selectLix('suspect','no')">No</button>
-      </div>
-
-      <label>Select at least one:</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="toggleLixCriterion('persistent')">Persistent symptoms</button>
-        <button type="button" class="toggle-button" onclick="toggleLixCriterion('imaging')">Imaging lesion</button>
-        <button type="button" class="toggle-button" onclick="toggleLixCriterion('treatment')">Thrombolysis/thrombectomy (after 24h, no hemorrhage)</button>
-      </div>
-
-      <label for="abcd2">ABCD2 score</label>
-      <input type="number" id="abcd2" required>
-
-      <label>Antiplatelet therapy in use or planned?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('anti','yes')">Yes</button>
-        <button type="button" class="toggle-button" onclick="selectLix('anti','no')">No</button>
-      </div>
-
-      <label for="inr">INR</label>
-      <input type="number" step="0.1" id="inr" required>
-
-      <label for="aptt">aPTT</label>
-      <input type="number" step="0.1" id="aptt" required>
-
-      <label>Pregnant?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('pregnant','no')">No</button>
-        <button type="button" class="toggle-button" onclick="selectLix('pregnant','yes')">Yes</button>
-      </div>
-
-      <label>History of intracranial bleeding?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('icb','no')">No</button>
-        <button type="button" class="toggle-button" onclick="selectLix('icb','yes')">Yes</button>
-      </div>
-
-      <label>Chronic anticoagulation required?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('chronic','no')">No</button>
-        <button type="button" class="toggle-button" onclick="selectLix('chronic','yes')">Yes</button>
-      </div>
-
-      <label>Bleeding risk disorders?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('bleed','no')">No</button>
-        <button type="button" class="toggle-button" onclick="selectLix('bleed','yes')">Yes</button>
-      </div>
-
-      <label>Hepatic disease?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('hepatic','no')">No</button>
-        <button type="button" class="toggle-button" onclick="selectLix('hepatic','yes')">Yes</button>
-      </div>
-
-      <label>Allergy to Milvexian excipients?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('allergy','no')">No</button>
-        <button type="button" class="toggle-button" onclick="selectLix('allergy','yes')">Yes</button>
-      </div>
-
-      <label for="gfr">GFR (ml/min)</label>
-      <input type="number" id="gfr" required>
-
-      <label>Taking CYP3A4/P-gp inhibitors?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('inhibitors','no')">No</button>
-        <button type="button" class="toggle-button" onclick="selectLix('inhibitors','yes')">Yes</button>
-      </div>
-
-      <label>ALT normal (≤3x normal)?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('alt','yes')">Yes</button>
-        <button type="button" class="toggle-button" onclick="selectLix('alt','no')">No</button>
-      </div>
-
-      <label>Platelets adequate (≥75,000)?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('platelets','yes')">Yes</button>
-        <button type="button" class="toggle-button" onclick="selectLix('platelets','no')">No</button>
-      </div>
-
-      <label>Bilirubin normal (&lt;1.5x normal)?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('bilirubin','yes')">Yes</button>
-        <button type="button" class="toggle-button" onclick="selectLix('bilirubin','no')">No</button>
-      </div>
-
-      <label>Hemoglobin normal (≥8)?</label>
-      <div class="toggle-group">
-        <button type="button" class="toggle-button" onclick="selectLix('hb','yes')">Yes</button>
-        <button type="button" class="toggle-button" onclick="selectLix('hb','no')">No</button>
-      </div>
-
-      <button type="button" onclick="submitLibrexia()">Next</button>
-    </form>
-  </div>
-
-  <!-- PAGE 10: Librexia Result -->
-  <div id="librexiaResult" class="page">
-    <h1>Librexia Study Result</h1>
-    <div id="lixResultMessage"></div>
-    <button type="button" class="info-btn" onclick="showInfo('librexia')" id="librexiaInfoBtn" style="display:none;">Info</button>
-    <button type="button" onclick="restart()">New Evaluation</button>
-  </div>
-
-  <!-- PAGE 11: Final Summary -->
-  <div id="summaryPage" class="page">
-    <h1>Summary</h1>
-    <p class="small">Select one or more eligible studies to include in the patient summary. Trial names remain clickable (when available) to open the randomization portal.</p>
-    <ul id="summaryContent" class="summary-list"></ul>
-    <div class="actions-bottom">
-      <button type="button" onclick="proceedToShare()">Next</button>
-      <!-- "New Evaluation" button intentionally removed -->
-    </div>
-  </div>
-
-  <!-- PAGE 12: Patient Summary & Share -->
-  <div id="sharePage" class="page">
-    <h1>Patient Summary & Share</h1>
-    <form id="shareForm">
-      <label for="patientNumber">Patient record number</label>
-      <input type="text" id="patientNumber" placeholder="e.g., 2025-00123" required>
-
-      <label>Randomization outcome for each selected study</label>
-      <div id="studyOutcomesContainer" class="study-outcomes"></div>
-
-      <label>Message (preview)</label>
-      <textarea id="shareMessage" rows="4" readonly></textarea>
-
-      <button type="button" onclick="copyMessage()">Copy</button>
-      <button type="button" onclick="shareWhatsApp()">Share via WhatsApp</button>
-      <button type="button" onclick="saveToSheet()">Save to Google Sheet</button>
-      <button type="button" onclick="showPage('summaryPage')">Back</button>
-    </form>
-  </div>
-
-  <!-- MAIN APP SCRIPT -->
-  <script>
-    let preData = {}, postData = {}, evtData = {}, hemData = {};
-    let lixData = { criteria: {} };
-    let eligibility = {
-      weTrust:false, athena:false, fastest:false, tich3:false,
-      librexia:false, vanish:false, pivotal:false, moste:false,
-      twin2win2:false, artemis:false, hybernia:false, doneSymple:false,
-      saferdoac:false
-    };
-    let selectedStudies = [];
-    let studyOutcomes = {}; // { studyName: "intervention" | "control" } (not for SAFER-DOAC)
-
-    function showPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('visible')); document.getElementById(id).classList.add('visible'); }
-    function goToTrialsCriteria(){ showPage('trialsList'); }
-    function goToNewPatient(){ showPage('preImaging'); }
-    function goBackToMain(){ showPage('mainMenu'); }
-
-    function showTrialCriteria(name){
-      document.getElementById('trialTitle').innerText = name === 'SaferDoac' ? 'SAFER-DOAC' : name;
-      document.getElementById('trialCriteriaText').innerHTML = trialCriteria[name] || "<p>No criteria found.</p>";
-      showPage('trialDetail');
-    }
-
-    const trialCriteria = {
-      "WeTrust": `<ul><li>Age ≥ 18 years</li><li>NIHSS ≥ 10</li><li>pre-mRS 0–2</li><li>Last Seen Well ≤ 6 hours</li><li>Philips angiograph available</li></ul>`,
-      "TICH3": `<ul><li>Onset &lt; 4.5h</li><li>Hemorrhage volume &lt; 60 mL</li><li>Not isolated IVH</li><li>GCS ≥ 5</li><li>No acute venous thrombosis/hypersensitivity, etc.</li></ul>`,
-      "ATHENA": `<ul><li>Age 22–85</li><li>NIHSS ≥ 8</li><li>pre-mRS 0–2</li><li>LTSW ≤ 24h</li><li>LVO = yes, tandem = no, tortuosity = no</li></ul>`,
-      "FASTEST": `<ul><li>Age 18–80</li><li>Onset ≤ 2h</li><li>GCS ≥ 8</li><li>Hemorrhage volume 2–60 cc</li><li>Acceptable IVH score, no procoagulant drugs, etc.</li></ul>`,
-      "Librexia": `<ul><li>Age ≥ 40 years</li><li>Within 48 hours from LTSW</li><li>Ischemic stroke with NIHSS ≤ 7 and suspected atherothrombotic cause</li><li>ABCD2 score ≥ 6 (if TIA)</li><li>INR ≤ 1.5, aPTT ≤ 1.4, not pregnant</li><li>Exclusions: pre-mRS ≥ 3, intracranial hemorrhage history, GFR &lt; 15, etc.</li></ul>`,
-      "Vanish": `<ul><li>Age ≥ 18 years</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 6</li><li>Target vessel: Terminal ICA (ICA-T) or M1</li><li>No contraindications to thrombolysis</li></ul>`,
-      "Pivotal": `<ul><li>LTSW &lt; 8 hours</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 6</li><li>Occlusion: Terminal ICA (ICA-T), M1 (prox–distal) or Basilar artery</li></ul>`,
-      "Moste": `<ul><li>LTSW &lt; 23 hours</li><li>pre-mRS 0–1</li><li>NIHSS &lt; 6</li><li>Occlusion: Terminal ICA (ICA-T), M1 or M2</li></ul>`,
-      "Twin2Win2": `<ul><li>LTSW &lt; 24h</li><li>Age &gt;18</li><li>pre-mRS 0–2</li><li>NIHSS ≥ 6</li><li>Occlusion: Terminal ICA (ICA-T), M1 (distal included), Basilar artery</li></ul>`,
-      "Artemis": `<ul><li>LTSW &lt; 24h</li><li>Age 18–85</li><li>pre-mRS 0–2</li><li>NIHSS 6–25</li><li>Occlusion: Intracranial ICA, M1, M2 proximal/dominant</li><li>ASPECTS &gt; 5</li></ul>`,
-      "Hybernia": `<ul><li>LTSW &lt; 24h</li><li>Age 18–89</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 6</li><li>Occlusion: Intracranial ICA, M1, Any M2</li><li>ASPECTS &gt; 4</li></ul>`,
-      "DoneSymple": `<ul><li>Window 24–72h</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥ 8</li><li>Occlusion: any vessel</li></ul>`,
-      "SaferDoac": `<ul><li>Patients on DOAC (NOAC)</li><li>Perform Chest CTA</li><li>Obtain blood tests for anticoagulant levels</li></ul>`
-    };
-
-    /* PRE-IMAGING / WETRUST */
-    function submitPreImaging() {
-      preData.age = parseInt(document.getElementById('age').value);
-      preData.nihss = parseInt(document.getElementById('nihss').value);
-      preData.premrs = parseInt(document.getElementById('premrs').value);
-      const ltswInput = document.getElementById('ltsw').value;
-      if (!ltswInput) { alert("Please enter Last Seen Well time."); return; }
-      const lastSeen = new Date(ltswInput), now = new Date();
-      if (lastSeen > now) { alert("Last Seen Well time cannot be in the future."); return; }
-      preData.ltsw = (now - lastSeen) / (1000 * 60 * 60);
-      preData.angiograph = document.getElementById('angiograph').value;
-      preData.doac = document.getElementById('doac').value; // "yes" | "no"
-
-      eligibility.weTrust = (preData.age >= 18 && preData.nihss >= 10 && preData.premrs <= 2 && preData.ltsw <= 6 && preData.angiograph === 'yes');
-
-      let errors = [];
-      if (preData.age < 18) errors.push("Age below 18");
-      if (preData.nihss < 10) errors.push("NIHSS below 10");
-      if (preData.premrs > 2) errors.push("pre-mRS above 2");
-      if (preData.ltsw > 6) errors.push("Time since LTSW above 6h");
-      if (preData.angiograph !== 'yes') errors.push("Philips angiograph not available");
-      infoMessages.weTrust = errors.join(", ");
-
-      document.getElementById('weTrustResultMessage').innerHTML = eligibility.weTrust ? "Eligible for WeTrust." : "Not eligible for WeTrust.";
-
-      // DOAC advisory
-      const doacAlert = document.getElementById('doacAlert');
-      doacAlert.style.display = (preData.doac === 'yes') ? 'block' : 'none';
-
-      document.getElementById('weTrustInfoBtn').style.display = eligibility.weTrust ? "none" : "inline-block";
-      document.getElementById('weTrustRandomizeBtn').style.display = eligibility.weTrust ? "inline-block" : "none";
-
-      showPage('preResult');
-    }
-    function continueAfterWeTrust(){ showPage('postImaging'); }
-    function openWeTrustRandomization(){ window.open('https://wetrust.eu1.phsdp.com/login', '_blank'); }
-
-    /* POST-IMAGING */
-    function selectStrokeType(value){
-      postData.strokeType = value;
-      document.querySelectorAll('#strokeTypeGroup .toggle-button').forEach(btn => btn.classList.remove('selected'));
-      Array.from(document.querySelectorAll('#strokeTypeGroup .toggle-button')).find(b => b.textContent.trim().toLowerCase() === value).classList.add('selected');
-      if (value === "ischemic") { document.getElementById("ischemicSection").style.display = 'block'; document.getElementById("hemorrhagicSection").style.display = 'none'; }
-      else { document.getElementById("ischemicSection").style.display = 'none'; document.getElementById("hemorrhagicSection").style.display = 'block'; updateHemorrhagicSection(); }
-    }
-
-    function selectCandidate(value){
-      postData.candidate = value;
-      document.querySelectorAll('#candidateGroup .toggle-button').forEach(btn => btn.classList.remove('selected'));
-      Array.from(document.querySelectorAll('#candidateGroup .toggle-button')).find(b => b.textContent.trim().toLowerCase().includes(value)).classList.add('selected');
-      if (value === "eligible") document.getElementById("evtSection").style.display = 'block';
-      else showPage('librexiaPage');
-    }
-
-    function selectHem(q, v){
-      hemData[q] = v;
-      const groups = { ivh:"ivhGroup", seizure:"seizureGroup", brainstem:"brainstemGroup", procoagulant:"procoagulantGroup", ecg:"ecgGroup", thrombosis:"thrombosisGroup", pregnancy:"pregnancyGroup", angioplasty:"angioplastyGroup", ivhScore:"ivhScoreGroup" };
-      if (groups[q]) {
-        document.querySelectorAll('#' + groups[q] + ' .toggle-button').forEach(btn => btn.classList.remove('selected'));
-        Array.from(document.querySelectorAll('#' + groups[q] + ' .toggle-button')).find(b => b.textContent.trim().toLowerCase() === v).classList.add('selected');
-      }
-    }
-
-    function updateHemorrhagicSection(){ document.getElementById("fastestSection").style.display = (preData.ltsw < 2 && preData.premrs <= 2) ? 'block' : 'none'; }
-    function checkIschemicPreExclusions(){ return []; }
-
-    function submitPostImaging(){
-      if (!postData.strokeType) { alert("Please select a Stroke Type."); return; }
-
-      if (postData.strokeType === "ischemic") {
-        const exclusionErrors = checkIschemicPreExclusions();
-        if (exclusionErrors.length) { document.getElementById('exclusionMessage').innerHTML = "Patient already has exclusion criteria: " + exclusionErrors.join(", "); showPage('postExclusionPage'); return; }
-        if (!postData.candidate) { alert("Please select the candidate option for thrombectomy."); return; }
-
-        if (postData.candidate === "eligible") {
-          const lvo = document.getElementById('lvo').value;
-          const tandem = document.getElementById('tandem').value;
-          const tortuosity = document.getElementById('tortuosity').value; // "" if not selected (optional)
-          const targetVessel = document.getElementById('targetVessel').value;
-          const contraTpa = document.getElementById('contraTpa').value;
-          const aspects = parseInt(document.getElementById('aspects').value);
-
-          // Reset "not indicated" flags
-          for (const k of Object.keys(notIndicated)) notIndicated[k] = false;
-
-          const vanishVesselOk  = (targetVessel === "ica-terminal" || targetVessel === "m1");
-          const pivotalVesselOk = (targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "basilar");
-          const mosteVesselOk   = (targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "m2-any" || targetVessel === "m2-proxdom");
-          const twinVesselOk    = (targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "basilar");
-          const artemisVesselOk = (targetVessel === "ica-intracranial" || targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "m2-proxdom");
-          const hyberniaVesselOk= (targetVessel === "ica-intracranial" || targetVessel === "ica-terminal" || targetVessel === "m1" || targetVessel === "m2-any" || targetVessel === "m2-proxdom");
-
-          // ATHENA requires tortuosity == "no". If tortuosity not provided, mark as Not indicated.
-          if (tortuosity === "") {
-            eligibility.athena = false;
-            notIndicated.athena = true;
-            infoMessages.athena = "Enter tortuosity to assess eligibility (ATHENA requires tortuosity = no).";
-          } else {
-            eligibility.athena = (preData.age >= 22 && preData.age <= 85 && preData.nihss >= 8 && preData.premrs <= 2 && preData.ltsw <= 24 && lvo === "yes" && tandem === "no" && tortuosity === "no");
-            let athenaErrors = [];
-            if (preData.nihss < 8) athenaErrors.push("NIHSS <8");
-            if (preData.ltsw > 24) athenaErrors.push("LTSW >24h");
-            if (tandem !== "no") athenaErrors.push("Tandem = yes");
-            if (tortuosity !== "no") athenaErrors.push("Tortuosity = yes");
-            if (lvo !== "yes") athenaErrors.push("LVO = no");
-            infoMessages.athena = athenaErrors.join(", ");
-          }
-
-          // Other trials unchanged
-          eligibility.vanish     = (preData.age >= 18 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && vanishVesselOk && contraTpa === "no");
-          eligibility.pivotal    = (preData.ltsw < 8 && preData.age >= 18 && preData.age <= 80 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && pivotalVesselOk);
-          eligibility.moste      = (preData.ltsw < 23 && preData.premrs <= 1 && preData.nihss < 6 && lvo === "yes" && mosteVesselOk);
-          eligibility.twin2win2  = (preData.ltsw < 24 && preData.age > 18 && preData.premrs <= 2 && preData.nihss >= 6 && lvo === "yes" && twinVesselOk);
-          eligibility.artemis    = (preData.ltsw < 24 && preData.age >= 18 && preData.age <= 85 && preData.premrs <= 2 && preData.nihss >= 6 && preData.nihss <= 25 && lvo === "yes" && artemisVesselOk && !isNaN(aspects) && aspects > 5);
-          eligibility.hybernia   = (preData.ltsw < 24 && preData.age >= 18 && preData.age <= 89 && preData.premrs <= 1 && preData.nihss >= 6 && lvo === "yes" && hyberniaVesselOk && !isNaN(aspects) && aspects > 4);
-          eligibility.doneSymple = (preData.ltsw >= 24 && preData.ltsw <= 72 && preData.age >= 18 && preData.age <= 80 && preData.premrs <= 1 && preData.nihss >= 8 && lvo === "yes");
-
-          // SAFER-DOAC eligibility (based on DOAC at Pre-Imaging)
-          eligibility.saferdoac = (preData.doac === 'yes');
-          if (!eligibility.saferdoac) infoMessages.saferdoac = "Trial targets patients on DOAC (NOAC).";
-
-          // VANISH info
-          let vanishErrors = [];
-          if (preData.age < 18) vanishErrors.push("Age <18");
-          if (preData.premrs > 1) vanishErrors.push("pre-mRS >1");
-          if (preData.nihss < 6) vanishErrors.push("NIHSS <6");
-          if (lvo !== "yes") vanishErrors.push("LVO = no");
-          if (!vanishVesselOk) vanishErrors.push("Vessel not ICA-T/M1");
-          if (contraTpa !== "no") vanishErrors.push("Contraindications to thrombolysis present");
-          infoMessages.vanish = vanishErrors.join(", ");
-
-          // PIVOTAL info
-          let pivotalErrors = [];
-          if (preData.ltsw >= 8) pivotalErrors.push("LTSW ≥8h");
-          if (preData.age < 18 || preData.age > 80) pivotalErrors.push("Age not in 18–80");
-          if (preData.premrs > 1) pivotalErrors.push("pre-mRS >1");
-          if (preData.nihss < 6) pivotalErrors.push("NIHSS <6");
-          if (lvo !== "yes") pivotalErrors.push("LVO = no");
-          if (!pivotalVesselOk) pivotalErrors.push("Vessel not ICA-T/M1/Basilar");
-          infoMessages.pivotal = pivotalErrors.join(", ");
-
-          // MOSTE info
-          let mosteErrors = [];
-          if (preData.ltsw >= 23) mosteErrors.push("LTSW ≥23h");
-          if (preData.premrs > 1) mosteErrors.push("pre-mRS >1");
-          if (!(preData.nihss < 6)) mosteErrors.push("NIHSS ≥6");
-          if (lvo !== "yes") mosteErrors.push("LVO = no");
-          if (!mosteVesselOk) mosteErrors.push("Vessel not ICA-T/M1/M2");
-          infoMessages.moste = mosteErrors.join(", ");
-
-          // RESULTS
-          const setResult = (id, ok, niFlag, name, extra) => {
-            const el = document.getElementById(id);
-            if (niFlag) {
-              el.innerHTML = `${name}: <span class="tag tag-ni">Not indicated</span>${extra ? " – " + extra : ""}`;
-              return;
-            }
-            el.innerHTML = ok ? `Eligible for ${name}.` : `Not eligible for ${name}.`;
+        // Trials keys mapping for Sheets
+        const SHEET_TRIAL_KEYS = [
+          "WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST","TICH3","LIBREXIA","TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE","SAFERDOAC","SHIONOGI","SOVATELTIDE","ORION"
+        ];
+        function buildTrialsForSheet(selectedStudies, studyOutcomes){
+          const t = Object.fromEntries(SHEET_TRIAL_KEYS.map(k=>[k,"no"]));
+          const nameToKey = {
+            "WeTrust":"WeTrust","MARSS":"MARSS","ATHENA":"ATHENA","VANISH":"VANISH","PIVOTAL":"PIVOTAL","MOSTE":"MOSTE","FASTEST":"FASTEST","TICH-3":"TICH3","Librexia":"LIBREXIA","TWIN-2-WIN 2":"TWIN2WIN","ARTEMIS":"ARTEMIS","HYBERNIA":"HYBERNIA","DONE SYMPLE":"DONESYMPLE","SAFER-DOAC":"SAFERDOAC","SHIONOGI":"SHIONOGI","SOVATELTIDE":"SOVATELTIDE","ORION":"ORION"
           };
-
-          setResult('athenaResult',     eligibility.athena,    notIndicated.athena,    'ATHENA', infoMessages.athena);
-          setResult('vanishResult',     eligibility.vanish,    notIndicated.vanish,    'VANISH', infoMessages.vanish);
-          setResult('pivotalResult',    eligibility.pivotal,   notIndicated.pivotal,   'PIVOTAL', infoMessages.pivotal);
-          setResult('mosteResult',      eligibility.moste,     notIndicated.moste,     'MOSTE', infoMessages.moste);
-          setResult('twin2winResult',   eligibility.twin2win2, notIndicated.twin2win2, 'TWIN-2-WIN 2', infoMessages.twin2win2);
-          setResult('artemisResult',    eligibility.artemis,   notIndicated.artemis,   'ARTEMIS', infoMessages.artemis);
-          setResult('hyberniaResult',   eligibility.hybernia,  notIndicated.hybernia,  'HYBERNIA', infoMessages.hybernia);
-          setResult('doneSympleResult', eligibility.doneSymple,notIndicated.doneSymple,'DONE SYMPLE', infoMessages.doneSymple);
-
-          showPage('marssAthenaResults');
-          return;
-        } else { showPage('librexiaPage'); return; }
-      }
-
-      if (postData.strokeType === "hemorrhagic") {
-        const hemVolume = parseFloat(document.getElementById('hemVolume').value);
-        const gcs = parseInt(document.getElementById('gcs').value);
-        const secondaryCause = document.getElementById('secondaryCause').value;
-        if (isNaN(hemVolume) || isNaN(gcs) || !hemData.ivh || !hemData.seizure) { alert("Please fill in all hemorrhagic study questions."); return; }
-
-        let fastestEligible = false;
-        if (preData.ltsw <= 2 && preData.premrs <= 2 && preData.age >= 18 && preData.age <= 80) {
-          if (!hemData.brainstem || !hemData.procoagulant || !hemData.ecg || !hemData.thrombosis || !hemData.pregnancy || !hemData.angioplasty || !hemData.ivhScore) { alert("Please fill in all FASTEST additional questions."); return; }
-          const anticoag = document.getElementById('anticoagulantTherapy').value;
-          fastestEligible = (gcs >= 8 && hemVolume >= 2 && hemVolume < 60 && hemData.brainstem === "no" && hemData.procoagulant === "no" && hemData.ecg === "no" && hemData.thrombosis === "no" && hemData.pregnancy === "no" && hemData.angioplasty === "no" && hemData.ivhScore === "yes" && anticoag === "none");
-        }
-        const tich3Eligible = (preData.ltsw < 4.5 && hemVolume < 60 && hemData.ivh === "no" && gcs >= 5 && hemData.seizure === "no" && secondaryCause === "None");
-        eligibility.fastest = fastestEligible; eligibility.tich3 = tich3Eligible;
-
-        let hemorrErrors = [];
-        if (preData.ltsw >= 4.5) hemorrErrors.push("Time since LTSW ≥4.5h");
-        if (hemVolume >= 60) hemorrErrors.push("Hemorrhage volume ≥60 mL");
-        if (gcs < 5) hemorrErrors.push("GCS <5");
-        infoMessages.hemorrhagic = hemorrErrors.join(", ");
-
-        // SAFER-DOAC applies globally to DOAC patients
-        eligibility.saferdoac = (preData.doac === 'yes');
-        if (!eligibility.saferdoac) infoMessages.saferdoac = "Trial targets patients on DOAC (NOAC).";
-
-        showSummary();
-      }
-    }
-
-    function handleMarssAthena(){
-      if (
-        eligibility.athena || eligibility.vanish || eligibility.pivotal || eligibility.moste ||
-        eligibility.twin2win2 || eligibility.artemis || eligibility.hybernia || eligibility.doneSymple
-      ) showSummary();
-      else showPage('librexiaPage');
-    }
-
-    /* LIBREXIA */
-    function selectLix(field, value){
-      lixData[field] = value;
-      document.querySelectorAll('[onclick*="selectLix(\'' + field + '\'"]').forEach(btn => btn.classList.remove('selected'));
-      const buttons = Array.from(document.querySelectorAll('[onclick*="selectLix(\'' + field + '\'"]'));
-      const target = buttons.find(b => b.textContent.trim().toLowerCase() === value);
-      if (target) target.classList.add('selected');
-    }
-
-    function toggleLixCriterion(crit){
-      if (!lixData.criteria) lixData.criteria = {};
-      lixData.criteria[crit] = !lixData.criteria[crit];
-      const btn = Array.from(document.querySelectorAll('.toggle-group .toggle-button')).find(b => {
-        const txt = b.textContent.trim().toLowerCase();
-        if (crit === "persistent") return txt === "persistent symptoms";
-        if (crit === "imaging") return txt === "imaging lesion";
-        if (crit === "treatment") return txt === "thrombolysis/thrombectomy (after 24h, no hemorrhage)";
-      });
-      if (btn) btn.classList.toggle('selected');
-    }
-
-    function submitLibrexia(){
-      let lixEligible = true, errors = [];
-      if (preData.age < 40) errors.push("Age below 40");
-      if (preData.ltsw > 48) errors.push("Time since LTSW > 48h");
-      if (lixData.suspect !== "yes") errors.push("Atherothrombotic cause not suspected");
-      if (preData.nihss > 7) errors.push("NIHSS > 7");
-      if (!(lixData.criteria && (lixData.criteria.persistent || lixData.criteria.imaging || lixData.criteria.treatment))) errors.push("No clinical criterion met");
-      const abcd2 = parseInt(document.getElementById('abcd2').value);
-      if (isNaN(abcd2) || abcd2 < 6) errors.push("ABCD2 score <6");
-      if (lixData.anti !== "yes") errors.push("Antiplatelet therapy not in use/planned");
-      const inr = parseFloat(document.getElementById('inr').value); if (isNaN(inr) || inr > 1.5) errors.push("INR >1.5");
-      const aptt = parseFloat(document.getElementById('aptt').value); if (isNaN(aptt) || aptt > 1.4) errors.push("aPTT >1.4");
-      if (lixData.pregnant !== "no") errors.push("Patient is pregnant");
-      if (preData.premrs >= 3) errors.push("pre-mRS ≥3");
-      if (lixData.chronic === "yes") errors.push("Requires chronic anticoagulation");
-      if (lixData.bleed === "yes") errors.push("Bleeding risk disorder present");
-      if (lixData.hepatic === "yes") errors.push("Hepatic disease present");
-      if (lixData.allergy === "yes") errors.push("Allergy to Milvexian excipients");
-      const gfr = parseFloat(document.getElementById('gfr').value); if (isNaN(gfr) || gfr < 15) errors.push("GFR <15");
-      if (lixData.inhibitors === "yes") errors.push("Taking CYP3A4/P-gp inhibitors");
-      if (lixData.alt !== "yes") errors.push("ALT not normal");
-      if (lixData.platelets !== "yes") errors.push("Platelets inadequate");
-      if (lixData.bilirubin !== "yes") errors.push("Bilirubin abnormal");
-      if (lixData.hb !== "yes") errors.push("Hemoglobin low");
-
-      if (errors.length > 0) { lixEligible = false; infoMessages.librexia = errors.join(", "); }
-      eligibility.librexia = lixEligible;
-
-      document.getElementById('lixResultMessage').innerHTML = lixEligible ? "Eligible for Librexia (Milvexian)." : "Not eligible for Librexia (Milvexian).";
-      document.getElementById('librexiaInfoBtn').style.display = lixEligible ? "none" : "inline-block";
-      showSummary();
-    }
-
-    /* INFO + SUMMARY */
-    function showInfo(key){ alert(infoMessages[key] || "No unmet criteria."); }
-
-    function showSummary(){
-      const items = [
-        ["WeTrust",  eligibility.weTrust,  infoMessages.weTrust,  "weTrust", false],
-        ["ATHENA",   eligibility.athena,   infoMessages.athena,   "athena", notIndicated.athena],
-        ["VANISH",   eligibility.vanish,   infoMessages.vanish,   "vanish", notIndicated.vanish],
-        ["PIVOTAL",  eligibility.pivotal,  infoMessages.pivotal,  "pivotal", notIndicated.pivotal],
-        ["MOSTE",    eligibility.moste,    infoMessages.moste,    "moste", notIndicated.moste],
-        ["TWIN-2-WIN 2", eligibility.twin2win2, infoMessages.twin2win2, "twin2win2", notIndicated.twin2win2],
-        ["ARTEMIS",  eligibility.artemis,  infoMessages.artemis,  "artemis", notIndicated.artemis],
-        ["HYBERNIA", eligibility.hybernia, infoMessages.hybernia, "hybernia", notIndicated.hybernia],
-        ["DONE SYMPLE", eligibility.doneSymple, infoMessages.doneSymple, "doneSymple", notIndicated.doneSymple],
-        ["FASTEST",  eligibility.fastest,  infoMessages.hemorrhagic, "hemorrhagic", false],
-        ["TICH-3",   eligibility.tich3,    infoMessages.hemorrhagic, "hemorrhagic", false],
-        ["Librexia", eligibility.librexia, infoMessages.librexia, "librexia", false],
-        ["SAFER-DOAC", eligibility.saferdoac, infoMessages.saferdoac, "saferdoac", false]
-      ];
-      const ul = document.getElementById('summaryContent');
-      ul.innerHTML = "";
-      items.forEach(([name, ok, reason, key, ni])=>{
-        const link = randomizationLinks[name];
-        const nameHtml = (ok && link) ? `<a class="study-name" href="${link}" target="_blank">${name}</a>` : `<span class="study-name">${name}</span>`;
-        const checkboxHtml = ok ? `<input type="checkbox" class="study-checkbox" value="${name}" title="Select ${name}">` : `<input type="checkbox" disabled title="${ni ? 'Not indicated' : 'Not eligible'}">`;
-        const statusHtml = ni ? `<span class="tag tag-ni">Not indicated</span>` : `<span class="${ok ? 'ok' : 'no'}">${ok ? 'Eligible' : 'Not eligible'}</span>`;
-        const reasonHtml = (!ok && reason) ? `<span class="reason">${ni ? 'Note: ' : 'Reasons: '}${reason}</span>` : `<span></span>`;
-        const li = document.createElement('li');
-        li.innerHTML = `${checkboxHtml}${nameHtml}${statusHtml}${reasonHtml}`;
-        ul.appendChild(li);
-      });
-      showPage('summaryPage');
-    }
-
-    /* SHARE FLOW */
-    function proceedToShare(){
-      // Allows zero selected studies
-      const checks = Array.from(document.querySelectorAll('.study-checkbox')).filter(c => c.checked).map(c => c.value);
-      selectedStudies = checks;
-      studyOutcomes = {};
-
-      // Default outcomes for non-SAFER studies; SAFER has no outcome selector
-      selectedStudies.forEach(s => {
-        if (s !== "SAFER-DOAC") {
-          studyOutcomes[s] = "intervention";
-        }
-      });
-
-      const container = document.getElementById('studyOutcomesContainer');
-      container.innerHTML = "";
-
-      selectedStudies.forEach(s => {
-        if (s === "SAFER-DOAC") {
-          // No outcome dropdown for SAFER-DOAC (intervention-only)
-          const label = document.createElement('div');
-          label.className = 'study-label';
-          label.textContent = `${s} (intervention-only)`;
-          const placeholder = document.createElement('div');
-          container.appendChild(label);
-          container.appendChild(placeholder);
-          return;
+          (selectedStudies||[]).forEach(n=>{
+            const k=nameToKey[n]; if(!k) return;
+            if(k==="SAFERDOAC"){ t[k]="si"; } else { t[k]= (studyOutcomes?.[n]||"intervention"); }
+          });
+          if(!selectedStudies?.includes("SAFER-DOAC")) t.SAFERDOAC="no";
+          return t;
         }
 
-        const label = document.createElement('div');
-        label.className = 'study-label';
-        label.textContent = s;
-        const sel = document.createElement('select');
-        sel.className = 'outcome-select';
-        sel.dataset.study = s;
-        sel.innerHTML = `<option value="intervention">intervention</option><option value="control">control</option>`;
-        sel.addEventListener('change', (e)=>{
-          studyOutcomes[e.target.dataset.study] = e.target.value;
-          buildShareMessage();
+        // “Not indicated” only per EVT trials when missing tortuosity, etc.
+        const notIndicated = { athena:false, vanish:false, pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false, doneSymple:false };
+
+        /* ======= STATE ======= */
+        let preData={}, postData={}, evtData={}, hemData={};
+        let eligibility={
+          weTrust:false, athena:false, fastest:false, tich3:false, librexia:false, vanish:false, pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false, doneSymple:false, saferdoac:false, shionogi:false, sovateltide:false, orion:false
+        };
+        let selectedStudies=[]; let studyOutcomes={};
+        let selectedChronic=[]; let studyChronicOutcomes={};
+
+        /* ======= NAV / VIEW ======= */
+        function showPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('visible')); document.getElementById(id).classList.add('visible'); }
+        function goToTrialsCriteria(){ showPage('trialsList'); } function goToNewPatient(){ showPage('preImaging'); } function goBackToMain(){ showPage('mainMenu'); }
+        function setActiveNav(id){ document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active')); const el=document.querySelector('[data-target="'+id+'"]'); if(el) el.classList.add('active'); }
+        function navGo(id){ showPage(id); setActiveNav(id); }
+
+        function showTrialCriteria(name){
+          document.getElementById('trialTitle').innerText = (name==='SaferDoac'?'SAFER-DOAC':name);
+          document.getElementById('trialCriteriaText').innerHTML = trialCriteria[name] || "<p>No criteria found.</p>";
+          showPage('trialDetail');
+        }
+
+        const trialCriteria={
+          "WeTrust":"<ul><li>Age ≥ 18</li><li>NIHSS ≥ 10</li><li>pre-mRS 0–2</li><li>LTSW ≤ 6h</li><li>Philips angiograph available</li></ul>",
+          "TICH3":"<ul><li>Onset &lt; 4.5h</li><li>Hemorrhage volume &lt; 60 mL</li><li>Not isolated IVH</li><li>GCS ≥ 5</li></ul>",
+          "ATHENA":"<ul><li>Age 22–85</li><li>NIHSS ≥ 8</li><li>pre-mRS 0–2</li><li>LTSW ≤ 24h</li><li>LVO yes, tandem no, tortuosity no</li></ul>",
+          "FASTEST":"<ul><li>Age 18–80</li><li>Onset ≤ 2h</li><li>GCS ≥ 8</li><li>Volume 2–60 mL</li></ul>",
+          "Librexia":"<ul><li>Age ≥ 40</li><li>Within 48h</li><li>NIHSS ≤ 7 with atherothrombotic suspicion</li></ul>",
+          "Vanish":"<ul><li>Age ≥18</li><li>pre-mRS 0–1</li><li>NIHSS ≥6</li><li>ICA-T or M1</li></ul>",
+          "Pivotal":"<ul><li>LTSW &lt; 8h</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥6</li><li>ICA-T/M1/Basilar</li></ul>",
+          "Moste":"<ul><li>LTSW &lt; 23h</li><li>pre-mRS 0–1</li><li>NIHSS &lt; 6</li><li>ICA-T/M1/M2</li></ul>",
+          "Twin2Win2":"<ul><li>LTSW &lt; 24h</li><li>Age &gt;18</li><li>pre-mRS 0–2</li><li>NIHSS ≥6</li></ul>",
+          "Artemis":"<ul><li>LTSW &lt; 24h</li><li>Age 18–85</li><li>pre-mRS 0–2</li><li>NIHSS 6–25</li><li>ASPECTS &gt;5</li></ul>",
+          "Hybernia":"<ul><li>LTSW &lt; 24h</li><li>Age 18–89</li><li>pre-mRS 0–1</li><li>NIHSS ≥6</li><li>ASPECTS &gt;4</li></ul>",
+          "DoneSymple":"<ul><li>Window 24–72h</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥8</li><li>LVO yes</li></ul>",
+          "SaferDoac":"<ul><li>Patients on DOAC (NOAC)</li><li>Chest CTA + drug levels</li></ul>",
+          "Shionogi":"<ul><li>Ischemic, LTSW &lt;25h</li><li>Age &gt;18</li><li>pre-mRS 0–1</li><li>NIHSS 6–22</li><li>Imaging lesion confirmed</li></ul>",
+          "Sovateltide":"<ul><li>Ischemic, LTSW &lt;24h</li><li>Age 18–80</li><li>pre-mRS 0–2</li><li>Not EVT candidate</li><li>Imaging lesion confirmed</li><li>NIHSS 8–19<br/><em>Info: level of consciousness item 1A required</em></li></ul>",
+          "Orion":"<ul><li>Ischemic, LTSW 4.5–24h</li><li>Age 18–90</li><li>pre-mRS 0–1</li><li>NIHSS &gt;5</li><li>No contraindication to thrombolysis</li><li><em>Info: administer treatment 1h before EVT</em></li></ul>"
+        };
+
+        /* ======= PRE-IMAGING ======= */
+        function submitPreImaging(){
+          Object.keys(reasons).forEach(k=>{ reasons[k].meet=[]; reasons[k].fail=[]; });
+
+          preData.age=parseInt(document.getElementById('age').value);
+          preData.nihss=parseInt(document.getElementById('nihss').value);
+          preData.premrs=parseInt(document.getElementById('premrs').value);
+          const ltswInput=document.getElementById('ltsw').value;
+          if(!ltswInput){ openModal("Missing field","Please enter <strong>Last Seen Well</strong>."); return; }
+          const lastSeen=new Date(ltswInput), now=new Date();
+          if(lastSeen>now){ openModal("Invalid time","<strong>LTSW</strong> cannot be in the future."); return; }
+          preData.ltsw=(now-lastSeen)/(1000*60*60);
+          preData.angiograph=document.getElementById('angiograph').value;
+          preData.doac=document.getElementById('doac').value;
+
+          const okWT = (preData.age>=18 && preData.nihss>=10 && preData.premrs<=2 && preData.ltsw<=6 && preData.angiograph==='yes');
+          eligibility.weTrust = okWT;
+
+          (preData.age>=18?reasons.weTrust.meet:reasons.weTrust.fail).push(preData.age>=18?"Age ≥18":"Age <18");
+          (preData.nihss>=10?reasons.weTrust.meet:reasons.weTrust.fail).push(preData.nihss>=10?"NIHSS ≥10":"NIHSS <10");
+          (preData.premrs<=2?reasons.weTrust.meet:reasons.weTrust.fail).push(preData.premrs<=2?"pre-mRS ≤2":"pre-mRS >2");
+          (preData.ltsw<=6?reasons.weTrust.meet:reasons.weTrust.fail).push(preData.ltsw<=6?"LTSW ≤6h":"LTSW >6h");
+          (preData.angiograph==='yes'?reasons.weTrust.meet:reasons.weTrust.fail).push(preData.angiograph==='yes'?"Philips angiograph available":"Philips angiograph not available");
+
+          document.getElementById('weTrustResultMessage').innerHTML = okWT ? "Eligible for WeTrust." : "Not eligible for WeTrust.";
+          document.getElementById('doacAlert').style.display=(preData.doac==='yes')?'block':'none';
+          document.getElementById('weTrustRandomizeBtn').style.display= okWT ? "inline-block" : "none";
+          showPage('preResult');
+        }
+        function continueAfterWeTrust(){ showPage('postImaging'); }
+        function openWeTrustRandomization(){ window.open('https://wetrust.eu1.phsdp.com/login','_blank'); }
+
+        /* ======= RADIO HELPERS ======= */
+        function markRadioSelected(groupEl){
+          if(!groupEl) return;
+          groupEl.querySelectorAll('.radio').forEach(l=>l.classList.remove('selected'));
+          const checked = groupEl.querySelector('input[type=radio]:checked');
+          if(checked) checked.closest('.radio').classList.add('selected');
+        }
+        function selectStrokeType(value){
+          postData.strokeType=value;
+          markRadioSelected(document.getElementById('strokeTypeGroup'));
+          if(value==="ischemic"){
+            document.getElementById("ischemicSection").style.display='block';
+            document.getElementById("hemorrhagicSection").style.display='none';
+          } else {
+            document.getElementById("ischemicSection").style.display='none';
+            document.getElementById("hemorrhagicSection").style.display='block'; updateHemorrhagicSection();
+          }
+        }
+        function selectCandidate(label){
+          postData.candidate=label; // 'eligible' | 'not eligible'
+          markRadioSelected(document.getElementById('candidateGroup'));
+          if(label==="eligible"){
+            document.getElementById("evtSection").style.display='block';
+            document.getElementById("nonEvtConfirm").style.display='none';
+          } else {
+            document.getElementById("evtSection").style.display='none';
+            document.getElementById("nonEvtConfirm").style.display='block';
+          }
+        }
+        function selectHem(q,v){
+          hemData[q]=v;
+          const map={ivh:"ivhGroup",seizure:"seizureGroup",brainstem:"brainstemGroup",procoagulant:"procoagulantGroup",ecg:"ecgGroup",thrombosis:"thrombosisGroup",pregnancy:"pregnancyGroup",angioplasty:"angioplastyGroup",ivhScore:"ivhScoreGroup"};
+          markRadioSelected(document.getElementById(map[q]));
+        }
+        function updateHemorrhagicSection(){ document.getElementById("fastestSection").style.display=(preData.ltsw<2 && preData.premrs<=2)?'block':'none'; }
+
+        /* ======= SUBMIT POST-IMAGING & ELIGIBILITY ======= */
+        function submitPostImaging(){
+          if(!postData.strokeType){ openModal("Missing field","Please select a <strong>Stroke type</strong>."); return; }
+
+          // reset reasons on each compute
+          Object.keys(reasons).forEach(k=>{ reasons[k].meet=[]; reasons[k].fail=[]; });
+
+          // SAFER-DOAC intervention-only
+          eligibility.saferdoac = (preData.doac === 'yes');
+          if(eligibility.saferdoac){
+            reasons.saferdoac.meet.push("On DOAC/NOAC");
+            reasons.saferdoac.meet.push("Chest CTA + drug levels indicated");
+          }else{ reasons.saferdoac.fail.push("Not on DOAC/NOAC"); }
+
+          if(postData.strokeType === "ischemic"){
+            // Hemorrhagic trials → not eligible with reason “not hemorrhage”
+            eligibility.fastest = false; reasons.fastest.fail.push("Not a hemorrhage (ischemic stroke)");
+            eligibility.tich3   = false; reasons.tich3.fail.push("Not a hemorrhage (ischemic stroke)");
+
+            if(!postData.candidate){ openModal("Missing field","Please select if the patient is a <strong>thrombectomy candidate</strong>."); return; }
+
+            // Helper vars
+            const tandem = (document.getElementById('tandem')||{}).value || "no";
+            const tortuosity = (document.getElementById('tortuosity')||{}).value || "";
+            const targetVessel = (document.getElementById('targetVessel')||{}).value || "other";
+            const contraTpa = (document.getElementById('contraTpa')||{}).value || "no";
+            const aspects = parseInt((document.getElementById('aspects')||{}).value);
+
+            for(const k of Object.keys(notIndicated)) notIndicated[k]=false;
+
+            const vanishVesselOk = (targetVessel==="ica-terminal"||targetVessel==="m1");
+            const pivotalVesselOk = (targetVessel==="ica-terminal"||targetVessel==="m1"||targetVessel==="basilar");
+            const mosteVesselOk = (targetVessel==="ica-terminal"||targetVessel==="m1"||targetVessel==="m2-any"||targetVessel==="m2-proxdom");
+            const twinVesselOk   = (targetVessel==="ica-terminal"||targetVessel==="m1"||targetVessel==="basilar");
+            const artemisVesselOk= (targetVessel==="ica-intracranial"||targetVessel==="ica-terminal"||targetVessel==="m1"||targetVessel==="m2-proxdom");
+            const hyberniaVesselOk=(targetVessel==="ica-intracranial"||targetVessel==="ica-terminal"||targetVessel==="m1"||targetVessel==="m2-any"||targetVessel==="m2-proxdom");
+
+            const lvo = (postData.candidate === "eligible") ? "yes" : "no";
+
+            /* ATHENA */
+            if(tortuosity===""){
+              eligibility.athena=false; notIndicated.athena=true;
+              reasons.athena.fail.push("Provide tortuosity (ATHENA requires tortuosity = No)");
+            }else{
+              const okAth = (
+                preData.age>=22 && preData.age<=85 &&
+                preData.nihss>=8 && preData.premrs<=2 &&
+                preData.ltsw<=24 && lvo==="yes" &&
+                tandem==="no" && tortuosity==="no"
+              );
+              eligibility.athena = okAth;
+
+              (preData.age>=22 && preData.age<=85?reasons.athena.meet:reasons.athena.fail).push((preData.age>=22&&preData.age<=85)?"Age 22–85":"Age not 22–85");
+              (preData.nihss>=8?reasons.athena.meet:reasons.athena.fail).push(preData.nihss>=8?"NIHSS ≥8":"NIHSS <8");
+              (preData.premrs<=2?reasons.athena.meet:reasons.athena.fail).push(preData.premrs<=2?"pre-mRS ≤2":"pre-mRS >2");
+              (preData.ltsw<=24?reasons.athena.meet:reasons.athena.fail).push(preData.ltsw<=24?"LTSW ≤24h":"LTSW >24h");
+              (lvo==="yes"?reasons.athena.meet:reasons.athena.fail).push(lvo==="yes"?"LVO present":"LVO absent");
+              (tandem==="no"?reasons.athena.meet:reasons.athena.fail).push(tandem==="no"?"Tandem = No":"Tandem = Yes");
+              (tortuosity==="no"?reasons.athena.meet:reasons.athena.fail).push(tortuosity==="no"?"Tortuosity = No":"Tortuosity = Yes");
+            }
+
+            /* VANISH */
+            const okVanish = (preData.age>=18 && preData.premrs<=1 && preData.nihss>=6 && lvo==="yes" && vanishVesselOk && contraTpa==="no");
+            eligibility.vanish = okVanish;
+            (preData.age>=18?reasons.vanish.meet:reasons.vanish.fail).push(preData.age>=18?"Age ≥18":"Age <18");
+            (preData.premrs<=1?reasons.vanish.meet:reasons.vanish.fail).push(preData.premrs<=1?"pre-mRS ≤1":"pre-mRS >1");
+            (preData.nihss>=6?reasons.vanish.meet:reasons.vanish.fail).push(preData.nihss>=6?"NIHSS ≥6":"NIHSS <6");
+            (lvo==="yes"?reasons.vanish.meet:reasons.vanish.fail).push(lvo==="yes"?"LVO present":"LVO absent");
+            (vanishVesselOk?reasons.vanish.meet:reasons.vanish.fail).push(vanishVesselOk?"Vessel ICA-T/M1":"Vessel not ICA-T/M1");
+            (contraTpa==="no"?reasons.vanish.meet:reasons.vanish.fail).push(contraTpa==="no"?"No thrombolysis contraindications":"Thrombolysis contraindications present");
+
+            /* PIVOTAL (paused UI elsewhere) */
+            const okPivotal = (preData.ltsw<8 && preData.age>=18 && preData.age<=80 && preData.premrs<=1 && preData.nihss>=6 && lvo==="yes" && pivotalVesselOk);
+            eligibility.pivotal = okPivotal;
+            (preData.ltsw<8?reasons.pivotal.meet:reasons.pivotal.fail).push(preData.ltsw<8?"LTSW <8h":"LTSW ≥8h");
+            (preData.age>=18 && preData.age<=80?reasons.pivotal.meet:reasons.pivotal.fail).push((preData.age>=18&&preData.age<=80)?"Age 18–80":"Age not 18–80");
+            (preData.premrs<=1?reasons.pivotal.meet:reasons.pivotal.fail).push(preData.premrs<=1?"pre-mRS ≤1":"pre-mRS >1");
+            (preData.nihss>=6?reasons.pivotal.meet:reasons.pivotal.fail).push(preData.nihss>=6?"NIHSS ≥6":"NIHSS <6");
+            (lvo==="yes"?reasons.pivotal.meet:reasons.pivotal.fail).push(lvo==="yes"?"LVO present":"LVO absent");
+            (pivotalVesselOk?reasons.pivotal.meet:reasons.pivotal.fail).push(pivotalVesselOk?"Vessel ICA-T/M1/Basilar":"Vessel not allowed");
+
+            /* MOSTE */
+            const okMoste = (preData.ltsw<23 && preData.premrs<=1 && preData.nihss<6 && lvo==="yes" && mosteVesselOk);
+            eligibility.moste = okMoste;
+            (preData.ltsw<23?reasons.moste.meet:reasons.moste.fail).push(preData.ltsw<23?"LTSW <23h":"LTSW ≥23h");
+            (preData.premrs<=1?reasons.moste.meet:reasons.moste.fail).push(preData.premrs<=1?"pre-mRS ≤1":"pre-mRS >1");
+            (preData.nihss<6?reasons.moste.meet:reasons.moste.fail).push(preData.nihss<6?"NIHSS <6":"NIHSS ≥6");
+            (lvo==="yes"?reasons.moste.meet:reasons.moste.fail).push(lvo==="yes"?"LVO present":"LVO absent");
+            (mosteVesselOk?reasons.moste.meet:reasons.moste.fail).push(mosteVesselOk?"Vessel ICA-T/M1/M2":"Vessel not allowed");
+
+            /* TWIN-2-WIN 2 */
+            const okTwin = (preData.ltsw<24 && preData.age>18 && preData.premrs<=2 && preData.nihss>=6 && lvo==="yes" && twinVesselOk);
+            eligibility.twin2win2 = okTwin;
+            (preData.ltsw<24?reasons.twin2win2.meet:reasons.twin2win2.fail).push(preData.ltsw<24?"LTSW <24h":"LTSW ≥24h");
+            (preData.age>18?reasons.twin2win2.meet:reasons.twin2win2.fail).push(preData.age>18?"Age >18":"Age ≤18");
+            (preData.premrs<=2?reasons.twin2win2.meet:reasons.twin2win2.fail).push(preData.premrs<=2?"pre-mRS ≤2":"pre-mRS >2");
+            (preData.nihss>=6?reasons.twin2win2.meet:reasons.twin2win2.fail).push(preData.nihss>=6?"NIHSS ≥6":"NIHSS <6");
+            (lvo==="yes"?reasons.twin2win2.meet:reasons.twin2win2.fail).push(lvo==="yes"?"LVO present":"LVO absent");
+            (twinVesselOk?reasons.twin2win2.meet:reasons.twin2win2.fail).push(twinVesselOk?"Vessel ICA-T/M1/Basilar":"Vessel not allowed");
+
+            /* ARTEMIS */
+            const okArtemis = (preData.ltsw<24 && preData.age>=18 && preData.age<=85 && preData.premrs<=2 && preData.nihss>=6 && preData.nihss<=25 && lvo==="yes" && artemisVesselOk && !Number.isNaN(aspects) && aspects>5);
+            eligibility.artemis = okArtemis;
+            (preData.ltsw<24?reasons.artemis.meet:reasons.artemis.fail).push(preData.ltsw<24?"LTSW <24h":"LTSW ≥24h");
+            (preData.age>=18 && preData.age<=85?reasons.artemis.meet:reasons.artemis.fail).push((preData.age>=18&&preData.age<=85)?"Age 18–85":"Age not 18–85");
+            (preData.premrs<=2?reasons.artemis.meet:reasons.artemis.fail).push(preData.premrs<=2?"pre-mRS ≤2":"pre-mRS >2");
+            (preData.nihss>=6 && preData.nihss<=25?reasons.artemis.meet:reasons.artemis.fail).push((preData.nihss>=6&&preData.nihss<=25)?"NIHSS 6–25":"NIHSS out of range");
+            (lvo==="yes"?reasons.artemis.meet:reasons.artemis.fail).push(lvo==="yes"?"LVO present":"LVO absent");
+            (artemisVesselOk?reasons.artemis.meet:reasons.artemis.fail).push(artemisVesselOk?"Allowed vessel":"Vessel not allowed");
+            (!Number.isNaN(aspects) && aspects>5 ? reasons.artemis.meet : reasons.artemis.fail)
+              .push(!Number.isNaN(aspects) && aspects>5 ? "ASPECTS >5" : "ASPECTS not >5 or missing");
+
+            /* HYBERNIA (paused UI elsewhere) */
+            const okHyber = (preData.ltsw<24 && preData.age>=18 && preData.age<=89 && preData.premrs<=1 && preData.nihss>=6 && lvo==="yes" && hyberniaVesselOk && !Number.isNaN(aspects) && aspects>4);
+            eligibility.hybernia = okHyber;
+            (preData.ltsw<24?reasons.hybernia.meet:reasons.hybernia.fail).push(preData.ltsw<24?"LTSW <24h":"LTSW ≥24h");
+            (preData.age>=18 && preData.age<=89?reasons.hybernia.meet:reasons.hybernia.fail).push((preData.age>=18&&preData.age<=89)?"Age 18–89":"Age not 18–89");
+            (preData.premrs<=1?reasons.hybernia.meet:reasons.hybernia.fail).push(preData.premrs<=1?"pre-mRS ≤1":"pre-mRS >1");
+            (preData.nihss>=6?reasons.hybernia.meet:reasons.hybernia.fail).push(preData.nihss>=6?"NIHSS ≥6":"NIHSS <6");
+            (lvo==="yes"?reasons.hybernia.meet:reasons.hybernia.fail).push(lvo==="yes"?"LVO present":"LVO absent");
+            (hyberniaVesselOk?reasons.hybernia.meet:reasons.hybernia.fail).push(hyberniaVesselOk?"Allowed vessel":"Vessel not allowed");
+            (!Number.isNaN(aspects) && aspects>4 ? reasons.hybernia.meet : reasons.hybernia.fail)
+              .push(!Number.isNaN(aspects) && aspects>4 ? "ASPECTS >4" : "ASPECTS not >4 or missing");
+
+            /* DONE SYMPLE */
+            const okDone = (preData.ltsw>=24 && preData.ltsw<=72 && preData.age>=18 && preData.age<=80 && preData.premrs<=1 && preData.nihss>=8 && lvo==="yes");
+            eligibility.doneSymple = okDone;
+            (preData.ltsw>=24 && preData.ltsw<=72 ? reasons.doneSymple.meet : reasons.doneSymple.fail)
+              .push(preData.ltsw>=24 && preData.ltsw<=72 ? "Window 24–72h" : (preData.ltsw<24?"LTSW <24h":"LTSW >72h"));
+            (preData.age>=18 && preData.age<=80 ? reasons.doneSymple.meet : reasons.doneSymple.fail)
+              .push(preData.age>=18 && preData.age<=80 ? "Age 18–80" : "Age not 18–80");
+            (preData.premrs<=1 ? reasons.doneSymple.meet : reasons.doneSymple.fail)
+              .push(preData.premrs<=1 ? "pre-mRS ≤1" : "pre-mRS >1");
+            (preData.nihss>=8 ? reasons.doneSymple.meet : reasons.doneSymple.fail)
+              .push(preData.nihss>=8 ? "NIHSS ≥8" : "NIHSS <8");
+            (lvo==="yes" ? reasons.doneSymple.meet : reasons.doneSymple.fail)
+              .push(lvo==="yes" ? "LVO present" : "LVO absent");
+
+            /* SHIONOGI — both EVT and non-EVT; imaging confirmation required but assumed YES if EVT-eligible */
+            const lesionConfirmed = (postData.candidate==="eligible") ? "yes" : ((document.getElementById('lesionConfirmed')||{}).value||"no");
+            const shioOk = (preData.ltsw<25 && preData.age>18 && preData.premrs<=1 && preData.nihss>=6 && preData.nihss<=22 && lesionConfirmed==="yes");
+            eligibility.shionogi = shioOk;
+            (preData.ltsw<25?reasons.shionogi.meet:reasons.shionogi.fail).push(preData.ltsw<25?"LTSW <25h":"LTSW ≥25h");
+            (preData.age>18?reasons.shionogi.meet:reasons.shionogi.fail).push(preData.age>18?"Age >18":"Age ≤18");
+            (preData.premrs<=1?reasons.shionogi.meet:reasons.shionogi.fail).push(preData.premrs<=1?"pre-mRS ≤1":"pre-mRS >1");
+            (preData.nihss>=6 && preData.nihss<=22?reasons.shionogi.meet:reasons.shionogi.fail).push((preData.nihss>=6&&preData.nihss<=22)?"NIHSS 6–22":"NIHSS out of 6–22");
+            (lesionConfirmed==="yes"?reasons.shionogi.meet:reasons.shionogi.fail).push(lesionConfirmed==="yes"?"Imaging lesion confirmed":"Imaging lesion not confirmed");
+
+            /* SOVATELTIDE — ischemic, NOT EVT candidate */
+            const sovaOk = (
+              postData.candidate==="not eligible" &&
+              preData.ltsw<24 && preData.age>=18 && preData.age<=80 &&
+              preData.premrs<=2 && (document.getElementById('lesionConfirmed')||{}).value==="yes" &&
+              preData.nihss>=8 && preData.nihss<20
+            );
+            eligibility.sovateltide = sovaOk;
+            (postData.candidate==="not eligible"?reasons.sovateltide.meet:reasons.sovateltide.fail).push(postData.candidate==="not eligible"?"Not EVT candidate":"EVT candidate");
+            (preData.ltsw<24?reasons.sovateltide.meet:reasons.sovateltide.fail).push(preData.ltsw<24?"LTSW <24h":"LTSW ≥24h");
+            (preData.age>=18 && preData.age<=80?reasons.sovateltide.meet:reasons.sovateltide.fail).push((preData.age>=18&&preData.age<=80)?"Age 18–80":"Age not 18–80");
+            (preData.premrs<=2?reasons.sovateltide.meet:reasons.sovateltide.fail).push(preData.premrs<=2?"pre-mRS ≤2":"pre-mRS >2");
+            (((document.getElementById('lesionConfirmed')||{}).value==="yes")?reasons.sovateltide.meet:reasons.sovateltide.fail).push(((document.getElementById('lesionConfirmed')||{}).value==="yes")?"Imaging lesion confirmed":"Imaging lesion not confirmed");
+            (preData.nihss>=8 && preData.nihss<20?reasons.sovateltide.meet:reasons.sovateltide.fail).push((preData.nihss>=8 && preData.nihss<20)?"NIHSS 8–19":"NIHSS not 8–19");
+
+            /* ORION — ischemic, both EVT and non-EVT; no thrombolysis contraindication required */
+            const noContra = (contraTpa==="no");
+            const orionOk = (
+              preData.ltsw>=4.5 && preData.ltsw<=24 && preData.age>=18 && preData.age<=90 &&
+              preData.premrs<=1 && preData.nihss>5 && noContra
+            );
+            eligibility.orion = orionOk;
+            (preData.ltsw>=4.5 && preData.ltsw<=24?reasons.orion.meet:reasons.orion.fail).push((preData.ltsw>=4.5&&preData.ltsw<=24)?"LTSW 4.5–24h":"LTSW outside 4.5–24h");
+            (preData.age>=18 && preData.age<=90?reasons.orion.meet:reasons.orion.fail).push((preData.age>=18&&preData.age<=90)?"Age 18–90":"Age not 18–90");
+            (preData.premrs<=1?reasons.orion.meet:reasons.orion.fail).push(preData.premrs<=1?"pre-mRS ≤1":"pre-mRS >1");
+            (preData.nihss>5?reasons.orion.meet:reasons.orion.fail).push(preData.nihss>5?"NIHSS >5":"NIHSS ≤5");
+            (noContra?reasons.orion.meet:reasons.orion.fail).push(noContra?"No thrombolysis contraindication":"Thrombolysis contraindication present");
+
+            showSummary();
+            return;
+
+          } // end ischemic
+
+          if(postData.strokeType === "hemorrhagic"){
+            const hemVolume = parseFloat(document.getElementById('hemVolume').value);
+            const gcs = parseInt(document.getElementById('gcs').value);
+            const secondaryCause = document.getElementById('secondaryCause').value;
+            if(isNaN(hemVolume)||isNaN(gcs)||!hemData.ivh||!hemData.seizure){
+              openModal("Missing fields","Please complete all <strong>hemorrhagic</strong> questions."); return;
+            }
+
+            // Ischemic EVT trials → not eligible with reason “not ischemic”
+            ["athena","vanish","pivotal","moste","twin2win2","artemis","hybernia","doneSymple","shionogi","sovateltide","orion"].forEach(k=>{
+              eligibility[k]=false;
+              reasons[k].fail.push("Not an ischemic stroke (hemorrhagic stroke)");
+            });
+
+            /* FASTEST */
+            let fastestEligible=false;
+            if(preData.ltsw<=2 && preData.premrs<=2 && preData.age>=18 && preData.age<=80){
+              const anticoag = document.getElementById('anticoagulantTherapy').value;
+              const extraMissing = !hemData.brainstem || !hemData.procoagulant || !hemData.ecg ||
+                                   !hemData.thrombosis || !hemData.pregnancy || !hemData.angioplasty || !hemData.ivhScore;
+              if(extraMissing){
+                reasons.fastest.fail.push("Complete FASTEST additional questions");
+              }else{
+                reasons.fastest.meet.push("LTSW ≤2h");
+                reasons.fastest.meet.push("pre-mRS ≤2");
+                reasons.fastest.meet.push("Age 18–80");
+
+                (gcs>=8?reasons.fastest.meet:reasons.fastest.fail).push(gcs>=8?"GCS ≥8":"GCS <8");
+                (hemVolume>=2 && hemVolume<60?reasons.fastest.meet:reasons.fastest.fail).push(hemVolume>=2&&hemVolume<60?"Volume 2–60 mL":"Volume outside 2–60 mL");
+                (hemData.brainstem==="no"?reasons.fastest.meet:reasons.fastest.fail).push(hemData.brainstem==="no"?"No brainstem hemorrhage":"Brainstem hemorrhage");
+                (hemData.procoagulant==="no"?reasons.fastest.meet:reasons.fastest.fail).push(hemData.procoagulant==="no"?"No procoagulants 24h":"Procoagulants used");
+                (hemData.ecg==="no"?reasons.fastest.meet:reasons.fastest.fail).push(hemData.ecg==="no"?"ECG without MI/ST↑":"ECG with MI/ST↑");
+                (hemData.thrombosis==="no"?reasons.fastest.meet:reasons.fastest.fail).push(hemData.thrombosis==="no"?"No thrombosis 90d":"Thrombosis in last 90d");
+                (hemData.pregnancy==="no"?reasons.fastest.meet:reasons.fastest.fail).push(hemData.pregnancy==="no"?"Not pregnant":"Pregnancy/gestation");
+                (hemData.angioplasty==="no"?reasons.fastest.meet:reasons.fastest.fail).push(hemData.angioplasty==="no"?"No PTA/stent 90d":"PTA/stent within 90d");
+                (hemData.ivhScore==="yes"?reasons.fastest.meet:reasons.fastest.fail).push(hemData.ivhScore==="yes"?"IVH score acceptable":"IVH score not acceptable");
+                (anticoag==="none"?reasons.fastest.meet:reasons.fastest.fail).push(anticoag==="none"?"No anticoagulant therapy":"On anticoagulant therapy");
+
+                fastestEligible = (reasons.fastest.fail.length===0);
+              }
+            }else{
+              if(preData.ltsw>2) reasons.fastest.fail.push("LTSW >2h");
+              if(preData.premrs>2) reasons.fastest.fail.push("pre-mRS >2");
+              if(preData.age<18 || preData.age>80) reasons.fastest.fail.push("Age not 18–80");
+            }
+            eligibility.fastest = fastestEligible;
+
+            /* TICH-3 */
+            const tichOk =
+              (preData.ltsw<4.5) &&
+              (hemVolume<60) &&
+              (hemData.ivh==="no") &&
+              (gcs>=5) &&
+              (hemData.seizure==="no") &&
+              (secondaryCause==="None");
+
+            (preData.ltsw<4.5?reasons.tich3.meet:reasons.tich3.fail).push(preData.ltsw<4.5?"LTSW <4.5h":"LTSW ≥4.5h");
+            (hemVolume<60?reasons.tich3.meet:reasons.tich3.fail).push(hemVolume<60?"Volume <60 mL":"Volume ≥60 mL");
+            (hemData.ivh==="no"?reasons.tich3.meet:reasons.tich3.fail).push(hemData.ivh==="no"?"Not isolated IVH":"Isolated IVH");
+            (gcs>=5?reasons.tich3.meet:reasons.tich3.fail).push(gcs>=5?"GCS ≥5":"GCS <5");
+            (hemData.seizure==="no"?reasons.tich3.meet:reasons.tich3.fail).push(hemData.seizure==="no"?"No active seizures/contraindications":"Seizures/contraindications present");
+            (secondaryCause==="None"?reasons.tich3.meet:reasons.tich3.fail).push(secondaryCause==="None"?"No secondary cause":"Secondary cause present");
+
+            eligibility.tich3 = tichOk;
+
+            showSummary();
+          }
+        }
+
+        /* ======= SUMMARY (ACUTE) ======= */
+        function summaryRowHtml(name, ok, key, ni, link, paused=false){
+          const nameLabel = paused ? `${name} (paused)` : name;
+          const nameHtml = (ok && link) ? `<a class="study-name" href="${link}" target="_blank">${nameLabel}</a>` : `<span class="study-name">${nameLabel}</span>`;
+          const checkboxHtml = (ok && !paused) ? `<input type="checkbox" class="study-checkbox" value="${name}" title="Select ${name}">` : `<input type="checkbox" disabled title="${paused?'Paused':(ni?'Not indicated':'Not eligible')}">`;
+          const statusHtml = paused ? `<span class="tag tag-ni">Paused</span>` : (ni ? `<span class="tag tag-ni">Not indicated</span>` : `<span class="${ok?'ok':'no'}">${ok?'Eligible':'Not eligible'}</span>`);
+          const infoBtn = `<button type="button" class="btn btn-small" onclick="showInfo('${key}')">Info</button>`;
+          return `${checkboxHtml}${nameHtml}${statusHtml}${infoBtn}`;
+        }
+
+        function showSummary(){
+          const items = [
+            ["WeTrust",eligibility.weTrust,"weTrust",false, randomizationLinks["WeTrust"], false],
+            ["ATHENA",eligibility.athena,"athena",notIndicated.athena, randomizationLinks["ATHENA"], false],
+            ["VANISH",eligibility.vanish,"vanish",notIndicated.vanish, randomizationLinks["VANISH"], false],
+            ["PIVOTAL",eligibility.pivotal,"pivotal",notIndicated.pivotal, randomizationLinks["PIVOTAL"], true], // paused
+            ["MOSTE",eligibility.moste,"moste",notIndicated.moste, randomizationLinks["MOSTE"], false],
+            ["TWIN-2-WIN 2",eligibility.twin2win2,"twin2win2",notIndicated.twin2win2, randomizationLinks["TWIN-2-WIN 2"], false],
+            ["ARTEMIS",eligibility.artemis,"artemis",notIndicated.artemis, randomizationLinks["ARTEMIS"], false],
+            ["HYBERNIA",eligibility.hybernia,"hybernia",notIndicated.hybernia, randomizationLinks["HYBERNIA"], true], // paused
+            ["DONE SYMPLE",eligibility.doneSymple,"doneSymple",notIndicated.doneSymple, randomizationLinks["DONE SYMPLE"], false],
+            ["SHIONOGI",eligibility.shionogi,"shionogi",false, null, false],
+            ["SOVATELTIDE",eligibility.sovateltide,"sovateltide",false, null, false],
+            ["ORION",eligibility.orion,"orion",false, null, false],
+            ["FASTEST",eligibility.fastest,"fastest",false, null, false],
+            ["TICH-3",eligibility.tich3,"tich3",false, null, false],
+            // Librexia is post-acute, not listed here
+            ["SAFER-DOAC",eligibility.saferdoac,"saferdoac",false, null, false]
+          ];
+
+          const ul = document.getElementById('summaryContent'); ul.innerHTML="";
+          items.forEach(([name,ok,key,ni,link,paused])=>{
+            const li = document.createElement('li');
+            li.innerHTML = summaryRowHtml(name, ok, key, ni, link, paused);
+            ul.appendChild(li);
+          });
+          showPage('summaryPage');
+        }
+
+        /* ======= POST-ACUTE FLOW ======= */
+        function goToPostAcute(){ document.querySelectorAll('#postAcutePage .radio-group').forEach(markRadioSelected); showPage('postAcutePage'); }
+        function cancelPostAcute(){ showPage('summaryPage'); }
+
+        function submitLibrexia(){
+          reasons.librexia.meet=[]; reasons.librexia.fail=[];
+
+          const suspect = (document.querySelector('input[name="lix_suspect"]:checked')||{}).value;
+          const crit_persistent = document.getElementById('lix_persistent').checked;
+          const crit_imaging = document.getElementById('lix_imaging').checked;
+          const crit_treat = document.getElementById('lix_treatment').checked;
+          const abcd2 = parseInt(document.getElementById('abcd2').value);
+          const anti = (document.querySelector('input[name="lix_anti"]:checked')||{}).value;
+
+          const altOk = document.getElementById('lix_alt').checked;
+          const pltOk = document.getElementById('lix_platelets').checked;
+          const biliOk = document.getElementById('lix_bilirubin').checked;
+          const hbOk = document.getElementById('lix_hb').checked;
+
+          const inr = parseFloat(document.getElementById('inr').value);
+          const aptt = parseFloat(document.getElementById('aptt').value);
+          const gfr = parseFloat(document.getElementById('gfr').value);
+
+          const chronic = document.getElementById('lix_chronic').checked;
+          const bleed = document.getElementById('lix_bleed').checked;
+          const hepatic = document.getElementById('lix_hepatic').checked;
+          const inhib = document.getElementById('lix_inhibitors').checked;
+
+          const preg = (document.querySelector('input[name="lix_preg"]:checked')||{}).value;
+
+          let ok = true;
+
+          if(preData.age<40){ reasons.librexia.fail.push("Age <40"); ok=false; } else reasons.librexia.meet.push("Age ≥40");
+          if(preData.ltsw>48){ reasons.librexia.fail.push("LTSW >48h"); ok=false; } else reasons.librexia.meet.push("LTSW ≤48h");
+          if(preData.nihss>7){ reasons.librexia.fail.push("NIHSS >7"); ok=false; } else reasons.librexia.meet.push("NIHSS ≤7");
+
+          if(suspect!=="yes"){ reasons.librexia.fail.push("Atherothrombotic cause not suspected"); ok=false; } else reasons.librexia.meet.push("Atherothrombotic suspicion");
+          if(!(crit_persistent||crit_imaging||crit_treat)){ reasons.librexia.fail.push("No clinical criterion met"); ok=false; } else reasons.librexia.meet.push("≥1 clinical criterion");
+          if(isNaN(abcd2)||abcd2<6){ reasons.librexia.fail.push("ABCD2 <6"); ok=false; } else reasons.librexia.meet.push("ABCD2 ≥6");
+          if(anti!=="yes"){ reasons.librexia.fail.push("Antiplatelet not in use/planned"); ok=false; } else reasons.librexia.meet.push("Antiplatelet in use/planned");
+
+          if(isNaN(inr)||inr>1.5){ reasons.librexia.fail.push("INR >1.5"); ok=false; } else reasons.librexia.meet.push("INR ≤1.5");
+          if(isNaN(aptt)||aptt>1.4){ reasons.librexia.fail.push("aPTT >1.4"); ok=false; } else reasons.librexia.meet.push("aPTT ≤1.4");
+          if(isNaN(gfr)||gfr<15){ reasons.librexia.fail.push("GFR <15"); ok=false; } else reasons.librexia.meet.push("GFR ≥15");
+
+          if(!altOk){ reasons.librexia.fail.push("ALT not normal"); ok=false; } else reasons.librexia.meet.push("ALT normal");
+          if(!pltOk){ reasons.librexia.fail.push("Platelets inadequate"); ok=false; } else reasons.librexia.meet.push("Platelets adequate");
+          if(!biliOk){ reasons.librexia.fail.push("Bilirubin abnormal"); ok=false; } else reasons.librexia.meet.push("Bilirubin normal");
+          if(!hbOk){ reasons.librexia.fail.push("Hemoglobin low"); ok=false; } else reasons.librexia.meet.push("Hemoglobin adequate");
+
+          if(preg!=="no"){ reasons.librexia.fail.push("Pregnant"); ok=false; } else reasons.librexia.meet.push("Not pregnant");
+
+          if(chronic){ reasons.librexia.fail.push("Requires chronic anticoagulation"); ok=false; }
+          if(bleed){ reasons.librexia.fail.push("Bleeding risk disorder"); ok=false; }
+          if(hepatic){ reasons.librexia.fail.push("Hepatic disease"); ok=false; }
+          if(inhib){ reasons.librexia.fail.push("On CYP3A4/P-gp inhibitors"); ok=false; }
+
+          eligibility.librexia = ok;
+
+          showChronicSummary();
+        }
+
+        function showChronicSummary(){
+          const items = [
+            ["Librexia", eligibility.librexia, "librexia", false, null]
+          ];
+          const ul = document.getElementById('summaryChronicContent'); ul.innerHTML="";
+          items.forEach(([name,ok,key,ni,link])=>{
+            const li = document.createElement('li');
+            const nameHtml = `<span class="study-name">${name}</span>`;
+            const checkboxHtml = ok ? `<input type="checkbox" class="study-checkbox-chronic" value="${name}" title="Select ${name}">` : `<input type="checkbox" disabled title="${ni?'Not indicated':'Not eligible'}">`;
+            const statusHtml = ni ? `<span class="tag tag-ni">Not indicated</span>` : `<span class="${ok?'ok':'no'}">${ok?'Eligible':'Not eligible'}</span>`;
+            const infoBtn = `<button type="button" class="btn btn-small" onclick="showInfo('${key}')">Info</button>`;
+            li.innerHTML = `${checkboxHtml}${nameHtml}${statusHtml}${infoBtn}`;
+            ul.appendChild(li);
+          });
+          showPage('summaryChronicPage');
+        }
+
+        /* ======= SHARE (ACUTE) ======= */
+        function proceedToShare(){
+          const checks = Array.from(document.querySelectorAll('.study-checkbox')).filter(c=>c.checked).map(c=>c.value);
+          selectedStudies = checks;
+          studyOutcomes = {};
+          selectedStudies.forEach(s=>{
+            if(s!=="SAFER-DOAC"){ studyOutcomes[s] = "intervention"; }
+          });
+
+          const container = document.getElementById('studyOutcomesContainer');
+          container.innerHTML = "";
+          selectedStudies.forEach(s=>{
+            if(s==="SAFER-DOAC"){
+              const l=document.createElement('div'); l.textContent=`${s} (intervention-only)`;
+              const p=document.createElement('div'); container.appendChild(l); container.appendChild(p); return;
+            }
+            const l=document.createElement('div'); l.textContent = s;
+            const sel=document.createElement('select'); sel.dataset.study=s;
+            sel.innerHTML=`<option value="intervention">intervention</option><option value="control">control</option>`;
+            sel.addEventListener('change',e=>{ studyOutcomes[e.target.dataset.study]=e.target.value; buildShareMessage(); });
+            container.appendChild(l); container.appendChild(sel);
+          });
+          buildShareMessage(); showPage('sharePage');
+        }
+
+        function buildShareMessage(){
+          const pn=(document.getElementById('patientNumber')?.value||"").trim()||"Patient record";
+          const tev=(document.querySelector('input[name="tev"]:checked')||{}).value||"";
+          const mtici=(document.getElementById('mtici')||{}).value||"";
+          const tiv=(document.querySelector('input[name="tiv"]:checked')||{}).value||"";
+          const notes=(document.getElementById('notesField')||{}).value||"";
+
+          const lines=selectedStudies.map(study=>{
+            const outcome=(studyOutcomes[study]||"intervention");
+            return `${pn}, age ${isFinite(preData.age)?preData.age:"?"}, NIHSS ${isFinite(preData.nihss)?preData.nihss:"?"}, mRS ${isFinite(preData.premrs)?preData.premrs:"?"}, ${study} (${outcome})`;
+          });
+
+          const extras = [];
+          if(tev) extras.push(`TEV: ${tev}`);
+          if(mtici) extras.push(`mTICI: ${mtici}`);
+          if(tiv) extras.push(`TIV: ${tiv}`);
+          if(extras.length) lines.push(extras.join(" | "));
+          if(notes) lines.push(`Notes: ${notes}`);
+
+          const ta=document.getElementById('shareMessage'); if(ta) ta.value=lines.join('\n');
+        }
+
+        // *** ONLY CHANGED: payload now includes TEV, mTICI, TIV, Notes ***
+        function saveToSheet(){
+          const Npatient=(document.getElementById('patientNumber')?.value||"").trim();
+          if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> before saving."); return; }
+          if(typeof preData.age==="undefined"||typeof preData.nihss==="undefined"||typeof preData.ltsw==="undefined"||typeof preData.premrs==="undefined"){
+            openModal("Incomplete Pre-Imaging","Complete Pre-Imaging first (Age, NIHSS, LTSW, pre-mRS)."); return;
+          }
+          const tev=(document.querySelector('input[name="tev"]:checked')||{}).value||"";
+          const mtici=(document.getElementById('mtici')||{}).value||"";
+          const tiv=(document.querySelector('input[name="tiv"]:checked')||{}).value||"";
+          const notes=(document.getElementById('notesField')||{}).value||"";
+
+          const trialsForSheet=buildTrialsForSheet(selectedStudies, studyOutcomes);
+          const payload={
+            N_patient:Npatient,
+            pre:{age:preData.age,nihss:preData.nihss,ltsw:preData.ltsw,premrs:preData.premrs},
+            trials:trialsForSheet,
+            TEV: tev, mTICI: mtici, TIV: tiv, Notes: notes
+          };
+          sendToSheet(payload);
+          openModal("Saved","Saved to Google Sheet ✅");
+        }
+
+        document.addEventListener('input',(e)=>{ if(e.target && e.target.id==='patientNumber') buildShareMessage(); });
+
+        function copyMessage(){
+          const ta=document.getElementById('shareMessage');
+          ta.select(); ta.setSelectionRange(0,99999);
+          document.execCommand('copy');
+          openModal("Copied","Message copied to clipboard.");
+        }
+        function shareWhatsApp(){
+          const msg=document.getElementById('shareMessage').value;
+          const url="https://wa.me/?text="+encodeURIComponent(msg);
+          window.open(url,"_blank");
+        }
+
+        /* ======= SHARE (POST-ACUTE) ======= */
+        function proceedToShareChronic(){
+          const checks = Array.from(document.querySelectorAll('.study-checkbox-chronic')).filter(c=>c.checked).map(c=>c.value);
+          selectedChronic = checks;
+          studyChronicOutcomes = {};
+          selectedChronic.forEach(s=>{ studyChronicOutcomes[s]="intervention"; });
+
+          const container = document.getElementById('studyChronicOutcomesContainer');
+          container.innerHTML = "";
+          selectedChronic.forEach(s=>{
+            const l=document.createElement('div'); l.textContent = s;
+            const sel=document.createElement('select'); sel.dataset.study=s;
+            sel.innerHTML=`<option value="intervention">intervention</option><option value="control">control</option>`;
+            sel.addEventListener('change',e=>{ studyChronicOutcomes[e.target.dataset.study]=e.target.value; buildShareMessageChronic(); });
+            container.appendChild(l); container.appendChild(sel);
+          });
+          buildShareMessageChronic(); showPage('shareChronicPage');
+        }
+
+        function buildShareMessageChronic(){
+          const pn=(document.getElementById('patientNumber2')?.value||"").trim()||"Patient record";
+          const lines=selectedChronic.map(study=>{
+            const outcome=studyChronicOutcomes[study]||"intervention";
+            return `${pn}, age ${isFinite(preData.age)?preData.age:"?"}, NIHSS ${isFinite(preData.nihss)?preData.nihss:"?"}, mRS ${isFinite(preData.premrs)?preData.premrs:"?"}, ${study} (${outcome})`;
+          });
+          const ta=document.getElementById('shareMessage2'); if(ta) ta.value=lines.join('\n');
+        }
+
+        function saveToSheetChronic(){
+          const Npatient=(document.getElementById('patientNumber2')?.value||"").trim();
+          if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> before saving."); return; }
+          if(typeof preData.age==="undefined"||typeof preData.nihss==="undefined"||typeof preData.ltsw==="undefined"||typeof preData.premrs==="undefined"){
+            openModal("Incomplete Pre-Imaging","Complete Pre-Imaging first (Age, NIHSS, LTSW, pre-mRS)."); return;
+          }
+          const t = Object.fromEntries(SHEET_TRIAL_KEYS.map(k=>[k,"no"]));
+          if(selectedChronic.includes("Librexia")){
+            t.LIBREXIA = studyChronicOutcomes["Librexia"] || "intervention";
+          }
+          const payload={
+            N_patient:Npatient,
+            pre:{age:preData.age,nihss:preData.nihss,ltsw:preData.ltsw,premrs:preData.premrs},
+            trials:t,
+            TEV:"", mTICI:"", TIV:"", Notes:"" // no acute fields here
+          };
+          sendToSheet(payload);
+          openModal("Saved","Saved to Google Sheet ✅");
+        }
+
+        document.addEventListener('input',(e)=>{ if(e.target && e.target.id==='patientNumber2') buildShareMessageChronic(); });
+
+        function copyMessageChronic(){
+          const ta=document.getElementById('shareMessage2');
+          ta.select(); ta.setSelectionRange(0,99999);
+          document.execCommand('copy');
+          openModal("Copied","Message copied to clipboard.");
+        }
+        function shareWhatsAppChronic(){
+          const msg=document.getElementById('shareMessage2').value;
+          const url="https://wa.me/?text="+encodeURIComponent(msg);
+          window.open(url,"_blank");
+        }
+
+        /* ======= RESET ======= */
+        function restart(){
+          preData={}; postData={}; evtData={}; hemData={};
+          eligibility={ weTrust:false, athena:false, fastest:false, tich3:false, librexia:false, vanish:false, pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false, doneSymple:false, saferdoac:false, shionogi:false, sovateltide:false, orion:false };
+          selectedStudies=[]; studyOutcomes={}; selectedChronic=[]; studyChronicOutcomes={};
+          for(const k of Object.keys(infoMessages)) infoMessages[k]="";
+          for(const k of Object.keys(notIndicated)) notIndicated[k]=false;
+          Object.keys(reasons).forEach(k=>{ reasons[k].meet=[]; reasons[k].fail=[]; });
+
+          const formPre=document.getElementById('formPreImaging'); if(formPre) formPre.reset();
+          const shareForm=document.getElementById('shareForm'); if(shareForm) shareForm.reset();
+          const shareForm2=document.getElementById('shareChronicForm'); if(shareForm2) shareForm2.reset();
+          const ta=document.getElementById('shareMessage'); if(ta) ta.value="";
+          const ta2=document.getElementById('shareMessage2'); if(ta2) ta2.value="";
+          const out=document.getElementById('studyOutcomesContainer'); if(out) out.innerHTML="";
+          const out2=document.getElementById('studyChronicOutcomesContainer'); if(out2) out2.innerHTML="";
+
+          document.querySelectorAll('.radio').forEach(lbl=>lbl.classList.remove('selected'));
+          document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+          document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
+
+          showPage('mainMenu');
+        }
+
+        /* ======= MODAL ======= */
+        function openModal(title, html){
+          const mb=document.getElementById('modalBackdrop');
+          document.getElementById('modalTitle').textContent=title||'Details';
+          document.getElementById('modalBody').innerHTML=html||'';
+          mb.classList.add('show');
+          mb.setAttribute('aria-hidden','false');
+        }
+        function closeModal(){
+          const mb=document.getElementById('modalBackdrop');
+          mb.classList.remove('show');
+          mb.setAttribute('aria-hidden','true');
+        }
+
+        // Pretty reasons modal
+        function showInfo(key){
+          const r = reasons[key] || {meet:[],fail:[]};
+          const ok = (Object.keys(eligibility).includes(key) ? eligibility[key] : null);
+          const title = key.toUpperCase();
+
+          const meetList = r.meet.length ? `<h4>✅ Met criteria</h4><ul class="k-list">${r.meet.map(x=>`<li>${x}</li>`).join("")}</ul>` : "";
+          const failList = r.fail.length ? `<h4>❌ Unmet criteria</h4><ul class="k-list">${r.fail.map(x=>`<li>${x}</li>`).join("")}</ul>` : "";
+
+          const statusBadge = ok===true ? `<span class="ok">Eligible</span>` :
+                              ok===false ? `<span class="no">Not eligible</span>` : ``;
+
+          const body = `
+            <div class="muted" style="margin-bottom:.5rem;">${statusBadge}</div>
+            ${meetList}${failList}
+          `.trim();
+
+          openModal(title, body);
+        }
+
+        // Close modal on ESC / backdrop click
+        document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+        document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
+          if(e.target.id==='modalBackdrop') closeModal();
         });
-        container.appendChild(label);
-        container.appendChild(sel);
-      });
+      </script>
 
-      buildShareMessage();
-      showPage('sharePage');
-    }
+    </div>
+  </div>
 
-    function buildShareMessage(){
-      const pn = (document.getElementById('patientNumber')?.value || "").trim() || "Patient record number";
-      const lines = selectedStudies.map(study => {
-        if (study === "SAFER-DOAC") {
-          return `${pn}, age ${isFinite(preData.age) ? preData.age : "?"}, NIHSS ${isFinite(preData.nihss) ? preData.nihss : "?"}, mRS ${isFinite(preData.premrs) ? preData.premrs : "?"}, SAFER-DOAC`;
-        }
-        const outcome = studyOutcomes[study] || "intervention";
-        return `${pn}, age ${isFinite(preData.age) ? preData.age : "?"}, NIHSS ${isFinite(preData.nihss) ? preData.nihss : "?"}, mRS ${isFinite(preData.premrs) ? preData.premrs : "?"}, ${study} (${outcome})`;
-      });
-      document.getElementById('shareMessage').value = lines.join('\n');
-    }
-
-    // === SAVE TO GOOGLE SHEET (GLOBAL) ===
-    function saveToSheet(){
-      const Npatient = (document.getElementById('patientNumber')?.value || "").trim();
-      if (!Npatient) { alert("Enter the patient record number before saving."); return; }
-      if (typeof preData.age === "undefined" || typeof preData.nihss === "undefined" ||
-          typeof preData.ltsw === "undefined" || typeof preData.premrs === "undefined") {
-        alert("Complete Pre-Imaging first (Age, NIHSS, LTSW, pre-mRS).");
-        return;
-      }
-      const trialsForSheet = buildTrialsForSheet(selectedStudies, studyOutcomes);
-      const payload = {
-        N_patient: Npatient,
-        pre: { age: preData.age, nihss: preData.nihss, ltsw: preData.ltsw, premrs: preData.premrs },
-        trials: trialsForSheet
-      };
-      sendToSheet(payload);
-      alert("Saved to Google Sheet ✅");
-    }
-
-    // Update preview when patient number changes
-    document.addEventListener('input', (e)=>{
-      if (e.target && e.target.id === 'patientNumber') buildShareMessage();
-    });
-
-    function copyMessage(){
-      const ta = document.getElementById('shareMessage');
-      ta.select(); ta.setSelectionRange(0, 99999);
-      document.execCommand('copy');
-      alert("Message copied to clipboard.");
-    }
-
-    function shareWhatsApp(){
-      const msg = document.getElementById('shareMessage').value;
-      const url = "https://wa.me/?text=" + encodeURIComponent(msg);
-      window.open(url, "_blank");
-    }
-
-    function restart(){
-      preData = {}; postData = {}; evtData = {}; hemData = {}; lixData = { criteria: {} };
-      eligibility = { weTrust:false, athena:false, fastest:false, tich3:false,
-                      librexia:false, vanish:false, pivotal:false, moste:false,
-                      twin2win2:false, artemis:false, hybernia:false, doneSymple:false,
-                      saferdoac:false };
-      selectedStudies = []; studyOutcomes = {};
-      for (const k of Object.keys(infoMessages)) infoMessages[k] = "";
-      for (const k of Object.keys(notIndicated)) notIndicated[k] = false;
-      const formPre = document.getElementById('formPreImaging'); if (formPre) formPre.reset();
-      const formLib = document.getElementById('formLibrexia'); if (formLib) formLib.reset();
-      const shareForm = document.getElementById('shareForm'); if (shareForm) shareForm.reset();
-      const container = document.getElementById('studyOutcomesContainer'); if (container) container.innerHTML = "";
-      document.getElementById('shareMessage').value = "";
-      document.querySelectorAll('.toggle-button').forEach(btn => btn.classList.remove('selected'));
-      showPage('mainMenu');
-    }
-  </script>
+  <nav class="bottom-nav">
+    <div class="shell bottom-inner">
+      <div class="bottom-grid">
+        <button class="navbtn active" data-target="mainMenu" onclick="navGo('mainMenu')"><span class="navdot"></span> Menu</button>
+        <button class="navbtn" data-target="preImaging" onclick="navGo('preImaging')"><span class="navdot"></span> Pre-Imaging</button>
+        <button class="navbtn" data-target="trialsList" onclick="navGo('trialsList')"><span class="navdot"></span> Trials</button>
+      </div>
+    </div>
+  </nav>
 </div>
 </body>
 </html>
+
+
