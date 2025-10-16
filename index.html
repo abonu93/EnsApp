@@ -105,34 +105,28 @@
     .k-list li{margin:.18rem 0}
     .modal-foot{display:flex;justify-content:flex-end;gap:.5rem;padding:.85rem 1rem;border-top:1px solid var(--border)}
     .btn-ghost{background:#f8fafc}
-    /* Mobile-friendly Summary rows */
+
 @media (max-width:560px){
   .summary-list li{
-    grid-template-columns: 24px 1fr;   /* checkbox | name */
+    grid-template-columns: 24px 1fr;
     align-items: start;
     row-gap: 6px;
   }
-  /* mostra il nome su più righe in mobile */
   .study-name{
     white-space: normal;
     overflow: visible;
     text-overflow: initial;
     word-break: break-word;
   }
-  /* sposta stato e bottone "Info" sotto il nome (colonna 2) */
   .summary-list li > .ok,
   .summary-list li > .no,
   .summary-list li > .tag{ grid-column: 2; justify-self: start; }
-
   .summary-list li > .btn-small{ grid-column: 2; justify-self: end; }
 }
-
-/* (facoltativo) migliora anche l'elenco Trials */
 .trial-title{
   flex:1; min-width:0;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-
   </style>
 </head>
 <body>
@@ -151,7 +145,7 @@
       <div id="mainMenu" class="page visible">
         <div class="tiles">
           <button class="tile" style="background:var(--tile-sky)" onclick="goToNewPatient()">
-            <div><div class="t-label">Clinical intake</div><div class="t-title">Pre-Imaging</div></div><div class="t-cta">Open</div>
+            <div><div class="t-label">Clinical intake</div><div class="t-title">New Patient</div></div><div class="t-cta">Open</div>
           </button>
           <button class="tile" style="background:var(--tile-pink)" onclick="goToTrialsCriteria()">
             <div><div class="t-label">Eligibility</div><div class="t-title">Trials</div></div><div class="t-cta">Open</div>
@@ -493,7 +487,7 @@
               <div id="studyOutcomesContainer" style="display:grid;grid-template-columns:1fr 150px;gap:.5rem;align-items:center;"></div>
             </div>
 
-            <!-- Acute reperfusion summary (already present in previous version) -->
+            <!-- Acute reperfusion summary -->
             <div class="card stack">
               <h3 style="margin:0">Acute treatments</h3>
               <div class="stack">
@@ -582,7 +576,6 @@
           shionogi:"", sovateltide:"", orion:""
         };
 
-        // Reasons store: meet (met criteria), fail (unmet criteria)
         const reasons = {
           weTrust:{meet:[],fail:[]}, athena:{meet:[],fail:[]}, vanish:{meet:[],fail:[]},
           pivotal:{meet:[],fail:[]}, moste:{meet:[],fail:[]}, twin2win2:{meet:[],fail:[]},
@@ -599,7 +592,7 @@
           "DONE SYMPLE":"https://www.studyrandomizer.com/"
         };
 
-        /* ======= GOOGLE SHEETS SEND (UPDATED ONLY HERE) ======= */
+        /* ======= GOOGLE SHEETS SEND ======= */
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwBu7TNgohiiFKXASSlCneWfVQh6NZGCEQ65Mf01LjeWFszUWv0AitvQqjhB9Vnp32g/exec";
         function sendToSheet(payload){
           try{
@@ -608,7 +601,6 @@
           }catch(e){ console.warn("sendToSheet error:", e); }
         }
 
-        // Trials keys mapping for Sheets
         const SHEET_TRIAL_KEYS = [
           "WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST","TICH3","LIBREXIA","TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE","SAFERDOAC","SHIONOGI","SOVATELTIDE","ORION"
         ];
@@ -625,7 +617,6 @@
           return t;
         }
 
-        // “Not indicated” only per EVT trials when missing tortuosity, etc.
         const notIndicated = { athena:false, vanish:false, pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false, doneSymple:false };
 
         /* ======= STATE ======= */
@@ -718,7 +709,7 @@
           }
         }
         function selectCandidate(label){
-          postData.candidate=label; // 'eligible' | 'not eligible'
+          postData.candidate=label;
           markRadioSelected(document.getElementById('candidateGroup'));
           if(label==="eligible"){
             document.getElementById("evtSection").style.display='block';
@@ -738,11 +729,9 @@
         /* ======= SUBMIT POST-IMAGING & ELIGIBILITY ======= */
         function submitPostImaging(){
           if(!postData.strokeType){ openModal("Missing field","Please select a <strong>Stroke type</strong>."); return; }
-
-          // reset reasons on each compute
           Object.keys(reasons).forEach(k=>{ reasons[k].meet=[]; reasons[k].fail=[]; });
 
-          // SAFER-DOAC intervention-only
+          // SAFER-DOAC
           eligibility.saferdoac = (preData.doac === 'yes');
           if(eligibility.saferdoac){
             reasons.saferdoac.meet.push("On DOAC/NOAC");
@@ -750,13 +739,11 @@
           }else{ reasons.saferdoac.fail.push("Not on DOAC/NOAC"); }
 
           if(postData.strokeType === "ischemic"){
-            // Hemorrhagic trials → not eligible with reason “not hemorrhage”
             eligibility.fastest = false; reasons.fastest.fail.push("Not a hemorrhage (ischemic stroke)");
             eligibility.tich3   = false; reasons.tich3.fail.push("Not a hemorrhage (ischemic stroke)");
 
             if(!postData.candidate){ openModal("Missing field","Please select if the patient is a <strong>thrombectomy candidate</strong>."); return; }
 
-            // Helper vars
             const tandem = (document.getElementById('tandem')||{}).value || "no";
             const tortuosity = (document.getElementById('tortuosity')||{}).value || "";
             const targetVessel = (document.getElementById('targetVessel')||{}).value || "other";
@@ -806,7 +793,7 @@
             (vanishVesselOk?reasons.vanish.meet:reasons.vanish.fail).push(vanishVesselOk?"Vessel ICA-T/M1":"Vessel not ICA-T/M1");
             (contraTpa==="no"?reasons.vanish.meet:reasons.vanish.fail).push(contraTpa==="no"?"No thrombolysis contraindications":"Thrombolysis contraindications present");
 
-            /* PIVOTAL (paused UI elsewhere) */
+            /* PIVOTAL */
             const okPivotal = (preData.ltsw<8 && preData.age>=18 && preData.age<=80 && preData.premrs<=1 && preData.nihss>=6 && lvo==="yes" && pivotalVesselOk);
             eligibility.pivotal = okPivotal;
             (preData.ltsw<8?reasons.pivotal.meet:reasons.pivotal.fail).push(preData.ltsw<8?"LTSW <8h":"LTSW ≥8h");
@@ -847,7 +834,7 @@
             (!Number.isNaN(aspects) && aspects>5 ? reasons.artemis.meet : reasons.artemis.fail)
               .push(!Number.isNaN(aspects) && aspects>5 ? "ASPECTS >5" : "ASPECTS not >5 or missing");
 
-            /* HYBERNIA (paused UI elsewhere) */
+            /* HYBERNIA */
             const okHyber = (preData.ltsw<24 && preData.age>=18 && preData.age<=89 && preData.premrs<=1 && preData.nihss>=6 && lvo==="yes" && hyberniaVesselOk && !Number.isNaN(aspects) && aspects>4);
             eligibility.hybernia = okHyber;
             (preData.ltsw<24?reasons.hybernia.meet:reasons.hybernia.fail).push(preData.ltsw<24?"LTSW <24h":"LTSW ≥24h");
@@ -873,7 +860,7 @@
             (lvo==="yes" ? reasons.doneSymple.meet : reasons.doneSymple.fail)
               .push(lvo==="yes" ? "LVO present" : "LVO absent");
 
-            /* SHIONOGI — both EVT and non-EVT; imaging confirmation required but assumed YES if EVT-eligible */
+            /* SHIONOGI */
             const lesionConfirmed = (postData.candidate==="eligible") ? "yes" : ((document.getElementById('lesionConfirmed')||{}).value||"no");
             const shioOk = (preData.ltsw<25 && preData.age>18 && preData.premrs<=1 && preData.nihss>=6 && preData.nihss<=22 && lesionConfirmed==="yes");
             eligibility.shionogi = shioOk;
@@ -883,7 +870,7 @@
             (preData.nihss>=6 && preData.nihss<=22?reasons.shionogi.meet:reasons.shionogi.fail).push((preData.nihss>=6&&preData.nihss<=22)?"NIHSS 6–22":"NIHSS out of 6–22");
             (lesionConfirmed==="yes"?reasons.shionogi.meet:reasons.shionogi.fail).push(lesionConfirmed==="yes"?"Imaging lesion confirmed":"Imaging lesion not confirmed");
 
-            /* SOVATELTIDE — ischemic, NOT EVT candidate */
+            /* SOVATELTIDE */
             const sovaOk = (
               postData.candidate==="not eligible" &&
               preData.ltsw<24 && preData.age>=18 && preData.age<=80 &&
@@ -898,7 +885,7 @@
             (((document.getElementById('lesionConfirmed')||{}).value==="yes")?reasons.sovateltide.meet:reasons.sovateltide.fail).push(((document.getElementById('lesionConfirmed')||{}).value==="yes")?"Imaging lesion confirmed":"Imaging lesion not confirmed");
             (preData.nihss>=8 && preData.nihss<20?reasons.sovateltide.meet:reasons.sovateltide.fail).push((preData.nihss>=8 && preData.nihss<20)?"NIHSS 8–19":"NIHSS not 8–19");
 
-            /* ORION — ischemic, both EVT and non-EVT; no thrombolysis contraindication required */
+            /* ORION */
             const noContra = (contraTpa==="no");
             const orionOk = (
               preData.ltsw>=4.5 && preData.ltsw<=24 && preData.age>=18 && preData.age<=90 &&
@@ -913,8 +900,7 @@
 
             showSummary();
             return;
-
-          } // end ischemic
+          }
 
           if(postData.strokeType === "hemorrhagic"){
             const hemVolume = parseFloat(document.getElementById('hemVolume').value);
@@ -924,7 +910,6 @@
               openModal("Missing fields","Please complete all <strong>hemorrhagic</strong> questions."); return;
             }
 
-            // Ischemic EVT trials → not eligible with reason “not ischemic”
             ["athena","vanish","pivotal","moste","twin2win2","artemis","hybernia","doneSymple","shionogi","sovateltide","orion"].forEach(k=>{
               eligibility[k]=false;
               reasons[k].fail.push("Not an ischemic stroke (hemorrhagic stroke)");
@@ -1000,18 +985,17 @@
             ["WeTrust",eligibility.weTrust,"weTrust",false, randomizationLinks["WeTrust"], false],
             ["ATHENA",eligibility.athena,"athena",notIndicated.athena, randomizationLinks["ATHENA"], false],
             ["VANISH",eligibility.vanish,"vanish",notIndicated.vanish, randomizationLinks["VANISH"], false],
-            ["PIVOTAL",eligibility.pivotal,"pivotal",notIndicated.pivotal, randomizationLinks["PIVOTAL"], true], // paused
+            ["PIVOTAL",eligibility.pivotal,"pivotal",notIndicated.pivotal, randomizationLinks["PIVOTAL"], true],
             ["MOSTE",eligibility.moste,"moste",notIndicated.moste, randomizationLinks["MOSTE"], false],
             ["TWIN-2-WIN 2",eligibility.twin2win2,"twin2win2",notIndicated.twin2win2, randomizationLinks["TWIN-2-WIN 2"], false],
             ["ARTEMIS",eligibility.artemis,"artemis",notIndicated.artemis, randomizationLinks["ARTEMIS"], false],
-            ["HYBERNIA",eligibility.hybernia,"hybernia",notIndicated.hybernia, randomizationLinks["HYBERNIA"], true], // paused
+            ["HYBERNIA",eligibility.hybernia,"hybernia",notIndicated.hybernia, randomizationLinks["HYBERNIA"], true],
             ["DONE SYMPLE",eligibility.doneSymple,"doneSymple",notIndicated.doneSymple, randomizationLinks["DONE SYMPLE"], false],
             ["SHIONOGI",eligibility.shionogi,"shionogi",false, null, false],
             ["SOVATELTIDE",eligibility.sovateltide,"sovateltide",false, null, false],
             ["ORION",eligibility.orion,"orion",false, null, false],
             ["FASTEST",eligibility.fastest,"fastest",false, null, false],
             ["TICH-3",eligibility.tich3,"tich3",false, null, false],
-            // Librexia is post-acute, not listed here
             ["SAFER-DOAC",eligibility.saferdoac,"saferdoac",false, null, false]
           ];
 
@@ -1150,7 +1134,7 @@
           const ta=document.getElementById('shareMessage'); if(ta) ta.value=lines.join('\n');
         }
 
-        // *** ONLY CHANGED: payload now includes TEV, mTICI, TIV, Notes ***
+        // SAVE to Sheet (acute)
         function saveToSheet(){
           const Npatient=(document.getElementById('patientNumber')?.value||"").trim();
           if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> before saving."); return; }
@@ -1173,7 +1157,15 @@
           openModal("Saved","Saved to Google Sheet ✅");
         }
 
-        document.addEventListener('input',(e)=>{ if(e.target && e.target.id==='patientNumber') buildShareMessage(); });
+        // 🔄 LIVE PREVIEW UPDATES (fix)
+        document.addEventListener('input',(e)=>{
+          if(e.target && (e.target.id==='patientNumber' || e.target.id==='notesField')) buildShareMessage();
+        });
+        document.addEventListener('change',(e)=>{
+          const t=e.target;
+          if(!t) return;
+          if(t.name==='tev' || t.name==='tiv' || t.id==='mtici') buildShareMessage();
+        });
 
         function copyMessage(){
           const ta=document.getElementById('shareMessage');
@@ -1229,7 +1221,7 @@
             N_patient:Npatient,
             pre:{age:preData.age,nihss:preData.nihss,ltsw:preData.ltsw,premrs:preData.premrs},
             trials:t,
-            TEV:"", mTICI:"", TIV:"", Notes:"" // no acute fields here
+            TEV:"", mTICI:"", TIV:"", Notes:""
           };
           sendToSheet(payload);
           openModal("Saved","Saved to Google Sheet ✅");
@@ -1287,7 +1279,6 @@
           mb.setAttribute('aria-hidden','true');
         }
 
-        // Pretty reasons modal
         function showInfo(key){
           const r = reasons[key] || {meet:[],fail:[]};
           const ok = (Object.keys(eligibility).includes(key) ? eligibility[key] : null);
@@ -1307,7 +1298,6 @@
           openModal(title, body);
         }
 
-        // Close modal on ESC / backdrop click
         document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
         document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
           if(e.target.id==='modalBackdrop') closeModal();
