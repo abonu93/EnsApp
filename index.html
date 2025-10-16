@@ -73,7 +73,7 @@
 
     .summary-list{list-style:none;padding:0;margin:0}
     .summary-list li{display:grid;grid-template-columns:28px 1fr 110px 90px;align-items:center;column-gap:10px;border:1px solid var(--border);border-radius:12px;padding:.55rem .6rem;margin-bottom:.5rem;min-height:42px}
-    .study-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .study-name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .ok{color:var(--ok);font-weight:700}.no{color:var(--no);font-weight:700}
     .tag{display:inline-block;padding:2px 6px;border-radius:6px;font-size:12px;line-height:1}
     .tag-ni{background:var(--ni-bg);border:1px solid var(--ni-bd);color:#333}
@@ -105,6 +105,34 @@
     .k-list li{margin:.18rem 0}
     .modal-foot{display:flex;justify-content:flex-end;gap:.5rem;padding:.85rem 1rem;border-top:1px solid var(--border)}
     .btn-ghost{background:#f8fafc}
+    /* Mobile-friendly Summary rows */
+@media (max-width:560px){
+  .summary-list li{
+    grid-template-columns: 24px 1fr;   /* checkbox | name */
+    align-items: start;
+    row-gap: 6px;
+  }
+  /* mostra il nome su più righe in mobile */
+  .study-name{
+    white-space: normal;
+    overflow: visible;
+    text-overflow: initial;
+    word-break: break-word;
+  }
+  /* sposta stato e bottone "Info" sotto il nome (colonna 2) */
+  .summary-list li > .ok,
+  .summary-list li > .no,
+  .summary-list li > .tag{ grid-column: 2; justify-self: start; }
+
+  .summary-list li > .btn-small{ grid-column: 2; justify-self: end; }
+}
+
+/* (facoltativo) migliora anche l'elenco Trials */
+.trial-title{
+  flex:1; min-width:0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
   </style>
 </head>
 <body>
@@ -123,7 +151,7 @@
       <div id="mainMenu" class="page visible">
         <div class="tiles">
           <button class="tile" style="background:var(--tile-sky)" onclick="goToNewPatient()">
-            <div><div class="t-label">Clinical intake</div><div class="t-title">New Patient</div></div><div class="t-cta">Open</div>
+            <div><div class="t-label">Clinical intake</div><div class="t-title">Pre-Imaging</div></div><div class="t-cta">Open</div>
           </button>
           <button class="tile" style="background:var(--tile-pink)" onclick="goToTrialsCriteria()">
             <div><div class="t-label">Eligibility</div><div class="t-title">Trials</div></div><div class="t-cta">Open</div>
@@ -1301,6 +1329,3 @@
 </div>
 </body>
 </html>
-
-
-
