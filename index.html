@@ -38,6 +38,17 @@
     .muted{color:var(--muted);font-size:.9rem}
     h2{margin:.2rem 0 .6rem 0;font-size:1.05rem;font-weight:700}
 
+    /* Quick access row (under main tiles) */
+    .subhead{margin:.9rem 0 .4rem 2px;font-weight:700;font-size:.95rem;color:#0f172a}
+    .quick-links{margin-top:.4rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+    .ql{display:flex;flex-direction:column;align-items:center;gap:.45rem;text-decoration:none;background:#fff;border:1px solid var(--border);border-radius:14px;padding:.6rem .4rem}
+    .ql:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring)}
+    .ql-img{width:28px;height:28px;display:block;
+      /* tinta vicina a --tile-sky; rimuovi la riga seguente se vuoi il colore originale dell'SVG */
+      filter: invert(54%) sepia(16%) saturate(1106%) hue-rotate(151deg) brightness(93%) contrast(88%);
+    }
+    .ql-label{font-size:.8rem;color:var(--muted);text-align:center;line-height:1.2}
+
     /* Form / buttons */
     form{text-align:left}
     label{display:block;font-size:.8rem;font-weight:600;color:#475569;margin-bottom:.25rem}
@@ -150,6 +161,26 @@
           <button class="tile" style="background:var(--tile-pink)" onclick="goToTrialsCriteria()">
             <div><div class="t-label">Eligibility</div><div class="t-title">Trials</div></div><div class="t-cta">Open</div>
           </button>
+        </div>
+
+        <!-- Quick access -->
+        <div class="subhead">Quick access</div>
+        <div class="quick-links" aria-label="Quick access links">
+          <!-- KEY / Randomization doc -->
+          <a class="ql" href="https://docs.google.com/document/d/1Ck67m0ZXobrpmYGbis4XDzMoeGsEOT-53Zuxz9U7d0w/edit?tab=t.0" target="_blank" rel="noopener">
+            <img class="ql-img" src="icons/key.svg" alt="" />
+            <span class="ql-label">Keys & Randomization</span>
+          </a>
+          <!-- Database (Sheet) -->
+          <a class="ql" href="https://docs.google.com/spreadsheets/d/13EibT5T9UxLjUkumf0PRqFjH7ksBYd3HuJqT10p1zC0/edit?gid=0#gid=0" target="_blank" rel="noopener">
+            <img class="ql-img" src="icons/database.svg" alt="" />
+            <span class="ql-label">Database</span>
+          </a>
+          <!-- Studies Drive -->
+          <a class="ql" href="https://drive.google.com/drive/folders/0B2EOfi9bZA7zflduZjQ1UERxNFNQMUpxMFFqakQ4cFBBOFFNaGQ5VFo4RWppaVg3RHdmdjQ" target="_blank" rel="noopener">
+            <img class="ql-img" src="icons/drive.svg" alt="" />
+            <span class="ql-label">Studies Drive</span>
+          </a>
         </div>
       </div>
 
@@ -791,7 +822,7 @@
             (preData.nihss>=6?reasons.vanish.meet:reasons.vanish.fail).push(preData.nihss>=6?"NIHSS ≥6":"NIHSS <6");
             (lvo==="yes"?reasons.vanish.meet:reasons.vanish.fail).push(lvo==="yes"?"LVO present":"LVO absent");
             (vanishVesselOk?reasons.vanish.meet:reasons.vanish.fail).push(vanishVesselOk?"Vessel ICA-T/M1":"Vessel not ICA-T/M1");
-            (contraTpa==="no"?reasons.vanish.meet:reasons.vanish.fail).push(contraTpa==="no"?"No thrombolysis contraindications":"Thrombolysis contraindications present");
+            (contraTpa==="no"?reasons.vanish.fail:reasons.vanish.meet).push(contraTpa==="no"?"No thrombolysis contraindications":"Thrombolysis contraindications present");
 
             /* PIVOTAL */
             const okPivotal = (preData.ltsw<8 && preData.age>=18 && preData.age<=80 && preData.premrs<=1 && preData.nihss>=6 && lvo==="yes" && pivotalVesselOk);
@@ -800,7 +831,7 @@
             (preData.age>=18 && preData.age<=80?reasons.pivotal.meet:reasons.pivotal.fail).push((preData.age>=18&&preData.age<=80)?"Age 18–80":"Age not 18–80");
             (preData.premrs<=1?reasons.pivotal.meet:reasons.pivotal.fail).push(preData.premrs<=1?"pre-mRS ≤1":"pre-mRS >1");
             (preData.nihss>=6?reasons.pivotal.meet:reasons.pivotal.fail).push(preData.nihss>=6?"NIHSS ≥6":"NIHSS <6");
-            (lvo==="yes"?reasons.pivotal.meet:reasons.pivotal.fail).push(lvo==="yes"?"LVO present":"LVO absent");
+            (lvo==="yes"?reasons.pivotal.fail:reasons.pivotal.meet).push(lvo==="yes"?"LVO present":"LVO absent");
             (pivotalVesselOk?reasons.pivotal.meet:reasons.pivotal.fail).push(pivotalVesselOk?"Vessel ICA-T/M1/Basilar":"Vessel not allowed");
 
             /* MOSTE */
@@ -1254,7 +1285,7 @@
           const shareForm=document.getElementById('shareForm'); if(shareForm) shareForm.reset();
           const shareForm2=document.getElementById('shareChronicForm'); if(shareForm2) shareForm2.reset();
           const ta=document.getElementById('shareMessage'); if(ta) ta.value="";
-          const ta2=document.getElementById('shareMessage2'); if(ta2) ta2.value="";
+          const ta2=document.getElementById('shareMessage2'); if(ta2) ta.value="";
           const out=document.getElementById('studyOutcomesContainer'); if(out) out.innerHTML="";
           const out2=document.getElementById('studyChronicOutcomesContainer'); if(out2) out2.innerHTML="";
 
