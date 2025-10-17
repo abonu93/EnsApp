@@ -9,7 +9,7 @@
       --bg:#ffffff; --text:#0f172a; --muted:#475569; --border:#e5e7eb;
       --tile-sky:#45B3CB; --tile-pink:#ED7390; --ring:#e2e8f0;
       --ok:#0b7a0b; --no:#b30000; --ni-bg:#f4f4f5; --ni-bd:#d4d4d8;
-      --info:#1f2937; --primary:#0ea5e9;
+      --info:#1f2937; --primary:#0ea5e9; --paused:#78350f; --chip:#0ea5e9;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -38,13 +38,12 @@
     .muted{color:var(--muted);font-size:.9rem}
     h2{margin:.2rem 0 .6rem 0;font-size:1.05rem;font-weight:700}
 
-    /* Quick access row (under main tiles) */
+    /* Quick access row */
     .subhead{margin:.9rem 0 .4rem 2px;font-weight:700;font-size:.95rem;color:#0f172a}
     .quick-links{margin-top:.4rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
     .ql{display:flex;flex-direction:column;align-items:center;gap:.45rem;text-decoration:none;background:#fff;border:1px solid var(--border);border-radius:14px;padding:.6rem .4rem}
     .ql:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring)}
     .ql-img{width:28px;height:28px;display:block;
-      /* tinta vicina a --tile-sky; rimuovi la riga seguente se vuoi il colore originale dell'SVG */
       filter: invert(54%) sepia(16%) saturate(1106%) hue-rotate(151deg) brightness(93%) contrast(88%);
     }
     .ql-label{font-size:.8rem;color:var(--muted);text-align:center;line-height:1.2}
@@ -69,13 +68,6 @@
     .btn-primary{border:none;background:var(--tile-sky);color:#fff}
     .btn-accent{background:var(--tile-pink);color:#fff;border:none}
     .btn-small{font-size:.8rem;padding:.4rem .6rem;border-radius:10px}
-
-    /* Radio groups */
-    .radio-group{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem}
-    .radio{display:flex;align-items:center;gap:.55rem;border:1px solid var(--border);border-radius:12px;padding:.55rem .7rem;background:#fff;cursor:pointer}
-    .radio input{accent-color:var(--primary);width:18px;height:18px}
-    .radio.selected{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,165,233,.15)}
-    .radio.full{grid-column:1/-1}
 
     /* Trials / summary */
     .trial-list{display:grid;gap:.7rem}
@@ -117,27 +109,22 @@
     .modal-foot{display:flex;justify-content:flex-end;gap:.5rem;padding:.85rem 1rem;border-top:1px solid var(--border)}
     .btn-ghost{background:#f8fafc}
 
-@media (max-width:560px){
-  .summary-list li{
-    grid-template-columns: 24px 1fr;
-    align-items: start;
-    row-gap: 6px;
-  }
-  .study-name{
-    white-space: normal;
-    overflow: visible;
-    text-overflow: initial;
-    word-break: break-word;
-  }
-  .summary-list li > .ok,
-  .summary-list li > .no,
-  .summary-list li > .tag{ grid-column: 2; justify-self: start; }
-  .summary-list li > .btn-small{ grid-column: 2; justify-self: end; }
-}
-.trial-title{
-  flex:1; min-width:0;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
+    /* Trial detail fancy layout */
+    .trial-headline{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--border);border-radius:999px;padding:.2rem .55rem;font-size:.75rem}
+    .chip .dot{width:8px;height:8px;border-radius:999px;background:var(--chip)}
+    .chip.paused{border-color:#fed7aa;color:#7c2d12}
+    .chip.paused .dot{background:#f59e0b}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
+    .kv{border:1px solid var(--border);border-radius:12px;padding:.6rem .7rem}
+    .kv b{display:block;font-size:.75rem;color:#64748b;margin-bottom:.15rem}
+    .section h3{margin:.2rem 0 .4rem 0;font-size:.95rem}
+    .bul{margin:.2rem 0 .2rem 1rem}
+    .bul li{margin:.15rem 0}
+    @media (max-width:640px){
+      .grid-2,.grid-3{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
@@ -166,17 +153,14 @@
         <!-- Quick access -->
         <div class="subhead">Quick access</div>
         <div class="quick-links" aria-label="Quick access links">
-          <!-- KEY / Randomization doc -->
           <a class="ql" href="https://docs.google.com/document/d/1Ck67m0ZXobrpmYGbis4XDzMoeGsEOT-53Zuxz9U7d0w/edit?tab=t.0" target="_blank" rel="noopener">
             <img class="ql-img" src="icons/key.svg" alt="" />
             <span class="ql-label">Keys & Randomization</span>
           </a>
-          <!-- Database (Sheet) -->
           <a class="ql" href="https://docs.google.com/spreadsheets/d/13EibT5T9UxLjUkumf0PRqFjH7ksBYd3HuJqT10p1zC0/edit?gid=0#gid=0" target="_blank" rel="noopener">
             <img class="ql-img" src="icons/database.svg" alt="" />
             <span class="ql-label">Database</span>
           </a>
-          <!-- Studies Drive -->
           <a class="ql" href="https://drive.google.com/drive/folders/0B2EOfi9bZA7zflduZjQ1UERxNFNQMUpxMFFqakQ4cFBBOFFNaGQ5VFo4RWppaVg3RHdmdjQ" target="_blank" rel="noopener">
             <img class="ql-img" src="icons/drive.svg" alt="" />
             <span class="ql-label">Studies Drive</span>
@@ -184,7 +168,7 @@
         </div>
       </div>
 
-      <!-- TRIALS LIST (same UI) -->
+      <!-- TRIALS LIST -->
       <div id="trialsList" class="page">
         <h2>Trials</h2>
         <div class="trial-list">
@@ -193,17 +177,23 @@
           <div class="trial-item"><span class="trial-title">ATHENA</span><button class="btn" onclick="showTrialCriteria('ATHENA')">Open</button></div>
           <div class="trial-item"><span class="trial-title">FASTEST</span><button class="btn" onclick="showTrialCriteria('FASTEST')">Open</button></div>
           <div class="trial-item"><span class="trial-title">Librexia</span><button class="btn" onclick="showTrialCriteria('Librexia')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">VANISH</span><button class="btn" onclick="showTrialCriteria('Vanish')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">PIVOTAL</span><button class="btn" onclick="showTrialCriteria('Pivotal')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">MOSTE</span><button class="btn" onclick="showTrialCriteria('Moste')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">VANISH</span><button class="btn" onclick="showTrialCriteria('VANISH')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">PIVOTAL</span><button class="btn" onclick="showTrialCriteria('PIVOTAL')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">MOSTE</span><button class="btn" onclick="showTrialCriteria('MOSTE')">Open</button></div>
           <div class="trial-item"><span class="trial-title">TWIN-2-WIN 2</span><button class="btn" onclick="showTrialCriteria('Twin2Win2')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">ARTEMIS</span><button class="btn" onclick="showTrialCriteria('Artemis')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">HYBERNIA</span><button class="btn" onclick="showTrialCriteria('Hybernia')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">ARTEMIS</span><button class="btn" onclick="showTrialCriteria('ARTEMIS')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">HYBERNIA</span><button class="btn" onclick="showTrialCriteria('HYBERNIA')">Open</button></div>
           <div class="trial-item"><span class="trial-title">DONE SYMPLE</span><button class="btn" onclick="showTrialCriteria('DoneSymple')">Open</button></div>
           <div class="trial-item"><span class="trial-title">SAFER-DOAC</span><button class="btn" onclick="showTrialCriteria('SaferDoac')">Open</button></div>
           <div class="trial-item"><span class="trial-title">SHIONOGI</span><button class="btn" onclick="showTrialCriteria('Shionogi')">Open</button></div>
           <div class="trial-item"><span class="trial-title">SOVATELTIDE</span><button class="btn" onclick="showTrialCriteria('Sovateltide')">Open</button></div>
           <div class="trial-item"><span class="trial-title">ORION</span><button class="btn" onclick="showTrialCriteria('Orion')">Open</button></div>
+
+          <!-- No trials -->
+          <div class="trial-item" style="border-style:dashed">
+            <span class="trial-title">No trials</span>
+            <button class="btn" onclick="showTrialCriteria('NO_TRIALS')">Open</button>
+          </div>
         </div>
         <div class="btn-row" style="margin-top:.9rem"><button class="btn" type="button" onclick="goBackToMain()">Back</button></div>
       </div>
@@ -211,11 +201,20 @@
       <!-- TRIAL DETAIL -->
       <div id="trialDetail" class="page">
         <h2 id="trialTitle"></h2>
-        <div class="card"><div id="trialCriteriaText"></div></div>
-        <div class="btn-row" style="margin-top:.9rem"><button class="btn" type="button" onclick="showPage('trialsList')">Back</button></div>
+        <div class="card stack">
+          <div class="trial-headline">
+            <span id="trialStatusChip" class="chip" style="display:none"><span class="dot"></span><span id="trialStatusText"></span></span>
+            <span id="trialCategoryChip" class="chip" style="display:none"><span class="dot"></span><span id="trialCategoryText"></span></span>
+          </div>
+          <div id="trialCriteriaText" class="stack"></div>
+        </div>
+        <div class="btn-row" style="margin-top:.9rem">
+          <button class="btn" type="button" onclick="showPage('trialsList')">Back</button>
+          <button class="btn btn-primary" type="button" onclick="goToTrialNewPatient()">New patient</button>
+        </div>
       </div>
 
-      <!-- PRE-IMAGING -->
+      <!-- PRE-IMAGING (unchanged) -->
       <div id="preImaging" class="page">
         <h2>Pre-Imaging</h2>
         <div class="card stack">
@@ -289,7 +288,6 @@
             </div>
 
             <div id="evtSection" class="card stack" style="display:none;">
-              <!-- LVO question removed per spec; when 'eligible' => LVO = yes -->
               <div class="stack"><label>Tandem occlusion?</label>
                 <select id="tandem" required><option value="no">No</option><option value="yes">Yes</option></select>
               </div>
@@ -314,7 +312,7 @@
               <div class="stack"><label for="aspects">ASPECTS</label><input type="number" id="aspects" min="0" max="10" /></div>
             </div>
 
-            <!-- Non-EVT ischemic confirmation used by Shionogi / Sovateltide / Orion NE branch -->
+            <!-- Non-EVT ischemic confirmation -->
             <div id="nonEvtConfirm" class="card stack" style="display:none;">
               <div class="stack"><label>Imaging lesion confirmed (CT / CTP / MRI)?</label>
                 <select id="lesionConfirmed">
@@ -582,7 +580,92 @@
         </div>
       </div>
 
-      <!-- MODAL (for reasons) -->
+      <!-- Patient Summary & Share (from Trials / No trials) -->
+      <div id="trialPatientPage" class="page">
+        <h2>Patient Summary & Share</h2>
+        <div class="card stack">
+          <form id="trialPatientForm" class="stack">
+            <div class="stack"><label for="tp_patientId">Patient record number</label><input type="text" id="tp_patientId" placeholder="e.g., 2025-00123" required /></div>
+            <div class="stack-lg">
+              <div class="stack"><label for="tp_age">Age</label><input type="number" id="tp_age" /></div>
+              <div class="stack"><label for="tp_nihss">NIHSS</label><input type="number" id="tp_nihss" /></div>
+              <div class="stack">
+                <label for="tp_mrs">pre-mRS</label>
+                <select id="tp_mrs">
+                  <option value=""></option>
+                  <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+                  <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="card stack">
+              <h3 style="margin:0">Selected study</h3>
+              <div class="muted">From Trials: <span id="tp_selectedStudyLabel"></span></div>
+              <div id="tp_armRow" class="stack">
+                <label for="tp_arm">Study arm</label>
+                <select id="tp_arm">
+                  <option value="intervention">intervention</option>
+                  <option value="control">control</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="card stack">
+              <h3 style="margin:0">Other enrolled trials</h3>
+              <div id="tp_otherTrials"></div>
+              <div class="btn-row">
+                <button class="btn btn-small" type="button" onclick="tp_addOtherTrial()">+ Add trial</button>
+              </div>
+            </div>
+
+            <div class="card stack">
+              <h3 style="margin:0">Acute treatments</h3>
+              <div class="stack">
+                <label>Thrombectomy performed (TEV)?</label>
+                <div class="radio-group">
+                  <label class="radio"><input type="radio" name="tp_tev" value="Yes"> Yes</label>
+                  <label class="radio"><input type="radio" name="tp_tev" value="No"> No</label>
+                </div>
+              </div>
+              <div class="stack">
+                <label>mTICI</label>
+                <select id="tp_mtici">
+                  <option value=""></option>
+                  <option value="0">0</option><option value="1">1</option>
+                  <option value="2a">2a</option><option value="2b">2b</option>
+                  <option value="2b67">2b67</option><option value="3">3</option>
+                </select>
+              </div>
+              <div class="stack">
+                <label>Thrombolysis (TIV)?</label>
+                <div class="radio-group">
+                  <label class="radio"><input type="radio" name="tp_tiv" value="Yes"> Yes</label>
+                  <label class="radio"><input type="radio" name="tp_tiv" value="No"> No</label>
+                </div>
+              </div>
+              <div class="stack">
+                <label for="tp_notes">Notes</label>
+                <textarea id="tp_notes" rows="3" placeholder="Notes to append in the message and save to Google Sheet"></textarea>
+              </div>
+            </div>
+
+            <div class="stack">
+              <label>Message (preview)</label>
+              <textarea id="tp_message" rows="6" readonly></textarea>
+            </div>
+
+            <div class="btn-row">
+              <button type="button" class="btn" onclick="tp_copy()">Copy</button>
+              <button type="button" class="btn" onclick="tp_shareWA()">Share via WhatsApp</button>
+              <button type="button" class="btn btn-accent" onclick="tp_save()">Save to Google Sheet</button>
+              <button type="button" class="btn" onclick="showPage('trialsList')">Back</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- MODAL -->
       <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
         <div class="modal" role="document">
           <div class="modal-head">
@@ -598,7 +681,266 @@
 
       <!-- SCRIPTS -->
       <script>
-        /* ======= CONFIG ======= */
+        /* ======= INFO CARDS DATA (from your table, English) ======= */
+        // Trials ignored: ACTISAVE, TNKCAT, ABBVIE
+        const TRIALS_INFO = {
+          "WeTrust": {
+            status: "active", category: "Imaging / Workflow",
+            key: { window: "≤ 6 h", age: "≥ 18 y", mrs: "0–2", nihss: "≥ 10", aspects: "—" },
+            consent: "—",
+            imaging: "Direct-to-angio OR multimodal CT pathway.",
+            thrombolytic: "Optional.",
+            thrombectomy: "Yes.",
+            preEvtLabs: "No.",
+            intervention: "Cone-beam CT software (vs standard).",
+            notes: ["Exclusion examples noted elsewhere: low GCS, INR > 3, seizure at onset."],
+            visits: null
+          },
+          "MOSTE": {
+            status: "active", category: "EVT strategy",
+            key: { window: "< 23 h", age: "No upper limit", mrs: "0–1", nihss: "0–5", aspects: "6–10" },
+            consent: "Written & oral/phone consent.",
+            imaging: "CTA showing occlusion: TICA, M1–M2 or tandem. CT + CTA at 24 h.",
+            thrombolytic: "Optional.",
+            thrombectomy: "Randomize: EVT yes/no.",
+            preEvtLabs: "No.",
+            intervention: "Thrombectomy vs No Thrombectomy (per protocol).",
+            notes: ["Isolated ICA exclusion.", "Drip & Ship: re-image if > 1 h pre-randomization.", "24 h CT and CTA always."],
+            visits: [
+              "Baseline (in-person)",
+              "24 h (in-person)",
+              "Day 5 / discharge (in-person)",
+              "Day 90 (phone)"
+            ]
+          },
+          "ATHENA": {
+            status: "active", category: "EVT device",
+            key: { window: "< 24 h", age: "22–85 y", mrs: "0–2", nihss: "≥ 8", aspects: "6–10" },
+            consent: "Written & oral/phone consent.",
+            imaging: "TICA, M1 or M2 occlusion.",
+            thrombolytic: "Optional.",
+            thrombectomy: "Yes.",
+            preEvtLabs: "No.",
+            intervention: "Stent retriever + ANA vs Stent retriever + DAC.",
+            notes: [
+              "Thrombolysis per local practice (3 h limit removed)."
+            ],
+            visits: [
+              "Baseline (in-person)",
+              "24 h (in-person)",
+              "Day 5 / discharge (in-person)",
+              "Day 90 (in-person)"
+            ]
+          },
+          "PIVOTAL": {
+            status: "paused", category: "EVT aspiration system",
+            key: { window: "< 8 h", age: "18–80 y", mrs: "0–1", nihss: "≥ 6", aspects: "6–10" },
+            consent: "Written & oral/phone consent.",
+            imaging: "ICA (including T), M1, M2, intracranial vertebral or basilar.",
+            thrombolytic: "Optional.",
+            thrombectomy: "Yes.",
+            preEvtLabs: "No.",
+            intervention: "RapidPulse™ aspiration pump + tubing/collection canister + RapidPulse™ 071 catheter.",
+            notes: [
+              "Initial treatment with a different thrombectomy device not allowed.",
+              "Any CT/MR hemorrhage excludes."
+            ],
+            visits: [
+              "Baseline (in-person)",
+              "24 h (in-person)",
+              "Day 5 / discharge (in-person)",
+              "Day 90 (phone)"
+            ]
+          },
+          "Twin2Win2": {
+            status: "active", category: "EVT technique",
+            key: { window: "< 24 h", age: "> 18 y", mrs: "0–2", nihss: "≥ 6", aspects: "—" },
+            consent: "Written & oral/phone consent.",
+            imaging: "Occlusion with TICI 0–1 flow at ICA-T, distal M1 MCA, or basilar.",
+            thrombolytic: "Optional.",
+            thrombectomy: "Yes.",
+            preEvtLabs: "No.",
+            intervention: "Double-stent (DS-EVT) technique.",
+            notes: [],
+            visits: [
+              "Baseline (in-person)",
+              "24 h (in-person)",
+              "48 h (in-person)",
+              "Day 3–10 / discharge (in-person)",
+              "Day 30 (phone)",
+              "Day 90 (phone)"
+            ]
+          },
+          "ARTEMIS": {
+            status: "active", category: "EVT device",
+            key: { window: "< 24 h", age: "18–85 y", mrs: "0–2", nihss: "6–25", aspects: "6–10" },
+            consent: "Written.",
+            imaging: "Intracranial ICA; MCA M1; MCA M2 proximal/dominant segments.",
+            thrombolytic: "Optional.",
+            thrombectomy: "Yes.",
+            preEvtLabs: "No.",
+            intervention: "Stent retriever CONDA.",
+            notes: [],
+            visits: [
+              "Baseline (in-person)",
+              "24 h (in-person)",
+              "Discharge (in-person)",
+              "Day 30 (phone)",
+              "Day 90 (phone)"
+            ]
+          },
+          "HYBERNIA": {
+            status: "paused", category: "Neuroprotection / Cooling adjunct",
+            key: { window: "< 24 h", age: "18–89 y", mrs: "0–1", nihss: "≥ 6", aspects: "5–10" },
+            consent: "Written & oral/phone consent.",
+            imaging: "Intracranial ICA, M1 or any M2.",
+            thrombolytic: "Optional.",
+            thrombectomy: "Yes.",
+            preEvtLabs: "Yes — blood gas incl. hematocrit.",
+            intervention: "Stent retriever + Hybernia Delta H (ΔH) Brain Cooling System.",
+            notes: [],
+            visits: [
+              "Baseline (in-person)",
+              "24 h (in-person)",
+              "Day 5 / discharge (in-person)",
+              "Day 90 (phone)"
+            ]
+          },
+          "DoneSymple": {
+            status: "active", category: "Late-window EVT + IA tPA",
+            key: { window: "24–72 h", age: "18–80 y", mrs: "0–1", nihss: "≥ 8", aspects: "—" },
+            consent: "Written & oral/phone consent.",
+            imaging: "Presence of LVO.",
+            thrombolytic: "Optional.",
+            thrombectomy: "Randomize: IA tPA yes/no alongside EVT strategy.",
+            preEvtLabs: "No.",
+            intervention: "Intra-arterial tPA (per arm).",
+            notes: [],
+            visits: [
+              "Baseline (in-person)",
+              "24 h (in-person)",
+              "Day 5 / discharge (in-person)",
+              "Day 90 (phone)"
+            ]
+          },
+          "VANISH": {
+            status: "active", category: "Thrombolysis with EVT pathway",
+            key: { window: "< 9 h (wake-up: ≤ 9 h from mid-sleep)", age: "> 18 y", mrs: "0–1", nihss: "≥ 6", aspects: "≥ 4" },
+            consent: "—",
+            imaging: "Occlusion (TICI 0–1) of ICA, M1, or weight-bearing M2 on CTA/MRA/DSA.",
+            thrombolytic: "Optional.",
+            thrombectomy: "Yes.",
+            preEvtLabs: "No.",
+            intervention: "tPA IA possible per protocol; EVT/stenting defer > 24 h after thrombolysis.",
+            notes: [],
+            visits: null
+          },
+          "SaferDoac": {
+            status: "active", category: "Safety / Diagnostics",
+            key: { window: "—", age: "—", mrs: "—", nihss: "—", aspects: "—" },
+            consent: "—",
+            imaging: "—",
+            thrombolytic: "—",
+            thrombectomy: "—",
+            preEvtLabs: "—",
+            intervention: "Workflow for DOAC/NOAC patients: Chest CTA and drug levels.",
+            notes: [],
+            visits: null
+          },
+          "Shionogi": {
+            status: "active", category: "Thrombolytic / Adjunct",
+            key: { window: "≤ 25 h", age: "> 18 y", mrs: "0–1", nihss: "6–22", aspects: "—" },
+            consent: "Written.",
+            imaging: "CT or MRI post-thrombolysis to exclude ICH; MRI < 4 days after.",
+            thrombolytic: "Yes — treatment allowed; if EVT/stent planned, wait > 24 h.",
+            thrombectomy: "Optional in pathway after study drug timing.",
+            preEvtLabs: "Yes — pre-dose.",
+            intervention: "Elezanumab 1800 mg IV vs placebo (120 min infusion).",
+            notes: ["If TEV/stent is planned, wait > 24 h after study drug."],
+            visits: [
+              "First in-person visit at 30 ±7 days from screening/randomization",
+              "Second in-person visit at 90 ±14 days from screening/randomization"
+            ]
+          },
+          "Librexia": {
+            status: "post-acute", category: "Antithrombotic (post-acute)",
+            key: { window: "≤ 48 h", age: "≥ 40 y", mrs: "0–2", nihss: "≤ 7 (AITS: ABCD2 ≥ 6)", aspects: "—" },
+            consent: "Written.",
+            imaging: "Non-cardioembolic / non-lacunar; CT/MR showing hypodensity, perfusion deficit, or vessel occlusion (anterior or posterior circulation).",
+            thrombolytic: "—",
+            thrombectomy: "—",
+            preEvtLabs: "Yes — pre-dose.",
+            intervention: "Milvexian 25 mg vs placebo (q12h; first dose within 3 h of randomization).",
+            notes: [
+              "No prophylactic LMWH > 3 days.",
+              "Exclude patients requiring therapeutic anticoagulation."
+            ],
+            visits: [
+              "First in-person visit at 28 ±7 days from screening/randomization",
+              "Second in-person visit at 90 ±7 days from screening/randomization"
+            ]
+          },
+          "Sovateltide": {
+            status: "active", category: "Neuroprotective",
+            key: { window: "< 24 h", age: "18–80 y", mrs: "0–2", nihss: "8–20", aspects: "—" },
+            consent: "Written (impartial witness permitted).",
+            imaging: "Ischemic stroke only (non-AITS): CT confirmation by any of: hypodensity, perfusion deficit, or vessel occlusion (anterior or posterior circulation).",
+            thrombolytic: "No.",
+            thrombectomy: "No (non-EVT candidate cohort).",
+            preEvtLabs: "Yes — pre-dose.",
+            intervention: "Sovateltide vs placebo — 3 bolus doses (1–2 min) on Day 0 / Day 3 / Day 6.",
+            notes: [
+              "5-day treatment course (daily IV bag 90 min).",
+              "Exclude: ICH, tandem occlusion, mass-effect lesion, cerebral vasculitis."
+            ],
+            visits: [
+              "Post-dose monitoring (0–72 h)",
+              "Day 7 / discharge visit",
+              "Day 30 (phone)",
+              "Day 90 (phone)"
+            ]
+          },
+          "Orion": {
+            status: "active", category: "Thrombolytic",
+            key: { window: "4.5–6 h / 4.5–24 h", age: "18–90 y", mrs: "< 2", nihss: "≥ 5", aspects: "—" },
+            consent: "Written (impartial witness permitted).",
+            imaging: "Intracranial ICA, M1/M2 MCA, distal ACA branches occlusion confirmed on CTA.",
+            thrombolytic: "Yes — administer study drug 1 h before EVT; ensure ≥ 1 h from end of infusion to femoral puncture.",
+            thrombectomy: "Yes (EVT after study drug as per timing rule).",
+            preEvtLabs: "Yes — pre-dose.",
+            intervention: "JX10 at 1 mg/kg or 3 mg/kg vs placebo.",
+            notes: [
+              "Exclude: infarct core volume > 70 mL; occlusions in > 1 vascular territory; direct EVT or EVT before study drug."
+            ],
+            visits: null
+          },
+          "FASTEST": {
+            status: "active", category: "ICH hemostatic",
+            key: { window: "≤ 2 h", age: "18–80 y", mrs: "≤ 2", nihss: "—", aspects: "—" },
+            consent: "—",
+            imaging: "— (ICH pathway; not detailed here in ischemic table).",
+            thrombolytic: "—",
+            thrombectomy: "—",
+            preEvtLabs: "—",
+            intervention: "—",
+            notes: [],
+            visits: null
+          },
+          "TICH3": {
+            status: "active", category: "ICH hemostatic",
+            key: { window: "< 4.5 h", age: "—", mrs: "—", nihss: "—", aspects: "—" },
+            consent: "—",
+            imaging: "— (ICH pathway).",
+            thrombolytic: "—",
+            thrombectomy: "—",
+            preEvtLabs: "—",
+            intervention: "—",
+            notes: [],
+            visits: null
+          }
+        };
+
+        /* ======= EXISTING CONFIG (unchanged below this line unless needed) ======= */
         const infoMessages = {
           weTrust: "", athena: "", hemorrhagic: "",
           vanish: "", pivotal: "", moste: "",
@@ -657,6 +999,7 @@
         };
         let selectedStudies=[]; let studyOutcomes={};
         let selectedChronic=[]; let studyChronicOutcomes={};
+        let selectedTrialName = null;
 
         /* ======= NAV / VIEW ======= */
         function showPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('visible')); document.getElementById(id).classList.add('visible'); }
@@ -664,32 +1007,109 @@
         function setActiveNav(id){ document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active')); const el=document.querySelector('[data-target="'+id+'"]'); if(el) el.classList.add('active'); }
         function navGo(id){ showPage(id); setActiveNav(id); }
 
+        /* ======= DETAIL RENDERER (NEW) ======= */
         function showTrialCriteria(name){
-          document.getElementById('trialTitle').innerText = (name==='SaferDoac'?'SAFER-DOAC':name);
-          document.getElementById('trialCriteriaText').innerHTML = trialCriteria[name] || "<p>No criteria found.</p>";
+          selectedTrialName = name;
+          const title = (name==='SaferDoac'?'SAFER-DOAC':name);
+          document.getElementById('trialTitle').innerText = (name==='NO_TRIALS') ? "No trials" : title;
+
+          const chipStatus = document.getElementById('trialStatusChip');
+          const chipCategory = document.getElementById('trialCategoryChip');
+
+          if(name==='NO_TRIALS'){
+            chipStatus.style.display='none'; chipCategory.style.display='none';
+            document.getElementById('trialCriteriaText').innerHTML = "<p class='muted'>No trial selected. You can still add a patient and share/save the summary.</p>";
+            showPage('trialDetail'); return;
+          }
+
+          const info = TRIALS_INFO[name] || TRIALS_INFO[title] || TRIALS_INFO[(name||'').toUpperCase()] || null;
+          if(!info){
+            chipStatus.style.display='none'; chipCategory.style.display='none';
+            document.getElementById('trialCriteriaText').innerHTML = "<p>Criteria not available.</p>";
+            showPage('trialDetail'); return;
+          }
+
+          // Chips
+          chipStatus.style.display='inline-flex';
+          chipStatus.classList.toggle('paused', info.status==='paused');
+          document.getElementById('trialStatusText').textContent = (info.status==='paused'?'Paused':'Active');
+
+          chipCategory.style.display='inline-flex';
+          document.getElementById('trialCategoryText').textContent = info.category;
+
+          // Sections
+          const k = info.key || {};
+          const keyGrid = `
+            <div class="grid-3">
+              <div class="kv"><b>Time window</b><div>${k.window||'—'}</div></div>
+              <div class="kv"><b>Age</b><div>${k.age||'—'}</div></div>
+              <div class="kv"><b>pre-mRS</b><div>${k.mrs||'—'}</div></div>
+            </div>
+            <div class="grid-2">
+              <div class="kv"><b>NIHSS</b><div>${k.nihss||'—'}</div></div>
+              <div class="kv"><b>ASPECTS</b><div>${k.aspects||'—'}</div></div>
+            </div>
+          `;
+
+          const imaging = `
+            <div class="section">
+              <h3>Neuroimaging</h3>
+              <div class="kv">${info.imaging||'—'}</div>
+            </div>
+          `;
+
+          const treatCtx = `
+            <div class="section">
+              <h3>Treatment context</h3>
+              <div class="grid-3">
+                <div class="kv"><b>Thrombolytic</b><div>${info.thrombolytic||'—'}</div></div>
+                <div class="kv"><b>Thrombectomy</b><div>${info.thrombectomy||'—'}</div></div>
+                <div class="kv"><b>Pre-EVT labs</b><div>${info.preEvtLabs||'—'}</div></div>
+              </div>
+            </div>
+          `;
+
+          const consent = `
+            <div class="section">
+              <h3>Consent</h3>
+              <div class="kv">${info.consent||'—'}</div>
+            </div>
+          `;
+
+          const intervention = `
+            <div class="section">
+              <h3>Intervention</h3>
+              <div class="kv">${info.intervention||'—'}</div>
+            </div>
+          `;
+
+          const notes = (info.notes && info.notes.length) ? `
+            <div class="section">
+              <h3>Notes / Exclusions</h3>
+              <ul class="bul">${info.notes.map(n=>`<li>${n}</li>`).join('')}</ul>
+            </div>
+          ` : '';
+
+          const visits = (info.visits && info.visits.length) ? `
+            <div class="section">
+              <h3>Follow-up visits</h3>
+              <ul class="bul">${info.visits.map(v=>`<li>${v}</li>`).join('')}</ul>
+            </div>
+          ` : '';
+
+          document.getElementById('trialCriteriaText').innerHTML = `
+            <div class="section"><h3>Key eligibility</h3>${keyGrid}</div>
+            ${imaging}
+            ${treatCtx}
+            ${consent}
+            ${intervention}
+            ${notes}
+            ${visits}
+          `;
           showPage('trialDetail');
         }
 
-        const trialCriteria={
-          "WeTrust":"<ul><li>Age ≥ 18</li><li>NIHSS ≥ 10</li><li>pre-mRS 0–2</li><li>LTSW ≤ 6h</li><li>Philips angiograph available</li></ul>",
-          "TICH3":"<ul><li>Onset &lt; 4.5h</li><li>Hemorrhage volume &lt; 60 mL</li><li>Not isolated IVH</li><li>GCS ≥ 5</li></ul>",
-          "ATHENA":"<ul><li>Age 22–85</li><li>NIHSS ≥ 8</li><li>pre-mRS 0–2</li><li>LTSW ≤ 24h</li><li>LVO yes, tandem no, tortuosity no</li></ul>",
-          "FASTEST":"<ul><li>Age 18–80</li><li>Onset ≤ 2h</li><li>GCS ≥ 8</li><li>Volume 2–60 mL</li></ul>",
-          "Librexia":"<ul><li>Age ≥ 40</li><li>Within 48h</li><li>NIHSS ≤ 7 with atherothrombotic suspicion</li></ul>",
-          "Vanish":"<ul><li>Age ≥18</li><li>pre-mRS 0–1</li><li>NIHSS ≥6</li><li>ICA-T or M1</li></ul>",
-          "Pivotal":"<ul><li>LTSW &lt; 8h</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥6</li><li>ICA-T/M1/Basilar</li></ul>",
-          "Moste":"<ul><li>LTSW &lt; 23h</li><li>pre-mRS 0–1</li><li>NIHSS &lt; 6</li><li>ICA-T/M1/M2</li></ul>",
-          "Twin2Win2":"<ul><li>LTSW &lt; 24h</li><li>Age &gt;18</li><li>pre-mRS 0–2</li><li>NIHSS ≥6</li></ul>",
-          "Artemis":"<ul><li>LTSW &lt; 24h</li><li>Age 18–85</li><li>pre-mRS 0–2</li><li>NIHSS 6–25</li><li>ASPECTS &gt;5</li></ul>",
-          "Hybernia":"<ul><li>LTSW &lt; 24h</li><li>Age 18–89</li><li>pre-mRS 0–1</li><li>NIHSS ≥6</li><li>ASPECTS &gt;4</li></ul>",
-          "DoneSymple":"<ul><li>Window 24–72h</li><li>Age 18–80</li><li>pre-mRS 0–1</li><li>NIHSS ≥8</li><li>LVO yes</li></ul>",
-          "SaferDoac":"<ul><li>Patients on DOAC (NOAC)</li><li>Chest CTA + drug levels</li></ul>",
-          "Shionogi":"<ul><li>Ischemic, LTSW &lt;25h</li><li>Age &gt;18</li><li>pre-mRS 0–1</li><li>NIHSS 6–22</li><li>Imaging lesion confirmed</li></ul>",
-          "Sovateltide":"<ul><li>Ischemic, LTSW &lt;24h</li><li>Age 18–80</li><li>pre-mRS 0–2</li><li>Not EVT candidate</li><li>Imaging lesion confirmed</li><li>NIHSS 8–19<br/><em>Info: level of consciousness item 1A required</em></li></ul>",
-          "Orion":"<ul><li>Ischemic, LTSW 4.5–24h</li><li>Age 18–90</li><li>pre-mRS 0–1</li><li>NIHSS &gt;5</li><li>No contraindication to thrombolysis</li><li><em>Info: administer treatment 1h before EVT</em></li></ul>"
-        };
-
-        /* ======= PRE-IMAGING ======= */
+        /* ======= PRE / POST logic (existing) ======= */
         function submitPreImaging(){
           Object.keys(reasons).forEach(k=>{ reasons[k].meet=[]; reasons[k].fail=[]; });
 
@@ -721,7 +1141,6 @@
         function continueAfterWeTrust(){ showPage('postImaging'); }
         function openWeTrustRandomization(){ window.open('https://wetrust.eu1.phsdp.com/login','_blank'); }
 
-        /* ======= RADIO HELPERS ======= */
         function markRadioSelected(groupEl){
           if(!groupEl) return;
           groupEl.querySelectorAll('.radio').forEach(l=>l.classList.remove('selected'));
@@ -757,7 +1176,7 @@
         }
         function updateHemorrhagicSection(){ document.getElementById("fastestSection").style.display=(preData.ltsw<2 && preData.premrs<=2)?'block':'none'; }
 
-        /* ======= SUBMIT POST-IMAGING & ELIGIBILITY ======= */
+        /* ======= (rest of existing trial logic, summary, share, etc.) ======= */
         function submitPostImaging(){
           if(!postData.strokeType){ openModal("Missing field","Please select a <strong>Stroke type</strong>."); return; }
           Object.keys(reasons).forEach(k=>{ reasons[k].meet=[]; reasons[k].fail=[]; });
@@ -810,7 +1229,7 @@
               (preData.premrs<=2?reasons.athena.meet:reasons.athena.fail).push(preData.premrs<=2?"pre-mRS ≤2":"pre-mRS >2");
               (preData.ltsw<=24?reasons.athena.meet:reasons.athena.fail).push(preData.ltsw<=24?"LTSW ≤24h":"LTSW >24h");
               (lvo==="yes"?reasons.athena.meet:reasons.athena.fail).push(lvo==="yes"?"LVO present":"LVO absent");
-              (tandem==="no"?reasons.athena.meet:reasons.athena.fail).push(tandem==="no"?"Tandem = No":"Tandem = Yes");
+              (tandem==="no"?reasons.athena.fail:reasons.athena.meet).push(tandem==="no"?"Tandem = No":"Tandem = Yes");
               (tortuosity==="no"?reasons.athena.meet:reasons.athena.fail).push(tortuosity==="no"?"Tortuosity = No":"Tortuosity = Yes");
             }
 
@@ -820,9 +1239,9 @@
             (preData.age>=18?reasons.vanish.meet:reasons.vanish.fail).push(preData.age>=18?"Age ≥18":"Age <18");
             (preData.premrs<=1?reasons.vanish.meet:reasons.vanish.fail).push(preData.premrs<=1?"pre-mRS ≤1":"pre-mRS >1");
             (preData.nihss>=6?reasons.vanish.meet:reasons.vanish.fail).push(preData.nihss>=6?"NIHSS ≥6":"NIHSS <6");
-            (lvo==="yes"?reasons.vanish.meet:reasons.vanish.fail).push(lvo==="yes"?"LVO present":"LVO absent");
+            (lvo==="yes"?reasons.vanish.fail:reasons.vanish.meet).push(lvo==="yes"?"LVO present":"LVO absent");
             (vanishVesselOk?reasons.vanish.meet:reasons.vanish.fail).push(vanishVesselOk?"Vessel ICA-T/M1":"Vessel not ICA-T/M1");
-            (contraTpa==="no"?reasons.vanish.fail:reasons.vanish.meet).push(contraTpa==="no"?"No thrombolysis contraindications":"Thrombolysis contraindications present");
+            (contraTpa==="no"?reasons.vanish.meet:reasons.vanish.fail).push(contraTpa==="no"?"No thrombolysis contraindications":"Thrombolysis contraindications present");
 
             /* PIVOTAL */
             const okPivotal = (preData.ltsw<8 && preData.age>=18 && preData.age<=80 && preData.premrs<=1 && preData.nihss>=6 && lvo==="yes" && pivotalVesselOk);
@@ -831,7 +1250,7 @@
             (preData.age>=18 && preData.age<=80?reasons.pivotal.meet:reasons.pivotal.fail).push((preData.age>=18&&preData.age<=80)?"Age 18–80":"Age not 18–80");
             (preData.premrs<=1?reasons.pivotal.meet:reasons.pivotal.fail).push(preData.premrs<=1?"pre-mRS ≤1":"pre-mRS >1");
             (preData.nihss>=6?reasons.pivotal.meet:reasons.pivotal.fail).push(preData.nihss>=6?"NIHSS ≥6":"NIHSS <6");
-            (lvo==="yes"?reasons.pivotal.fail:reasons.pivotal.meet).push(lvo==="yes"?"LVO present":"LVO absent");
+            (lvo==="yes"?reasons.pivotal.meet:reasons.pivotal.fail).push(lvo==="yes"?"LVO present":"LVO absent");
             (pivotalVesselOk?reasons.pivotal.meet:reasons.pivotal.fail).push(pivotalVesselOk?"Vessel ICA-T/M1/Basilar":"Vessel not allowed");
 
             /* MOSTE */
@@ -1001,7 +1420,6 @@
           }
         }
 
-        /* ======= SUMMARY (ACUTE) ======= */
         function summaryRowHtml(name, ok, key, ni, link, paused=false){
           const nameLabel = paused ? `${name} (paused)` : name;
           const nameHtml = (ok && link) ? `<a class="study-name" href="${link}" target="_blank">${nameLabel}</a>` : `<span class="study-name">${nameLabel}</span>`;
@@ -1039,7 +1457,7 @@
           showPage('summaryPage');
         }
 
-        /* ======= POST-ACUTE FLOW ======= */
+        /* ======= POST-ACUTE (unchanged) ======= */
         function goToPostAcute(){ document.querySelectorAll('#postAcutePage .radio-group').forEach(markRadioSelected); showPage('postAcutePage'); }
         function cancelPostAcute(){ showPage('summaryPage'); }
 
@@ -1165,7 +1583,6 @@
           const ta=document.getElementById('shareMessage'); if(ta) ta.value=lines.join('\n');
         }
 
-        // SAVE to Sheet (acute)
         function saveToSheet(){
           const Npatient=(document.getElementById('patientNumber')?.value||"").trim();
           if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> before saving."); return; }
@@ -1188,27 +1605,11 @@
           openModal("Saved","Saved to Google Sheet ✅");
         }
 
-        // 🔄 LIVE PREVIEW UPDATES (fix)
-        document.addEventListener('input',(e)=>{
-          if(e.target && (e.target.id==='patientNumber' || e.target.id==='notesField')) buildShareMessage();
-        });
-        document.addEventListener('change',(e)=>{
-          const t=e.target;
-          if(!t) return;
-          if(t.name==='tev' || t.name==='tiv' || t.id==='mtici') buildShareMessage();
-        });
+        document.addEventListener('input',(e)=>{ if(e.target && (e.target.id==='patientNumber' || e.target.id==='notesField')) buildShareMessage(); });
+        document.addEventListener('change',(e)=>{ const t=e.target; if(!t) return; if(t.name==='tev' || t.name==='tiv' || t.id==='mtici') buildShareMessage(); });
 
-        function copyMessage(){
-          const ta=document.getElementById('shareMessage');
-          ta.select(); ta.setSelectionRange(0,99999);
-          document.execCommand('copy');
-          openModal("Copied","Message copied to clipboard.");
-        }
-        function shareWhatsApp(){
-          const msg=document.getElementById('shareMessage').value;
-          const url="https://wa.me/?text="+encodeURIComponent(msg);
-          window.open(url,"_blank");
-        }
+        function copyMessage(){ const ta=document.getElementById('shareMessage'); ta.select(); ta.setSelectionRange(0,99999); document.execCommand('copy'); openModal("Copied","Message copied to clipboard."); }
+        function shareWhatsApp(){ const msg=document.getElementById('shareMessage').value; const url="https://wa.me/?text="+encodeURIComponent(msg); window.open(url,"_blank"); }
 
         /* ======= SHARE (POST-ACUTE) ======= */
         function proceedToShareChronic(){
@@ -1260,19 +1661,133 @@
 
         document.addEventListener('input',(e)=>{ if(e.target && e.target.id==='patientNumber2') buildShareMessageChronic(); });
 
-        function copyMessageChronic(){
-          const ta=document.getElementById('shareMessage2');
-          ta.select(); ta.setSelectionRange(0,99999);
-          document.execCommand('copy');
-          openModal("Copied","Message copied to clipboard.");
-        }
-        function shareWhatsAppChronic(){
-          const msg=document.getElementById('shareMessage2').value;
-          const url="https://wa.me/?text="+encodeURIComponent(msg);
-          window.open(url,"_blank");
+        function copyMessageChronic(){ const ta=document.getElementById('shareMessage2'); ta.select(); ta.setSelectionRange(0,99999); document.execCommand('copy'); openModal("Copied","Message copied to clipboard."); }
+        function shareWhatsAppChronic(){ const msg=document.getElementById('shareMessage2').value; const url="https://wa.me/?text="+encodeURIComponent(msg); window.open(url,"_blank"); }
+
+        /* ======= Patient-from-trial helpers ======= */
+        function goToTrialNewPatient(){
+          const lbl = (selectedTrialName==='NO_TRIALS') ? 'No trials' :
+                      (selectedTrialName==='SaferDoac' ? 'SAFER-DOAC' : (selectedTrialName||'-'));
+          document.getElementById('tp_selectedStudyLabel').textContent = lbl;
+          const armRow = document.getElementById('tp_armRow');
+          armRow.style.display = (selectedTrialName==='NO_TRIALS') ? 'none' : 'grid';
+          document.getElementById('trialPatientForm').reset();
+          document.getElementById('tp_otherTrials').innerHTML = "";
+          tp_buildMessage();
+          showPage('trialPatientPage');
         }
 
-        /* ======= RESET ======= */
+        function tp_addOtherTrial(){
+          const wrap=document.getElementById('tp_otherTrials');
+          const row=document.createElement('div');
+          row.className='btn-row';
+          row.style.alignItems='center';
+          row.innerHTML=`
+            <select class="tp_other_name">
+              <option value=""></option>
+              <option>WeTrust</option><option>TICH-3</option><option>ATHENA</option>
+              <option>FASTEST</option><option>Librexia</option><option>VANISH</option>
+              <option>PIVOTAL</option><option>MOSTE</option><option>TWIN-2-WIN 2</option>
+              <option>ARTEMIS</option><option>HYBERNIA</option><option>DONE SYMPLE</option>
+              <option>SAFER-DOAC</option><option>SHIONOGI</option><option>SOVATELTIDE</option><option>ORION</option>
+            </select>
+            <select class="tp_other_arm">
+              <option value="intervention">intervention</option>
+              <option value="control">control</option>
+            </select>
+            <button class="btn btn-small" type="button" onclick="this.parentElement.remove(); tp_buildMessage();">Remove</button>
+          `;
+          wrap.appendChild(row);
+          row.querySelectorAll('select').forEach(sel=>sel.addEventListener('change', tp_buildMessage));
+        }
+
+        function tp_collectOtherTrials(){
+          const rows=[...document.querySelectorAll('#tp_otherTrials .btn-row')];
+          return rows.map(r=>{
+            const name=r.querySelector('.tp_other_name')?.value||"";
+            const arm=r.querySelector('.tp_other_arm')?.value||"intervention";
+            return name?{name,arm}:null;
+          }).filter(Boolean);
+        }
+
+        function tp_buildMessage(){
+          const id=(document.getElementById('tp_patientId')?.value||"").trim()||"Patient record";
+          const age=(document.getElementById('tp_age')?.value||"").trim();
+          const nihss=(document.getElementById('tp_nihss')?.value||"").trim();
+          const mrs=(document.getElementById('tp_mrs')?.value||"").trim();
+          const arm=(document.getElementById('tp_arm')?.value||"intervention");
+          const tev=(document.querySelector('input[name="tp_tev"]:checked')||{}).value||"";
+          const mtici=(document.getElementById('tp_mtici')||{}).value||"";
+          const tiv=(document.querySelector('input[name="tp_tiv"]:checked')||{}).value||"";
+          const notes=(document.getElementById('tp_notes')?.value||"").trim();
+
+          const lines=[];
+          const base = `${id}, age ${age||"?"}, NIHSS ${nihss||"?"}, mRS ${mrs||"?"}`;
+          if(selectedTrialName && selectedTrialName!=='NO_TRIALS'){
+            const label = (selectedTrialName==='SaferDoac')?'SAFER-DOAC':selectedTrialName;
+            lines.push(`${base}, ${label} (${arm})`);
+          }else{
+            lines.push(base);
+          }
+
+          const others = tp_collectOtherTrials();
+          others.forEach(o=>{ lines.push(`${o.name} (${o.arm})`); });
+
+          const extras=[];
+          if(tev) extras.push(`TEV: ${tev}`);
+          if(mtici) extras.push(`mTICI: ${mtici}`);
+          if(tiv) extras.push(`TIV: ${tiv}`);
+          if(extras.length) lines.push(extras.join(" | "));
+          if(notes) lines.push(`Notes: ${notes}`);
+
+          document.getElementById('tp_message').value = lines.join('\n');
+        }
+
+        function tp_copy(){ const ta=document.getElementById('tp_message'); ta.select(); ta.setSelectionRange(0,99999); document.execCommand('copy'); openModal("Copied","Message copied to clipboard."); }
+        function tp_shareWA(){ const msg=document.getElementById('tp_message').value; const url="https://wa.me/?text="+encodeURIComponent(msg); window.open(url,"_blank"); }
+
+        function tp_save(){
+          const Npatient=(document.getElementById('tp_patientId')?.value||"").trim();
+          if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> before saving."); return; }
+
+          const pre={
+            age: parseInt(document.getElementById('tp_age')?.value||""),
+            nihss: parseInt(document.getElementById('tp_nihss')?.value||""),
+            premrs: parseInt(document.getElementById('tp_mrs')?.value||""),
+            ltsw: ""
+          };
+
+          const trialsSelected=[];
+          const outcomes={};
+
+          if(selectedTrialName && selectedTrialName!=='NO_TRIALS'){
+            const label = (selectedTrialName==='SaferDoac')?'SAFER-DOAC':selectedTrialName;
+            trialsSelected.push(label);
+            if(label==="SAFER-DOAC"){ outcomes[label]="si"; } else { outcomes[label]= (document.getElementById('tp_arm')?.value||"intervention"); }
+          }
+          tp_collectOtherTrials().forEach(o=>{
+            trialsSelected.push(o.name);
+            outcomes[o.name]=o.arm;
+          });
+
+          const trialsForSheet=buildTrialsForSheet(trialsSelected, outcomes);
+
+          const tev=(document.querySelector('input[name="tp_tev"]:checked')||{}).value||"";
+          const mtici=(document.getElementById('tp_mtici')||{}).value||"";
+          const tiv=(document.querySelector('input[name="tp_tiv"]:checked')||{}).value||"";
+          const notes=(document.getElementById('tp_notes')?.value||"").trim();
+
+          const payload={
+            N_patient:Npatient,
+            pre:pre,
+            trials:trialsForSheet,
+            TEV: tev, mTICI: mtici, TIV: tiv, Notes: notes
+          };
+          sendToSheet(payload);
+          openModal("Saved","Saved to Google Sheet ✅");
+        }
+
+        /* ======= RESET / MODAL ======= */
         function restart(){
           preData={}; postData={}; evtData={}; hemData={};
           eligibility={ weTrust:false, athena:false, fastest:false, tich3:false, librexia:false, vanish:false, pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false, doneSymple:false, saferdoac:false, shionogi:false, sovateltide:false, orion:false };
@@ -1280,14 +1795,20 @@
           for(const k of Object.keys(infoMessages)) infoMessages[k]="";
           for(const k of Object.keys(notIndicated)) notIndicated[k]=false;
           Object.keys(reasons).forEach(k=>{ reasons[k].meet=[]; reasons[k].fail=[]; });
+          selectedTrialName=null;
 
           const formPre=document.getElementById('formPreImaging'); if(formPre) formPre.reset();
           const shareForm=document.getElementById('shareForm'); if(shareForm) shareForm.reset();
           const shareForm2=document.getElementById('shareChronicForm'); if(shareForm2) shareForm2.reset();
+          const tpForm=document.getElementById('trialPatientForm'); if(tpForm) tpForm.reset();
+
           const ta=document.getElementById('shareMessage'); if(ta) ta.value="";
-          const ta2=document.getElementById('shareMessage2'); if(ta2) ta.value="";
+          const ta2=document.getElementById('shareMessage2'); if(ta2) ta2.value="";
+          const tpTa=document.getElementById('tp_message'); if(tpTa) tpTa.value="";
+
           const out=document.getElementById('studyOutcomesContainer'); if(out) out.innerHTML="";
           const out2=document.getElementById('studyChronicOutcomesContainer'); if(out2) out2.innerHTML="";
+          const out3=document.getElementById('tp_otherTrials'); if(out3) out3.innerHTML="";
 
           document.querySelectorAll('.radio').forEach(lbl=>lbl.classList.remove('selected'));
           document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
@@ -1296,7 +1817,6 @@
           showPage('mainMenu');
         }
 
-        /* ======= MODAL ======= */
         function openModal(title, html){
           const mb=document.getElementById('modalBackdrop');
           document.getElementById('modalTitle').textContent=title||'Details';
@@ -1330,9 +1850,7 @@
         }
 
         document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
-        document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
-          if(e.target.id==='modalBackdrop') closeModal();
-        });
+        document.getElementById('modalBackdrop').addEventListener('click', (e)=>{ if(e.target.id==='modalBackdrop') closeModal(); });
       </script>
 
     </div>
