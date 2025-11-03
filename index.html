@@ -1592,27 +1592,38 @@
           buildShareMessage(); showPage('sharePage');
         }
 
-        function buildShareMessage(){
-          const pn=(document.getElementById('patientNumber')?.value||"").trim()||"Patient record";
-          const tev=(document.querySelector('input[name="tev"]:checked')||{}).value||"";
-          const mtici=(document.getElementById('mtici')||{}).value||"";
-          const tiv=(document.querySelector('input[name="tiv"]:checked')||{}).value||"";
-          const notes=(document.getElementById('notesField')||{}).value||"";
+function buildShareMessage(){
+  const pn=(document.getElementById('patientNumber')?.value||"").trim()||"Patient record";
+  const tev=(document.querySelector('input[name="tev"]:checked')||{}).value||"";
+  const mtici=(document.getElementById('mtici')||{}).value||"";
+  const tiv=(document.querySelector('input[name="tiv"]:checked')||{}).value||"";
+  const notes=(document.getElementById('notesField')||{}).value||"";
 
-          const lines=selectedStudies.map(study=>{
-            const outcome=(studyOutcomes[study]||"intervention");
-            return `${pn}, age ${isFinite(preData.age)?preData.age:"?"}, NIHSS ${isFinite(preData.nihss)?preData.nihss:"?"}, mRS ${isFinite(preData.premrs)?preData.premrs:"?"}, ${study} (${outcome})`;
-          });
+  const base = `${pn}, age ${isFinite(preData.age)?preData.age:"?"}, NIHSS ${isFinite(preData.nihss)?preData.nihss:"?"}, mRS ${isFinite(preData.premrs)?preData.premrs:"?"}`;
 
-          const extras = [];
-          if(tev) extras.push(`TEV: ${tev}`);
-          if(mtici) extras.push(`mTICI: ${mtici}`);
-          if(tiv) extras.push(`TIV: ${tiv}`);
-          if(extras.length) lines.push(extras.join(" | "));
-          if(notes) lines.push(`Notes: ${notes}`);
+  let lines=[];
+  if (selectedStudies && selectedStudies.length){
+    lines = selectedStudies.map(study=>{
+      const outcome=(studyOutcomes[study]||"intervention");
+      return `${base}, ${study} (${outcome})`;
+    });
+  } else {
+    // Nessuno studio selezionato: mostra almeno i dati del paziente
+    lines = [base];
+  }
 
-          const ta=document.getElementById('shareMessage'); if(ta) ta.value=lines.join('\n');
-        }
+  const extras = [];
+  if(tev) extras.push(`TEV: ${tev}`);
+  if(mtici) extras.push(`mTICI: ${mtici}`);
+  if(tiv) extras.push(`TIV: ${tiv}`);
+  if(extras.length) lines.push(extras.join(" | "));
+  if(notes) lines.push(`Notes: ${notes}`);
+
+  const ta=document.getElementById('shareMessage');
+  if(ta) ta.value=lines.join('\n');
+}
+
+
 
         function saveToSheet(){
           const Npatient=(document.getElementById('patientNumber')?.value||"").trim();
@@ -1773,6 +1784,18 @@
 
           document.getElementById('tp_message').value = lines.join('\n');
         }
+        // Live preview per la pagina "trialPatientPage"
+document.addEventListener('input',(e)=>{
+  if(['tp_patientId','tp_age','tp_nihss','tp_notes'].includes(e.target.id)){
+    tp_buildMessage();
+  }
+});
+document.addEventListener('change',(e)=>{
+  const id = e.target.id;
+  if(['tp_mrs','tp_arm','tp_mtici'].includes(id) || e.target.name==='tp_tev' || e.target.name==='tp_tiv'){
+    tp_buildMessage();
+  }
+});
 
         function tp_copy(){ const ta=document.getElementById('tp_message'); ta.select(); ta.setSelectionRange(0,99999); document.execCommand('copy'); openModal("Copied","Message copied to clipboard."); }
         function tp_shareWA(){ const msg=document.getElementById('tp_message').value; const url="https://wa.me/?text="+encodeURIComponent(msg); window.open(url,"_blank"); }
@@ -1899,3 +1922,5 @@
 </div>
 </body>
 </html>
+
+   
