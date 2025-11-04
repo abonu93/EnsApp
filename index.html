@@ -11,6 +11,7 @@
     --ok:#0b7a0b; --no:#b30000; --ni-bg:#f4f4f5; --ni-bd:#d4d4d8;
     --info:#1f2937; --primary:#0ea5e9;
     --ischemic:#0ea5e9; --hemorrhagic:#ed7390; --elig:#0b7a0b; --notelig:#b30000;
+    --tile-orange:#f59e0b
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -28,7 +29,24 @@
   .visible{display:block}
 
   /* Tiles */
-  .tiles{margin-top:.75rem;display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem}
+  .tiles{
+  margin-top:.75rem;
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr)); /* 2 colonne fisse */
+  gap:.9rem;}
+@media (max-width:360px){
+  .tiles{
+    grid-auto-flow: column;   /* disposizione in riga */
+    grid-auto-columns: 80vw;  /* ogni tile largo ~80% viewport */
+    overflow-x: auto;         /* scroll orizzontale */
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tile{
+    scroll-snap-align: start;
+    min-height: 44vw;         /* mantiene forma “quadra” circa */
+  }
+}
   .tile{aspect-ratio:1/1;border-radius:22px;padding:1rem;color:#fff;text-align:left;display:flex;flex-direction:column;justify-content:space-between;transition:.08s;box-shadow:0 2px 0 rgba(17,24,39,.05);border:1px solid rgba(255,255,255,.2);cursor:pointer}
   .tile:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(2,6,23,.18)}
   .t-label{font-size:.78rem;opacity:.9}.t-title{margin:.15rem 0 0 0;font-size:1rem;font-weight:700;line-height:1.1}.t-cta{align-self:flex-end;font-size:.75rem;opacity:.85}
@@ -179,6 +197,11 @@
           <button class="tile" style="background:var(--tile-pink)" onclick="goToTrialsCriteria()">
             <div><div class="t-label">Eligibility</div><div class="t-title">Trials</div></div><div class="t-cta">Open</div>
           </button>
+          <!-- >>> ADDED: Quick patient (NO_TRIALS) <<< -->
+          <button class="tile" style="background:var(--tile-orange)" onclick="selectedTrialName='NO_TRIALS'; goToTrialNewPatient()">
+            <div><div class="t-label">Fast track</div><div class="t-title">Quick patient</div></div><div class="t-cta">Open</div>
+          </button>
+          <!-- >>> END ADD <<< -->
         </div>
 
         <!-- Quick access -->
@@ -1629,8 +1652,7 @@ function buildShareMessage(){
           const Npatient=(document.getElementById('patientNumber')?.value||"").trim();
           if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> before saving."); return; }
           if(typeof preData.age==="undefined"||typeof preData.nihss==="undefined"||typeof preData.ltsw==="undefined"||typeof preData.premrs==="undefined"){
-            openModal("Incomplete Pre-Imaging","Complete Pre-Imaging first (Age, NIHSS, LTSW, pre-mRS)."); return;
-          }
+            openModal("Incomplete Pre-Imaging","Complete Pre-Imaging first (Age, NIHSS, LTSW, pre-mRS)."); return; }
           const tev=(document.querySelector('input[name="tev"]:checked')||{}).value||"";
           const mtici=(document.getElementById('mtici')||{}).value||"";
           const tiv=(document.querySelector('input[name="tiv"]:checked')||{}).value||"";
@@ -1685,8 +1707,7 @@ function buildShareMessage(){
           const Npatient=(document.getElementById('patientNumber2')?.value||"").trim();
           if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> before saving."); return; }
           if(typeof preData.age==="undefined"||typeof preData.nihss==="undefined"||typeof preData.ltsw==="undefined"||typeof preData.premrs==="undefined"){
-            openModal("Incomplete Pre-Imaging","Complete Pre-Imaging first (Age, NIHSS, LTSW, pre-mRS)."); return;
-          }
+            openModal("Incomplete Pre-Imaging","Complete Pre-Imaging first (Age, NIHSS, LTSW, pre-mRS)."); return; }
           const t = Object.fromEntries(SHEET_TRIAL_KEYS.map(k=>[k,"no"]));
           if(selectedChronic.includes("Librexia")){
             t.LIBREXIA = studyChronicOutcomes["Librexia"] || "intervention";
@@ -1858,7 +1879,7 @@ document.addEventListener('change',(e)=>{
 
           const ta=document.getElementById('shareMessage'); if(ta) ta.value="";
           const ta2=document.getElementById('shareMessage2'); if(ta2) ta2.value="";
-          const tpTa=document.getElementById('tp_message'); if(tpTa) tpTa.value="";
+          const tpTa=document.getElementById('tp_message'); if(tpTa) ta.value="";
 
           const out=document.getElementById('studyOutcomesContainer'); if(out) out.innerHTML="";
           const out2=document.getElementById('studyChronicOutcomesContainer'); if(out2) out2.innerHTML="";
@@ -1922,5 +1943,3 @@ document.addEventListener('change',(e)=>{
 </div>
 </body>
 </html>
-
-   
