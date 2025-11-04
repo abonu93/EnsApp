@@ -768,7 +768,7 @@
             ]
           },
           "ATHENA": {
-            status: "active", category: "EVT device",
+            status: "paused", category: "EVT device",
             key: { window: "< 24 h", age: "22–85 y", mrs: "0–2", nihss: "≥ 8", aspects: "6–10" },
             consent: "Written & oral/phone consent.",
             imaging: "TICA, M1 or M2 occlusion.",
@@ -1486,7 +1486,7 @@
         function showSummary(){
           const items = [
             ["WeTrust",eligibility.weTrust,"weTrust",false, randomizationLinks["WeTrust"], false],
-            ["ATHENA",eligibility.athena,"athena",notIndicated.athena, randomizationLinks["ATHENA"], false],
+            ["ATHENA",eligibility.athena,"athena",notIndicated.athena, randomizationLinks["ATHENA"], true],
             ["VANISH",eligibility.vanish,"vanish",notIndicated.vanish, randomizationLinks["VANISH"], false],
             ["PIVOTAL",eligibility.pivotal,"pivotal",notIndicated.pivotal, randomizationLinks["PIVOTAL"], true],
             ["MOSTE",eligibility.moste,"moste",notIndicated.moste, randomizationLinks["MOSTE"], false],
@@ -1943,3 +1943,4 @@ document.addEventListener('change',(e)=>{
 </div>
 </body>
 </html>
+
