@@ -242,7 +242,7 @@
           <div class="trial-item"><span class="trial-title">SHIONOGI</span><button class="btn" onclick="showTrialCriteria('Shionogi')">Open</button></div>
           <div class="trial-item"><span class="trial-title">SOVATELTIDE</span><button class="btn" onclick="showTrialCriteria('Sovateltide')">Open</button></div>
           <div class="trial-item"><span class="trial-title">ORION</span><button class="btn" onclick="showTrialCriteria('Orion')">Open</button></div>
-
+          <div class="trial-item"><span class="trial-title">PROMISE</span><button class="btn" onclick="showTrialCriteria('PROMISE')">Open</button></div>
           <!-- No trials -->
           <div class="trial-item" style="border-style:dashed">
             <span class="trial-title">No trials</span>
@@ -349,17 +349,35 @@
                 <select id="tortuosity"><option value="">-- Select (optional) --</option><option value="no">No</option><option value="yes">Yes</option></select>
                 <div class="muted">For some trials, tortuosity is required; if missing those trials will be “Not indicated”.</div>
               </div>
-              <div class="stack"><label>Target vessel</label>
-                <select id="targetVessel" required>
-                  <option value="ica-intracranial">Intracranial ICA</option>
-                  <option value="ica-terminal">Terminal ICA (ICA-T)</option>
-                  <option value="m1">M1</option>
-                  <option value="m2-proxdom">M2 proximal/dominant</option>
-                  <option value="m2-any">Any M2</option>
-                  <option value="basilar">Basilar artery</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
+             <div class="stack">
+  <label>Target vessel</label>
+  <details id="targetVesselDetails">
+    <summary style="cursor:pointer; padding:.35rem .6rem; border:1px solid var(--border); border-radius:10px; list-style:none;">
+      <span id="targetVesselSummaryText" class="muted">Select target vessels</span>
+    </summary>
+    <div style="margin-top:.5rem;">
+      <div id="targetVesselGroup" class="radio-group" style="grid-template-columns:1fr 1fr;">
+        <label class="radio full"><input type="checkbox" value="ica-extracranial"> Extracranial ICA</label>
+        <label class="radio full"><input type="checkbox" value="ica-intracranial"> Intracranial ICA (no T)</label>
+        <label class="radio full"><input type="checkbox" value="ica-terminal"> Terminal ICA (ICA-T)</label>
+        <label class="radio full"><input type="checkbox" value="m1"> M1</label>
+        <label class="radio full"><input type="checkbox" value="m2-proxdom"> M2 proximal/dominant</label>
+        <label class="radio full"><input type="checkbox" value="m2-any"> Any M2</label>
+        <label class="radio full"><input type="checkbox" value="gt-m2">&gt;M2</label>
+        <label class="radio full"><input type="checkbox" value="a1"> A1</label>
+        <label class="radio full"><input type="checkbox" value="a2"> A2</label>
+        <label class="radio full"><input type="checkbox" value="gt-a2">&gt;A2</label>
+        <label class="radio full"><input type="checkbox" value="basilar"> Basilar</label>
+        <label class="radio full"><input type="checkbox" value="p1"> P1</label>
+        <label class="radio full"><input type="checkbox" value="p2"> P2</label>
+        <label class="radio full"><input type="checkbox" value="gt-p2">&gt;P2</label>
+        <label class="radio full"><input type="checkbox" value="va"> VA</label>
+      </div>
+    </div>
+  </details>
+</div>
+
+
               <div class="stack"><label>Contraindications to thrombolysis?</label>
                 <select id="contraTpa" required><option value="no">No</option><option value="yes">Yes</option></select>
               </div>
@@ -580,15 +598,16 @@
                   <label class="radio"><input type="radio" name="tev" value="No"> No</label>
                 </div>
               </div>
-              <div class="stack">
-                <label>mTICI</label>
-                <select id="mtici">
-                  <option value=""></option>
-                  <option value="0">0</option><option value="1">1</option>
-                  <option value="2a">2a</option><option value="2b">2b</option>
-                  <option value="2b67">2b67</option><option value="3">3</option>
-                </select>
-              </div>
+              <div class="stack" id="mticiRow" style="display:none;">
+  <label>mTICI</label>
+  <select id="mtici">
+    <option value=""></option>
+    <option value="0">0</option><option value="1">1</option>
+    <option value="2a">2a</option><option value="2b50">2b50</option>
+    <option value="2b67">2b67</option><option value="2c">2c</option>
+    <option value="3">3</option>
+  </select>
+</div>
               <div class="stack">
                 <label>Thrombolysis (TIV)?</label>
                 <div class="radio-group">
@@ -652,6 +671,17 @@
                 </select>
               </div>
             </div>
+<div class="card stack">
+  <h3 style="margin:0">Stroke type</h3>
+  <div class="radio-group" id="tp_strokeTypeGroup">
+    <label class="radio">
+      <input type="radio" name="tp_strokeType" value="ischemic"> Ischemic
+    </label>
+    <label class="radio">
+      <input type="radio" name="tp_strokeType" value="hemorrhagic"> Hemorrhagic
+    </label>
+  </div>
+</div>
 
             <div class="card stack">
               <h3 style="margin:0">Selected study</h3>
@@ -672,8 +702,35 @@
                 <button class="btn btn-small" type="button" onclick="tp_addOtherTrial()">+ Add trial</button>
               </div>
             </div>
+<div class="card stack" id="tp_vesselCard" style="display:none;">
+  <h3 style="margin:0">Target vessel (if ischemic)</h3>
+  <details>
+    <summary style="cursor:pointer; padding:.35rem .6rem; border:1px solid var(--border); border-radius:10px; list-style:none;">
+      <span id="tp_targetVesselSummaryText" class="muted">Select target vessels</span>
+    </summary>
+    <div style="margin-top:.5rem;">
+      <div id="tp_targetVesselGroup" class="radio-group" style="grid-template-columns:1fr 1fr;">
+        <label class="radio full"><input type="checkbox" value="ica-extracranial"> Extracranial ICA</label>
+        <label class="radio full"><input type="checkbox" value="ica-intracranial"> Intracranial ICA (no T)</label>
+        <label class="radio full"><input type="checkbox" value="ica-terminal"> Terminal ICA (ICA-T)</label>
+        <label class="radio full"><input type="checkbox" value="m1"> M1</label>
+        <label class="radio full"><input type="checkbox" value="m2-proxdom"> M2 proximal/dominant</label>
+        <label class="radio full"><input type="checkbox" value="m2-any"> Any M2</label>
+        <label class="radio full"><input type="checkbox" value="gt-m2">&gt;M2</label>
+        <label class="radio full"><input type="checkbox" value="a1"> A1</label>
+        <label class="radio full"><input type="checkbox" value="a2"> A2</label>
+        <label class="radio full"><input type="checkbox" value="gt-a2">&gt;A2</label>
+        <label class="radio full"><input type="checkbox" value="basilar"> Basilar</label>
+        <label class="radio full"><input type="checkbox" value="p1"> P1</label>
+        <label class="radio full"><input type="checkbox" value="p2"> P2</label>
+        <label class="radio full"><input type="checkbox" value="gt-p2">&gt;P2</label>
+        <label class="radio full"><input type="checkbox" value="va"> VA</label>
+      </div>
+    </div>
+  </details>
+</div>
 
-            <div class="card stack">
+            <div class="card stack" id="tp_acuteCard">
               <h3 style="margin:0">Acute treatments</h3>
               <div class="stack">
                 <label>Thrombectomy performed (TEV)?</label>
@@ -682,15 +739,17 @@
                   <label class="radio"><input type="radio" name="tp_tev" value="No"> No</label>
                 </div>
               </div>
-              <div class="stack">
-                <label>mTICI</label>
-                <select id="tp_mtici">
-                  <option value=""></option>
-                  <option value="0">0</option><option value="1">1</option>
-                  <option value="2a">2a</option><option value="2b">2b</option>
-                  <option value="2b67">2b67</option><option value="3">3</option>
-                </select>
-              </div>
+              <div class="stack" id="tp_mticiRow" style="display:none;">
+  <label>mTICI</label>
+  <select id="tp_mtici">
+    <option value=""></option>
+    <option value="0">0</option><option value="1">1</option>
+    <option value="2a">2a</option><option value="2b50">2b50</option>
+    <option value="2b67">2b67</option><option value="2c">2c</option>
+    <option value="3">3</option>
+  </select>
+</div>
+
               <div class="stack">
                 <label>Thrombolysis (TIV)?</label>
                 <div class="radio-group">
@@ -806,6 +865,26 @@
               "Day 90 (phone)"
             ]
           },
+          "PROMISE": {
+  status: "active",
+  category: "EVT device",
+  key: {
+    window: "< 24 h",
+    age: "≥ 18 y",
+    mrs: "0–2",
+    nihss: "≥ 1",
+    aspects: "—"
+  },
+  consent: "Written.",
+  imaging: "Intracranial ICA (distal/T-ICA) or MCA M1/M2 occlusion suitable for EVT.",
+  thrombolytic: "Optional.",
+  thrombectomy: "Yes.",
+  preEvtLabs: "No.",
+  intervention: "PROMISE thrombectomy device (per protocol).",
+  notes: [],
+  visits: null
+},
+
           "Twin2Win2": {
             status: "active", category: "EVT technique",
             key: { window: "< 24 h", age: "> 18 y", mrs: "0–2", nihss: "≥ 6", aspects: "—" },
@@ -996,20 +1075,23 @@
 
         /* ======= EXISTING CONFIG (unchanged below this line unless needed) ======= */
         const infoMessages = {
-          weTrust: "", athena: "", hemorrhagic: "",
-          vanish: "", pivotal: "", moste: "",
-          twin2win2: "", artemis: "", hybernia: "", doneSymple: "",
-          fastest: "", tich3: "", librexia: "", saferdoac:"",
-          shionogi:"", sovateltide:"", orion:""
-        };
+  weTrust: "", athena: "", hemorrhagic: "",
+  vanish: "", pivotal: "", moste: "",
+  twin2win2: "", artemis: "", hybernia: "", doneSymple: "", promise:"",
+  fastest: "", tich3: "", librexia: "", saferdoac:"",
+  shionogi:"", sovateltide:"", orion:""
+};
+
 
         const reasons = {
-          weTrust:{meet:[],fail:[]}, athena:{meet:[],fail:[]}, vanish:{meet:[],fail:[]},
-          pivotal:{meet:[],fail:[]}, moste:{meet:[],fail:[]}, twin2win2:{meet:[],fail:[]},
-          artemis:{meet:[],fail:[]}, hybernia:{meet:[],fail:[]}, doneSymple:{meet:[],fail:[]},
-          fastest:{meet:[],fail:[]}, tich3:{meet:[],fail:[]}, librexia:{meet:[],fail:[]},
-          saferdoac:{meet:[],fail:[]}, shionogi:{meet:[],fail:[]}, sovateltide:{meet:[],fail:[]}, orion:{meet:[],fail:[]}
-        };
+  weTrust:{meet:[],fail:[]}, athena:{meet:[],fail:[]}, vanish:{meet:[],fail:[]},
+  pivotal:{meet:[],fail:[]}, moste:{meet:[],fail:[]}, twin2win2:{meet:[],fail:[]},
+  artemis:{meet:[],fail:[]}, hybernia:{meet:[],fail:[]}, doneSymple:{meet:[],fail:[]},
+  fastest:{meet:[],fail:[]}, tich3:{meet:[],fail:[]}, librexia:{meet:[],fail:[]},
+  saferdoac:{meet:[],fail:[]}, shionogi:{meet:[],fail:[]}, sovateltide:{meet:[],fail:[]},
+  orion:{meet:[],fail:[]}, promise:{meet:[],fail:[]}
+};
+
 
         const randomizationLinks = {
           "ATHENA":"https://www.randomize.net/Randomize/Set.aspx?id=ba510dbb-ab7d-42ee-ae95-d8a46394d6ec&token=0d0bff39-455b-4f60-a95a-154476064f2e",
@@ -1020,7 +1102,7 @@
         };
 
         /* ======= GOOGLE SHEETS SEND ======= */
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwBu7TNgohiiFKXASSlCneWfVQh6NZGCEQ65Mf01LjeWFszUWv0AitvQqjhB9Vnp32g/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbysTO3xAY0hVQRVkTsSJVFHKBhsvGnmlAEjhDiM7p_EAaOxiPv80PBC2jH-lDHpU8za/exec";
         function sendToSheet(payload){
           try{
             const body = new URLSearchParams({ payload: JSON.stringify(payload) });
@@ -1028,14 +1110,25 @@
           }catch(e){ console.warn("sendToSheet error:", e); }
         }
 
-        const SHEET_TRIAL_KEYS = [
-          "WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST","TICH3","LIBREXIA","TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE","SAFERDOAC","SHIONOGI","SOVATELTIDE","ORION"
-        ];
+      const SHEET_TRIAL_KEYS = [
+  "WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST",
+  "TICH3","LIBREXIA","TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE",
+  "SAFERDOAC","SHIONOGI","SOVATELTIDE","ORION","PROMISE"
+];
+
+
         function buildTrialsForSheet(selectedStudies, studyOutcomes){
           const t = Object.fromEntries(SHEET_TRIAL_KEYS.map(k=>[k,"no"]));
           const nameToKey = {
-            "WeTrust":"WeTrust","MARSS":"MARSS","ATHENA":"ATHENA","VANISH":"VANISH","PIVOTAL":"PIVOTAL","MOSTE":"MOSTE","FASTEST":"FASTEST","TICH-3":"TICH3","Librexia":"LIBREXIA","TWIN-2-WIN 2":"TWIN2WIN","ARTEMIS":"ARTEMIS","HYBERNIA":"HYBERNIA","DONE SYMPLE":"DONESYMPLE","SAFER-DOAC":"SAFERDOAC","SHIONOGI":"SHIONOGI","SOVATELTIDE":"SOVATELTIDE","ORION":"ORION"
-          };
+  "WeTrust":"WeTrust","MARSS":"MARSS","ATHENA":"ATHENA","VANISH":"VANISH",
+  "PIVOTAL":"PIVOTAL","MOSTE":"MOSTE","FASTEST":"FASTEST","TICH-3":"TICH3",
+  "Librexia":"LIBREXIA","TWIN-2-WIN 2":"TWIN2WIN","ARTEMIS":"ARTEMIS",
+  "HYBERNIA":"HYBERNIA","DONE SYMPLE":"DONESYMPLE","SAFER-DOAC":"SAFERDOAC",
+  "SHIONOGI":"SHIONOGI","SOVATELTIDE":"SOVATELTIDE","ORION":"ORION",
+  "PROMISE":"PROMISE"
+};
+
+
           (selectedStudies||[]).forEach(n=>{
             const k=nameToKey[n]; if(!k) return;
             if(k==="SAFERDOAC"){ t[k]="si"; } else { t[k]= (studyOutcomes?.[n]||"intervention"); }
@@ -1044,17 +1137,24 @@
           return t;
         }
 
-        const notIndicated = { athena:false, vanish:false, pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false, doneSymple:false };
+const notIndicated = {
+  athena:false, vanish:false, pivotal:false, moste:false,
+  twin2win2:false, artemis:false, hybernia:false, doneSymple:false, promise:false
+};
 
         /* ======= STATE ======= */
         let preData={}, postData={}, evtData={}, hemData={};
-        let eligibility={
-          weTrust:false, athena:false, fastest:false, tich3:false, librexia:false, vanish:false, pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false, doneSymple:false, saferdoac:false, shionogi:false, sovateltide:false, orion:false
-        };
+       let eligibility={
+  weTrust:false, athena:false, fastest:false, tich3:false, librexia:false, vanish:false,
+  pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false,
+  doneSymple:false, saferdoac:false, shionogi:false, sovateltide:false, orion:false,
+  promise:false
+};
+
         let selectedStudies=[]; let studyOutcomes={};
         let selectedChronic=[]; let studyChronicOutcomes={};
         let selectedTrialName = null;
-
+let tpStrokeType = null;
         /* ======= NAV / VIEW ======= */
         function showPage(id){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('visible')); document.getElementById(id).classList.add('visible'); }
         function goToTrialsCriteria(){ showPage('trialsList'); } function goToNewPatient(){ showPage('preImaging'); } function goBackToMain(){ showPage('mainMenu'); }
@@ -1249,19 +1349,22 @@
             if(!postData.candidate){ openModal("Missing field","Please select if the patient is a <strong>thrombectomy candidate</strong>."); return; }
 
             const tandem = (document.getElementById('tandem')||{}).value || "no";
-            const tortuosity = (document.getElementById('tortuosity')||{}).value || "";
-            const targetVessel = (document.getElementById('targetVessel')||{}).value || "other";
-            const contraTpa = (document.getElementById('contraTpa')||{}).value || "no";
-            const aspects = parseInt((document.getElementById('aspects')||{}).value);
+const tortuosity = (document.getElementById('tortuosity')||{}).value || "";
+const targetVessels = Array.from(document.querySelectorAll('#targetVesselGroup input[type="checkbox"]:checked')).map(i => i.value);
+const contraTpa = (document.getElementById('contraTpa')||{}).value || "no";
+const aspects = parseInt((document.getElementById('aspects')||{}).value);
 
-            for(const k of Object.keys(notIndicated)) notIndicated[k]=false;
+for(const k of Object.keys(notIndicated)) notIndicated[k]=false;
 
-            const vanishVesselOk = (targetVessel==="ica-terminal"||targetVessel==="m1");
-            const pivotalVesselOk = (targetVessel==="ica-terminal"||targetVessel==="m1"||targetVessel==="basilar");
-            const mosteVesselOk = (targetVessel==="ica-terminal"||targetVessel==="m1"||targetVessel==="m2-any"||targetVessel==="m2-proxdom");
-            const twinVesselOk   = (targetVessel==="ica-terminal"||targetVessel==="m1"||targetVessel==="basilar");
-            const artemisVesselOk= (targetVessel==="ica-intracranial"||targetVessel==="ica-terminal"||targetVessel==="m1"||targetVessel==="m2-proxdom");
-            const hyberniaVesselOk=(targetVessel==="ica-intracranial"||targetVessel==="ica-terminal"||targetVessel==="m1"||targetVessel==="m2-any"||targetVessel==="m2-proxdom");
+const hasVessel = (code) => targetVessels.includes(code);
+
+const vanishVesselOk   = hasVessel("ica-terminal") || hasVessel("m1");
+const pivotalVesselOk  = hasVessel("ica-terminal") || hasVessel("m1") || hasVessel("basilar");
+const mosteVesselOk    = hasVessel("ica-terminal") || hasVessel("m1") || hasVessel("m2-any") || hasVessel("m2-proxdom");
+const twinVesselOk     = hasVessel("ica-terminal") || hasVessel("m1") || hasVessel("basilar");
+const artemisVesselOk  = hasVessel("ica-intracranial") || hasVessel("ica-terminal") || hasVessel("m1") || hasVessel("m2-proxdom");
+const hyberniaVesselOk = hasVessel("ica-intracranial") || hasVessel("ica-terminal") || hasVessel("m1") || hasVessel("m2-any") || hasVessel("m2-proxdom");
+const promiseVesselOk  = hasVessel("ica-terminal") || hasVessel("m1") || hasVessel("m2-any") || hasVessel("m2-proxdom");
 
             const lvo = (postData.candidate === "eligible") ? "yes" : "no";
 
@@ -1306,6 +1409,35 @@
             (preData.nihss>=6?reasons.pivotal.meet:reasons.pivotal.fail).push(preData.nihss>=6?"NIHSS ≥6":"NIHSS <6");
             (lvo==="yes"?reasons.pivotal.meet:reasons.pivotal.fail).push(lvo==="yes"?"LVO present":"LVO absent");
             (pivotalVesselOk?reasons.pivotal.meet:reasons.pivotal.fail).push(pivotalVesselOk?"Vessel ICA-T/M1/Basilar":"Vessel not allowed");
+
+            /* PROMISE */
+const okPromise = (
+  preData.ltsw <= 24 &&        // trattabile entro 24 h
+  preData.age >= 18 &&         // età ≥18
+  preData.premrs <= 2 &&       // mRS ≤2
+  preData.nihss >= 1 &&        // NIHSS ≥1
+  lvo === "yes" &&             // candidato EVT
+  promiseVesselOk              // occlusione ICA-T / M1 / M2
+);
+eligibility.promise = okPromise;
+
+(preData.ltsw <= 24 ? reasons.promise.meet : reasons.promise.fail)
+  .push(preData.ltsw <= 24 ? "LTSW ≤24h" : "LTSW >24h");
+
+(preData.age >= 18 ? reasons.promise.meet : reasons.promise.fail)
+  .push(preData.age >= 18 ? "Age ≥18" : "Age <18");
+
+(preData.premrs <= 2 ? reasons.promise.meet : reasons.promise.fail)
+  .push(preData.premrs <= 2 ? "pre-mRS ≤2" : "pre-mRS >2");
+
+(preData.nihss >= 1 ? reasons.promise.meet : reasons.promise.fail)
+  .push(preData.nihss >= 1 ? "NIHSS ≥1" : "NIHSS <1");
+
+(lvo === "yes" ? reasons.promise.meet : reasons.promise.fail)
+  .push(lvo === "yes" ? "LVO present / EVT candidate" : "Not EVT candidate");
+
+(promiseVesselOk ? reasons.promise.meet : reasons.promise.fail)
+  .push(promiseVesselOk ? "ICA-T/M1/M2 occlusion" : "Vessel not allowed for PROMISE");
 
             /* MOSTE */
             const okMoste = (preData.ltsw<23 && preData.premrs<=1 && preData.nihss<6 && lvo==="yes" && mosteVesselOk);
@@ -1414,10 +1546,10 @@
               openModal("Missing fields","Please complete all <strong>hemorrhagic</strong> questions."); return;
             }
 
-            ["athena","vanish","pivotal","moste","twin2win2","artemis","hybernia","doneSymple","shionogi","sovateltide","orion"].forEach(k=>{
-              eligibility[k]=false;
-              reasons[k].fail.push("Not an ischemic stroke (hemorrhagic stroke)");
-            });
+            ["athena","vanish","pivotal","moste","twin2win2","artemis","hybernia","doneSymple","shionogi","sovateltide","orion","promise"].forEach(k=>{
+  eligibility[k]=false;
+  reasons[k].fail.push("Not an ischemic stroke (hemorrhagic stroke)");
+});
 
             /* FASTEST */
             let fastestEligible=false;
@@ -1485,22 +1617,24 @@
 
         function showSummary(){
           const items = [
-            ["WeTrust",eligibility.weTrust,"weTrust",false, randomizationLinks["WeTrust"], false],
-            ["ATHENA",eligibility.athena,"athena",notIndicated.athena, randomizationLinks["ATHENA"], true],
-            ["VANISH",eligibility.vanish,"vanish",notIndicated.vanish, randomizationLinks["VANISH"], false],
-            ["PIVOTAL",eligibility.pivotal,"pivotal",notIndicated.pivotal, randomizationLinks["PIVOTAL"], true],
-            ["MOSTE",eligibility.moste,"moste",notIndicated.moste, randomizationLinks["MOSTE"], false],
-            ["TWIN-2-WIN 2",eligibility.twin2win2,"twin2win2",notIndicated.twin2win2, randomizationLinks["TWIN-2-WIN 2"], false],
-            ["ARTEMIS",eligibility.artemis,"artemis",notIndicated.artemis, randomizationLinks["ARTEMIS"], false],
-            ["HYBERNIA",eligibility.hybernia,"hybernia",notIndicated.hybernia, randomizationLinks["HYBERNIA"], true],
-            ["DONE SYMPLE",eligibility.doneSymple,"doneSymple",notIndicated.doneSymple, randomizationLinks["DONE SYMPLE"], false],
-            ["SHIONOGI",eligibility.shionogi,"shionogi",false, null, false],
-            ["SOVATELTIDE",eligibility.sovateltide,"sovateltide",false, null, false],
-            ["ORION",eligibility.orion,"orion",false, null, false],
-            ["FASTEST",eligibility.fastest,"fastest",false, null, false],
-            ["TICH-3",eligibility.tich3,"tich3",false, null, false],
-            ["SAFER-DOAC",eligibility.saferdoac,"saferdoac",false, null, false]
-          ];
+  ["WeTrust",eligibility.weTrust,"weTrust",false, randomizationLinks["WeTrust"], false],
+  ["ATHENA",eligibility.athena,"athena",notIndicated.athena, randomizationLinks["ATHENA"], true],
+  ["VANISH",eligibility.vanish,"vanish",notIndicated.vanish, randomizationLinks["VANISH"], false],
+  ["PIVOTAL",eligibility.pivotal,"pivotal",notIndicated.pivotal, randomizationLinks["PIVOTAL"], true],
+  ["PROMISE",eligibility.promise,"promise",notIndicated.promise, null, false],
+  ["MOSTE",eligibility.moste,"moste",notIndicated.moste, randomizationLinks["MOSTE"], false],
+  ["TWIN-2-WIN 2",eligibility.twin2win2,"twin2win2",notIndicated.twin2win2, randomizationLinks["TWIN-2-WIN 2"], false],
+  ["ARTEMIS",eligibility.artemis,"artemis",notIndicated.artemis, randomizationLinks["ARTEMIS"], false],
+  ["HYBERNIA",eligibility.hybernia,"hybernia",notIndicated.hybernia, randomizationLinks["HYBERNIA"], true],
+  ["DONE SYMPLE",eligibility.doneSymple,"doneSymple",notIndicated.doneSymple, randomizationLinks["DONE SYMPLE"], false],
+  ["SHIONOGI",eligibility.shionogi,"shionogi",false, null, false],
+  ["SOVATELTIDE",eligibility.sovateltide,"sovateltide",false, null, false],
+  ["ORION",eligibility.orion,"orion",false, null, false],
+  ["FASTEST",eligibility.fastest,"fastest",false, null, false],
+  ["TICH-3",eligibility.tich3,"tich3",false, null, false],
+  ["SAFER-DOAC",eligibility.saferdoac,"saferdoac",false, null, false]
+];
+
 
           const ul = document.getElementById('summaryContent'); ul.innerHTML="";
           items.forEach(([name,ok,key,ni,link,paused])=>{
@@ -1614,37 +1748,159 @@
           });
           buildShareMessage(); showPage('sharePage');
         }
+function updateMticiVisibility() {
+  const tev = (document.querySelector('input[name="tev"]:checked') || {}).value || "";
+  const row = document.getElementById('mticiRow');
+  if (row) {
+    row.style.display = (tev === "Yes") ? "block" : "none";
+    if (tev !== "Yes") {
+      const sel = document.getElementById('mtici');
+      if (sel) sel.value = "";
+    }
+  }
+}
+
+function updateTpMticiVisibility() {
+  const tev = (document.querySelector('input[name="tp_tev"]:checked') || {}).value || "";
+  const row = document.getElementById('tp_mticiRow');
+  if (row) {
+    row.style.display = (tev === "Yes") ? "block" : "none";
+    if (tev !== "Yes") {
+      const sel = document.getElementById('tp_mtici');
+      if (sel) sel.value = "";
+    }
+  }
+}
+function tp_selectStrokeType(value){
+  tpStrokeType = value;
+  // Evidenzia radio selezionato
+  markRadioSelected(document.getElementById('tp_strokeTypeGroup'));
+
+  // Se ischemico: mostra acute treatments + target vessel
+  const acuteCard = document.getElementById('tp_acuteCard');
+  const vesselCard = document.getElementById('tp_vesselCard');
+  if (acuteCard) acuteCard.style.display = (value === 'ischemic') ? 'block' : 'none';
+  if (vesselCard) vesselCard.style.display = (value === 'ischemic') ? 'block' : 'none';
+
+  tp_buildMessage();
+}
+
+function tp_getTargetVesselLabels(){
+  const map = {
+    "ica-extracranial": "extracranial ICA",
+    "ica-intracranial": "intracranial ICA",
+    "ica-terminal": "ICA-T",
+    "m1": "M1",
+    "m2-proxdom": "M2 prox/dom",
+    "m2-any": "any M2",
+    "gt-m2": ">M2",
+    "a1": "A1",
+    "a2": "A2",
+    "gt-a2": ">A2",
+    "basilar": "Basilar",
+    "p1": "P1",
+    "p2": "P2",
+    "gt-p2": ">P2",
+    "va": "VA"
+  };
+  return Array.from(document.querySelectorAll('#tp_targetVesselGroup input[type="checkbox"]:checked'))
+    .map(i => map[i.value] || i.value);
+}
+
+function tp_updateTargetVesselSummary(){
+  const span = document.getElementById('tp_targetVesselSummaryText');
+  if (!span) return;
+  const labels = tp_getTargetVesselLabels();
+  if (!labels.length){
+    span.textContent = "Select target vessels";
+  } else if (labels.length <= 3){
+    span.textContent = labels.join(", ");
+  } else {
+    span.textContent = `${labels.slice(0,2).join(", ")} +${labels.length - 2}`;
+  }
+}
+
+function getTargetVesselLabels(){
+  const map = {
+    "ica-extracranial": "extracranial ICA",
+    "ica-intracranial": "intracranial ICA",
+    "ica-terminal": "ICA-T",
+    "m1": "M1",
+    "m2-proxdom": "M2 prox/dom",
+    "m2-any": "any M2",
+    "gt-m2": ">M2",
+    "a1": "A1",
+    "a2": "A2",
+    "gt-a2": ">A2",
+    "basilar": "Basilar",
+    "p1": "P1",
+    "p2": "P2",
+    "gt-p2": ">P2",
+    "va": "VA"
+  };
+  return Array.from(document.querySelectorAll('#targetVesselGroup input[type="checkbox"]:checked'))
+    .map(i => map[i.value] || i.value);
+}
+
+function updateTargetVesselSummary(){
+  const span = document.getElementById('targetVesselSummaryText');
+  if (!span) return;
+
+  const labels = getTargetVesselLabels();
+  if (!labels.length){
+    span.textContent = "Select target vessels";
+  } else if (labels.length <= 3){
+    span.textContent = labels.join(", ");
+  } else {
+    span.textContent = `${labels.slice(0,2).join(", ")} +${labels.length - 2}`;
+  }
+}
+
 
 function buildShareMessage(){
-  const pn=(document.getElementById('patientNumber')?.value||"").trim()||"Patient record";
-  const tev=(document.querySelector('input[name="tev"]:checked')||{}).value||"";
-  const mtici=(document.getElementById('mtici')||{}).value||"";
-  const tiv=(document.querySelector('input[name="tiv"]:checked')||{}).value||"";
-  const notes=(document.getElementById('notesField')||{}).value||"";
+  const pn = (document.getElementById('patientNumber')?.value || "").trim() || "Patient record";
+  const tev = (document.querySelector('input[name="tev"]:checked') || {}).value || "";
+  const mtici = (document.getElementById('mtici') || {}).value || "";
+  const tiv = (document.querySelector('input[name="tiv"]:checked') || {}).value || "";
+  const notes = (document.getElementById('notesField') || {}).value || "";
 
-  const base = `${pn}, age ${isFinite(preData.age)?preData.age:"?"}, NIHSS ${isFinite(preData.nihss)?preData.nihss:"?"}, mRS ${isFinite(preData.premrs)?preData.premrs:"?"}`;
+  const strokeLabel = postData.strokeType
+    ? (postData.strokeType === 'ischemic' ? 'Ischemic stroke' : 'Hemorrhagic stroke')
+    : 'Stroke type ?';
 
-  let lines=[];
+  const base = `${pn}, ${strokeLabel}, age ${isFinite(preData.age) ? preData.age : "?"}, NIHSS ${isFinite(preData.nihss) ? preData.nihss : "?"}, mRS ${isFinite(preData.premrs) ? preData.premrs : "?"}`;
+
+  const lines = [];
+
+  // 🔹 Qui il cambiamento: un'unica riga con tutti gli studi
   if (selectedStudies && selectedStudies.length){
-    lines = selectedStudies.map(study=>{
-      const outcome=(studyOutcomes[study]||"intervention");
-      return `${base}, ${study} (${outcome})`;
-    });
+    const studiesPart = selectedStudies.map(study => {
+      const outcome = studyOutcomes[study] || "intervention";
+      return `${study} (${outcome})`;
+    }).join(' ');
+    lines.push(`${base}, ${studiesPart}`);
   } else {
-    // Nessuno studio selezionato: mostra almeno i dati del paziente
-    lines = [base];
+    // Nessuno studio selezionato: solo i dati del paziente
+    lines.push(base);
   }
 
+  // Extra (TEV, Target, mTICI, TIV)
   const extras = [];
-  if(tev) extras.push(`TEV: ${tev}`);
-  if(mtici) extras.push(`mTICI: ${mtici}`);
-  if(tiv) extras.push(`TIV: ${tiv}`);
-  if(extras.length) lines.push(extras.join(" | "));
-  if(notes) lines.push(`Notes: ${notes}`);
+  if (tev) extras.push(`TEV: ${tev}`);
 
-  const ta=document.getElementById('shareMessage');
-  if(ta) ta.value=lines.join('\n');
+  const tv = (typeof getTargetVesselLabels === 'function') ? getTargetVesselLabels() : [];
+  if (tv.length) extras.push(`Target: ${tv.join('/')}`);
+
+  if (mtici) extras.push(`mTICI: ${mtici}`);
+  if (tiv) extras.push(`TIV: ${tiv}`);
+
+  if (extras.length) lines.push(extras.join(" | "));
+  if (notes) lines.push(`Notes: ${notes}`);
+
+  const ta = document.getElementById('shareMessage');
+  if (ta) ta.value = lines.join('\n');
 }
+
 
 
 
@@ -1670,7 +1926,27 @@ function buildShareMessage(){
         }
 
         document.addEventListener('input',(e)=>{ if(e.target && (e.target.id==='patientNumber' || e.target.id==='notesField')) buildShareMessage(); });
-        document.addEventListener('change',(e)=>{ const t=e.target; if(!t) return; if(t.name==='tev' || t.name==='tiv' || t.id==='mtici') buildShareMessage(); });
+        document.addEventListener('change',(e)=>{
+  const t = e.target;
+  if (!t) return;
+
+  if (t.name === 'tev') {
+    updateMticiVisibility();
+    buildShareMessage();
+  } else if (t.name === 'tiv' || t.id === 'mtici') {
+    buildShareMessage();
+  }
+});
+document.addEventListener('change',(e)=>{
+  if (e.target && e.target.closest('#targetVesselGroup') && e.target.type === 'checkbox') {
+    updateTargetVesselSummary();
+  }
+});
+document.addEventListener('DOMContentLoaded', ()=>{
+  updateTargetVesselSummary();
+});
+
+
 
         function copyMessage(){ const ta=document.getElementById('shareMessage'); ta.select(); ta.setSelectionRange(0,99999); document.execCommand('copy'); openModal("Copied","Message copied to clipboard."); }
         function shareWhatsApp(){ const msg=document.getElementById('shareMessage').value; const url="https://wa.me/?text="+encodeURIComponent(msg); window.open(url,"_blank"); }
@@ -1753,6 +2029,7 @@ function buildShareMessage(){
               <option>PIVOTAL</option><option>MOSTE</option><option>TWIN-2-WIN 2</option>
               <option>ARTEMIS</option><option>HYBERNIA</option><option>DONE SYMPLE</option>
               <option>SAFER-DOAC</option><option>SHIONOGI</option><option>SOVATELTIDE</option><option>ORION</option>
+              <option>PROMISE</option>
             </select>
             <select class="tp_other_arm">
               <option value="intervention">intervention</option>
@@ -1783,9 +2060,12 @@ function buildShareMessage(){
           const mtici=(document.getElementById('tp_mtici')||{}).value||"";
           const tiv=(document.querySelector('input[name="tp_tiv"]:checked')||{}).value||"";
           const notes=(document.getElementById('tp_notes')?.value||"").trim();
-
+ const strokeLabel = tpStrokeType
+    ? (tpStrokeType === 'ischemic' ? 'Ischemic stroke' : 'Hemorrhagic stroke')
+    : 'Stroke type ?';
           const lines=[];
-          const base = `${id}, age ${age||"?"}, NIHSS ${nihss||"?"}, mRS ${mrs||"?"}`;
+  const base = `${id}, ${strokeLabel}, age ${age||"?"}, NIHSS ${nihss||"?"}, mRS ${mrs||"?"}`;
+
           if(selectedTrialName && selectedTrialName!=='NO_TRIALS'){
             const label = (selectedTrialName==='SaferDoac')?'SAFER-DOAC':selectedTrialName;
             lines.push(`${base}, ${label} (${arm})`);
@@ -1797,11 +2077,17 @@ function buildShareMessage(){
           others.forEach(o=>{ lines.push(`${o.name} (${o.arm})`); });
 
           const extras=[];
-          if(tev) extras.push(`TEV: ${tev}`);
-          if(mtici) extras.push(`mTICI: ${mtici}`);
-          if(tiv) extras.push(`TIV: ${tiv}`);
-          if(extras.length) lines.push(extras.join(" | "));
-          if(notes) lines.push(`Notes: ${notes}`);
+  if(tev) extras.push(`TEV: ${tev}`);
+  if(mtici) extras.push(`mTICI: ${mtici}`);
+  if(tiv) extras.push(`TIV: ${tiv}`);
+
+  // Target vessel solo se ischemico
+  if (tpStrokeType === 'ischemic') {
+    const tv = tp_getTargetVesselLabels();
+    if (tv.length) extras.push(`Vessel: ${tv.join('/')}`);
+  }
+
+  if(extras.length) lines.push(extras.join(" | "));
 
           document.getElementById('tp_message').value = lines.join('\n');
         }
@@ -1811,12 +2097,32 @@ document.addEventListener('input',(e)=>{
     tp_buildMessage();
   }
 });
+
 document.addEventListener('change',(e)=>{
   const id = e.target.id;
-  if(['tp_mrs','tp_arm','tp_mtici'].includes(id) || e.target.name==='tp_tev' || e.target.name==='tp_tiv'){
+
+  // Stroke type (Quick / Trial)
+  if (e.target.name === 'tp_strokeType') {
+    tp_selectStrokeType(e.target.value);
+    return;
+  }
+
+  // Acute treatments (Quick / Trial)
+  if (e.target.name === 'tp_tev') {
+    updateTpMticiVisibility();
+    tp_buildMessage();
+  } else if (['tp_mrs','tp_arm','tp_mtici'].includes(id) || e.target.name === 'tp_tiv') {
+    tp_buildMessage();
+  }
+
+  // Target vessel (Quick / Trial)
+  if (e.target.closest('#tp_targetVesselGroup') && e.target.type === 'checkbox') {
+    tp_updateTargetVesselSummary();
     tp_buildMessage();
   }
 });
+
+
 
         function tp_copy(){ const ta=document.getElementById('tp_message'); ta.select(); ta.setSelectionRange(0,99999); document.execCommand('copy'); openModal("Copied","Message copied to clipboard."); }
         function tp_shareWA(){ const msg=document.getElementById('tp_message').value; const url="https://wa.me/?text="+encodeURIComponent(msg); window.open(url,"_blank"); }
@@ -1943,4 +2249,3 @@ document.addEventListener('change',(e)=>{
 </div>
 </body>
 </html>
-
