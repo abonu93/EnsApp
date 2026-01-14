@@ -243,6 +243,8 @@
           <div class="trial-item"><span class="trial-title">SOVATELTIDE</span><button class="btn" onclick="showTrialCriteria('Sovateltide')">Open</button></div>
           <div class="trial-item"><span class="trial-title">ORION</span><button class="btn" onclick="showTrialCriteria('Orion')">Open</button></div>
           <div class="trial-item"><span class="trial-title">PROMISE</span><button class="btn" onclick="showTrialCriteria('PROMISE')">Open</button></div>
+          <div class="trial-item"><span class="trial-title">NiVO</span><button class="btn" onclick="showTrialCriteria('NiVO')">Open</button></div>
+
           <!-- No trials -->
           <div class="trial-item" style="border-style:dashed">
             <span class="trial-title">No trials</span>
@@ -1071,6 +1073,30 @@
             notes: [],
             visits: null
           }
+          ,
+"NiVO": {
+  status: "active",
+  category: "EVT device — distal aspiration catheter (MeVO)",
+  key: {
+    window: "≤ 24 h",
+    age: "≥ 18 y",
+    mrs: "≤ 2",
+    nihss: "≥ 5",
+    aspects: "≥ 6"
+  },
+  consent: "Per local practice.",
+  imaging: "Isolated primary occlusion in a distal medium vessel (non-dominant/distal M2, M3/M4; A2/A3; P1/P2/P3) on CTA or MRA.",
+  thrombolytic: "Optional.",
+  thrombectomy: "Yes (distal aspiration catheter strategy).",
+  preEvtLabs: "No.",
+  intervention: "NiVO distal aspiration catheter approach (per protocol).",
+  notes: [
+    "Target arteries (app logic): any M2 or >M2; A2 or >A2; P1 or >P1.",
+    "Requires ASPECTS ≥6."
+  ],
+  visits: null
+}
+
         };
 
         /* ======= EXISTING CONFIG (unchanged below this line unless needed) ======= */
@@ -1079,8 +1105,10 @@
   vanish: "", pivotal: "", moste: "",
   twin2win2: "", artemis: "", hybernia: "", doneSymple: "", promise:"",
   fastest: "", tich3: "", librexia: "", saferdoac:"",
-  shionogi:"", sovateltide:"", orion:""
+  shionogi:"", sovateltide:"", orion:"",
+  nivo:""
 };
+
 
 
         const reasons = {
@@ -1089,7 +1117,7 @@
   artemis:{meet:[],fail:[]}, hybernia:{meet:[],fail:[]}, doneSymple:{meet:[],fail:[]},
   fastest:{meet:[],fail:[]}, tich3:{meet:[],fail:[]}, librexia:{meet:[],fail:[]},
   saferdoac:{meet:[],fail:[]}, shionogi:{meet:[],fail:[]}, sovateltide:{meet:[],fail:[]},
-  orion:{meet:[],fail:[]}, promise:{meet:[],fail:[]}
+  orion:{meet:[],fail:[]}, promise:{meet:[],fail:[]}, nivo:{meet:[],fail:[]}
 };
 
 
@@ -1102,7 +1130,7 @@
         };
 
         /* ======= GOOGLE SHEETS SEND ======= */
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbysTO3xAY0hVQRVkTsSJVFHKBhsvGnmlAEjhDiM7p_EAaOxiPv80PBC2jH-lDHpU8za/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxs1CIhvk-4I1VbojMJUqNAaoPCH1ywhyuiNLfd_aDvAJ3TxdZcUurd2_B-PWicNi3W/exec";
         function sendToSheet(payload){
           try{
             const body = new URLSearchParams({ payload: JSON.stringify(payload) });
@@ -1110,11 +1138,13 @@
           }catch(e){ console.warn("sendToSheet error:", e); }
         }
 
-      const SHEET_TRIAL_KEYS = [
+    const SHEET_TRIAL_KEYS = [
   "WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST",
   "TICH3","LIBREXIA","TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE",
-  "SAFERDOAC","SHIONOGI","SOVATELTIDE","ORION","PROMISE"
+  "SAFERDOAC","SHIONOGI","SOVATELTIDE","ORION","PROMISE",
+  "NIVO"
 ];
+
 
 
         function buildTrialsForSheet(selectedStudies, studyOutcomes){
@@ -1125,7 +1155,7 @@
   "Librexia":"LIBREXIA","TWIN-2-WIN 2":"TWIN2WIN","ARTEMIS":"ARTEMIS",
   "HYBERNIA":"HYBERNIA","DONE SYMPLE":"DONESYMPLE","SAFER-DOAC":"SAFERDOAC",
   "SHIONOGI":"SHIONOGI","SOVATELTIDE":"SOVATELTIDE","ORION":"ORION",
-  "PROMISE":"PROMISE"
+  "PROMISE":"PROMISE",   "NiVO":"NIVO"
 };
 
 
@@ -1139,8 +1169,10 @@
 
 const notIndicated = {
   athena:false, vanish:false, pivotal:false, moste:false,
-  twin2win2:false, artemis:false, hybernia:false, doneSymple:false, promise:false
+  twin2win2:false, artemis:false, hybernia:false, doneSymple:false, promise:false,
+  nivo:false
 };
+
 
         /* ======= STATE ======= */
         let preData={}, postData={}, evtData={}, hemData={};
@@ -1148,8 +1180,10 @@ const notIndicated = {
   weTrust:false, athena:false, fastest:false, tich3:false, librexia:false, vanish:false,
   pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false,
   doneSymple:false, saferdoac:false, shionogi:false, sovateltide:false, orion:false,
-  promise:false
+  promise:false,
+  nivo:false
 };
+
 
         let selectedStudies=[]; let studyOutcomes={};
         let selectedChronic=[]; let studyChronicOutcomes={};
@@ -1365,6 +1399,11 @@ const twinVesselOk     = hasVessel("ica-terminal") || hasVessel("m1") || hasVess
 const artemisVesselOk  = hasVessel("ica-intracranial") || hasVessel("ica-terminal") || hasVessel("m1") || hasVessel("m2-proxdom");
 const hyberniaVesselOk = hasVessel("ica-intracranial") || hasVessel("ica-terminal") || hasVessel("m1") || hasVessel("m2-any") || hasVessel("m2-proxdom");
 const promiseVesselOk  = hasVessel("ica-terminal") || hasVessel("m1") || hasVessel("m2-any") || hasVessel("m2-proxdom");
+// NiVO — distal medium vessel occlusion targets
+const nivoVesselOk =
+  hasVessel("m2-any") || hasVessel("gt-m2") ||         // any M2 or >M2
+  hasVessel("a2") || hasVessel("gt-a2") ||             // A2 or >A2
+  hasVessel("p1") || hasVessel("p2") || hasVessel("gt-p2"); // P1 or >P1 (P2/P3)
 
             const lvo = (postData.candidate === "eligible") ? "yes" : "no";
 
@@ -1438,6 +1477,27 @@ eligibility.promise = okPromise;
 
 (promiseVesselOk ? reasons.promise.meet : reasons.promise.fail)
   .push(promiseVesselOk ? "ICA-T/M1/M2 occlusion" : "Vessel not allowed for PROMISE");
+  /* NiVO */
+const okNivo = (
+  preData.age >= 18 &&
+  preData.ltsw <= 24 &&
+  preData.nihss >= 5 &&
+  preData.premrs <= 2 &&
+  lvo === "yes" &&
+  nivoVesselOk &&
+  !Number.isNaN(aspects) && aspects >= 6
+);
+eligibility.nivo = okNivo;
+
+(preData.age >= 18 ? reasons.nivo.meet : reasons.nivo.fail).push(preData.age >= 18 ? "Age ≥18" : "Age <18");
+(preData.ltsw <= 24 ? reasons.nivo.meet : reasons.nivo.fail).push(preData.ltsw <= 24 ? "LTSW ≤24h" : "LTSW >24h");
+(preData.nihss >= 5 ? reasons.nivo.meet : reasons.nivo.fail).push(preData.nihss >= 5 ? "NIHSS ≥5" : "NIHSS <5");
+(preData.premrs <= 2 ? reasons.nivo.meet : reasons.nivo.fail).push(preData.premrs <= 2 ? "pre-mRS ≤2" : "pre-mRS >2");
+(lvo === "yes" ? reasons.nivo.meet : reasons.nivo.fail).push(lvo === "yes" ? "EVT candidate" : "Not EVT candidate");
+(nivoVesselOk ? reasons.nivo.meet : reasons.nivo.fail).push(nivoVesselOk ? "Target vessel: any M2/>M2 or A2/>A2 or P1/>P1" : "Target vessel not allowed");
+(!Number.isNaN(aspects) && aspects >= 6 ? reasons.nivo.meet : reasons.nivo.fail)
+  .push(!Number.isNaN(aspects) && aspects >= 6 ? "ASPECTS ≥6" : "ASPECTS <6 or missing");
+
 
             /* MOSTE */
             const okMoste = (preData.ltsw<23 && preData.premrs<=1 && preData.nihss<6 && lvo==="yes" && mosteVesselOk);
@@ -1622,6 +1682,7 @@ eligibility.promise = okPromise;
   ["VANISH",eligibility.vanish,"vanish",notIndicated.vanish, randomizationLinks["VANISH"], false],
   ["PIVOTAL",eligibility.pivotal,"pivotal",notIndicated.pivotal, randomizationLinks["PIVOTAL"], true],
   ["PROMISE",eligibility.promise,"promise",notIndicated.promise, null, false],
+  ["NiVO",eligibility.nivo,"nivo",notIndicated.nivo, null, false],
   ["MOSTE",eligibility.moste,"moste",notIndicated.moste, randomizationLinks["MOSTE"], false],
   ["TWIN-2-WIN 2",eligibility.twin2win2,"twin2win2",notIndicated.twin2win2, randomizationLinks["TWIN-2-WIN 2"], false],
   ["ARTEMIS",eligibility.artemis,"artemis",notIndicated.artemis, randomizationLinks["ARTEMIS"], false],
@@ -2030,6 +2091,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
               <option>ARTEMIS</option><option>HYBERNIA</option><option>DONE SYMPLE</option>
               <option>SAFER-DOAC</option><option>SHIONOGI</option><option>SOVATELTIDE</option><option>ORION</option>
               <option>PROMISE</option>
+              <option>NiVO</option>
             </select>
             <select class="tp_other_arm">
               <option value="intervention">intervention</option>
@@ -2171,7 +2233,13 @@ document.addEventListener('change',(e)=>{
         /* ======= RESET / MODAL ======= */
         function restart(){
           preData={}; postData={}; evtData={}; hemData={};
-          eligibility={ weTrust:false, athena:false, fastest:false, tich3:false, librexia:false, vanish:false, pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false, doneSymple:false, saferdoac:false, shionogi:false, sovateltide:false, orion:false };
+          eligibility={
+  weTrust:false, athena:false, fastest:false, tich3:false, librexia:false, vanish:false,
+  pivotal:false, moste:false, twin2win2:false, artemis:false, hybernia:false,
+  doneSymple:false, saferdoac:false, shionogi:false, sovateltide:false, orion:false,
+  promise:false, nivo:false
+};
+
           selectedStudies=[]; studyOutcomes={}; selectedChronic=[]; studyChronicOutcomes={};
           for(const k of Object.keys(infoMessages)) infoMessages[k]="";
           for(const k of Object.keys(notIndicated)) notIndicated[k]=false;
