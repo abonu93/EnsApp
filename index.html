@@ -17,23 +17,67 @@
     </div>
   </header>
 
+  <!-- PROGRESS BAR (shown only during New Patient flow) -->
+  <div id="progressBar" class="progress-bar" style="display:none;">
+    <div class="shell">
+      <div class="progress-steps">
+        <div class="progress-step active" data-step="0"><div class="ps-circle">1</div><div class="ps-label">Patient</div></div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="1"><div class="ps-circle">2</div><div class="ps-label">Pre-Imaging</div></div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="2"><div class="ps-circle">3</div><div class="ps-label">Post-Imaging</div></div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="3"><div class="ps-circle">4</div><div class="ps-label">Trials</div></div>
+        <div class="progress-connector"></div>
+        <div class="progress-step" data-step="4"><div class="ps-circle">5</div><div class="ps-label">Save</div></div>
+      </div>
+    </div>
+  </div>
+
   <div class="content">
     <div class="shell page-wrap">
 
-      <!-- MAIN MENU -->
-      <div id="mainMenu" class="page visible">
+      <!-- LANDING PAGE -->
+      <div id="landingPage" class="page visible">
+        <div class="landing-hero">
+          <div class="landing-badge-wrap">
+            <div class="landing-badge"></div>
+          </div>
+          <h1 class="landing-title">ENS-APP</h1>
+          <p class="landing-subtitle muted">Stroke Clinical Trial Evaluator</p>
+        </div>
+
+        <div class="landing-actions">
+          <button class="btn-landing-primary" onclick="promptNewPatient()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            New Patient
+          </button>
+
+          <div id="patientInProgressWrap" style="display:none;">
+            <button class="btn-landing-secondary" onclick="showPage('workflowSelector')">
+              <div class="pip-top">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Patient in Progress
+              </div>
+              <div id="patientInProgressPreview" class="pip-preview"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKFLOW SELECTOR (was mainMenu) -->
+      <div id="workflowSelector" class="page">
+        <h2>Select workflow</h2>
         <div class="tiles">
-          <button class="tile" style="background:var(--tile-sky)" onclick="goToNewPatient()">
-            <div><div class="t-label">Clinical intake</div><div class="t-title">New Patient</div></div><div class="t-cta">Open</div>
+          <button class="tile" style="background:var(--tile-sky)" onclick="startEligibilityEvaluation()">
+            <div><div class="t-label">Clinical intake</div><div class="t-title">Eligibility Evaluation</div></div><div class="t-cta">Start</div>
           </button>
           <button class="tile" style="background:var(--tile-pink)" onclick="goToTrialsCriteria()">
-            <div><div class="t-label">Eligibility</div><div class="t-title">Trials</div></div><div class="t-cta">Open</div>
+            <div><div class="t-label">Reference</div><div class="t-title">Trials Info</div></div><div class="t-cta">Open</div>
           </button>
-          <!-- >>> ADDED: Quick patient (NO_TRIALS) <<< -->
-          <button class="tile" style="background:var(--tile-orange)" onclick="selectedTrialName='NO_TRIALS'; goToTrialNewPatient()">
-            <div><div class="t-label">Fast track</div><div class="t-title">Quick patient</div></div><div class="t-cta">Open</div>
+          <button class="tile" style="background:var(--tile-orange)" onclick="startQuickPatient()">
+            <div><div class="t-label">Fast track</div><div class="t-title">Quick Patient</div></div><div class="t-cta">Open</div>
           </button>
-          <!-- >>> END ADD <<< -->
         </div>
 
         <!-- Quick access -->
@@ -52,40 +96,52 @@
             <span class="ql-label">Studies Drive</span>
           </a>
         </div>
+        <div class="btn-row" style="margin-top:1rem">
+          <button class="btn btn-ghost" type="button" onclick="showPage('landingPage')">Back</button>
+        </div>
       </div>
 
       <!-- TRIALS LIST -->
       <div id="trialsList" class="page">
         <h2>Trials</h2>
-        <div class="trial-list">
-          <div class="trial-item"><span class="trial-title">WeTrust</span><button class="btn" onclick="showTrialCriteria('WeTrust')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">TICH-3</span><button class="btn" onclick="showTrialCriteria('TICH3')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">ATHENA</span><button class="btn" onclick="showTrialCriteria('ATHENA')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">FASTEST</span><button class="btn" onclick="showTrialCriteria('FASTEST')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">Librexia</span><button class="btn" onclick="showTrialCriteria('Librexia')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">VANISH</span><button class="btn" onclick="showTrialCriteria('VANISH')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">PIVOTAL</span><button class="btn" onclick="showTrialCriteria('PIVOTAL')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">MOSTE</span><button class="btn" onclick="showTrialCriteria('MOSTE')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">TWIN-2-WIN 2</span><button class="btn" onclick="showTrialCriteria('Twin2Win2')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">ARTEMIS</span><button class="btn" onclick="showTrialCriteria('ARTEMIS')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">HYBERNIA</span><button class="btn" onclick="showTrialCriteria('HYBERNIA')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">DONE SYMPLE</span><button class="btn" onclick="showTrialCriteria('DoneSymple')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">SAFER-DOAC</span><button class="btn" onclick="showTrialCriteria('SaferDoac')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">SHIONOGI</span><button class="btn" onclick="showTrialCriteria('Shionogi')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">SOVATELTIDE</span><button class="btn" onclick="showTrialCriteria('Sovateltide')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">ORION</span><button class="btn" onclick="showTrialCriteria('Orion')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">DO-IT</span><button class="btn" onclick="showTrialCriteria('DOIT')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">REMEDY</span><button class="btn" onclick="showTrialCriteria('REMEDY')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">PROMISE</span><button class="btn" onclick="showTrialCriteria('PROMISE')">Open</button></div>
-          <div class="trial-item"><span class="trial-title">NiVO</span><button class="btn" onclick="showTrialCriteria('NiVO')">Open</button></div>
+        <div class="trials-search">
+          <input type="search" id="trialsSearch" placeholder="Search trials..." oninput="filterTrials()" />
+        </div>
+        <div class="filter-pills">
+          <button class="pill active" data-filter="all" onclick="setTrialFilter(this,'all')">All</button>
+          <button class="pill" data-filter="ischemic" onclick="setTrialFilter(this,'ischemic')">Ischemic</button>
+          <button class="pill" data-filter="hemorrhagic" onclick="setTrialFilter(this,'hemorrhagic')">Hemorrhagic</button>
+          <button class="pill" data-filter="postacute" onclick="setTrialFilter(this,'postacute')">Post-acute</button>
+        </div>
+        <div class="trial-list" id="trialListContainer">
+          <div class="trial-item" data-name="wetrust" data-stroke="ischemic"><span class="trial-title">WeTrust</span><button class="btn" onclick="showTrialCriteria('WeTrust')">Open</button></div>
+          <div class="trial-item" data-name="tich-3" data-stroke="hemorrhagic"><span class="trial-title">TICH-3</span><button class="btn" onclick="showTrialCriteria('TICH3')">Open</button></div>
+          <div class="trial-item" data-name="athena" data-stroke="ischemic"><span class="trial-title">ATHENA</span><button class="btn" onclick="showTrialCriteria('ATHENA')">Open</button></div>
+          <div class="trial-item" data-name="fastest" data-stroke="hemorrhagic"><span class="trial-title">FASTEST</span><button class="btn" onclick="showTrialCriteria('FASTEST')">Open</button></div>
+          <div class="trial-item" data-name="librexia" data-stroke="postacute"><span class="trial-title">Librexia</span><button class="btn" onclick="showTrialCriteria('Librexia')">Open</button></div>
+          <div class="trial-item" data-name="vanish" data-stroke="hemorrhagic"><span class="trial-title">VANISH</span><button class="btn" onclick="showTrialCriteria('VANISH')">Open</button></div>
+          <div class="trial-item" data-name="pivotal" data-stroke="ischemic"><span class="trial-title">PIVOTAL</span><button class="btn" onclick="showTrialCriteria('PIVOTAL')">Open</button></div>
+          <div class="trial-item" data-name="moste" data-stroke="ischemic"><span class="trial-title">MOSTE</span><button class="btn" onclick="showTrialCriteria('MOSTE')">Open</button></div>
+          <div class="trial-item" data-name="twin-2-win 2" data-stroke="ischemic"><span class="trial-title">TWIN-2-WIN 2</span><button class="btn" onclick="showTrialCriteria('Twin2Win2')">Open</button></div>
+          <div class="trial-item" data-name="artemis" data-stroke="ischemic"><span class="trial-title">ARTEMIS</span><button class="btn" onclick="showTrialCriteria('ARTEMIS')">Open</button></div>
+          <div class="trial-item" data-name="hybernia" data-stroke="ischemic"><span class="trial-title">HYBERNIA</span><button class="btn" onclick="showTrialCriteria('HYBERNIA')">Open</button></div>
+          <div class="trial-item" data-name="done symple" data-stroke="ischemic"><span class="trial-title">DONE SYMPLE</span><button class="btn" onclick="showTrialCriteria('DoneSymple')">Open</button></div>
+          <div class="trial-item" data-name="safer-doac" data-stroke="ischemic"><span class="trial-title">SAFER-DOAC</span><button class="btn" onclick="showTrialCriteria('SaferDoac')">Open</button></div>
+          <div class="trial-item" data-name="shionogi" data-stroke="ischemic"><span class="trial-title">SHIONOGI</span><button class="btn" onclick="showTrialCriteria('Shionogi')">Open</button></div>
+          <div class="trial-item" data-name="sovateltide" data-stroke="ischemic"><span class="trial-title">SOVATELTIDE</span><button class="btn" onclick="showTrialCriteria('Sovateltide')">Open</button></div>
+          <div class="trial-item" data-name="orion" data-stroke="ischemic"><span class="trial-title">ORION</span><button class="btn" onclick="showTrialCriteria('Orion')">Open</button></div>
+          <div class="trial-item" data-name="do-it" data-stroke="ischemic"><span class="trial-title">DO-IT</span><button class="btn" onclick="showTrialCriteria('DOIT')">Open</button></div>
+          <div class="trial-item" data-name="remedy" data-stroke="ischemic"><span class="trial-title">REMEDY</span><button class="btn" onclick="showTrialCriteria('REMEDY')">Open</button></div>
+          <div class="trial-item" data-name="promise" data-stroke="ischemic"><span class="trial-title">PROMISE</span><button class="btn" onclick="showTrialCriteria('PROMISE')">Open</button></div>
+          <div class="trial-item" data-name="nivo" data-stroke="ischemic"><span class="trial-title">NiVO</span><button class="btn" onclick="showTrialCriteria('NiVO')">Open</button></div>
 
           <!-- No trials -->
-          <div class="trial-item" style="border-style:dashed">
+          <div class="trial-item" data-name="no trials" data-stroke="all" style="border-style:dashed">
             <span class="trial-title">No trials</span>
             <button class="btn" onclick="showTrialCriteria('NO_TRIALS')">Open</button>
           </div>
         </div>
-        <div class="btn-row" style="margin-top:.9rem"><button class="btn" type="button" onclick="goBackToMain()">Back</button></div>
+        <div class="btn-row" style="margin-top:.9rem"><button class="btn btn-ghost" type="button" onclick="goBackToMain()">Back</button></div>
       </div>
 
       <!-- TRIAL DETAIL -->
@@ -110,6 +166,7 @@
         <div class="card stack">
           <form id="formPreImaging" class="stack">
             <div class="stack-lg">
+              <div class="stack"><label for="patientId">Patient record number</label><input type="text" id="patientId" placeholder="e.g., 2025-00123" /></div>
               <div class="stack"><label for="age">Age</label><input type="number" id="age" required /></div>
               <div class="stack"><label for="nihss">NIHSS</label><input type="number" id="nihss" required /></div>
               <div class="stack">
@@ -133,7 +190,10 @@
                 <select id="acei" required><option value="no">No</option><option value="yes">Yes</option></select>
               </div>
             </div>
-            <div class="btn-row" style="margin-top:.5rem"><button class="btn btn-primary" type="button" onclick="submitPreImaging()">Next</button></div>
+            <div class="btn-row" style="margin-top:.5rem">
+              <button class="btn btn-ghost" type="button" onclick="showPage('workflowSelector')">Back</button>
+              <button class="btn btn-primary" type="button" onclick="submitPreImaging()">Next</button>
+            </div>
           </form>
         </div>
       </div>
@@ -145,6 +205,7 @@
           <p id="weTrustResultMessage" class="muted"></p>
           <div id="doacAlert" class="card" style="display:none;background:#fff6d6;border-color:#ffd36a;color:#7a5b00;">Patient on DOAC (NOAC): perform Chest CTA and obtain drug levels.</div>
           <div class="btn-row">
+            <button type="button" class="btn btn-ghost" onclick="showPage('preImaging')">Back</button>
             <button type="button" class="btn btn-small" onclick="showInfo('weTrust')" id="weTrustInfoBtn">Info</button>
             <button type="button" class="btn" onclick="openWeTrustRandomization()" id="weTrustRandomizeBtn" style="display:none;">Randomization</button>
             <button type="button" class="btn btn-primary" onclick="continueAfterWeTrust()">Next</button>
@@ -176,6 +237,7 @@
           <!-- Ischemic -->
           <div id="ischemicSection" class="stack" style="display:none;">
             <div class="card">
+              <h3 class="section-title">Treatment candidacy</h3>
               <label>Candidate for thrombectomy?</label>
               <div id="candidateGroup" class="radio-group">
                 <label class="radio"><input type="radio" name="candidate" value="not eligible" onchange="selectCandidate('not eligible')"> Not eligible</label>
@@ -191,6 +253,8 @@
             </div>
 
             <div id="evtSection" class="card stack" style="display:none;">
+              <h3 class="section-title">Imaging EVT</h3>
+              <p class="section-hint muted">Required for ATHENA, PIVOTAL, MOSTE, and other EVT trials.</p>
               <div class="stack"><label>Tandem occlusion?</label>
                 <select id="tandem" required><option value="no">No</option><option value="yes">Yes</option></select>
               </div>
@@ -247,6 +311,7 @@
           <!-- Hemorrhagic -->
           <div id="hemorrhagicSection" class="stack" style="display:none;">
             <div class="card stack">
+              <h3 class="section-title">Hemorrhagic parameters</h3>
               <div class="stack"><label>Hemorrhage volume (mL)</label><input type="number" step="0.1" id="hemVolume" /></div>
               <div class="stack"><label>GCS</label><input type="number" id="gcs" required /></div>
 
@@ -279,7 +344,8 @@
             </div>
 
             <div id="fastestSection" class="card stack" style="display:none;">
-              <h3 style="margin:0">FASTEST — Additional questions</h3>
+              <h3 class="section-title">FASTEST — Additional questions</h3>
+              <p class="section-hint muted">Shown only when LTSW &lt; 2h and pre-mRS ≤ 2.</p>
 
               <label>Brainstem hemorrhage?</label>
               <div id="brainstemGroup" class="radio-group">
@@ -325,7 +391,10 @@
             </div>
           </div>
 
-          <div class="btn-row"><button type="button" class="btn btn-primary" onclick="submitPostImaging()">Next</button></div>
+          <div class="btn-row">
+            <button type="button" class="btn btn-ghost" onclick="showPage('preResult')">Back</button>
+            <button type="button" class="btn btn-primary" onclick="submitPostImaging()">Next</button>
+          </div>
         </div>
       </div>
 
@@ -343,6 +412,7 @@
               <div class="muted">Evaluate trials like <strong>Librexia</strong> after acute screening.</div>
             </div>
             <div class="btn-row">
+              <button type="button" class="btn btn-ghost" onclick="showPage('postImaging')">Back</button>
               <button type="button" class="btn" onclick="goToPostAcute()">Evaluate post-acute studies</button>
               <button type="button" class="btn btn-primary" onclick="proceedToShare()">Next</button>
             </div>
@@ -421,7 +491,7 @@
         <p class="muted">This page lists only post-acute studies.</p>
         <div class="card"><ul id="summaryChronicContent" class="summary-list"></ul></div>
         <div class="btn-row" style="margin-top:.9rem">
-          <button type="button" class="btn" onclick="showPage('summaryPage')">Back</button>
+          <button type="button" class="btn btn-ghost" onclick="showPage('postAcutePage')">Back</button>
           <button type="button" class="btn btn-primary" onclick="proceedToShareChronic()">Next</button>
         </div>
       </div>
@@ -431,8 +501,6 @@
         <h2>Patient Summary & Share</h2>
         <div class="card stack">
           <form id="shareForm" class="stack">
-            <div class="stack"><label for="patientNumber">Patient record number</label><input type="text" id="patientNumber" placeholder="e.g., 2025-00123" required /></div>
-
             <div class="stack">
               <label>Randomization outcome for each selected study</label>
               <div id="studyOutcomesContainer" style="display:grid;grid-template-columns:1fr 150px;gap:.5rem;align-items:center;"></div>
@@ -487,7 +555,6 @@
         <h2>Post-acute Summary & Share</h2>
         <div class="card stack">
           <form id="shareChronicForm" class="stack">
-            <div class="stack"><label for="patientNumber2">Patient record number</label><input type="text" id="patientNumber2" placeholder="e.g., 2025-00123" required /></div>
             <div class="stack">
               <label>Randomization outcome</label>
               <div id="studyChronicOutcomesContainer" style="display:grid;grid-template-columns:1fr 150px;gap:.5rem;align-items:center;"></div>
@@ -622,7 +689,7 @@
               <button type="button" class="btn" onclick="tp_copy()">Copy</button>
               <button type="button" class="btn" onclick="tp_shareWA()">Share via WhatsApp</button>
               <button type="button" class="btn btn-accent" onclick="tp_save()">Save to Google Sheet</button>
-              <button type="button" class="btn" onclick="showPage('trialsList')">Back</button>
+              <button type="button" class="btn btn-ghost" onclick="showPage(selectedTrialName==='NO_TRIALS'?'workflowSelector':'trialDetail')">Back</button>
             </div>
           </form>
         </div>
@@ -660,9 +727,18 @@
   <nav class="bottom-nav">
     <div class="shell bottom-inner">
       <div class="bottom-grid">
-        <button class="navbtn active" data-target="mainMenu" onclick="navGo('mainMenu')"><span class="navdot"></span> Menu</button>
-        <button class="navbtn" data-target="preImaging" onclick="navGo('preImaging')"><span class="navdot"></span> Pre-Imaging</button>
-        <button class="navbtn" data-target="trialsList" onclick="navGo('trialsList')"><span class="navdot"></span> Trials</button>
+        <button class="navbtn active" data-target="landingPage" onclick="navGo('landingPage')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span class="nav-label">Menu</span>
+        </button>
+        <button class="navbtn" data-target="workflowSelector" onclick="promptNewPatient()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          <span class="nav-label">New Patient</span>
+        </button>
+        <button class="navbtn" data-target="trialsList" onclick="navGo('trialsList')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          <span class="nav-label">Trials Info</span>
+        </button>
       </div>
     </div>
   </nav>

@@ -1,4 +1,16 @@
         /* ======= RESET / MODAL ======= */
+        let _confirmCallback = null;
+        function openConfirmModal(title, body, onConfirm){
+          _confirmCallback = onConfirm;
+          openModal(title, `
+            <p style="margin:0 0 1rem 0;color:#475569">${body}</p>
+            <div class="btn-row" style="justify-content:flex-end">
+              <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+              <button class="btn btn-accent" onclick="closeModal(); if(_confirmCallback){ _confirmCallback(); _confirmCallback=null; }">Yes, delete</button>
+            </div>
+          `);
+        }
+
         function restart(){
           preData={}; postData={}; evtData={}; hemData={};
           eligibility={
@@ -33,7 +45,7 @@
           document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
           document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
 
-          showPage('mainMenu');
+          showPage('landingPage');
         }
 
         function openModal(title, html){

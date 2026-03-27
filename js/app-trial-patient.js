@@ -7,6 +7,15 @@
           armRow.style.display = (selectedTrialName==='NO_TRIALS' || !hasKnownStudyArm(lbl)) ? 'none' : 'grid';
           document.getElementById('trialPatientForm').reset();
           document.getElementById('tp_otherTrials').innerHTML = "";
+
+          // Pre-populate from preData (Patient in Progress cross-flow sharing)
+          if(preData){
+            if(preData.patientId){ const el=document.getElementById('tp_patientId'); if(el) el.value=preData.patientId; }
+            if(isFinite(preData.age)){ const el=document.getElementById('tp_age'); if(el) el.value=preData.age; }
+            if(isFinite(preData.nihss)){ const el=document.getElementById('tp_nihss'); if(el) el.value=preData.nihss; }
+            if(isFinite(preData.premrs)){ const el=document.getElementById('tp_mrs'); if(el) el.value=preData.premrs; }
+          }
+
           tp_buildMessage();
           showPage('trialPatientPage');
         }

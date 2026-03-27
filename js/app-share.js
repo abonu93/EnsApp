@@ -133,7 +133,7 @@ function updateTargetVesselSummary(){
 
 
 function buildShareMessage(){
-  const pn = (document.getElementById('patientNumber')?.value || "").trim() || "Patient record";
+  const pn = (preData.patientId || "Patient record");
   const tev = (document.querySelector('input[name="tev"]:checked') || {}).value || "";
   const mtici = (document.getElementById('mtici') || {}).value || "";
   const tiv = (document.querySelector('input[name="tiv"]:checked') || {}).value || "";
@@ -181,8 +181,8 @@ function buildShareMessage(){
 
 
         function saveToSheet(){
-          const Npatient=(document.getElementById('patientNumber')?.value||"").trim();
-          if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> before saving."); return; }
+          const Npatient=preData.patientId||"";
+          if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> in the Pre-Imaging form before saving."); return; }
           if(typeof preData.age==="undefined"||typeof preData.nihss==="undefined"||typeof preData.ltsw==="undefined"||typeof preData.premrs==="undefined"){
             openModal("Incomplete Pre-Imaging","Complete Pre-Imaging first (Age, NIHSS, LTSW, pre-mRS)."); return; }
           const tev=(document.querySelector('input[name="tev"]:checked')||{}).value||"";
@@ -201,7 +201,7 @@ function buildShareMessage(){
           openModal("Saved","Saved to Google Sheet ✅");
         }
 
-        document.addEventListener('input',(e)=>{ if(e.target && (e.target.id==='patientNumber' || e.target.id==='notesField')) buildShareMessage(); });
+        document.addEventListener('input',(e)=>{ if(e.target && e.target.id==='notesField') buildShareMessage(); });
         document.addEventListener('change',(e)=>{
   const t = e.target;
   if (!t) return;
@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         }
 
         function buildShareMessageChronic(){
-          const pn=(document.getElementById('patientNumber2')?.value||"").trim()||"Patient record";
+          const pn=(preData.patientId||"Patient record");
           const lines=selectedChronic.map(study=>{
             const outcome=studyChronicOutcomes[study]||"intervention";
             return `${pn}, age ${isFinite(preData.age)?preData.age:"?"}, NIHSS ${isFinite(preData.nihss)?preData.nihss:"?"}, mRS ${isFinite(preData.premrs)?preData.premrs:"?"}, ${study} (${outcome})`;
@@ -256,8 +256,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
         }
 
         function saveToSheetChronic(){
-          const Npatient=(document.getElementById('patientNumber2')?.value||"").trim();
-          if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> before saving."); return; }
+          const Npatient=preData.patientId||"";
+          if(!Npatient){ openModal("Missing field","Enter the <strong>patient record number</strong> in the Pre-Imaging form before saving."); return; }
           if(typeof preData.age==="undefined"||typeof preData.nihss==="undefined"||typeof preData.ltsw==="undefined"||typeof preData.premrs==="undefined"){
             openModal("Incomplete Pre-Imaging","Complete Pre-Imaging first (Age, NIHSS, LTSW, pre-mRS)."); return; }
           const t = Object.fromEntries(SHEET_TRIAL_KEYS.map(k=>[k,"no"]));
@@ -274,7 +274,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
           openModal("Saved","Saved to Google Sheet ✅");
         }
 
-        document.addEventListener('input',(e)=>{ if(e.target && e.target.id==='patientNumber2') buildShareMessageChronic(); });
 
         function copyMessageChronic(){ const ta=document.getElementById('shareMessage2'); ta.select(); ta.setSelectionRange(0,99999); document.execCommand('copy'); openModal("Copied","Message copied to clipboard."); }
         function shareWhatsAppChronic(){ const msg=document.getElementById('shareMessage2').value; const url="https://wa.me/?text="+encodeURIComponent(msg); window.open(url,"_blank"); }

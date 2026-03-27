@@ -2,6 +2,7 @@
         function submitPreImaging(){
           Object.keys(reasons).forEach(k=>{ reasons[k].meet=[]; reasons[k].fail=[]; });
 
+          preData.patientId=(document.getElementById('patientId')?.value||"").trim();
           preData.age=parseInt(document.getElementById('age').value);
           preData.nihss=parseInt(document.getElementById('nihss').value);
           preData.premrs=parseInt(document.getElementById('premrs').value);
