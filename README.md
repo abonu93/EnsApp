@@ -40,6 +40,14 @@ Prerequisito: Node.js installato.
 1. Esegui `npm test`
 2. I test coprono le regole pure in `js/domain/`
 
+## Branch del repository
+
+- **`main`** -> versione **live** (produzione). Sempre stabile.
+- **`develop`** -> versione **di lavoro** (integrazione). Qui confluiscono le modifiche prima di andare in produzione.
+- **`feature/...`** / **`fix/...`** -> branch temporanei per ogni task, creati da `develop`.
+
+Per il flusso completo vedi [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md#branching-strategy).
+
 ## Documentazione di supporto
 
 - [Architettura](docs/ARCHITETTURA.md)
