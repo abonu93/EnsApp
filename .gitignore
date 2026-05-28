@@ -19,3 +19,4 @@ playwright/.cache/
 .env
 .env.local
 .env.*.local
+screenshots/
