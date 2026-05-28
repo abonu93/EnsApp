@@ -18,10 +18,13 @@ const browser = await chromium.launch({
 });
 
 const shots = [
-  { name: "01-mobile-light", viewport: { width: 390, height: 844 }, theme: "light" },
-  { name: "02-mobile-dark", viewport: { width: 390, height: 844 }, theme: "dark" },
-  { name: "03-desktop-light", viewport: { width: 1280, height: 900 }, theme: "light" },
-  { name: "04-desktop-dark", viewport: { width: 1280, height: 900 }, theme: "dark" },
+  { name: "01-landing-mobile-light", route: "/", viewport: { width: 390, height: 844 }, theme: "light" },
+  { name: "02-landing-mobile-dark", route: "/", viewport: { width: 390, height: 844 }, theme: "dark" },
+  { name: "03-components-mobile-light", route: "/components", viewport: { width: 390, height: 1400 }, theme: "light" },
+  { name: "04-components-mobile-dark", route: "/components", viewport: { width: 390, height: 1400 }, theme: "dark" },
+  { name: "05-form-demo-mobile", route: "/form-demo", viewport: { width: 390, height: 844 }, theme: "light" },
+  { name: "06-landing-desktop", route: "/", viewport: { width: 1280, height: 900 }, theme: "light" },
+  { name: "07-components-desktop-dark", route: "/components", viewport: { width: 1280, height: 1400 }, theme: "dark" },
 ];
 
 for (const shot of shots) {
@@ -31,13 +34,15 @@ for (const shot of shots) {
     colorScheme: shot.theme === "dark" ? "dark" : "light",
   });
   const page = await ctx.newPage();
-  await page.goto(URL, { waitUntil: "networkidle" });
-  // Set theme explicitly (overrides "auto" default)
-  await page.evaluate((t) => {
+  // Set theme before navigation (storageState pattern is overkill for this)
+  await page.addInitScript((t) => {
     localStorage.setItem("ensapp:theme:v1", t);
+  }, shot.theme);
+  await page.goto(URL + "#" + shot.route, { waitUntil: "networkidle" });
+  await page.evaluate((t) => {
     document.documentElement.setAttribute("data-theme", t);
   }, shot.theme);
-  await page.waitForTimeout(150);
+  await page.waitForTimeout(250);
 
   const file = join(outDir, `${shot.name}.png`);
   await page.screenshot({ path: file, fullPage: true });
