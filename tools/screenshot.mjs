@@ -18,13 +18,13 @@ const browser = await chromium.launch({
 });
 
 const shots = [
-  { name: "01-landing-mobile-light", route: "/", viewport: { width: 390, height: 844 }, theme: "light" },
-  { name: "02-landing-mobile-dark", route: "/", viewport: { width: 390, height: 844 }, theme: "dark" },
-  { name: "03-components-mobile-light", route: "/components", viewport: { width: 390, height: 1400 }, theme: "light" },
-  { name: "04-components-mobile-dark", route: "/components", viewport: { width: 390, height: 1400 }, theme: "dark" },
-  { name: "05-form-demo-mobile", route: "/form-demo", viewport: { width: 390, height: 844 }, theme: "light" },
-  { name: "06-landing-desktop", route: "/", viewport: { width: 1280, height: 900 }, theme: "light" },
-  { name: "07-components-desktop-dark", route: "/components", viewport: { width: 1280, height: 1400 }, theme: "dark" },
+  { name: "01-landing", route: "/", viewport: { width: 390, height: 844 }, theme: "light" },
+  { name: "02-workflow", route: "/workflow", viewport: { width: 390, height: 844 }, theme: "light" },
+  { name: "03-trials-list", route: "/trials", viewport: { width: 390, height: 1400 }, theme: "light" },
+  { name: "04-trial-detail", route: "/trial/MOSTE", viewport: { width: 390, height: 1400 }, theme: "light" },
+  { name: "05-pre-imaging", route: "/pre-imaging", viewport: { width: 390, height: 1700 }, theme: "light" },
+  { name: "06-pre-imaging-dark", route: "/pre-imaging", viewport: { width: 390, height: 1700 }, theme: "dark" },
+  { name: "07-trials-desktop-dark", route: "/trials", viewport: { width: 1280, height: 1200 }, theme: "dark" },
 ];
 
 for (const shot of shots) {

@@ -1,150 +1,119 @@
 <script lang="ts">
-  import { link } from "svelte-spa-router";
+  import { link, push } from "svelte-spa-router";
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import { hasPatientInProgress, preData, clearPatient } from "$lib/stores/patient";
+
+  function startNew() {
+    clearPatient();
+    push("/workflow");
+  }
+
+  function resume() {
+    push("/workflow");
+  }
 </script>
 
-<h1>EnsApp</h1>
-<p class="lead">Assegnazione paziente a trial clinici - foundation Svelte 5.</p>
-
-{#if $hasPatientInProgress}
-  <Card title="Paziente in lavorazione" subtitle="Ripreso da localStorage">
-    {#snippet children()}
-      <dl class="resume">
-        {#if $preData.patientId}<div><dt>ID</dt><dd>{$preData.patientId}</dd></div>{/if}
-        {#if $preData.age != null}<div><dt>Età</dt><dd>{$preData.age}</dd></div>{/if}
-        {#if $preData.nihss != null}<div><dt>NIHSS</dt><dd>{$preData.nihss}</dd></div>{/if}
-        {#if $preData.ltsw != null}<div><dt>LTSW</dt><dd>{$preData.ltsw}h</dd></div>{/if}
-      </dl>
-      <div class="resume-actions">
-        <Button variant="ghost" onclick={clearPatient}>Scarta</Button>
-        <Button variant="primary">
-          {#snippet children()}Riprendi{/snippet}
-        </Button>
-      </div>
-    {/snippet}
-  </Card>
-{/if}
-
-<div class="stack-lg">
-  <Card title="Stato del redesign">
-    {#snippet children()}
-      <ul class="status">
-        <li><Pill tone="success">{#snippet children()}Fase 0{/snippet}</Pill> Setup tooling</li>
-        <li><Pill tone="success">{#snippet children()}In corso{/snippet}</Pill> Fase 1 - componenti + router</li>
-        <li><Pill tone="neutral">{#snippet children()}Prossima{/snippet}</Pill> Fase 2 - migrazione schermate</li>
-      </ul>
-    {/snippet}
-  </Card>
-
-  <div class="cta-grid">
-    <a href="/components" use:link class="cta-link">
-      <Card title="Component gallery" subtitle="Tutti gli atomi del design system">
-        {#snippet children()}<p class="cta-desc">Button, TextField, RadioGroup, Modal, ProgressBar, Pill...</p>{/snippet}
-      </Card>
-    </a>
-    <a href="/form-demo" use:link class="cta-link">
-      <Card title="Form demo" subtitle="Mini wizard di esempio con validazione live">
-        {#snippet children()}<p class="cta-desc">Età, NIHSS, mRS - con persistenza in localStorage.</p>{/snippet}
-      </Card>
-    </a>
+<div class="hero">
+  <div class="brand-mark" aria-hidden="true">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2a4 4 0 0 0-4 4v4a4 4 0 0 0 4 4 4 4 0 0 0 4-4V6a4 4 0 0 0-4-4z" />
+      <path d="M12 14v8" />
+      <path d="M8 22h8" />
+    </svg>
   </div>
+  <h1>EnsApp</h1>
+  <p class="lead">Assegnazione paziente a trial clinici - acuto, emorragico e post-acuto.</p>
+</div>
+
+<div class="actions">
+  <Button variant="primary" size="lg" fullWidth onclick={startNew}>
+    {#snippet children()}Nuovo paziente{/snippet}
+  </Button>
+
+  {#if $hasPatientInProgress}
+    <Card title="Paziente in lavorazione" subtitle="Ripreso da localStorage">
+      {#snippet children()}
+        <dl class="resume">
+          {#if $preData.patientId}<div><dt>ID</dt><dd>{$preData.patientId}</dd></div>{/if}
+          {#if $preData.age != null}<div><dt>Eta'</dt><dd>{$preData.age}</dd></div>{/if}
+          {#if $preData.nihss != null}<div><dt>NIHSS</dt><dd>{$preData.nihss}</dd></div>{/if}
+          {#if $preData.ltsw != null}<div><dt>LTSW</dt><dd>{$preData.ltsw}h</dd></div>{/if}
+        </dl>
+        <div class="resume-actions">
+          <Button variant="ghost" onclick={clearPatient}>{#snippet children()}Scarta{/snippet}</Button>
+          <Button variant="primary" onclick={resume}>{#snippet children()}Riprendi{/snippet}</Button>
+        </div>
+      {/snippet}
+    </Card>
+  {/if}
+
+  <a href="/trials" use:link class="link-card">
+    <Card title="Catalogo trial" subtitle="Esplora i criteri di tutti i trial attivi">
+      {#snippet children()}<p class="muted">Browse senza paziente, per consultazione rapida.</p>{/snippet}
+    </Card>
+  </a>
 </div>
 
 <style>
+  .hero {
+    text-align: center;
+    padding-block: var(--sp-6) var(--sp-6);
+  }
+  .brand-mark {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto var(--sp-4);
+    border-radius: 24px;
+    background: linear-gradient(135deg, var(--primary), var(--hemorrhagic));
+    color: var(--text-inverted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+  }
   h1 {
     font-size: var(--fs-3xl);
     margin: 0;
   }
-
   .lead {
     color: var(--text-muted);
-    margin-block: var(--sp-2) var(--sp-6);
+    margin: var(--sp-2) 0 0;
+    font-size: var(--fs-base);
   }
-
-  .stack-lg {
+  .actions {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-6);
-  }
-
-  .status {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    color: var(--text);
-  }
-
-  .status li {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-3);
-    font-size: var(--fs-sm);
-  }
-
-  .cta-grid {
-    display: grid;
     gap: var(--sp-4);
   }
-
-  @media (min-width: 640px) {
-    .cta-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
-
-  .cta-link {
+  .link-card {
     text-decoration: none;
     color: inherit;
-    display: block;
     transition: transform var(--transition-fast);
   }
-
-  .cta-link:hover {
+  .link-card:hover {
     text-decoration: none;
     transform: translateY(-2px);
   }
-
-  .cta-desc {
+  .muted {
     margin: 0;
     color: var(--text-muted);
     font-size: var(--fs-sm);
   }
-
   .resume {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: var(--sp-3);
     margin: 0 0 var(--sp-4);
   }
-
-  .resume div {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
+  .resume div { display: flex; flex-direction: column; gap: 2px; }
   .resume dt {
     font-size: var(--fs-xs);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.4px;
   }
-
-  .resume dd {
-    margin: 0;
-    font-size: var(--fs-base);
-    font-weight: var(--fw-semibold);
-  }
-
-  .resume-actions {
-    display: flex;
-    gap: var(--sp-2);
-    justify-content: flex-end;
-  }
+  .resume dd { margin: 0; font-size: var(--fs-base); font-weight: var(--fw-semibold); }
+  .resume-actions { display: flex; gap: var(--sp-2); justify-content: flex-end; }
 </style>

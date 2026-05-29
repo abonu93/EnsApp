@@ -8,8 +8,8 @@
 
   const navItems = [
     { href: "/", label: "Home", icon: "home" as const },
-    { href: "/components", label: "Componenti", icon: "list" as const },
-    { href: "/form-demo", label: "Demo form", icon: "user-plus" as const },
+    { href: "/workflow", label: "Nuovo", icon: "user-plus" as const },
+    { href: "/trials", label: "Trial", icon: "list" as const },
   ];
 </script>
 
