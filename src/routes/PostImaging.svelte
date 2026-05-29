@@ -25,11 +25,26 @@
   let strokeType = $state<StrokeType>(($postData.strokeType as StrokeType) ?? "");
   // Ischemic
   let candidate = $state<CandidateStatus>(($postData.candidate as CandidateStatus) ?? "");
-  let ivtCandidate = $state<CandidateStatus>(($postData.ivtCandidate as CandidateStatus) ?? "");
+  // IVT unificato: 3 stati derivati su ivtCandidate + contraTpa
+  // - "eligible-no-contra" -> ivtCandidate=eligible, contraTpa=no
+  // - "eligible-with-contra" -> ivtCandidate=eligible, contraTpa=yes
+  // - "not-eligible" -> ivtCandidate=not eligible, contraTpa=""
+  type IvtStatus = "" | "eligible-no-contra" | "eligible-with-contra" | "not-eligible";
+  function ivtFromStore(ivt: string | undefined, contra: string | undefined): IvtStatus {
+    if (ivt === "eligible" && contra === "yes") return "eligible-with-contra";
+    if (ivt === "eligible") return "eligible-no-contra";
+    if (ivt === "not eligible") return "not-eligible";
+    return "";
+  }
+  let ivtStatus = $state<IvtStatus>(ivtFromStore($postData.ivtCandidate, $postData.contraTpa));
+  const ivtCandidate = $derived<CandidateStatus>(
+    ivtStatus === "not-eligible" ? "not eligible" : ivtStatus ? "eligible" : ""
+  );
+  const contraTpa = $derived<YN>(ivtStatus === "eligible-with-contra" ? "yes" : ivtStatus === "eligible-no-contra" ? "no" : "");
+
   let tandem = $state<YN>(($postData.tandem as YN) ?? "");
   let tortuosity = $state<YN>(($postData.tortuosity as YN) ?? "");
   let targetVessels = $state<VesselCode[]>(($postData.targetVessels as VesselCode[]) ?? []);
-  let contraTpa = $state<YN>(($postData.contraTpa as YN) ?? "");
   let aspects = $state<number | null>($postData.aspects ?? null);
   let lesionConfirmed = $state<YN>(($postData.lesionConfirmed as YN) ?? "");
   // Hemorrhagic
@@ -62,6 +77,12 @@
       lesionConfirmed: lesionConfirmed || undefined,
     });
   });
+
+  const ivtUnifiedOpts = $derived<{ value: IvtStatus; label: string; description?: string }[]>([
+    { value: "eligible-no-contra", label: $t.postImaging.candidateEligible, description: "Senza controindicazioni a trombolisi" },
+    { value: "eligible-with-contra", label: "Eleggibile con controindicazioni", description: "Eligible IVT ma presenti controindicazioni TPA" },
+    { value: "not-eligible", label: $t.postImaging.candidateNotEligible },
+  ]);
 
   $effect(() => {
     hemData.set({
@@ -150,25 +171,15 @@
   {#if isIschemic}
     <Card title={$t.postImaging.candidacyTitle}>
       {#snippet children()}
-        <div class="form-stack">
-          <RadioGroup
-            id="post-candidate"
-            label={$t.postImaging.candidateEvt}
-            name="candidate"
-            columns={2}
-            bind:value={candidate}
-            options={candidateOpts}
-            required
-          />
-          <RadioGroup
-            id="post-ivt"
-            label={$t.postImaging.candidateIvt}
-            name="ivtCandidate"
-            columns={2}
-            bind:value={ivtCandidate}
-            options={candidateOpts}
-          />
-        </div>
+        <RadioGroup
+          id="post-candidate"
+          label={$t.postImaging.candidateEvt}
+          name="candidate"
+          columns={2}
+          bind:value={candidate}
+          options={candidateOpts}
+          required
+        />
       {/snippet}
     </Card>
 
@@ -187,9 +198,20 @@
               hint={$t.postImaging.vesselsHint}
               required
             />
-            <RadioGroup id="post-contra" label={$t.postImaging.contraTpaLabel} name="contraTpa" columns={2} bind:value={contraTpa} options={ynOpts} required />
             <NumberField id="post-aspects" label={$t.postImaging.aspectsLabel} bind:value={aspects} min={0} max={10} hint={$t.postImaging.aspectsHint} />
           </div>
+        {/snippet}
+      </Card>
+
+      <Card title={$t.postImaging.candidacyTitle}>
+        {#snippet children()}
+          <RadioGroup
+            id="post-ivt"
+            label={$t.postImaging.candidateIvt}
+            name="ivtStatus"
+            bind:value={ivtStatus}
+            options={ivtUnifiedOpts}
+          />
         {/snippet}
       </Card>
     {:else if showNonEvtConfirm}

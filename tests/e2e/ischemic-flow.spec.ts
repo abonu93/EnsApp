@@ -35,7 +35,9 @@ test.describe("ischemic flow - golden patient", () => {
     await fillNumber(page, "pre-age", 70);
     await fillNumber(page, "pre-nihss", 14);
     await fillNumber(page, "pre-mrs", 1);
-    await fillNumber(page, "pre-ltsw", 3);
+    // LTSW datetime: 3 ore fa
+    const ltsw3h = new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 16);
+    await page.locator("#pre-ltsw").fill(ltsw3h);
     await selectRadio(page, "pre-angio", "yes");
     await selectRadio(page, "pre-doac", "no");
     await selectRadio(page, "pre-acei", "no");
@@ -51,12 +53,12 @@ test.describe("ischemic flow - golden patient", () => {
     // -- PostImaging: ischemic + EVT --
     await selectRadio(page, "post-stroke", "ischemic");
     await selectRadio(page, "post-candidate", "eligible");
-    await selectRadio(page, "post-ivt", "eligible");
     await selectRadio(page, "post-tandem", "no");
     await selectRadio(page, "post-tort", "no");
     await toggleCheckbox(page, "post-vessels", "m1");
-    await selectRadio(page, "post-contra", "no");
     await fillNumber(page, "post-aspects", 8);
+    // IVT unificato: eligible-no-contra
+    await selectRadio(page, "post-ivt", "eligible-no-contra");
     await page.getByRole("button", { name: /^avanti$/i }).click();
     await expect(page).toHaveURL(/\/summary$/);
 
@@ -115,6 +117,40 @@ test.describe("ischemic flow - golden patient", () => {
     // Banner di resume su landing
     await page.goto("/#/");
     await expect(page.getByText(/in lavorazione/i)).toBeVisible();
+  });
+
+  test("saved patients list persists across refresh", async ({ page }) => {
+    // freshSession (beforeEach) ha gia' fatto clear; inietta lo snapshot ORA
+    // e poi reload per far creare lo store con il valore presente in storage.
+    const entry = {
+      id: "test-123",
+      savedAt: new Date().toISOString(),
+      patientId: "TEST-001",
+      strokeType: "ischemic",
+      age: 72,
+      nihss: 10,
+      trials: ["WeTrust"],
+      snapshot: {
+        pre: { patientId: "TEST-001", age: 72, nihss: 10 },
+        post: {},
+        hem: {},
+        studies: ["WeTrust"],
+        outcomes: {},
+        chronic: [],
+        notes: "",
+        extras: {},
+      },
+    };
+    await page.evaluate((e) => {
+      const envelope = { v: 1, ts: Date.now(), data: [e] };
+      localStorage.setItem("ensapp:saved:v1", JSON.stringify(envelope));
+    }, entry);
+    await page.goto("/#/saved");
+    await page.reload();
+    await expect(page.getByText("TEST-001")).toBeVisible();
+    // Refresh ulteriore: la lista persiste
+    await page.reload();
+    await expect(page.getByText("TEST-001")).toBeVisible();
   });
 
   test("language switch updates UI immediately", async ({ page }) => {

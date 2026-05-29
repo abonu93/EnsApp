@@ -14,6 +14,9 @@ export type PreData = Partial<{
   age: number;
   nihss: number;
   premrs: number;
+  /** ISO datetime "Last seen well". Le ore vengono derivate. */
+  ltswDate: string;
+  /** Fallback: se l'utente preferisce inserire ore direttamente. */
   ltsw: number;
   wakeupStroke: boolean;
   wakeupSymptomsWithin6h: boolean;
@@ -57,9 +60,28 @@ export const hemData = persisted<HemData>({
   ttlMs: TTL_24H,
 });
 
-/** Snapshot completo per le regole acute (preData + postData merged). */
-export const acuteInput = derived([preData, postData], ([$pre, $post]) => {
-  return { ...$pre, ...$post } as Partial<AcuteInput>;
+/** Calcola ore tra LTSW datetime e adesso (positive). */
+export function hoursSince(isoDate: string | undefined): number | undefined {
+  if (!isoDate) return undefined;
+  const t = new Date(isoDate).getTime();
+  if (Number.isNaN(t)) return undefined;
+  const diffMs = Date.now() - t;
+  return diffMs / 3_600_000;
+}
+
+/**
+ * LTSW ore derivato: priorita' a `ltswDate` (se presente),
+ * fallback a `ltsw` numerico per retro-compatibilita'.
+ */
+export const ltswHours = derived(preData, ($pre) => {
+  const fromDate = hoursSince($pre.ltswDate);
+  if (fromDate !== undefined) return fromDate;
+  return $pre.ltsw;
+});
+
+/** Snapshot completo per le regole acute (preData + postData merged + ltswHours derived). */
+export const acuteInput = derived([preData, postData, ltswHours], ([$pre, $post, $h]) => {
+  return { ...$pre, ...$post, ltsw: $h } as Partial<AcuteInput>;
 });
 
 export function clearPatient(): void {

@@ -5,10 +5,12 @@
   import Pill from "$lib/components/Pill.svelte";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
   import { selectedStudies } from "$lib/stores/trialSelection";
+  import { acuteInput } from "$lib/stores/patient";
+  import { REASON_BY_TRIAL } from "$lib/domain/acute-reasons";
   import { t } from "$lib/i18n";
 
-  // Mappa nome di display -> nome usato in Sheet payload
-  // (consistente con buildTrialsForSheet)
+  let showIneligible = $state(false);
+
   interface EligibleEntry { display: string; eligible: boolean; tone: "ischemic" | "hemorrhagic" | "post-acute" }
 
   const acuteEligible = $derived<EligibleEntry[]>([
@@ -39,13 +41,27 @@
     [...acuteEligible, ...hemEligibleList].filter((e) => e.eligible)
   );
 
+  const ineligibleItems = $derived(
+    acuteEligible.filter((e) => !e.eligible)
+  );
+
   function toggle(name: string) {
     selectedStudies.update((arr) =>
       arr.includes(name) ? arr.filter((n) => n !== name) : [...arr, name]
     );
   }
 
+  function reasonsFor(name: string): string[] {
+    const fn = REASON_BY_TRIAL[name];
+    if (!fn) return [];
+    return fn($acuteInput as Parameters<typeof fn>[0]).fail;
+  }
+
   const selectedCount = $derived($selectedStudies.length);
+
+  function proceedSkip() {
+    push("/share");
+  }
 </script>
 
 <h1>{$t.summary.title}</h1>
@@ -55,16 +71,6 @@
   <Card title={$t.summary.noneTitle}>
     {#snippet children()}<p class="muted">{$t.summary.noneDesc}</p>{/snippet}
   </Card>
-  <div class="actions">
-    <Button variant="secondary" fullWidth onclick={() => push("/post-imaging")}>
-      {#snippet children()}{$t.common.back}{/snippet}
-    </Button>
-    <a href="/post-acute" use:link class="full">
-      <Button variant="primary" fullWidth>
-        {#snippet children()}{$t.summary.goToPostAcute}{/snippet}
-      </Button>
-    </a>
-  </div>
 {:else}
   <Card>
     {#snippet children()}
@@ -85,20 +91,68 @@
       </ul>
     {/snippet}
   </Card>
+{/if}
 
-  <div class="actions">
-    <Button variant="secondary" fullWidth onclick={() => push("/post-imaging")}>
-      {#snippet children()}{$t.common.back}{/snippet}
-    </Button>
-    <Button variant="primary" fullWidth disabled={selectedCount === 0} onclick={() => push("/share")}>
-      {#snippet children()}{$t.summary.proceed} ({selectedCount}){/snippet}
-    </Button>
+{#if ineligibleItems.length > 0}
+  <div class="toggle-row">
+    <button class="toggle-btn" type="button" onclick={() => (showIneligible = !showIneligible)} aria-expanded={showIneligible}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class:rot={showIneligible}>
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+      {showIneligible ? "Nascondi" : "Mostra"} non eleggibili ({ineligibleItems.length})
+    </button>
   </div>
 
-  <a href="/post-acute" use:link class="post-link">
-    {$t.summary.goToPostAcute} →
-  </a>
+  {#if showIneligible}
+    <Card>
+      {#snippet children()}
+        <ul class="trial-list">
+          {#each ineligibleItems as item (item.display)}
+            {@const fails = reasonsFor(item.display)}
+            <li class="inel">
+              <div class="row no-touch">
+                <div class="row-text">
+                  <strong>{item.display}</strong>
+                  <Pill tone="ischemic">{#snippet children()}{item.tone}{/snippet}</Pill>
+                </div>
+                <Pill tone="danger">{#snippet children()}{$t.common.notEligible}{/snippet}</Pill>
+              </div>
+              {#if fails.length > 0}
+                <details class="reasons">
+                  <summary>Criteri mancanti ({fails.length})</summary>
+                  <ul>
+                    {#each fails as f}
+                      <li>{f}</li>
+                    {/each}
+                  </ul>
+                </details>
+              {/if}
+            </li>
+          {/each}
+        </ul>
+      {/snippet}
+    </Card>
+  {/if}
 {/if}
+
+<div class="actions">
+  <Button variant="secondary" fullWidth onclick={() => push("/post-imaging")}>
+    {#snippet children()}{$t.common.back}{/snippet}
+  </Button>
+  {#if selectedCount > 0}
+    <Button variant="primary" fullWidth onclick={() => push("/share")}>
+      {#snippet children()}{$t.summary.proceed} ({selectedCount}){/snippet}
+    </Button>
+  {:else}
+    <Button variant="primary" fullWidth onclick={proceedSkip}>
+      {#snippet children()}Continua senza selezione{/snippet}
+    </Button>
+  {/if}
+</div>
+
+<a href="/post-acute" use:link class="post-link">
+  {$t.summary.goToPostAcute} →
+</a>
 
 <style>
   h1 { font-size: var(--fs-2xl); margin: 0; }
@@ -117,8 +171,9 @@
     transition: all var(--transition-fast);
     min-height: var(--touch-min);
   }
-  .row:hover { border-color: var(--primary); }
+  .row:not(.no-touch):hover { border-color: var(--primary); }
   .row.checked { background: var(--primary-soft); border-color: var(--primary); }
+  .row.no-touch { cursor: default; }
   .row input { width: 20px; height: 20px; accent-color: var(--primary); }
   .row-text {
     flex: 1;
@@ -128,6 +183,39 @@
     flex-wrap: wrap;
   }
   .row-text strong { font-size: var(--fs-base); }
+  .toggle-row { margin-top: var(--sp-4); }
+  .toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    padding: var(--sp-2) var(--sp-3);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-medium);
+    min-height: var(--touch-min);
+  }
+  .toggle-btn:hover { color: var(--text); }
+  .toggle-btn svg { transition: transform var(--transition-fast); }
+  .toggle-btn svg.rot { transform: rotate(90deg); }
+  .inel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .reasons {
+    padding: var(--sp-2) var(--sp-3);
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-sm);
+  }
+  .reasons summary {
+    cursor: pointer;
+    color: var(--text-muted);
+    font-weight: var(--fw-medium);
+    padding: var(--sp-1) 0;
+  }
+  .reasons ul { margin: var(--sp-2) 0 0; padding-left: var(--sp-5); color: var(--danger); }
+  .reasons li { margin-bottom: 2px; }
   .actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -140,14 +228,12 @@
     margin-inline: calc(-1 * var(--sp-4));
     border-top: 1px solid var(--border);
   }
-  .full { grid-column: 1 / -1; text-decoration: none; color: inherit; }
-  .full :global(button) { color: var(--text-inverted); }
   .post-link {
     display: block;
     text-align: center;
     margin-top: var(--sp-4);
     padding: var(--sp-3);
-    color: var(--post-acute);
+    color: var(--post-acute-text);
     font-weight: var(--fw-medium);
     text-decoration: none;
   }

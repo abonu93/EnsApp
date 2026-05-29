@@ -11,6 +11,7 @@
   const navItems = $derived([
     { href: "/", label: $t.nav.home, icon: "home" as const },
     { href: "/workflow", label: $t.nav.new, icon: "user-plus" as const },
+    { href: "/saved", label: "Inviati", icon: "archive" as const },
     { href: "/trials", label: $t.nav.trials, icon: "list" as const },
   ]);
 </script>

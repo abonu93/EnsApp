@@ -19,7 +19,11 @@ test.describe("hemorrhagic flow - FASTEST eligible", () => {
     await fillNumber(page, "pre-age", 65);
     await fillNumber(page, "pre-nihss", 5);
     await fillNumber(page, "pre-mrs", 1);
-    await fillNumber(page, "pre-ltsw", 1.5);
+    // LTSW datetime: 1.5 ore fa
+    {
+      const dt = new Date(Date.now() - 1.5 * 3600 * 1000).toISOString().slice(0, 16);
+      await page.locator("#pre-ltsw").fill(dt);
+    }
     await selectRadio(page, "pre-angio", "yes");
     await selectRadio(page, "pre-doac", "no");
     await selectRadio(page, "pre-acei", "no");
@@ -61,7 +65,11 @@ test.describe("hemorrhagic flow - FASTEST eligible", () => {
     await fillNumber(page, "pre-age", 65);
     await fillNumber(page, "pre-nihss", 5);
     await fillNumber(page, "pre-mrs", 1);
-    await fillNumber(page, "pre-ltsw", 5); // > 2h, niente FASTEST extra
+    {
+      // LTSW 5h fa: oltre la finestra FASTEST extra
+      const dt = new Date(Date.now() - 5 * 3600 * 1000).toISOString().slice(0, 16);
+      await page.locator("#pre-ltsw").fill(dt);
+    }
     await selectRadio(page, "pre-angio", "yes");
     await selectRadio(page, "pre-doac", "no");
     await selectRadio(page, "pre-acei", "no");

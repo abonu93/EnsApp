@@ -12,6 +12,7 @@ import Summary from "../../routes/Summary.svelte";
 import Share from "../../routes/Share.svelte";
 import PostAcute from "../../routes/PostAcute.svelte";
 import TrialPatient from "../../routes/TrialPatient.svelte";
+import SavedPatients from "../../routes/SavedPatients.svelte";
 import Components from "../../routes/Components.svelte";
 import FormDemo from "../../routes/FormDemo.svelte";
 import NotFound from "../../routes/NotFound.svelte";
@@ -28,6 +29,7 @@ export const routes = {
   "/share": Share,
   "/post-acute": PostAcute,
   "/trial-patient": TrialPatient,
+  "/saved": SavedPatients,
   "/components": Components,
   "/form-demo": FormDemo,
   "*": NotFound,

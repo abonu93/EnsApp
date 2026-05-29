@@ -5,7 +5,7 @@
   interface NavItem {
     href: string;
     label: string;
-    icon: "home" | "user-plus" | "list";
+    icon: "home" | "user-plus" | "list" | "archive";
   }
 
   interface Props {
@@ -45,6 +45,12 @@
             <line x1="3" y1="6" x2="3.01" y2="6" />
             <line x1="3" y1="12" x2="3.01" y2="12" />
             <line x1="3" y1="18" x2="3.01" y2="18" />
+          </svg>
+        {:else if item.icon === "archive"}
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="21 8 21 21 3 21 3 8" />
+            <rect x="1" y="3" width="22" height="5" />
+            <line x1="10" y1="12" x2="14" y2="12" />
           </svg>
         {/if}
       </span>
