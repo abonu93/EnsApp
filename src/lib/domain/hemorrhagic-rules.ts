@@ -1,7 +1,22 @@
 import type { YesNoEmpty } from "./acute-rules.js";
 
-export type AnticoagStatus = "none" | "warfarin" | "doac" | "lmwh" | "antiplatelet" | "";
-export type SecondaryCause = "None" | "Tumor" | "AVM" | "Aneurysm" | "Cavernoma" | "Other" | "";
+export type AnticoagStatus =
+  | "none"
+  | "warfarin"
+  | "doac"
+  | "lmwh"
+  | "heparin"
+  | "antiplatelet"
+  | "";
+export type SecondaryCause =
+  | "None"
+  | "Tumor"
+  | "AVM"
+  | "Aneurysm"
+  | "Cavernoma"
+  | "Traumatic"
+  | "Other"
+  | "";
 
 export interface HemorrhagicInput {
   age: number;

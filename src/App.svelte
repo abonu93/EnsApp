@@ -2,26 +2,31 @@
   import Router from "svelte-spa-router";
   import { routes, setupRouterA11y } from "$lib/router";
   import ThemeToggle from "$lib/components/ThemeToggle.svelte";
+  import LocaleToggle from "$lib/components/LocaleToggle.svelte";
   import BottomNav from "$lib/components/BottomNav.svelte";
+  import { t } from "$lib/i18n";
 
   setupRouterA11y();
 
-  const navItems = [
-    { href: "/", label: "Home", icon: "home" as const },
-    { href: "/workflow", label: "Nuovo", icon: "user-plus" as const },
-    { href: "/trials", label: "Trial", icon: "list" as const },
-  ];
+  const navItems = $derived([
+    { href: "/", label: $t.nav.home, icon: "home" as const },
+    { href: "/workflow", label: $t.nav.new, icon: "user-plus" as const },
+    { href: "/trials", label: $t.nav.trials, icon: "list" as const },
+  ]);
 </script>
 
-<a href="#main" class="skip-link">Vai al contenuto</a>
+<a href="#main" class="skip-link">{$t.common.skipToContent}</a>
 
 <header>
   <div class="container header-row">
     <a href="/" class="brand">
       <span class="brand-dot" aria-hidden="true"></span>
-      EnsApp
+      {$t.common.appName}
     </a>
-    <ThemeToggle />
+    <div class="header-controls">
+      <LocaleToggle />
+      <ThemeToggle />
+    </div>
   </div>
 </header>
 
@@ -52,6 +57,12 @@
     justify-content: space-between;
     min-height: var(--header-h);
     gap: var(--sp-3);
+  }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
   }
 
   .brand {

@@ -18,13 +18,13 @@ const browser = await chromium.launch({
 });
 
 const shots = [
-  { name: "01-landing", route: "/", viewport: { width: 390, height: 844 }, theme: "light" },
-  { name: "02-workflow", route: "/workflow", viewport: { width: 390, height: 844 }, theme: "light" },
-  { name: "03-trials-list", route: "/trials", viewport: { width: 390, height: 1400 }, theme: "light" },
-  { name: "04-trial-detail", route: "/trial/MOSTE", viewport: { width: 390, height: 1400 }, theme: "light" },
-  { name: "05-pre-imaging", route: "/pre-imaging", viewport: { width: 390, height: 1700 }, theme: "light" },
-  { name: "06-pre-imaging-dark", route: "/pre-imaging", viewport: { width: 390, height: 1700 }, theme: "dark" },
-  { name: "07-trials-desktop-dark", route: "/trials", viewport: { width: 1280, height: 1200 }, theme: "dark" },
+  { name: "01-landing-it", route: "/", viewport: { width: 390, height: 844 }, theme: "light", locale: "it" },
+  { name: "02-landing-en", route: "/", viewport: { width: 390, height: 844 }, theme: "light", locale: "en" },
+  { name: "03-landing-es", route: "/", viewport: { width: 390, height: 844 }, theme: "light", locale: "es" },
+  { name: "04-workflow-en", route: "/workflow", viewport: { width: 390, height: 844 }, theme: "light", locale: "en" },
+  { name: "05-post-imaging-en", route: "/post-imaging", viewport: { width: 390, height: 1600 }, theme: "light", locale: "en" },
+  { name: "06-summary-en", route: "/summary", viewport: { width: 390, height: 1200 }, theme: "light", locale: "en" },
+  { name: "07-share-es-dark", route: "/share", viewport: { width: 390, height: 1400 }, theme: "dark", locale: "es" },
 ];
 
 for (const shot of shots) {
@@ -34,14 +34,21 @@ for (const shot of shots) {
     colorScheme: shot.theme === "dark" ? "dark" : "light",
   });
   const page = await ctx.newPage();
-  // Set theme before navigation (storageState pattern is overkill for this)
-  await page.addInitScript((t) => {
-    localStorage.setItem("ensapp:theme:v1", t);
-  }, shot.theme);
+  await page.addInitScript(
+    ({ theme, locale }) => {
+      localStorage.setItem("ensapp:theme:v1", theme);
+      if (locale) localStorage.setItem("ensapp:locale:v1", locale);
+    },
+    { theme: shot.theme, locale: shot.locale ?? "it" }
+  );
   await page.goto(URL + "#" + shot.route, { waitUntil: "networkidle" });
-  await page.evaluate((t) => {
-    document.documentElement.setAttribute("data-theme", t);
-  }, shot.theme);
+  await page.evaluate(
+    ({ theme, locale }) => {
+      document.documentElement.setAttribute("data-theme", theme);
+      if (locale) document.documentElement.setAttribute("lang", locale);
+    },
+    { theme: shot.theme, locale: shot.locale ?? "it" }
+  );
   await page.waitForTimeout(250);
 
   const file = join(outDir, `${shot.name}.png`);

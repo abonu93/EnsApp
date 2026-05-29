@@ -1,9 +1,4 @@
 // Wrapper attorno a svelte-spa-router: route map + focus management a11y.
-// Route patterns supportate da svelte-spa-router:
-//   /                              (statica)
-//   /trial/:name                   (parametro :name in `params.name`)
-//   /workflow                      (annidate ok)
-//   *                              (catch-all 404)
 
 import { location } from "svelte-spa-router";
 import Landing from "../../routes/Landing.svelte";
@@ -12,6 +7,11 @@ import TrialsList from "../../routes/TrialsList.svelte";
 import TrialDetail from "../../routes/TrialDetail.svelte";
 import PreImaging from "../../routes/PreImaging.svelte";
 import PreResult from "../../routes/PreResult.svelte";
+import PostImaging from "../../routes/PostImaging.svelte";
+import Summary from "../../routes/Summary.svelte";
+import Share from "../../routes/Share.svelte";
+import PostAcute from "../../routes/PostAcute.svelte";
+import TrialPatient from "../../routes/TrialPatient.svelte";
 import Components from "../../routes/Components.svelte";
 import FormDemo from "../../routes/FormDemo.svelte";
 import NotFound from "../../routes/NotFound.svelte";
@@ -23,6 +23,11 @@ export const routes = {
   "/trial/:name": TrialDetail,
   "/pre-imaging": PreImaging,
   "/pre-result": PreResult,
+  "/post-imaging": PostImaging,
+  "/summary": Summary,
+  "/share": Share,
+  "/post-acute": PostAcute,
+  "/trial-patient": TrialPatient,
   "/components": Components,
   "/form-demo": FormDemo,
   "*": NotFound,

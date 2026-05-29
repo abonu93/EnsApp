@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { link, push } from "svelte-spa-router";
+  import { link } from "svelte-spa-router";
   import Card from "$lib/components/Card.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import Button from "$lib/components/Button.svelte";
   import { TRIALS_INFO, getTrialCategory, randomizationLinks } from "$lib/domain/trials-info";
+  import { t } from "$lib/i18n";
 
   interface Props {
     params?: { name?: string };
@@ -20,18 +21,18 @@
 </script>
 
 {#if !info}
-  <h1>Trial non trovato</h1>
-  <p class="lead">"{name}" non e' presente nel catalogo.</p>
+  <h1>{$t.trials.notFoundTitle}</h1>
+  <p class="lead">"{name}" {$t.trials.notFoundDesc}</p>
   <a href="/trials" use:link>
-    <Button>{#snippet children()}Torna al catalogo{/snippet}</Button>
+    <Button>{#snippet children()}{$t.trials.backCatalog}{/snippet}</Button>
   </a>
 {:else}
   <div class="head">
-    <a href="/trials" use:link class="back" aria-label="Torna al catalogo">
+    <a href="/trials" use:link class="back" aria-label={$t.trials.backToCatalog}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <polyline points="15 18 9 12 15 6" />
       </svg>
-      <span>Catalogo</span>
+      <span>{$t.trials.backToCatalog}</span>
     </a>
   </div>
 
@@ -43,41 +44,41 @@
   </div>
 
   <div class="stack">
-    <Card title="Criteri chiave">
+    <Card title={$t.trials.keyCriteria}>
       {#snippet children()}
         <dl class="criteria">
-          <div><dt>Finestra</dt><dd>{info.key.window}</dd></div>
-          <div><dt>Eta'</dt><dd>{info.key.age}</dd></div>
-          <div><dt>pre-mRS</dt><dd>{info.key.mrs}</dd></div>
-          <div><dt>NIHSS</dt><dd>{info.key.nihss}</dd></div>
-          <div><dt>ASPECTS</dt><dd>{info.key.aspects}</dd></div>
+          <div><dt>{$t.trials.fieldWindow}</dt><dd>{info.key.window}</dd></div>
+          <div><dt>{$t.trials.fieldAge}</dt><dd>{info.key.age}</dd></div>
+          <div><dt>{$t.trials.fieldMrs}</dt><dd>{info.key.mrs}</dd></div>
+          <div><dt>{$t.trials.fieldNihss}</dt><dd>{info.key.nihss}</dd></div>
+          <div><dt>{$t.trials.fieldAspects}</dt><dd>{info.key.aspects}</dd></div>
         </dl>
       {/snippet}
     </Card>
 
-    <Card title="Imaging">
-      {#snippet children()}<p>{info.imaging}</p>{/snippet}
+    <Card title={$t.trials.imaging}>
+      {#snippet children()}<p lang="en">{info.imaging}</p>{/snippet}
     </Card>
 
-    <Card title="Intervento">
-      {#snippet children()}<p>{info.intervention}</p>{/snippet}
+    <Card title={$t.trials.intervention}>
+      {#snippet children()}<p lang="en">{info.intervention}</p>{/snippet}
     </Card>
 
-    <Card title="Trattamento">
+    <Card title={$t.trials.treatment}>
       {#snippet children()}
         <dl class="kv">
-          <div><dt>Trombolitico</dt><dd>{info.thrombolytic}</dd></div>
-          <div><dt>Trombectomia</dt><dd>{info.thrombectomy}</dd></div>
-          <div><dt>Pre-EVT labs</dt><dd>{info.preEvtLabs}</dd></div>
-          <div><dt>Consenso</dt><dd>{info.consent}</dd></div>
+          <div><dt>{$t.trials.thrombolytic}</dt><dd lang="en">{info.thrombolytic}</dd></div>
+          <div><dt>{$t.trials.thrombectomy}</dt><dd lang="en">{info.thrombectomy}</dd></div>
+          <div><dt>{$t.trials.preEvtLabs}</dt><dd lang="en">{info.preEvtLabs}</dd></div>
+          <div><dt>{$t.trials.consent}</dt><dd lang="en">{info.consent}</dd></div>
         </dl>
       {/snippet}
     </Card>
 
     {#if info.notes.length > 0}
-      <Card title="Note">
+      <Card title={$t.trials.notes}>
         {#snippet children()}
-          <ul class="notes">
+          <ul class="notes" lang="en">
             {#each info.notes as note}
               <li>{note}</li>
             {/each}
@@ -87,9 +88,9 @@
     {/if}
 
     {#if info.visits && info.visits.length > 0}
-      <Card title="Visite di follow-up">
+      <Card title={$t.trials.visits}>
         {#snippet children()}
-          <ol class="visits">
+          <ol class="visits" lang="en">
             {#each info.visits as v}
               <li>{v}</li>
             {/each}
@@ -101,7 +102,7 @@
     {#if randomizationLinks[name]}
       <a href={randomizationLinks[name]} target="_blank" rel="noopener noreferrer" class="rand-link">
         <Button variant="primary" fullWidth>
-          {#snippet children()}Apri randomizzatore{/snippet}
+          {#snippet children()}{$t.trials.openRandomizer}{/snippet}
         </Button>
       </a>
     {/if}

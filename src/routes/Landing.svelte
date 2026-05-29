@@ -2,12 +2,19 @@
   import { link, push } from "svelte-spa-router";
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
-  import Pill from "$lib/components/Pill.svelte";
   import { hasPatientInProgress, preData, clearPatient } from "$lib/stores/patient";
+  import { clearSelection } from "$lib/stores/trialSelection";
+  import { t } from "$lib/i18n";
 
   function startNew() {
     clearPatient();
+    clearSelection();
     push("/workflow");
+  }
+
+  function discardPatient() {
+    clearPatient();
+    clearSelection();
   }
 
   function resume() {
@@ -23,35 +30,35 @@
       <path d="M8 22h8" />
     </svg>
   </div>
-  <h1>EnsApp</h1>
-  <p class="lead">Assegnazione paziente a trial clinici - acuto, emorragico e post-acuto.</p>
+  <h1>{$t.common.appName}</h1>
+  <p class="lead">{$t.landing.tagline}</p>
 </div>
 
 <div class="actions">
   <Button variant="primary" size="lg" fullWidth onclick={startNew}>
-    {#snippet children()}Nuovo paziente{/snippet}
+    {#snippet children()}{$t.landing.newPatient}{/snippet}
   </Button>
 
   {#if $hasPatientInProgress}
-    <Card title="Paziente in lavorazione" subtitle="Ripreso da localStorage">
+    <Card title={$t.landing.inProgressTitle} subtitle={$t.landing.inProgressSubtitle}>
       {#snippet children()}
         <dl class="resume">
-          {#if $preData.patientId}<div><dt>ID</dt><dd>{$preData.patientId}</dd></div>{/if}
-          {#if $preData.age != null}<div><dt>Eta'</dt><dd>{$preData.age}</dd></div>{/if}
-          {#if $preData.nihss != null}<div><dt>NIHSS</dt><dd>{$preData.nihss}</dd></div>{/if}
-          {#if $preData.ltsw != null}<div><dt>LTSW</dt><dd>{$preData.ltsw}h</dd></div>{/if}
+          {#if $preData.patientId}<div><dt>{$t.landing.patientId}</dt><dd>{$preData.patientId}</dd></div>{/if}
+          {#if $preData.age != null}<div><dt>{$t.landing.age}</dt><dd>{$preData.age}</dd></div>{/if}
+          {#if $preData.nihss != null}<div><dt>{$t.landing.nihss}</dt><dd>{$preData.nihss}</dd></div>{/if}
+          {#if $preData.ltsw != null}<div><dt>{$t.landing.ltsw}</dt><dd>{$preData.ltsw}h</dd></div>{/if}
         </dl>
         <div class="resume-actions">
-          <Button variant="ghost" onclick={clearPatient}>{#snippet children()}Scarta{/snippet}</Button>
-          <Button variant="primary" onclick={resume}>{#snippet children()}Riprendi{/snippet}</Button>
+          <Button variant="ghost" onclick={discardPatient}>{#snippet children()}{$t.landing.discard}{/snippet}</Button>
+          <Button variant="primary" onclick={resume}>{#snippet children()}{$t.landing.resume}{/snippet}</Button>
         </div>
       {/snippet}
     </Card>
   {/if}
 
   <a href="/trials" use:link class="link-card">
-    <Card title="Catalogo trial" subtitle="Esplora i criteri di tutti i trial attivi">
-      {#snippet children()}<p class="muted">Browse senza paziente, per consultazione rapida.</p>{/snippet}
+    <Card title={$t.landing.catalogTitle} subtitle={$t.landing.catalogSubtitle}>
+      {#snippet children()}<p class="muted">{$t.landing.catalogDesc}</p>{/snippet}
     </Card>
   </a>
 </div>
@@ -73,34 +80,20 @@
     justify-content: center;
     box-shadow: var(--shadow-md);
   }
-  h1 {
-    font-size: var(--fs-3xl);
-    margin: 0;
-  }
+  h1 { font-size: var(--fs-3xl); margin: 0; }
   .lead {
     color: var(--text-muted);
     margin: var(--sp-2) 0 0;
     font-size: var(--fs-base);
   }
-  .actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-  }
+  .actions { display: flex; flex-direction: column; gap: var(--sp-4); }
   .link-card {
     text-decoration: none;
     color: inherit;
     transition: transform var(--transition-fast);
   }
-  .link-card:hover {
-    text-decoration: none;
-    transform: translateY(-2px);
-  }
-  .muted {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: var(--fs-sm);
-  }
+  .link-card:hover { text-decoration: none; transform: translateY(-2px); }
+  .muted { margin: 0; color: var(--text-muted); font-size: var(--fs-sm); }
   .resume {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));

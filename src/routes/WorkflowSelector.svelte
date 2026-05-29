@@ -1,38 +1,18 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
-  import Card from "$lib/components/Card.svelte";
+  import { t } from "$lib/i18n";
 
-  const choices = [
-    {
-      key: "eligibility",
-      title: "Valutazione eligibility",
-      desc: "Anamnesi + imaging guidati per identificare trial idonei.",
-      icon: "stethoscope",
-      route: "/pre-imaging",
-    },
-    {
-      key: "trials",
-      title: "Info sui trial",
-      desc: "Catalogo dei trial con criteri di inclusione/esclusione.",
-      icon: "book",
-      route: "/trials",
-    },
-    {
-      key: "quick",
-      title: "Quick patient",
-      desc: "Inserimento rapido per paziente gia' arruolato.",
-      icon: "zap",
-      route: "/form-demo", // TODO Fase 2.8: /trial-patient
-    },
-  ];
+  const choices = $derived([
+    { key: "eligibility", title: $t.workflow.eligibilityTitle, desc: $t.workflow.eligibilityDesc, icon: "stethoscope", route: "/pre-imaging" },
+    { key: "trials", title: $t.workflow.trialsTitle, desc: $t.workflow.trialsDesc, icon: "book", route: "/trials" },
+    { key: "quick", title: $t.workflow.quickTitle, desc: $t.workflow.quickDesc, icon: "zap", route: "/trial-patient" },
+  ]);
 
-  function pick(route: string) {
-    push(route);
-  }
+  function pick(route: string) { push(route); }
 </script>
 
-<h1>Cosa vuoi fare?</h1>
-<p class="lead">Seleziona il flusso per iniziare.</p>
+<h1>{$t.workflow.title}</h1>
+<p class="lead">{$t.workflow.subtitle}</p>
 
 <div class="grid">
   {#each choices as c (c.key)}
@@ -68,15 +48,8 @@
 
 <style>
   h1 { font-size: var(--fs-2xl); margin: 0; }
-  .lead {
-    color: var(--text-muted);
-    margin: var(--sp-2) 0 var(--sp-6);
-  }
-  .grid {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-  }
+  .lead { color: var(--text-muted); margin: var(--sp-2) 0 var(--sp-6); }
+  .grid { display: flex; flex-direction: column; gap: var(--sp-3); }
   .tile {
     display: flex;
     align-items: center;
@@ -108,23 +81,8 @@
     align-items: center;
     justify-content: center;
   }
-  .tile-text {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-  }
-  .tile-title {
-    font-size: var(--fs-base);
-    font-weight: var(--fw-semibold);
-  }
-  .tile-desc {
-    font-size: var(--fs-sm);
-    color: var(--text-muted);
-  }
-  .tile-chevron {
-    color: var(--text-muted);
-    flex: 0 0 auto;
-  }
+  .tile-text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .tile-title { font-size: var(--fs-base); font-weight: var(--fw-semibold); }
+  .tile-desc { font-size: var(--fs-sm); color: var(--text-muted); }
+  .tile-chevron { color: var(--text-muted); flex: 0 0 auto; }
 </style>

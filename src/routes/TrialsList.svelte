@@ -4,18 +4,19 @@
   import Pill from "$lib/components/Pill.svelte";
   import TextField from "$lib/components/TextField.svelte";
   import { filterTrials, type TrialFilter, getTrialCategory } from "$lib/domain/trials-info";
+  import { t } from "$lib/i18n";
 
   let query = $state("");
   let filter = $state<TrialFilter>("all");
 
   const items = $derived(filterTrials(filter, query));
 
-  const filters: { value: TrialFilter; label: string }[] = [
-    { value: "all", label: "Tutti" },
-    { value: "ischemic", label: "Ischemico" },
-    { value: "hemorrhagic", label: "Emorragico" },
-    { value: "post-acute", label: "Post-acuto" },
-  ];
+  const filters = $derived<{ value: TrialFilter; label: string }[]>([
+    { value: "all", label: $t.trials.filterAll },
+    { value: "ischemic", label: $t.trials.filterIschemic },
+    { value: "hemorrhagic", label: $t.trials.filterHemorrhagic },
+    { value: "post-acute", label: $t.trials.filterPostAcute },
+  ]);
 
   function statusTone(status: string) {
     if (status === "active") return "success" as const;
@@ -29,17 +30,17 @@
   }
 </script>
 
-<h1>Trial clinici</h1>
-<p class="lead">{items.length} di {Object.keys($state.snapshot(items)).length === 0 ? "0" : "totali"}.</p>
+<h1>{$t.trials.title}</h1>
+<p class="lead">{items.length} {$t.trials.countSuffix}</p>
 
 <div class="filters">
   <TextField
     id="trials-search"
-    label="Cerca"
-    placeholder="nome, categoria, intervento..."
+    label={$t.trials.searchLabel}
+    placeholder={$t.trials.searchPlaceholder}
     bind:value={query}
   />
-  <div class="pills" role="tablist" aria-label="Filtro categoria">
+  <div class="pills" role="tablist" aria-label="Filtri">
     {#each filters as f (f.value)}
       <button
         class="filter-pill"
@@ -58,30 +59,30 @@
 {#if items.length === 0}
   <Card>
     {#snippet children()}
-      <p class="empty">Nessun trial corrisponde ai filtri.</p>
+      <p class="empty">{$t.trials.empty}</p>
     {/snippet}
   </Card>
 {:else}
   <ul class="trial-list">
-    {#each items as t (t.name)}
+    {#each items as item (item.name)}
       <li>
-        <a href={`/trial/${encodeURIComponent(t.name)}`} use:link class="trial-link">
+        <a href={`/trial/${encodeURIComponent(item.name)}`} use:link class="trial-link">
           <Card>
             {#snippet children()}
               <div class="trial-row">
                 <div class="trial-main">
                   <div class="trial-head">
-                    <strong class="trial-name">{t.name}</strong>
-                    <Pill tone={categoryTone(t.name)}>{#snippet children()}{getTrialCategory(t.name)}{/snippet}</Pill>
+                    <strong class="trial-name">{item.name}</strong>
+                    <Pill tone={categoryTone(item.name)}>{#snippet children()}{getTrialCategory(item.name)}{/snippet}</Pill>
                   </div>
-                  <p class="trial-cat">{t.info.category}</p>
+                  <p class="trial-cat">{item.info.category}</p>
                   <div class="trial-meta">
-                    <span><strong>Window:</strong> {t.info.key.window}</span>
-                    <span><strong>NIHSS:</strong> {t.info.key.nihss}</span>
+                    <span><strong>{$t.trials.fieldWindow}:</strong> {item.info.key.window}</span>
+                    <span><strong>{$t.trials.fieldNihss}:</strong> {item.info.key.nihss}</span>
                   </div>
                 </div>
                 <div class="trial-status">
-                  <Pill tone={statusTone(t.info.status)}>{#snippet children()}{t.info.status}{/snippet}</Pill>
+                  <Pill tone={statusTone(item.info.status)}>{#snippet children()}{item.info.status}{/snippet}</Pill>
                   <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>

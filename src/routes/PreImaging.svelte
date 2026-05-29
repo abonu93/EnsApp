@@ -8,6 +8,7 @@
   import { preData } from "$lib/stores/patient";
   import { validate, isValid } from "$lib/validation/schema";
   import { required, range } from "$lib/validation/rules";
+  import { t } from "$lib/i18n";
 
   type YN = "yes" | "no" | "";
 
@@ -22,7 +23,6 @@
   let doac = $state<YN>(($preData.doac as YN) ?? "");
   let acei = $state<YN>(($preData.acei as YN) ?? "");
 
-  // Persist on every change
   $effect(() => {
     preData.set({
       patientId,
@@ -42,13 +42,13 @@
     validate(
       { age, nihss, premrs, ltsw, angiograph, doac, acei },
       {
-        age: [required(), range(0, 120, "Eta' fra 0 e 120")],
-        nihss: [required(), range(0, 42, "NIHSS fra 0 e 42")],
-        premrs: [required(), range(0, 5, "pre-mRS fra 0 e 5")],
-        ltsw: [required(), range(0, 168, "LTSW in ore (0-168)")],
-        angiograph: [required("Selezionare")],
-        doac: [required("Selezionare")],
-        acei: [required("Selezionare")],
+        age: [required($t.common.required), range(0, 120, $t.preImaging.rangeAge)],
+        nihss: [required($t.common.required), range(0, 42, $t.preImaging.rangeNihss)],
+        premrs: [required($t.common.required), range(0, 5, $t.preImaging.rangeMrs)],
+        ltsw: [required($t.common.required), range(0, 168, $t.preImaging.rangeLtsw)],
+        angiograph: [required($t.common.select)],
+        doac: [required($t.common.select)],
+        acei: [required($t.common.select)],
       }
     )
   );
@@ -60,62 +60,62 @@
     push("/pre-result");
   }
 
-  const ynOptions: { value: "yes" | "no"; label: string }[] = [
-    { value: "no", label: "No" },
-    { value: "yes", label: "Si'" },
-  ];
+  const ynOptions = $derived<{ value: "yes" | "no"; label: string }[]>([
+    { value: "no", label: $t.common.no },
+    { value: "yes", label: $t.common.yes },
+  ]);
 </script>
 
-<h1>Pre-Imaging</h1>
-<p class="lead">Anamnesi iniziale per la valutazione WeTrust.</p>
+<h1>{$t.preImaging.title}</h1>
+<p class="lead">{$t.preImaging.subtitle}</p>
 
 <div class="stack">
-  <Card title="Identificazione">
+  <Card title={$t.preImaging.identification}>
     {#snippet children()}
       <TextField
         id="pre-pid"
-        label="Patient record number"
-        placeholder="es. 2025-00123"
+        label={$t.preImaging.patientRecordLabel}
+        placeholder={$t.preImaging.patientRecordPlaceholder}
         bind:value={patientId}
       />
     {/snippet}
   </Card>
 
-  <Card title="Anamnesi">
+  <Card title={$t.preImaging.anamnesis}>
     {#snippet children()}
       <div class="form-stack">
-        <NumberField id="pre-age" label="Eta'" suffix="anni" bind:value={age} required error={errors.age ?? ""} />
-        <NumberField id="pre-nihss" label="NIHSS" hint="0-42" bind:value={nihss} required error={errors.nihss ?? ""} />
-        <NumberField id="pre-mrs" label="pre-mRS" hint="0 autonomo - 5 severamente disabile" bind:value={premrs} required error={errors.premrs ?? ""} />
-        <NumberField id="pre-ltsw" label="LTSW" suffix="ore" hint="Ore dall'ultima volta visto bene" bind:value={ltsw} step={0.1} required error={errors.ltsw ?? ""} />
+        <NumberField id="pre-age" label={$t.preImaging.ageLabel} suffix={$t.preImaging.ageSuffix} bind:value={age} required error={errors.age ?? ""} />
+        <NumberField id="pre-nihss" label="NIHSS" hint={$t.preImaging.nihssHint} bind:value={nihss} required error={errors.nihss ?? ""} />
+        <NumberField id="pre-mrs" label={$t.preImaging.mrsLabel} hint={$t.preImaging.mrsHint} bind:value={premrs} required error={errors.premrs ?? ""} />
+        <NumberField id="pre-ltsw" label={$t.preImaging.ltswLabel} suffix={$t.preImaging.ltswSuffix} hint={$t.preImaging.ltswHint} bind:value={ltsw} step={0.1} required error={errors.ltsw ?? ""} />
       </div>
     {/snippet}
   </Card>
 
-  <Card title="Wake-up stroke">
+  <Card title={$t.preImaging.wakeupTitle}>
     {#snippet children()}
       <label class="check-row">
         <input type="checkbox" bind:checked={wakeupStroke} />
         <span>
-          <strong>Wake-up stroke</strong>
-          <small>Per WeTrust: ammette LTSW fino a 12h se sintomi identificati entro 6h.</small>
+          <strong>{$t.preImaging.wakeupLabel}</strong>
+          <small>{$t.preImaging.wakeupDesc}</small>
         </span>
       </label>
       {#if wakeupStroke}
         <label class="check-row">
           <input type="checkbox" bind:checked={wakeupSymptomsWithin6h} />
-          <span>Sintomi identificati entro 6h dal risveglio</span>
+          <span>{$t.preImaging.wakeupSymptomsLabel}</span>
         </label>
       {/if}
     {/snippet}
   </Card>
 
-  <Card title="Contesto operativo">
+  <Card title={$t.preImaging.contextTitle}>
     {#snippet children()}
       <div class="form-stack">
         <RadioGroup
           id="pre-angio"
-          label="Angiografo Philips disponibile?"
+          label={$t.preImaging.angioLabel}
           name="angiograph"
           columns={2}
           options={ynOptions}
@@ -125,7 +125,7 @@
         />
         <RadioGroup
           id="pre-doac"
-          label="DOAC (NOAC) nelle 48h precedenti?"
+          label={$t.preImaging.doacLabel}
           name="doac"
           columns={2}
           options={ynOptions}
@@ -135,7 +135,7 @@
         />
         <RadioGroup
           id="pre-acei"
-          label="ACE inibitore (IECA) in terapia?"
+          label={$t.preImaging.aceiLabel}
           name="acei"
           columns={2}
           options={ynOptions}
@@ -149,10 +149,10 @@
 
   <div class="actions">
     <Button variant="secondary" fullWidth onclick={() => push("/workflow")}>
-      {#snippet children()}Indietro{/snippet}
+      {#snippet children()}{$t.common.back}{/snippet}
     </Button>
     <Button variant="primary" fullWidth disabled={!canSubmit} onclick={submit}>
-      {#snippet children()}Avanti{/snippet}
+      {#snippet children()}{$t.common.next}{/snippet}
     </Button>
   </div>
 </div>

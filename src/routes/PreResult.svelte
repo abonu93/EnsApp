@@ -5,29 +5,26 @@
   import Pill from "$lib/components/Pill.svelte";
   import { preData } from "$lib/stores/patient";
   import { acuteEligibility } from "$lib/stores/eligibility";
-  import { randomizationLinks } from "$lib/domain/trials-info";
   import { announce } from "$lib/a11y/liveRegion";
+  import { t } from "$lib/i18n";
 
   const weTrust = $derived($acuteEligibility.weTrust);
   const doac = $derived($preData.doac === "yes");
 
   $effect(() => {
-    announce(weTrust ? "WeTrust eleggibile" : "WeTrust non eleggibile");
+    announce(weTrust ? $t.preResult.weTrustEligibleAnnounce : $t.preResult.weTrustNotEligibleAnnounce);
   });
 
   function openRandomization() {
-    // WeTrust non ha link in randomizationLinks: in attesa di indicazione,
-    // si apre un placeholder.
     window.open("https://app.studyrandomizer.com/dashboard/", "_blank", "noopener");
   }
 
   function continueToPostImaging() {
-    // TODO Fase 2 - prossima tappa: /post-imaging
-    push("/workflow");
+    push("/post-imaging");
   }
 </script>
 
-<h1>Esito Pre-Imaging</h1>
+<h1>{$t.preResult.title}</h1>
 
 <div class="stack">
   <Card>
@@ -36,15 +33,13 @@
         <div class="result-head">
           <strong>WeTrust</strong>
           {#if weTrust}
-            <Pill tone="success">{#snippet children()}Eleggibile{/snippet}</Pill>
+            <Pill tone="success">{#snippet children()}{$t.common.eligible}{/snippet}</Pill>
           {:else}
-            <Pill tone="danger">{#snippet children()}Non eleggibile{/snippet}</Pill>
+            <Pill tone="danger">{#snippet children()}{$t.common.notEligible}{/snippet}</Pill>
           {/if}
         </div>
         <p class="muted">
-          {weTrust
-            ? "Il paziente soddisfa i criteri WeTrust. E' possibile procedere alla randomizzazione."
-            : "Il paziente non soddisfa tutti i criteri WeTrust. Proseguire con la valutazione post-imaging."}
+          {weTrust ? $t.preResult.weTrustEligible : $t.preResult.weTrustNotEligible}
         </p>
       </div>
     {/snippet}
@@ -60,8 +55,8 @@
             <line x1="12" y1="17" x2="12.01" y2="17" />
           </svg>
           <div>
-            <strong>Paziente in DOAC (NOAC)</strong>
-            <p>Eseguire CTA del torace e dosaggio del farmaco.</p>
+            <strong>{$t.preResult.doacAlertTitle}</strong>
+            <p>{$t.preResult.doacAlertDesc}</p>
           </div>
         </div>
       {/snippet}
@@ -70,15 +65,15 @@
 
   <div class="actions">
     <Button variant="secondary" fullWidth onclick={() => push("/pre-imaging")}>
-      {#snippet children()}Indietro{/snippet}
+      {#snippet children()}{$t.common.back}{/snippet}
     </Button>
     {#if weTrust}
       <Button variant="primary" fullWidth onclick={openRandomization}>
-        {#snippet children()}Randomizza{/snippet}
+        {#snippet children()}{$t.preResult.randomize}{/snippet}
       </Button>
     {/if}
     <Button variant={weTrust ? "ghost" : "primary"} fullWidth onclick={continueToPostImaging}>
-      {#snippet children()}Continua{/snippet}
+      {#snippet children()}{$t.preResult.continue}{/snippet}
     </Button>
   </div>
 </div>
@@ -108,8 +103,5 @@
   .alert svg { flex-shrink: 0; margin-top: 2px; }
   .alert strong { display: block; color: var(--text); }
   .alert p { margin: 4px 0 0; color: var(--text); font-size: var(--fs-sm); }
-  .actions {
-    display: grid;
-    gap: var(--sp-2);
-  }
+  .actions { display: grid; gap: var(--sp-2); }
 </style>
