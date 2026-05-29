@@ -75,17 +75,21 @@ test.describe("ischemic flow - golden patient", () => {
     await expect(page).toHaveURL(/\/share$/);
 
     // -- Share: intercetta la POST verso Apps Script --
-    const sheetCall = page.waitForRequest(
-      (req) => req.method() === "POST" && req.url().includes("script.google.com")
-    );
+    // page.route serve sia a catturare il payload sia a simulare una risposta
+    // immediata (in CI la rete esterna verso script.google.com non e' garantita).
+    let capturedBody = "";
+    await page.route("**/script.google.com/**", async (route) => {
+      capturedBody = route.request().postData() ?? "";
+      await route.fulfill({ status: 200, contentType: "text/plain", body: "OK" });
+    });
 
     await page.getByRole("button", { name: /invia a sheet/i }).click();
 
-    const req = await sheetCall;
-    const body = req.postData() ?? "";
-    expect(body).toContain("payload=");
-    // Decodifica il payload x-www-form-urlencoded
-    const params = new URLSearchParams(body);
+    // Attende che la fetch sia partita e abbia popolato capturedBody.
+    await expect.poll(() => capturedBody.length, { timeout: 5_000 }).toBeGreaterThan(0);
+
+    expect(capturedBody).toContain("payload=");
+    const params = new URLSearchParams(capturedBody);
     const payload = JSON.parse(decodeURIComponent(params.get("payload") ?? "{}"));
     expect(payload.patientId).toBe("E2E-2025-001");
     expect(payload.age).toBe(70);
