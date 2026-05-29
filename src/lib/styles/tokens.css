@@ -20,21 +20,27 @@
   --primary-soft: #dbeafe;
 
   /* Semantic */
-  --success: #10b981;
+  --success: #047857;
   --success-soft: #d1fae5;
-  --danger: #dc2626;
+  --danger: #b91c1c;
   --danger-soft: #fee2e2;
-  --warn: #f59e0b;
+  --warn: #92400e;
   --warn-soft: #fef3c7;
-  --info: #0ea5e9;
+  --info: #075985;
   --info-soft: #e0f2fe;
 
   /* Clinico (cifre semantiche dell'app) */
   --eligible: var(--success);
   --not-eligible: var(--danger);
   --ischemic: #1f6feb;
+  --ischemic-text: #1d4ed8;        /* WCAG AA su primary-soft */
+  --ischemic-soft: #dbeafe;
   --hemorrhagic: #f43f5e;
+  --hemorrhagic-text: #9f1239;     /* WCAG AA su danger-soft */
+  --hemorrhagic-soft: #fee2e2;
   --post-acute: #8b5cf6;
+  --post-acute-text: #6d28d9;      /* WCAG AA su post-acute-soft */
+  --post-acute-soft: #ede9fe;
 
   /* Tipografia (mobile-first) */
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -129,8 +135,14 @@
   --info-soft: #0c4a6e;
 
   --ischemic: #5b9eff;
+  --ischemic-text: #93c5fd;
+  --ischemic-soft: #1e3a8a;
   --hemorrhagic: #fb7185;
+  --hemorrhagic-text: #fca5a5;
+  --hemorrhagic-soft: #7f1d1d;
   --post-acute: #a78bfa;
+  --post-acute-text: #c4b5fd;
+  --post-acute-soft: #4c1d95;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -164,8 +176,14 @@
     --info-soft: #0c4a6e;
 
     --ischemic: #5b9eff;
+    --ischemic-text: #93c5fd;
+    --ischemic-soft: #1e3a8a;
     --hemorrhagic: #fb7185;
+    --hemorrhagic-text: #fca5a5;
+    --hemorrhagic-soft: #7f1d1d;
     --post-acute: #a78bfa;
+    --post-acute-text: #c4b5fd;
+    --post-acute-soft: #4c1d95;
 
     --focus-ring: 0 0 0 3px rgba(91, 158, 255, 0.45);
   }

@@ -51,15 +51,15 @@
     color: var(--info);
   }
   .pill-ischemic {
-    background: var(--primary-soft);
-    color: var(--ischemic);
+    background: var(--ischemic-soft);
+    color: var(--ischemic-text);
   }
   .pill-hemorrhagic {
-    background: var(--danger-soft);
-    color: var(--hemorrhagic);
+    background: var(--hemorrhagic-soft);
+    color: var(--hemorrhagic-text);
   }
   .pill-post-acute {
-    background: rgba(139, 92, 246, 0.18);
-    color: var(--post-acute);
+    background: var(--post-acute-soft);
+    color: var(--post-acute-text);
   }
 </style>

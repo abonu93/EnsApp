@@ -51,14 +51,35 @@ git push -u origin feature/nome-descrittivo
 3. Aggiorna sempre la documentazione in `docs/` se cambi flussi o regole.
 4. Testa manualmente i percorsi critici prima di chiudere.
 
+## Comandi locali
+
+```bash
+npm run dev            # dev server con hot reload (Vite)
+npm run check          # type check (svelte-check)
+npm test               # unit + golden + parity tests (Vitest)
+npm run test:e2e       # E2E + a11y mobile (Playwright)
+npm run test:all       # check + unit + e2e (gate completo locale)
+npm run build          # build prod in dist/
+npm run preview        # serve dist/ a 127.0.0.1:4173
+```
+
+## CI / CD
+
+Su ogni PR verso `develop` o `main` GitHub Actions esegue:
+- type check + 211 unit test + build (job `test`)
+- 18 test E2E con axe-core a11y scan (job `e2e`)
+
+Su push a `develop` o `main`, deploy preview automatico su GitHub Pages
+(workflow `pages.yml`). URL: `https://abonu93.github.io/EnsApp/`.
+
 ## Checklist PR
 
 - [ ] Nessuna regressione nei flussi principali
 - [ ] Regole di eligibility verificate con almeno un caso positivo e uno negativo
 - [ ] Mapping `buildTrialsForSheet` coerente con i trial visibili in UI
-- [ ] Nessun riferimento DOM rotto (`getElementById` / selettori)
+- [ ] `npm run test:all` verde locale
 - [ ] Docs aggiornate
-- [ ] `npm test` eseguito (quando Node e disponibile)
+- [ ] Bundle prod sotto 100 kB gz
 
 ## Linee guida codice
 

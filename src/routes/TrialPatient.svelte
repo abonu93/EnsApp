@@ -59,7 +59,8 @@
 
   <Card title={$t.trialPatient.selectedTrialLabel}>
     {#snippet children()}
-      <select bind:value={trial} class="select">
+      <label for="tp-trial" class="sr-only">{$t.trialPatient.selectedTrialLabel}</label>
+      <select id="tp-trial" bind:value={trial} class="select" aria-label={$t.trialPatient.selectedTrialLabel}>
         <option value="">--- {$t.common.select} ---</option>
         {#each trialOptions as opt (opt.value)}
           <option value={opt.value}>{opt.label}</option>
