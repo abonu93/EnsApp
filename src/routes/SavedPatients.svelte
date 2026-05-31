@@ -4,8 +4,6 @@
   import Card from "$lib/components/Card.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import { savedPatients, removeSavedPatient, mergeRemote, type SavedPatient } from "$lib/stores/savedPatients";
-  import { preData, postData, hemData } from "$lib/stores/patient";
-  import { selectedStudies, studyOutcomes, notesText, selectedChronic } from "$lib/stores/trialSelection";
   import { fetchPatientsFromSheet, type SheetPatientRow } from "$lib/domain/sheet-payload";
   import { t } from "$lib/i18n";
 
@@ -142,14 +140,7 @@
   }
 
   function reopen(p: SavedPatient) {
-    preData.set(p.snapshot.pre);
-    postData.set(p.snapshot.post);
-    hemData.set(p.snapshot.hem);
-    selectedStudies.set(p.snapshot.studies);
-    studyOutcomes.set(p.snapshot.outcomes);
-    selectedChronic.set(p.snapshot.chronic);
-    notesText.set(p.snapshot.notes);
-    push("/share");
+    push("/saved/" + encodeURIComponent(p.id));
   }
 
   function remove(id: string, label: string) {
@@ -260,6 +251,13 @@
                       {#if p.trials.length > 0}<span class="trials-enrolled">{p.trials.join(", ")}</span>{/if}
                       {#if p.missed && p.missed.length > 0}<span class="trials-missed">{p.missed.length} missed</span>{/if}
                     </div>
+                    {#if p.snapshot.extras.tev || p.snapshot.extras.mtici || p.snapshot.extras.tiv}
+                      <div class="saved-treatments">
+                        {#if p.snapshot.extras.tev}<span class="tx"><span class="tx-k">TEV</span> {p.snapshot.extras.tev}</span>{/if}
+                        {#if p.snapshot.extras.mtici}<span class="tx"><span class="tx-k">mTICI</span> {p.snapshot.extras.mtici}</span>{/if}
+                        {#if p.snapshot.extras.tiv}<span class="tx"><span class="tx-k">TIV</span> {p.snapshot.extras.tiv}</span>{/if}
+                      </div>
+                    {/if}
                     <small class="saved-date">{formatDate(p.savedAt)}</small>
                   </button>
                   <button class="remove-btn ens-press" type="button" onclick={() => remove(p.id, p.patientId || p.id)} aria-label="Rimuovi">
@@ -558,6 +556,31 @@
   }
   .trials-enrolled { color: var(--success); font-weight: 600; }
   .trials-missed { color: var(--warn); font-weight: 600; }
+  .saved-treatments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .tx {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--primary-soft);
+    color: var(--primary-hover);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .tx-k {
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
   .page-meta {
     font-size: 12px;
     color: var(--text-muted);
