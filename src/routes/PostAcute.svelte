@@ -4,6 +4,8 @@
   // eligibility on-the-fly al medico (no porting da legacy: librexia
   // non aveva regola pura in domain/, era inline in app-post-acute.js).
   import { push } from "svelte-spa-router";
+  import AppHeader from "$lib/components/AppHeader.svelte";
+  import BottomBar from "$lib/components/BottomBar.svelte";
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
   import RadioGroup from "$lib/components/RadioGroup.svelte";
@@ -56,10 +58,9 @@
   }
 </script>
 
-<h1>{$t.postAcute.title}</h1>
-<p class="lead">{$t.postAcute.subtitle}</p>
+<AppHeader title={$t.postAcute.title} sub={$t.postAcute.subtitle} onBack={() => push("/summary")} />
 
-<div class="stack">
+<div class="body"><div class="stack">
   <Card>
     {#snippet children()}
       <div class="status">
@@ -103,19 +104,13 @@
       </div>
     {/snippet}
   </Card>
-
-  <div class="actions">
-    <Button variant="secondary" fullWidth onclick={() => push("/summary")}>
-      {#snippet children()}{$t.common.back}{/snippet}
-    </Button>
-    <Button variant="primary" fullWidth disabled={!eligible} onclick={proceed}>
-      {#snippet children()}{$t.summary.proceed}{/snippet}
-    </Button>
-  </div>
+</div>
 </div>
 
+<BottomBar onBack={() => push("/summary")} onNext={proceed} nextDisabled={!eligible} nextLabel={$t.summary.proceed} />
+
 <style>
-  h1 { font-size: var(--fs-2xl); margin: 0; }
+  .body { padding: 6px 16px 16px; }
   .lead { color: var(--text-muted); margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-sm); }
   .stack { display: flex; flex-direction: column; gap: var(--sp-4); }
   .form-stack { display: flex; flex-direction: column; gap: var(--sp-4); }

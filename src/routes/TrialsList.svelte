@@ -1,5 +1,6 @@
 <script lang="ts">
   import { link } from "svelte-spa-router";
+  import AppHeader from "$lib/components/AppHeader.svelte";
   import Card from "$lib/components/Card.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import TextField from "$lib/components/TextField.svelte";
@@ -30,9 +31,9 @@
   }
 </script>
 
-<h1>{$t.trials.title}</h1>
-<p class="lead">{items.length} {$t.trials.countSuffix}</p>
+<AppHeader title={$t.trials.title} sub={`${items.length} ${$t.trials.countSuffix}`} />
 
+<div class="body">
 <div class="filters">
   <TextField
     id="trials-search"
@@ -95,10 +96,10 @@
     {/each}
   </ul>
 {/if}
+</div>
 
 <style>
-  h1 { font-size: var(--fs-2xl); margin: 0; }
-  .lead { color: var(--text-muted); margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-sm); }
+  .body { padding: 6px 16px 16px; display: flex; flex-direction: column; }
   .filters {
     display: flex;
     flex-direction: column;

@@ -4,12 +4,12 @@
   interface Props {
     title?: string;
     subtitle?: string;
-    padded?: boolean;
     children: Snippet;
     actions?: Snippet;
+    padded?: boolean;
   }
 
-  let { title = "", subtitle = "", padded = true, children, actions }: Props = $props();
+  let { title = "", subtitle = "", children, actions, padded = true }: Props = $props();
 </script>
 
 <section class="card" class:padded>
@@ -27,42 +27,38 @@
 
 <style>
   .card {
-    background: var(--surface-elevated);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
+    background: var(--surface);
+    border-radius: 18px;
+    box-shadow: var(--shadow-md);
     overflow: hidden;
   }
-
-  .card.padded .card-header,
-  .card.padded .card-body {
-    padding: var(--sp-4);
+  .card.padded .card-body { padding: 16px; }
+  .card.padded .card-header {
+    padding: 16px 16px 0;
   }
-
+  .card.padded .card-header + .card-body { padding-top: 12px; }
   .card-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--sp-3);
-    border-bottom: 1px solid var(--border);
+    gap: 12px;
   }
-
   .card-title {
-    font-size: var(--fs-lg);
-    font-weight: var(--fw-semibold);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
     margin: 0;
     color: var(--text);
   }
-
   .card-subtitle {
-    margin: 4px 0 0;
-    font-size: var(--fs-sm);
+    margin: 3px 0 0;
+    font-size: 12px;
     color: var(--text-muted);
+    line-height: 1.4;
   }
-
   .card-actions {
     display: flex;
-    gap: var(--sp-2);
+    gap: 8px;
     flex-shrink: 0;
   }
 </style>

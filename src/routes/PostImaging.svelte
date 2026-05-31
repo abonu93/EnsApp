@@ -1,34 +1,24 @@
 <script lang="ts">
-  // PostImaging: form single-page con sezioni condizionali (ischemic vs hemorrhagic).
-  // L'esperienza mobile-first usa scroll + sticky bottom CTA, non un wizard,
-  // perche' i campi sono spesso compilati in ordine non strettamente sequenziale
-  // (es. tipo di stroke -> vasi -> ASPECTS).
   import { push } from "svelte-spa-router";
+  import AppHeader from "$lib/components/AppHeader.svelte";
+  import BottomBar from "$lib/components/BottomBar.svelte";
   import Card from "$lib/components/Card.svelte";
-  import Button from "$lib/components/Button.svelte";
-  import RadioGroup from "$lib/components/RadioGroup.svelte";
-  import CheckboxGroup from "$lib/components/CheckboxGroup.svelte";
-  import NumberField from "$lib/components/NumberField.svelte";
-  import Pill from "$lib/components/Pill.svelte";
+  import Segmented from "$lib/components/Segmented.svelte";
+  import VesselPicker from "$lib/components/VesselPicker.svelte";
+  import ToggleRow from "$lib/components/ToggleRow.svelte";
+  import AspectsCells from "$lib/components/AspectsCells.svelte";
   import { preData, postData, hemData } from "$lib/stores/patient";
   import { t } from "$lib/i18n";
-  import { VESSEL_OPTIONS } from "$lib/domain/vessels";
   import type { VesselCode } from "$lib/domain/acute-rules";
 
   type YN = "yes" | "no" | "";
   type StrokeType = "ischemic" | "hemorrhagic" | "";
   type CandidateStatus = "eligible" | "not eligible" | "";
-  type Anticoag = "none" | "warfarin" | "heparin" | "doac" | "";
-  type SecondaryCause = "None" | "Traumatic" | "AVM" | "Aneurysm" | "Tumor" | "Other" | "";
 
-  // -- Stato --
   let strokeType = $state<StrokeType>(($postData.strokeType as StrokeType) ?? "");
-  // Ischemic
   let candidate = $state<CandidateStatus>(($postData.candidate as CandidateStatus) ?? "");
-  // IVT unificato: 3 stati derivati su ivtCandidate + contraTpa
-  // - "eligible-no-contra" -> ivtCandidate=eligible, contraTpa=no
-  // - "eligible-with-contra" -> ivtCandidate=eligible, contraTpa=yes
-  // - "not-eligible" -> ivtCandidate=not eligible, contraTpa=""
+
+  // IVT unificato (mapped da ivtCandidate + contraTpa)
   type IvtStatus = "" | "eligible-no-contra" | "eligible-with-contra" | "not-eligible";
   function ivtFromStore(ivt: string | undefined, contra: string | undefined): IvtStatus {
     if (ivt === "eligible" && contra === "yes") return "eligible-with-contra";
@@ -37,24 +27,24 @@
     return "";
   }
   let ivtStatus = $state<IvtStatus>(ivtFromStore($postData.ivtCandidate, $postData.contraTpa));
-  const ivtCandidate = $derived<CandidateStatus>(
-    ivtStatus === "not-eligible" ? "not eligible" : ivtStatus ? "eligible" : ""
-  );
+  const ivtCandidate = $derived<CandidateStatus>(ivtStatus === "not-eligible" ? "not eligible" : ivtStatus ? "eligible" : "");
   const contraTpa = $derived<YN>(ivtStatus === "eligible-with-contra" ? "yes" : ivtStatus === "eligible-no-contra" ? "no" : "");
 
-  let tandem = $state<YN>(($postData.tandem as YN) ?? "");
-  let tortuosity = $state<YN>(($postData.tortuosity as YN) ?? "");
+  // Switches (Tandem, Tortuosity)
+  let tandem = $state<boolean>($postData.tandem === "yes");
+  let tortuosity = $state<boolean>($postData.tortuosity === "yes");
+
   let targetVessels = $state<VesselCode[]>(($postData.targetVessels as VesselCode[]) ?? []);
   let aspects = $state<number | null>($postData.aspects ?? null);
   let lesionConfirmed = $state<YN>(($postData.lesionConfirmed as YN) ?? "");
+
   // Hemorrhagic
   let hemVolume = $state<number | null>($hemData.hemVolume ?? null);
   let gcs = $state<number | null>($hemData.gcs ?? null);
   let ivh = $state<YN>(($hemData.ivh as YN) ?? "");
-  let secondaryCause = $state<SecondaryCause>(($hemData.secondaryCause as SecondaryCause) ?? "");
+  let secondaryCause = $state<string>(($hemData.secondaryCause as string) ?? "");
   let seizure = $state<YN>(($hemData.seizure as YN) ?? "");
-  let anticoag = $state<Anticoag>(($hemData.anticoag as Anticoag) ?? "");
-  // FASTEST extra
+  let anticoag = $state<string>(($hemData.anticoag as string) ?? "");
   let brainstem = $state<YN>(($hemData.brainstem as YN) ?? "");
   let procoagulant = $state<YN>(($hemData.procoagulant as YN) ?? "");
   let ecg = $state<YN>(($hemData.ecg as YN) ?? "");
@@ -63,14 +53,13 @@
   let angioplasty = $state<YN>(($hemData.angioplasty as YN) ?? "");
   let ivhScore = $state<YN>(($hemData.ivhScore as YN) ?? "");
 
-  // -- Persist su stores --
   $effect(() => {
     postData.set({
       strokeType,
       candidate: candidate || undefined,
       ivtCandidate: ivtCandidate || undefined,
-      tandem: tandem || undefined,
-      tortuosity: tortuosity || undefined,
+      tandem: tandem ? "yes" : "no",
+      tortuosity: tortuosity ? "yes" : "no",
       targetVessels,
       contraTpa: contraTpa || undefined,
       aspects: aspects ?? undefined,
@@ -78,20 +67,14 @@
     });
   });
 
-  const ivtUnifiedOpts = $derived<{ value: IvtStatus; label: string; description?: string }[]>([
-    { value: "eligible-no-contra", label: $t.postImaging.candidateEligible, description: "Senza controindicazioni a trombolisi" },
-    { value: "eligible-with-contra", label: "Eleggibile con controindicazioni", description: "Eligible IVT ma presenti controindicazioni TPA" },
-    { value: "not-eligible", label: $t.postImaging.candidateNotEligible },
-  ]);
-
   $effect(() => {
     hemData.set({
       hemVolume: hemVolume ?? undefined,
       gcs: gcs ?? undefined,
       ivh: ivh || undefined,
-      secondaryCause: secondaryCause || undefined,
+      secondaryCause: (secondaryCause || undefined) as any,
       seizure: seizure || undefined,
-      anticoag: anticoag === "" ? undefined : anticoag,
+      anticoag: (anticoag === "" ? undefined : anticoag) as any,
       brainstem: brainstem || undefined,
       procoagulant: procoagulant || undefined,
       ecg: ecg || undefined,
@@ -102,122 +85,95 @@
     });
   });
 
-  // -- Conditional visibility --
   const isIschemic = $derived(strokeType === "ischemic");
   const isHem = $derived(strokeType === "hemorrhagic");
   const showEvt = $derived(isIschemic && candidate === "eligible");
-  const showNonEvtConfirm = $derived(isIschemic && candidate === "not eligible");
-  const showFastestExtra = $derived(
-    isHem && ($preData.ltsw ?? 999) < 2 && ($preData.premrs ?? 99) <= 2
-  );
+  const showNonEvt = $derived(isIschemic && candidate === "not eligible");
+  const showFastest = $derived(isHem && ($preData.ltsw ?? 999) < 2 && ($preData.premrs ?? 99) <= 2);
 
-  // -- Options derivate i18n --
+  const strokeOpts = $derived([
+    { value: "ischemic" as const, label: $t.postImaging.ischemic },
+    { value: "hemorrhagic" as const, label: $t.postImaging.hemorrhagic },
+  ]);
+  const candidateOpts = $derived([
+    { value: "eligible" as const, label: "Eleggibile" },
+    { value: "not eligible" as const, label: "Non eleggibile" },
+  ]);
+  const ivtOpts = $derived([
+    { value: "eligible-no-contra" as const, label: "Si, no controind." },
+    { value: "eligible-with-contra" as const, label: "Si, con controind." },
+    { value: "not-eligible" as const, label: "Non eleggibile" },
+  ]);
   const ynOpts = $derived<{ value: "yes" | "no"; label: string }[]>([
     { value: "no", label: $t.common.no },
     { value: "yes", label: $t.common.yes },
   ]);
-  const strokeOpts = $derived<{ value: "ischemic" | "hemorrhagic"; label: string; description?: string }[]>([
-    { value: "ischemic", label: $t.postImaging.ischemic, description: $t.postImaging.ischemicDesc },
-    { value: "hemorrhagic", label: $t.postImaging.hemorrhagic, description: $t.postImaging.hemorrhagicDesc },
-  ]);
-  const candidateOpts = $derived<{ value: "eligible" | "not eligible"; label: string }[]>([
-    { value: "eligible", label: $t.postImaging.candidateEligible },
-    { value: "not eligible", label: $t.postImaging.candidateNotEligible },
-  ]);
-  const secondaryOpts = $derived<{ value: SecondaryCause; label: string }[]>([
-    { value: "None", label: $t.postImaging.secondaryCauseNone },
+  const secondaryOpts = [
+    { value: "None", label: "Nessuna" },
     { value: "Traumatic", label: "Trauma" },
     { value: "AVM", label: "AVM" },
-    { value: "Aneurysm", label: "Aneurysm" },
-    { value: "Tumor", label: "Tumor" },
-    { value: "Other", label: "Other" },
-  ]);
-  const anticoagOpts = $derived<{ value: "none" | "warfarin" | "heparin" | "doac"; label: string }[]>([
-    { value: "none", label: $t.postImaging.anticoagNone },
+    { value: "Aneurysm", label: "Aneurisma" },
+    { value: "Tumor", label: "Tumore" },
+    { value: "Other", label: "Altro" },
+  ];
+  const anticoagOpts = [
+    { value: "none", label: "Nessuna" },
     { value: "warfarin", label: "Warfarin" },
-    { value: "heparin", label: "Heparin <24h" },
+    { value: "heparin", label: "Hep <24h" },
     { value: "doac", label: "DOAC" },
-  ]);
+  ];
 
   const canSubmit = $derived(
     (isIschemic && candidate !== "" && (showEvt ? targetVessels.length > 0 : lesionConfirmed !== "")) ||
     (isHem && gcs !== null && hemVolume !== null && secondaryCause !== "")
   );
-
-  function submit() {
-    if (!canSubmit) return;
-    push("/summary");
-  }
 </script>
 
-<h1>{$t.postImaging.title}</h1>
-<p class="lead">{$t.postImaging.subtitle}</p>
+<AppHeader title={$t.postImaging.title} sub={$t.postImaging.subtitle} step={1} steps={3} />
 
-<div class="stack">
+<div class="body">
   <Card>
     {#snippet children()}
-      <RadioGroup
-        id="post-stroke"
-        label={$t.postImaging.strokeTypeLabel}
-        name="strokeType"
-        columns={2}
-        bind:value={strokeType}
-        options={strokeOpts}
-        required
-      />
+      <Segmented options={strokeOpts} bind:value={strokeType} cols={2} label={$t.postImaging.strokeTypeLabel} />
     {/snippet}
   </Card>
 
   {#if isIschemic}
     <Card title={$t.postImaging.candidacyTitle}>
       {#snippet children()}
-        <RadioGroup
-          id="post-candidate"
-          label={$t.postImaging.candidateEvt}
-          name="candidate"
-          columns={2}
-          bind:value={candidate}
-          options={candidateOpts}
-          required
-        />
+        <div class="stack">
+          <Segmented options={candidateOpts} bind:value={candidate} cols={2} label={$t.postImaging.candidateEvt} />
+        </div>
       {/snippet}
     </Card>
 
     {#if showEvt}
       <Card title={$t.postImaging.evtTitle} subtitle={$t.postImaging.evtDesc}>
         {#snippet children()}
-          <div class="form-stack">
-            <RadioGroup id="post-tandem" label={$t.postImaging.tandemLabel} name="tandem" columns={2} bind:value={tandem} options={ynOpts} required />
-            <RadioGroup id="post-tort" label={$t.postImaging.tortuosityLabel} name="tortuosity" columns={2} bind:value={tortuosity} options={ynOpts} hint={$t.postImaging.tortuosityHint} />
-            <CheckboxGroup
-              id="post-vessels"
-              label={$t.postImaging.vesselsLabel}
-              options={VESSEL_OPTIONS}
-              bind:value={targetVessels}
-              columns={2}
-              hint={$t.postImaging.vesselsHint}
-              required
-            />
-            <NumberField id="post-aspects" label={$t.postImaging.aspectsLabel} bind:value={aspects} min={0} max={10} hint={$t.postImaging.aspectsHint} />
+          <div class="stack">
+            <ToggleRow title={$t.postImaging.tandemLabel} bind:checked={tandem} />
+            <ToggleRow title={$t.postImaging.tortuosityLabel} sub={$t.postImaging.tortuosityHint} bind:checked={tortuosity} />
+            <div class="field">
+              <span class="lbl">{$t.postImaging.vesselsLabel}</span>
+              <VesselPicker bind:value={targetVessels} />
+            </div>
+            <div class="field">
+              <span class="lbl">{$t.postImaging.aspectsLabel}</span>
+              <AspectsCells bind:value={aspects} />
+            </div>
           </div>
         {/snippet}
       </Card>
 
-      <Card title={$t.postImaging.candidacyTitle}>
+      <Card>
         {#snippet children()}
-          <RadioGroup
-            id="post-ivt"
-            label={$t.postImaging.candidateIvt}
-            name="ivtStatus"
-            bind:value={ivtStatus}
-            options={ivtUnifiedOpts}
-          />
+          <Segmented options={ivtOpts} bind:value={ivtStatus} cols={1} label={$t.postImaging.candidateIvt} />
         {/snippet}
       </Card>
-    {:else if showNonEvtConfirm}
+    {:else if showNonEvt}
       <Card title={$t.postImaging.nonEvtTitle}>
         {#snippet children()}
-          <RadioGroup id="post-lesion" label={$t.postImaging.lesionConfirmedLabel} name="lesionConfirmed" columns={2} bind:value={lesionConfirmed} options={ynOpts} required />
+          <Segmented options={ynOpts} bind:value={lesionConfirmed} cols={2} label={$t.postImaging.lesionConfirmedLabel} />
         {/snippet}
       </Card>
     {/if}
@@ -226,60 +182,79 @@
   {#if isHem}
     <Card title={$t.postImaging.hemTitle}>
       {#snippet children()}
-        <div class="form-stack">
-          <NumberField id="post-hemvol" label={$t.postImaging.hemVolumeLabel} suffix={$t.postImaging.hemVolumeSuffix} bind:value={hemVolume} step={0.1} required />
-          <NumberField id="post-gcs" label={$t.postImaging.gcsLabel} bind:value={gcs} min={3} max={15} hint={$t.postImaging.gcsHint} required />
-          <RadioGroup id="post-ivh" label={$t.postImaging.ivhLabel} name="ivh" columns={2} bind:value={ivh} options={ynOpts} required />
-          <RadioGroup id="post-sec" label={$t.postImaging.secondaryCauseLabel} name="secondaryCause" bind:value={secondaryCause} options={secondaryOpts} columns="auto" required />
-          <RadioGroup id="post-seizure" label={$t.postImaging.seizureLabel} name="seizure" columns={2} bind:value={seizure} options={ynOpts} required />
-          <RadioGroup id="post-anti" label={$t.postImaging.anticoagLabel} name="anticoag" bind:value={anticoag} options={anticoagOpts} columns="auto" required />
+        <div class="stack">
+          <label class="field">
+            <span class="lbl">{$t.postImaging.hemVolumeLabel} ({$t.postImaging.hemVolumeSuffix})</span>
+            <input class="input mono" type="number" min="0" step="0.1" value={hemVolume ?? ""} oninput={(e) => { const v = (e.currentTarget as HTMLInputElement).value; hemVolume = v === '' ? null : Number(v); }} />
+          </label>
+          <label class="field">
+            <span class="lbl">{$t.postImaging.gcsLabel} ({$t.postImaging.gcsHint})</span>
+            <input class="input mono" type="number" min="3" max="15" value={gcs ?? ""} oninput={(e) => { const v = (e.currentTarget as HTMLInputElement).value; gcs = v === '' ? null : Number(v); }} />
+          </label>
+          <div class="field">
+            <span class="lbl">{$t.postImaging.ivhLabel}</span>
+            <Segmented options={ynOpts} bind:value={ivh} cols={2} />
+          </div>
+          <div class="field">
+            <span class="lbl">{$t.postImaging.secondaryCauseLabel}</span>
+            <Segmented options={secondaryOpts} bind:value={secondaryCause} cols={3} />
+          </div>
+          <div class="field">
+            <span class="lbl">{$t.postImaging.seizureLabel}</span>
+            <Segmented options={ynOpts} bind:value={seizure} cols={2} />
+          </div>
+          <div class="field">
+            <span class="lbl">{$t.postImaging.anticoagLabel}</span>
+            <Segmented options={anticoagOpts} bind:value={anticoag} cols={2} />
+          </div>
         </div>
       {/snippet}
     </Card>
 
-    {#if showFastestExtra}
+    {#if showFastest}
       <Card title={$t.postImaging.fastestTitle} subtitle={$t.postImaging.fastestHint}>
         {#snippet children()}
-          <div class="form-stack">
-            <Pill tone="info">{#snippet children()}FASTEST{/snippet}</Pill>
-            <RadioGroup id="post-brain" label={$t.postImaging.brainstemLabel} name="brainstem" columns={2} bind:value={brainstem} options={ynOpts} required />
-            <RadioGroup id="post-proco" label={$t.postImaging.procoagulantLabel} name="procoagulant" columns={2} bind:value={procoagulant} options={ynOpts} required />
-            <RadioGroup id="post-ecg" label={$t.postImaging.ecgLabel} name="ecg" columns={2} bind:value={ecg} options={ynOpts} required />
-            <RadioGroup id="post-thrombosis" label={$t.postImaging.thrombosisLabel} name="thrombosis" columns={2} bind:value={thrombosis} options={ynOpts} required />
-            <RadioGroup id="post-pregn" label={$t.postImaging.pregnancyLabel} name="pregnancy" columns={2} bind:value={pregnancy} options={ynOpts} required />
-            <RadioGroup id="post-angio" label={$t.postImaging.angioplastyLabel} name="angioplasty" columns={2} bind:value={angioplasty} options={ynOpts} required />
-            <RadioGroup id="post-ivhscore" label={$t.postImaging.ivhScoreLabel} name="ivhScore" columns={2} bind:value={ivhScore} options={ynOpts} required />
+          <div class="stack">
+            <div class="field"><span class="lbl">{$t.postImaging.brainstemLabel}</span><Segmented options={ynOpts} bind:value={brainstem} cols={2} /></div>
+            <div class="field"><span class="lbl">{$t.postImaging.procoagulantLabel}</span><Segmented options={ynOpts} bind:value={procoagulant} cols={2} /></div>
+            <div class="field"><span class="lbl">{$t.postImaging.ecgLabel}</span><Segmented options={ynOpts} bind:value={ecg} cols={2} /></div>
+            <div class="field"><span class="lbl">{$t.postImaging.thrombosisLabel}</span><Segmented options={ynOpts} bind:value={thrombosis} cols={2} /></div>
+            <div class="field"><span class="lbl">{$t.postImaging.pregnancyLabel}</span><Segmented options={ynOpts} bind:value={pregnancy} cols={2} /></div>
+            <div class="field"><span class="lbl">{$t.postImaging.angioplastyLabel}</span><Segmented options={ynOpts} bind:value={angioplasty} cols={2} /></div>
+            <div class="field"><span class="lbl">{$t.postImaging.ivhScoreLabel}</span><Segmented options={ynOpts} bind:value={ivhScore} cols={2} /></div>
           </div>
         {/snippet}
       </Card>
     {/if}
   {/if}
-
-  <div class="actions">
-    <Button variant="secondary" fullWidth onclick={() => push("/pre-result")}>
-      {#snippet children()}{$t.common.back}{/snippet}
-    </Button>
-    <Button variant="primary" fullWidth disabled={!canSubmit} onclick={submit}>
-      {#snippet children()}{$t.common.next}{/snippet}
-    </Button>
-  </div>
 </div>
 
+<BottomBar onBack={() => push("/pre-result")} onNext={() => push("/summary")} nextDisabled={!canSubmit} />
+
 <style>
-  h1 { font-size: var(--fs-2xl); margin: 0; }
-  .lead { color: var(--text-muted); margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-sm); }
-  .stack { display: flex; flex-direction: column; gap: var(--sp-4); }
-  .form-stack { display: flex; flex-direction: column; gap: var(--sp-4); }
-  .actions {
-    position: sticky;
-    bottom: var(--bottom-nav-h);
-    background: var(--surface-elevated);
-    padding: var(--sp-3);
-    margin-inline: calc(-1 * var(--sp-4));
-    margin-block: var(--sp-4) calc(-1 * var(--sp-8));
-    border-top: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--sp-2);
+  .body {
+    flex: 1;
+    overflow: auto;
+    padding: 6px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
+  .stack { display: flex; flex-direction: column; gap: 20px; }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .lbl { font-size: 13.5px; font-weight: 600; color: var(--text-muted); }
+  .input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 14px;
+    font-size: 16px;
+    color: var(--text);
+    background: var(--surface);
+    font-family: inherit;
+    outline: none;
+  }
+  .input.mono { font-family: var(--font-mono); }
+  .input:focus { border-color: var(--primary); box-shadow: var(--focus-ring); }
 </style>

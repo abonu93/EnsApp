@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { link } from "svelte-spa-router";
+  import { link, push } from "svelte-spa-router";
+  import AppHeader from "$lib/components/AppHeader.svelte";
   import Card from "$lib/components/Card.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import Button from "$lib/components/Button.svelte";
@@ -21,22 +22,10 @@
 </script>
 
 {#if !info}
-  <h1>{$t.trials.notFoundTitle}</h1>
-  <p class="lead">"{name}" {$t.trials.notFoundDesc}</p>
-  <a href="/trials" use:link>
-    <Button>{#snippet children()}{$t.trials.backCatalog}{/snippet}</Button>
-  </a>
+  <AppHeader title={$t.trials.notFoundTitle} sub={`"${name}" ${$t.trials.notFoundDesc}`} onBack={() => push("/trials")} />
 {:else}
-  <div class="head">
-    <a href="/trials" use:link class="back" aria-label={$t.trials.backToCatalog}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <polyline points="15 18 9 12 15 6" />
-      </svg>
-      <span>{$t.trials.backToCatalog}</span>
-    </a>
-  </div>
-
-  <h1>{name}</h1>
+  <AppHeader title={name} sub={info.category} onBack={() => push("/trials")} />
+  <div class="body">
   <div class="badges">
     <Pill tone={statusTone(info.status)}>{#snippet children()}{info.status}{/snippet}</Pill>
     <Pill tone={getTrialCategory(name)}>{#snippet children()}{getTrialCategory(name)}{/snippet}</Pill>
@@ -107,23 +96,11 @@
       </a>
     {/if}
   </div>
+  </div>
 {/if}
 
 <style>
-  h1 { font-size: var(--fs-3xl); margin: var(--sp-3) 0 var(--sp-3); }
-  .lead { color: var(--text-muted); margin-bottom: var(--sp-4); }
-  .head { margin-bottom: var(--sp-3); }
-  .back {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-1);
-    color: var(--primary);
-    text-decoration: none;
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
-    min-height: var(--touch-min);
-  }
-  .back:hover { text-decoration: underline; }
+  .body { padding: 6px 16px 16px; }
   .badges {
     display: flex;
     flex-wrap: wrap;

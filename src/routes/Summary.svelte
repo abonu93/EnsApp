@@ -1,7 +1,8 @@
 <script lang="ts">
   import { push, link } from "svelte-spa-router";
+  import AppHeader from "$lib/components/AppHeader.svelte";
+  import BottomBar from "$lib/components/BottomBar.svelte";
   import Card from "$lib/components/Card.svelte";
-  import Button from "$lib/components/Button.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
   import { selectedStudies } from "$lib/stores/trialSelection";
@@ -37,20 +38,12 @@
     { display: "TICH-3", eligible: $hemEligibility.tich3, tone: "hemorrhagic" },
   ]);
 
-  const eligibleItems = $derived(
-    [...acuteEligible, ...hemEligibleList].filter((e) => e.eligible)
-  );
-
-  const ineligibleItems = $derived(
-    acuteEligible.filter((e) => !e.eligible)
-  );
+  const eligibleItems = $derived([...acuteEligible, ...hemEligibleList].filter((e) => e.eligible));
+  const ineligibleItems = $derived(acuteEligible.filter((e) => !e.eligible));
 
   function toggle(name: string) {
-    selectedStudies.update((arr) =>
-      arr.includes(name) ? arr.filter((n) => n !== name) : [...arr, name]
-    );
+    selectedStudies.update((arr) => arr.includes(name) ? arr.filter((n) => n !== name) : [...arr, name]);
   }
-
   function reasonsFor(name: string): string[] {
     const fn = REASON_BY_TRIAL[name];
     if (!fn) return [];
@@ -58,184 +51,177 @@
   }
 
   const selectedCount = $derived($selectedStudies.length);
-
-  function proceedSkip() {
-    push("/share");
-  }
 </script>
 
-<h1>{$t.summary.title}</h1>
-<p class="lead">{$t.summary.subtitle}</p>
+<AppHeader title="Risultati" sub={`${eligibleItems.length} ${eligibleItems.length === 1 ? 'trial eleggibile' : 'trial eleggibili'}`} step={2} steps={3} onBack={() => push("/post-imaging")} />
 
-{#if eligibleItems.length === 0}
-  <Card title={$t.summary.noneTitle}>
-    {#snippet children()}<p class="muted">{$t.summary.noneDesc}</p>{/snippet}
-  </Card>
-{:else}
-  <Card>
-    {#snippet children()}
-      <ul class="trial-list">
-        {#each eligibleItems as item (item.display)}
-          {@const checked = $selectedStudies.includes(item.display)}
-          <li>
-            <label class="row" class:checked>
-              <input type="checkbox" {checked} onchange={() => toggle(item.display)} />
-              <div class="row-text">
-                <strong>{item.display}</strong>
-                <Pill tone={item.tone}>{#snippet children()}{item.tone}{/snippet}</Pill>
-              </div>
-              <Pill tone="success">{#snippet children()}{$t.common.eligible}{/snippet}</Pill>
-            </label>
-          </li>
-        {/each}
-      </ul>
-    {/snippet}
-  </Card>
-{/if}
+<div class="body">
+  {#if eligibleItems.length === 0}
+    <Card title="Nessun trial eleggibile">
+      {#snippet children()}<p class="muted">Il paziente non soddisfa i criteri di nessun trial attivo.</p>{/snippet}
+    </Card>
+  {:else}
+    <div class="list">
+      {#each eligibleItems as item (item.display)}
+        {@const checked = $selectedStudies.includes(item.display)}
+        <button class="card-pick" class:on={checked} type="button" onclick={() => toggle(item.display)}>
+          <span class="check" class:on={checked} aria-hidden="true">
+            {#if checked}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M5 12l4 4 10-10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            {/if}
+          </span>
+          <span class="card-pick-text">
+            <span class="name">{item.display}</span>
+            <Pill tone={item.tone}>{#snippet children()}{item.tone}{/snippet}</Pill>
+          </span>
+        </button>
+      {/each}
+    </div>
+  {/if}
 
-{#if ineligibleItems.length > 0}
-  <div class="toggle-row">
-    <button class="toggle-btn" type="button" onclick={() => (showIneligible = !showIneligible)} aria-expanded={showIneligible}>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class:rot={showIneligible}>
+  {#if ineligibleItems.length > 0}
+    <button class="ineligible-toggle" type="button" onclick={() => (showIneligible = !showIneligible)} aria-expanded={showIneligible}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class:rot={showIneligible}>
         <polyline points="9 18 15 12 9 6" />
       </svg>
       {showIneligible ? "Nascondi" : "Mostra"} non eleggibili ({ineligibleItems.length})
     </button>
-  </div>
 
-  {#if showIneligible}
-    <Card>
-      {#snippet children()}
-        <ul class="trial-list">
-          {#each ineligibleItems as item (item.display)}
-            {@const fails = reasonsFor(item.display)}
-            <li class="inel">
-              <div class="row no-touch">
-                <div class="row-text">
+    {#if showIneligible}
+      <Card>
+        {#snippet children()}
+          <ul class="inel-list">
+            {#each ineligibleItems as item (item.display)}
+              {@const fails = reasonsFor(item.display)}
+              <li class="inel">
+                <div class="inel-head">
                   <strong>{item.display}</strong>
-                  <Pill tone="ischemic">{#snippet children()}{item.tone}{/snippet}</Pill>
+                  <Pill tone="danger">{#snippet children()}Non elegg.{/snippet}</Pill>
                 </div>
-                <Pill tone="danger">{#snippet children()}{$t.common.notEligible}{/snippet}</Pill>
-              </div>
-              {#if fails.length > 0}
-                <details class="reasons">
-                  <summary>Criteri mancanti ({fails.length})</summary>
-                  <ul>
-                    {#each fails as f}
-                      <li>{f}</li>
-                    {/each}
-                  </ul>
-                </details>
-              {/if}
-            </li>
-          {/each}
-        </ul>
-      {/snippet}
-    </Card>
+                {#if fails.length > 0}
+                  <details class="reasons">
+                    <summary>Criteri mancanti ({fails.length})</summary>
+                    <ul>{#each fails as f}<li>{f}</li>{/each}</ul>
+                  </details>
+                {/if}
+              </li>
+            {/each}
+          </ul>
+        {/snippet}
+      </Card>
+    {/if}
   {/if}
-{/if}
 
-<div class="actions">
-  <Button variant="secondary" fullWidth onclick={() => push("/post-imaging")}>
-    {#snippet children()}{$t.common.back}{/snippet}
-  </Button>
-  {#if selectedCount > 0}
-    <Button variant="primary" fullWidth onclick={() => push("/share")}>
-      {#snippet children()}{$t.summary.proceed} ({selectedCount}){/snippet}
-    </Button>
-  {:else}
-    <Button variant="primary" fullWidth onclick={proceedSkip}>
-      {#snippet children()}Continua senza selezione{/snippet}
-    </Button>
-  {/if}
+  <a href="/post-acute" use:link class="post-link">{$t.summary.goToPostAcute} →</a>
 </div>
 
-<a href="/post-acute" use:link class="post-link">
-  {$t.summary.goToPostAcute} →
-</a>
+<BottomBar
+  onBack={() => push("/post-imaging")}
+  onNext={() => push("/share")}
+  nextLabel={selectedCount > 0 ? `Revisione · ${selectedCount}` : "Continua senza selezione"}
+/>
 
 <style>
-  h1 { font-size: var(--fs-2xl); margin: 0; }
-  .lead { color: var(--text-muted); margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-sm); }
-  .muted { color: var(--text-muted); margin: 0; }
-  .trial-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-2); }
-  .row {
+  .body {
+    flex: 1;
+    overflow: auto;
+    padding: 6px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .muted { color: var(--text-muted); margin: 0; font-size: 13px; }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+  .card-pick {
     display: flex;
     align-items: center;
-    gap: var(--sp-3);
-    padding: var(--sp-3);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-md);
-    background: var(--surface-elevated);
+    gap: 12px;
+    padding: 14px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
     cursor: pointer;
+    font-family: inherit;
+    color: var(--text);
     transition: all var(--transition-fast);
     min-height: var(--touch-min);
   }
-  .row:not(.no-touch):hover { border-color: var(--primary); }
-  .row.checked { background: var(--primary-soft); border-color: var(--primary); }
-  .row.no-touch { cursor: default; }
-  .row input { width: 20px; height: 20px; accent-color: var(--primary); }
-  .row-text {
+  .card-pick:hover { border-color: var(--primary); }
+  .card-pick:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .card-pick.on {
+    border: 1.5px solid var(--success);
+    background: var(--success-soft);
+  }
+  .check {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 2px solid var(--border-strong);
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: all var(--transition-fast);
+  }
+  .check.on {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--text-inverted);
+  }
+  .card-pick-text {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: var(--sp-2);
-    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
   }
-  .row-text strong { font-size: var(--fs-base); }
-  .toggle-row { margin-top: var(--sp-4); }
-  .toggle-btn {
+  .name { font-size: 15px; font-weight: 600; }
+
+  .ineligible-toggle {
     display: inline-flex;
     align-items: center;
-    gap: var(--sp-2);
-    padding: var(--sp-2) var(--sp-3);
+    gap: 8px;
+    padding: 12px 16px;
     color: var(--text-muted);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-medium);
-    min-height: var(--touch-min);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0 auto;
+    font-family: inherit;
   }
-  .toggle-btn:hover { color: var(--text); }
-  .toggle-btn svg { transition: transform var(--transition-fast); }
-  .toggle-btn svg.rot { transform: rotate(90deg); }
-  .inel {
+  .ineligible-toggle svg { transition: transform var(--transition-fast); }
+  .ineligible-toggle svg.rot { transform: rotate(90deg); }
+  .inel-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .inel-head {
     display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
   }
   .reasons {
-    padding: var(--sp-2) var(--sp-3);
-    background: var(--surface);
-    border-radius: var(--radius-md);
-    font-size: var(--fs-sm);
+    margin-top: 8px;
+    font-size: 12.5px;
   }
-  .reasons summary {
-    cursor: pointer;
-    color: var(--text-muted);
-    font-weight: var(--fw-medium);
-    padding: var(--sp-1) 0;
-  }
-  .reasons ul { margin: var(--sp-2) 0 0; padding-left: var(--sp-5); color: var(--danger); }
-  .reasons li { margin-bottom: 2px; }
-  .actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--sp-2);
-    margin-top: var(--sp-4);
-    position: sticky;
-    bottom: var(--bottom-nav-h);
-    background: var(--surface-elevated);
-    padding: var(--sp-3);
-    margin-inline: calc(-1 * var(--sp-4));
-    border-top: 1px solid var(--border);
-  }
+  .reasons summary { cursor: pointer; color: var(--text-muted); font-weight: 600; }
+  .reasons ul { margin: 8px 0 0; padding-left: 18px; color: var(--danger); }
+
   .post-link {
     display: block;
     text-align: center;
-    margin-top: var(--sp-4);
-    padding: var(--sp-3);
+    padding: 14px;
     color: var(--post-acute-text);
-    font-weight: var(--fw-medium);
+    font-weight: 500;
     text-decoration: none;
+    font-size: 13.5px;
   }
   .post-link:hover { text-decoration: underline; }
 </style>

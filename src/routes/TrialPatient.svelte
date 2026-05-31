@@ -3,6 +3,8 @@
   // Differente dal flusso eligibility: nessuna regola applicata,
   // solo raccolta dati per Sheet.
   import { push } from "svelte-spa-router";
+  import AppHeader from "$lib/components/AppHeader.svelte";
+  import BottomBar from "$lib/components/BottomBar.svelte";
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
   import TextField from "$lib/components/TextField.svelte";
@@ -42,10 +44,9 @@
   }
 </script>
 
-<h1>{$t.trialPatient.title}</h1>
-<p class="lead">{$t.trialPatient.subtitle}</p>
+<AppHeader title={$t.trialPatient.title} sub={$t.trialPatient.subtitle} onBack={() => push("/workflow")} />
 
-<div class="stack">
+<div class="body"><div class="stack">
   <Card>
     {#snippet children()}
       <div class="form-stack">
@@ -73,20 +74,13 @@
       {/if}
     {/snippet}
   </Card>
-
-  <div class="actions">
-    <Button variant="secondary" fullWidth onclick={() => push("/workflow")}>
-      {#snippet children()}{$t.common.back}{/snippet}
-    </Button>
-    <Button variant="primary" fullWidth disabled={!canSubmit} onclick={submit}>
-      {#snippet children()}{$t.common.next}{/snippet}
-    </Button>
-  </div>
+</div>
 </div>
 
+<BottomBar onBack={() => push("/workflow")} onNext={submit} nextDisabled={!canSubmit} />
+
 <style>
-  h1 { font-size: var(--fs-2xl); margin: 0; }
-  .lead { color: var(--text-muted); margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-sm); }
+  .body { padding: 6px 16px 16px; }
   .stack { display: flex; flex-direction: column; gap: var(--sp-4); }
   .form-stack { display: flex; flex-direction: column; gap: var(--sp-4); }
   .select {

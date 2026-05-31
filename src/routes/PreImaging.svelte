@@ -1,14 +1,12 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
+  import AppHeader from "$lib/components/AppHeader.svelte";
+  import BottomBar from "$lib/components/BottomBar.svelte";
   import Card from "$lib/components/Card.svelte";
-  import Button from "$lib/components/Button.svelte";
-  import TextField from "$lib/components/TextField.svelte";
-  import NumberField from "$lib/components/NumberField.svelte";
-  import DatetimeField from "$lib/components/DatetimeField.svelte";
-  import RadioGroup from "$lib/components/RadioGroup.svelte";
+  import NihssScale from "$lib/components/NihssScale.svelte";
+  import Segmented from "$lib/components/Segmented.svelte";
+  import Switch from "$lib/components/Switch.svelte";
   import { preData, hoursSince } from "$lib/stores/patient";
-  import { validate, isValid } from "$lib/validation/schema";
-  import { required, range } from "$lib/validation/rules";
   import { t } from "$lib/i18n";
 
   type YN = "yes" | "no" | "";
@@ -23,12 +21,8 @@
   let doac = $state<YN>(($preData.doac as YN) ?? "");
   let acei = $state<YN>(($preData.acei as YN) ?? "");
 
-  // Ore derivate dal datetime (per validazione + UI feedback)
   const ltswHrs = $derived(hoursSince(ltswDate));
-  // Auto-calcolo: wake-up + sintomi entro 6h = ore tra LTSW e adesso <= 6
-  const symptomsWithin6h = $derived(
-    wakeupStroke && ltswHrs !== undefined && ltswHrs <= 6
-  );
+  const symptomsWithin6h = $derived(wakeupStroke && ltswHrs !== undefined && ltswHrs <= 6);
 
   $effect(() => {
     preData.set({
@@ -46,201 +40,246 @@
     });
   });
 
-  const errors = $derived(
-    validate(
-      { age, nihss, premrs, ltswDate, angiograph, doac, acei },
-      {
-        age: [required($t.common.required), range(0, 120, $t.preImaging.rangeAge)],
-        nihss: [required($t.common.required), range(0, 42, $t.preImaging.rangeNihss)],
-        premrs: [required($t.common.required), range(0, 5, $t.preImaging.rangeMrs)],
-        ltswDate: [required($t.common.required)],
-        angiograph: [required($t.common.select)],
-        doac: [required($t.common.select)],
-        acei: [required($t.common.select)],
-      }
-    )
+  const canSubmit = $derived(
+    age !== null && nihss !== null && premrs !== null && ltswDate !== "" &&
+    angiograph !== "" && doac !== "" && acei !== ""
   );
 
-  const canSubmit = $derived(isValid(errors));
+  function submit() { if (canSubmit) push("/pre-result"); }
 
-  function submit() {
-    if (!canSubmit) return;
-    push("/pre-result");
+  // Window classification per LTSW
+  function windowInfo(hours: number | undefined): { tone: "success" | "warn" | "danger"; label: string } | null {
+    if (hours === undefined) return null;
+    const min = hours * 60;
+    if (min <= 270) return { tone: "success", label: "Finestra trombolisi IV" };
+    if (min <= 360) return { tone: "success", label: "Finestra EVT standard" };
+    if (min <= 1440) return { tone: "warn", label: "Finestra EVT selezionata (<=24h)" };
+    return { tone: "danger", label: "Finestra chiusa" };
+  }
+  const win = $derived(windowInfo(ltswHrs));
+
+  // Presets per LTSW (now / -1h / -3h / -6h)
+  function setPreset(hoursAgo: number) {
+    const d = new Date(Date.now() - hoursAgo * 3_600_000);
+    // datetime-local accetta YYYY-MM-DDTHH:MM
+    const off = d.getTimezoneOffset() * 60_000;
+    ltswDate = new Date(d.getTime() - off).toISOString().slice(0, 16);
   }
 
-  const ynOptions = $derived<{ value: "yes" | "no"; label: string }[]>([
+  const mrsOpts: { value: number; label: string }[] = [0, 1, 2, 3, 4, 5].map((v) => ({ value: v, label: String(v) }));
+  const ynOpts = $derived<{ value: "yes" | "no"; label: string }[]>([
     { value: "no", label: $t.common.no },
     { value: "yes", label: $t.common.yes },
   ]);
 </script>
 
-<h1>{$t.preImaging.title}</h1>
-<p class="lead">{$t.preImaging.subtitle}</p>
+<AppHeader title={$t.preImaging.title} sub={$t.preImaging.subtitle} step={0} steps={3} />
 
-<div class="stack">
-  <Card title={$t.preImaging.identification}>
+<div class="body">
+  <Card>
     {#snippet children()}
-      <TextField
-        id="pre-pid"
-        label={$t.preImaging.patientRecordLabel}
-        placeholder={$t.preImaging.patientRecordPlaceholder}
-        bind:value={patientId}
-      />
+      <label class="field">
+        <span class="lbl">{$t.preImaging.patientRecordLabel}</span>
+        <input class="input mono" type="text" bind:value={patientId} placeholder="2025-00123" />
+      </label>
     {/snippet}
   </Card>
 
   <Card title={$t.preImaging.anamnesis}>
     {#snippet children()}
-      <div class="form-stack">
-        <NumberField id="pre-age" label={$t.preImaging.ageLabel} suffix={$t.preImaging.ageSuffix} bind:value={age} required error={errors.age ?? ""} />
-        <NumberField id="pre-nihss" label="NIHSS" hint={$t.preImaging.nihssHint} bind:value={nihss} required error={errors.nihss ?? ""} />
-        <NumberField id="pre-mrs" label={$t.preImaging.mrsLabel} hint={$t.preImaging.mrsHint} bind:value={premrs} required error={errors.premrs ?? ""} />
-        <DatetimeField
-          id="pre-ltsw"
-          label={$t.preImaging.ltswLabel}
-          hint={$t.preImaging.ltswHint}
-          bind:value={ltswDate}
-          required
-          error={errors.ltswDate ?? ""}
-        />
+      <div class="stack">
+        <label class="field">
+          <span class="row-lbl"><span class="lbl">{$t.preImaging.ageLabel}</span><span class="hint">18-110</span></span>
+          <div class="input-wrap">
+            <input class="input mono" type="text" inputmode="numeric" value={age ?? ""} oninput={(e) => { const v = (e.currentTarget as HTMLInputElement).value.replace(/[^0-9]/g, ''); age = v === '' ? null : Number(v); }} placeholder="—" />
+            <span class="unit">{$t.preImaging.ageSuffix}</span>
+          </div>
+        </label>
+
+        <div class="field">
+          <span class="row-lbl"><span class="lbl">NIHSS</span><span class="hint">0-42</span></span>
+          <NihssScale bind:value={nihss} />
+        </div>
+
+        <div class="field">
+          <span class="row-lbl"><span class="lbl">pre-mRS</span><span class="hint">0 autonomo - 5 severo</span></span>
+          <Segmented
+            options={mrsOpts}
+            value={premrs ?? ""}
+            onChange={(v) => (premrs = v)}
+          />
+        </div>
+      </div>
+    {/snippet}
+  </Card>
+
+  <Card title="Last seen well">
+    {#snippet children()}
+      <div class="stack">
+        <input class="input" type="datetime-local" bind:value={ltswDate} aria-label="LTSW" />
+
+        <div class="presets">
+          <button type="button" class="preset" onclick={() => setPreset(0)}>Adesso</button>
+          <button type="button" class="preset" onclick={() => setPreset(1)}>-1h</button>
+          <button type="button" class="preset" onclick={() => setPreset(3)}>-3h</button>
+          <button type="button" class="preset" onclick={() => setPreset(6)}>-6h</button>
+        </div>
+
         {#if ltswHrs !== undefined}
-          <p class="auto-calc">
-            <strong>{ltswHrs.toFixed(1)}h</strong> {$t.preImaging.ltswSuffix}
-          </p>
+          <div class="elapsed">
+            <span class="elapsed-val">{ltswHrs.toFixed(1)}h</span>
+            <span class="elapsed-lbl">da LTSW</span>
+          </div>
+          {#if win}
+            <div class="window tone-{win.tone}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span>{win.label}</span>
+            </div>
+          {/if}
+        {/if}
+
+        <div class="toggle">
+          <span class="text">
+            <strong>{$t.preImaging.wakeupLabel}</strong>
+            <small>{$t.preImaging.wakeupDesc}</small>
+          </span>
+          <Switch bind:checked={wakeupStroke} label={$t.preImaging.wakeupLabel} />
+        </div>
+        {#if wakeupStroke && ltswHrs !== undefined}
+          <div class="window tone-{symptomsWithin6h ? 'success' : 'warn'}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span>Sintomi entro 6h: <strong>{symptomsWithin6h ? $t.common.yes : $t.common.no}</strong></span>
+          </div>
         {/if}
       </div>
     {/snippet}
   </Card>
 
-  <Card title={$t.preImaging.wakeupTitle}>
-    {#snippet children()}
-      <label class="check-row">
-        <input type="checkbox" bind:checked={wakeupStroke} />
-        <span>
-          <strong>{$t.preImaging.wakeupLabel}</strong>
-          <small>{$t.preImaging.wakeupDesc}</small>
-        </span>
-      </label>
-      {#if wakeupStroke && ltswHrs !== undefined}
-        <div class="auto-status" class:ok={symptomsWithin6h} class:warn={!symptomsWithin6h}>
-          {#if symptomsWithin6h}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          {:else}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-          {/if}
-          <span>
-            {$t.preImaging.wakeupSymptomsLabel}: <strong>{symptomsWithin6h ? $t.common.yes : $t.common.no}</strong>
-            <small>(calcolato da LTSW)</small>
-          </span>
-        </div>
-      {/if}
-    {/snippet}
-  </Card>
-
   <Card title={$t.preImaging.contextTitle}>
     {#snippet children()}
-      <div class="form-stack">
-        <RadioGroup
-          id="pre-angio"
-          label={$t.preImaging.angioLabel}
-          name="angiograph"
-          columns={2}
-          options={ynOptions}
-          bind:value={angiograph}
-          required
-          error={errors.angiograph ?? ""}
-        />
-        <RadioGroup
-          id="pre-doac"
-          label={$t.preImaging.doacLabel}
-          name="doac"
-          columns={2}
-          options={ynOptions}
-          bind:value={doac}
-          required
-          error={errors.doac ?? ""}
-        />
-        <RadioGroup
-          id="pre-acei"
-          label={$t.preImaging.aceiLabel}
-          name="acei"
-          columns={2}
-          options={ynOptions}
-          bind:value={acei}
-          required
-          error={errors.acei ?? ""}
-        />
+      <div class="stack">
+        <div class="field">
+          <span class="lbl">{$t.preImaging.angioLabel}</span>
+          <Segmented options={ynOpts} bind:value={angiograph} cols={2} />
+        </div>
+        <div class="field">
+          <span class="lbl">{$t.preImaging.doacLabel}</span>
+          <Segmented options={ynOpts} bind:value={doac} cols={2} />
+        </div>
+        <div class="field">
+          <span class="lbl">{$t.preImaging.aceiLabel}</span>
+          <Segmented options={ynOpts} bind:value={acei} cols={2} />
+        </div>
       </div>
     {/snippet}
   </Card>
-
-  <div class="actions">
-    <Button variant="secondary" fullWidth onclick={() => push("/workflow")}>
-      {#snippet children()}{$t.common.back}{/snippet}
-    </Button>
-    <Button variant="primary" fullWidth disabled={!canSubmit} onclick={submit}>
-      {#snippet children()}{$t.common.next}{/snippet}
-    </Button>
-  </div>
 </div>
 
+<BottomBar onBack={() => push("/workflow")} onNext={submit} nextDisabled={!canSubmit} />
+
 <style>
-  h1 { font-size: var(--fs-2xl); margin: 0; }
-  .lead { color: var(--text-muted); margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-sm); }
-  .stack { display: flex; flex-direction: column; gap: var(--sp-4); }
-  .form-stack { display: flex; flex-direction: column; gap: var(--sp-4); }
-  .check-row {
+  .body {
+    flex: 1;
+    overflow: auto;
+    padding: 6px 16px 16px;
     display: flex;
-    gap: var(--sp-3);
-    align-items: flex-start;
-    cursor: pointer;
-    padding: var(--sp-2);
-    border-radius: var(--radius-md);
+    flex-direction: column;
+    gap: 12px;
   }
-  .check-row input { margin-top: 4px; transform: scale(1.2); accent-color: var(--primary); }
-  .check-row strong { display: block; }
-  .check-row small {
-    display: block;
-    font-size: var(--fs-sm);
-    color: var(--text-muted);
-    margin-top: 2px;
+  .stack { display: flex; flex-direction: column; gap: 20px; }
+  .field { display: block; }
+  .row-lbl {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
   }
-  .auto-calc {
-    margin: 0;
-    padding: var(--sp-2) var(--sp-3);
+  .lbl { font-size: 13.5px; font-weight: 600; color: var(--text-muted); }
+  .hint { font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono); }
+  .input-wrap { position: relative; display: flex; align-items: center; }
+  .input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 14px;
+    font-size: 16px;
+    color: var(--text);
     background: var(--surface);
-    border-radius: var(--radius-md);
-    font-size: var(--fs-sm);
+    font-family: inherit;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  }
+  .input.mono { font-family: var(--font-mono); }
+  .input:focus { border-color: var(--primary); box-shadow: var(--focus-ring); }
+  .unit {
+    position: absolute;
+    right: 14px;
+    font-size: 13px;
     color: var(--text-muted);
+    font-family: var(--font-mono);
+    pointer-events: none;
   }
-  .auto-calc strong { color: var(--primary); font-size: var(--fs-base); }
-  .auto-status {
-    margin-top: var(--sp-2);
-    padding: var(--sp-3);
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: flex-start;
-    gap: var(--sp-2);
-    font-size: var(--fs-sm);
-  }
-  .auto-status.ok { background: var(--success-soft); color: var(--success); }
-  .auto-status.warn { background: var(--warn-soft); color: var(--warn); }
-  .auto-status strong { color: var(--text); }
-  .auto-status small { color: var(--text-muted); display: block; margin-top: 2px; }
-  .actions {
-    position: sticky;
-    bottom: var(--bottom-nav-h);
-    background: var(--surface-elevated);
-    padding: var(--sp-3);
-    margin-inline: calc(-1 * var(--sp-4));
-    margin-block: var(--sp-4) calc(-1 * var(--sp-8));
-    border-top: 1px solid var(--border);
+
+  .presets {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--sp-2);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
   }
+  .preset {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: 10px;
+    padding: 10px 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+  .preset:hover { border-color: var(--primary); color: var(--primary); }
+  .preset:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+  .elapsed {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .elapsed-val {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.4px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .elapsed-lbl { font-size: 12.5px; color: var(--text-muted); }
+
+  .window {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .window.tone-success { background: var(--success-soft); color: var(--success); }
+  .window.tone-warn { background: var(--warn-soft); color: var(--warn); }
+  .window.tone-danger { background: var(--danger-soft); color: var(--danger); }
+
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 0;
+  }
+  .text { flex: 1; min-width: 0; }
+  .text strong { display: block; font-size: 14px; font-weight: 600; color: var(--text); }
+  .text small { display: block; font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
 </style>

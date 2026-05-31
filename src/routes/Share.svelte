@@ -1,5 +1,6 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
+  import AppHeader from "$lib/components/AppHeader.svelte";
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
   import RadioGroup from "$lib/components/RadioGroup.svelte";
@@ -154,10 +155,9 @@
   ];
 </script>
 
-<h1>{$t.share.title}</h1>
-<p class="lead">{$t.share.subtitle}</p>
+<AppHeader title={$t.share.title} sub={$t.share.subtitle} step={2} steps={3} onBack={() => push("/summary")} />
 
-<div class="stack">
+<div class="body"><div class="stack">
   {#each $selectedStudies as name (name)}
     {#if hasKnownStudyArm(name)}
       <Card title={`${$t.share.outcomeFor} ${name}`}>
@@ -252,10 +252,10 @@
     {/if}
   </div>
 </div>
+</div>
 
 <style>
-  h1 { font-size: var(--fs-2xl); margin: 0; }
-  .lead { color: var(--text-muted); margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-sm); }
+  .body { padding: 6px 16px 16px; }
   .stack { display: flex; flex-direction: column; gap: var(--sp-4); }
   .form-stack { display: flex; flex-direction: column; gap: var(--sp-4); }
   .field { display: flex; flex-direction: column; gap: var(--sp-1); }

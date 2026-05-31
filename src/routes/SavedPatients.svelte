@@ -1,5 +1,6 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
+  import AppHeader from "$lib/components/AppHeader.svelte";
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
   import Pill from "$lib/components/Pill.svelte";
@@ -34,8 +35,9 @@
   }
 </script>
 
-<h1>Pazienti inviati</h1>
-<p class="lead">Lista locale dei pazienti gia' salvati. Tap per riaprire.</p>
+<AppHeader title="Pazienti inviati" sub="Lista locale - tap per riaprire" onBack={() => push("/")} />
+
+<div class="body">
 
 {#if $savedPatients.length === 0}
   <Card>
@@ -84,10 +86,10 @@
     {/each}
   </ul>
 {/if}
+</div>
 
 <style>
-  h1 { font-size: var(--fs-2xl); margin: 0; }
-  .lead { color: var(--text-muted); margin: var(--sp-2) 0 var(--sp-4); font-size: var(--fs-sm); }
+  .body { padding: 6px 16px 16px; }
   .empty { color: var(--text-muted); text-align: center; padding-block: var(--sp-3); margin: 0; }
   .empty-actions { display: flex; justify-content: center; margin-top: var(--sp-3); }
   .saved-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--sp-3); }
