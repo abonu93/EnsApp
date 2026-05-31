@@ -2,7 +2,7 @@
 // (Apps Script GAS_URL). Snapshot test in tests/domain/sheet-payload.test.ts.
 
 const GAS_URL =
-  "https://script.google.com/macros/s/AKfycbzvQuV7Zy6ljhotzZPGxgWIleqpNV3XC-kaUs8Rsn2a6FVAlU9cq0J7dm1LRfwf9fwW/exec";
+  "https://script.google.com/macros/s/AKfycbxt9NhlJbn5n6d06_aKFW-a76pYqpe-86xedfNKI6MIkexDOSjLnTSZd56Nau9y12Lf/exec";
 
 export const SHEET_TRIAL_KEYS = [
   "WeTrust",
