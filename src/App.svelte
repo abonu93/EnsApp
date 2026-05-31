@@ -1,10 +1,8 @@
 <script lang="ts">
   import Router from "svelte-spa-router";
   import { routes, setupRouterA11y } from "$lib/router";
-  import ThemeToggle from "$lib/components/ThemeToggle.svelte";
-  import LocaleToggle from "$lib/components/LocaleToggle.svelte";
   import BottomNav from "$lib/components/BottomNav.svelte";
-  import { t } from "$lib/i18n";
+  import { t, locale, LOCALES, cycleLocale } from "$lib/i18n";
 
   setupRouterA11y();
 
@@ -18,20 +16,24 @@
 
 <a href="#main" class="skip-link">{$t.common.skipToContent}</a>
 
-<header>
-  <div class="container header-row">
-    <a href="/" class="brand">
-      <span class="brand-dot" aria-hidden="true"></span>
-      {$t.common.appName}
-    </a>
-    <div class="header-controls">
-      <LocaleToggle />
-      <ThemeToggle />
-    </div>
-  </div>
+<header class="hdr">
+  <a href="/" class="brand">
+    <span class="brand-dot" aria-hidden="true">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v6" />
+        <path d="M12 22v-6" />
+        <path d="M5.6 5.6l4.2 4.2" />
+        <path d="M14.2 14.2l4.2 4.2" />
+      </svg>
+    </span>
+    <span class="brand-name">EnsApp</span>
+  </a>
+  <button class="lang-btn" type="button" onclick={cycleLocale} aria-label="{$t.common.language}: {$locale.toUpperCase()}">
+    {$locale.toUpperCase()}
+  </button>
 </header>
 
-<main id="main" class="container" tabindex="-1">
+<main id="main" tabindex="-1">
   <Router {routes} />
 </main>
 
@@ -39,57 +41,63 @@
 
 <style>
   :global(html) {
-    /* Padding bottom = bottom-nav-h + safe-area */
-    padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0));
+    background: var(--bg);
+    /* Spazio per pill nav floating + safe area */
+    padding-bottom: calc(var(--bottom-nav-h) + 24px + env(safe-area-inset-bottom, 0));
+  }
+  :global(body) {
+    background: var(--bg);
   }
 
-  header {
-    position: sticky;
-    top: 0;
-    background: var(--surface-elevated);
-    border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(8px) saturate(180%);
-    z-index: var(--z-header);
-  }
-
-  .header-row {
+  .hdr {
+    padding: 58px 20px 4px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: var(--header-h);
-    gap: var(--sp-3);
-  }
-
-  .header-controls {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-2);
+    background: var(--bg);
   }
 
   .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .brand:hover { text-decoration: none; }
+  .brand-dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: var(--primary);
+    color: var(--text-inverted);
     display: inline-flex;
     align-items: center;
-    gap: var(--sp-2);
-    font-size: var(--fs-lg);
-    font-weight: var(--fw-bold);
-    color: var(--text);
-    text-decoration: none;
+    justify-content: center;
+  }
+  .brand-name {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
   }
 
-  .brand:hover {
-    text-decoration: none;
+  .lang-btn {
+    color: var(--text-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    letter-spacing: 0.3px;
+    padding: 6px;
+    cursor: pointer;
+    min-height: 32px;
+    min-width: 32px;
+    border-radius: 6px;
+    transition: background var(--transition-fast), color var(--transition-fast);
   }
-
-  .brand-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary), var(--hemorrhagic));
-    box-shadow: 0 0 0 2px var(--surface-elevated), 0 0 0 3px var(--primary-soft);
-  }
+  .lang-btn:hover { background: var(--primary-soft); color: var(--primary); }
+  .lang-btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
   main {
-    padding-block: var(--sp-6) var(--sp-8);
     outline: none;
   }
 </style>

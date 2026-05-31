@@ -1,8 +1,6 @@
 <script lang="ts">
-  import { link, push } from "svelte-spa-router";
-  import Card from "$lib/components/Card.svelte";
-  import Button from "$lib/components/Button.svelte";
-  import { hasPatientInProgress, preData, clearPatient } from "$lib/stores/patient";
+  import { push } from "svelte-spa-router";
+  import { hasPatientInProgress, preData, hoursSince, clearPatient } from "$lib/stores/patient";
   import { clearSelection } from "$lib/stores/trialSelection";
   import { t } from "$lib/i18n";
 
@@ -11,102 +9,255 @@
     clearSelection();
     push("/workflow");
   }
+  function resume() { push("/workflow"); }
+  function goCatalog() { push("/trials"); }
+  function goPast() { push("/saved"); }
 
-  function discardPatient() {
-    clearPatient();
-    clearSelection();
+  // Active session timer (mm:ss da LTSW)
+  const ltswHours = $derived(hoursSince($preData.ltswDate) ?? $preData.ltsw);
+  function fmtElapsed(hours: number | undefined): string {
+    if (hours === undefined || hours < 0) return "—";
+    const totalMin = Math.floor(hours * 60);
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return h > 0 ? `${h}h ${m.toString().padStart(2, "0")}` : `${m}m`;
   }
-
-  function resume() {
-    push("/workflow");
-  }
+  const elapsedLabel = $derived(fmtElapsed(ltswHours));
+  // Frazione finestra terapeutica (4.5h IV thrombolysis)
+  const windowFrac = $derived(
+    ltswHours !== undefined ? Math.min(1, (ltswHours * 60) / (4.5 * 60)) : 0
+  );
 </script>
 
-<div class="hero">
-  <div class="brand-mark" aria-hidden="true">
-    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 2a4 4 0 0 0-4 4v4a4 4 0 0 0 4 4 4 4 0 0 0 4-4V6a4 4 0 0 0-4-4z" />
-      <path d="M12 14v8" />
-      <path d="M8 22h8" />
-    </svg>
+<div class="page">
+  <div class="intro">
+    <h1>Assegna un paziente<br />a un trial.</h1>
+    <p class="tagline">{$t.landing.tagline}</p>
   </div>
-  <h1>{$t.common.appName}</h1>
-  <p class="lead">{$t.landing.tagline}</p>
-</div>
 
-<div class="actions">
-  <Button variant="primary" size="lg" fullWidth onclick={startNew}>
-    {#snippet children()}{$t.landing.newPatient}{/snippet}
-  </Button>
+  <button class="hero" type="button" onclick={startNew}>
+    <span class="hero-text">
+      <span class="hero-title">{$t.landing.newPatient}</span>
+      <span class="hero-sub">{$t.workflow.eligibilityDesc}</span>
+    </span>
+    <span class="hero-arrow" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    </span>
+  </button>
 
   {#if $hasPatientInProgress}
-    <Card title={$t.landing.inProgressTitle} subtitle={$t.landing.inProgressSubtitle}>
-      {#snippet children()}
-        <dl class="resume">
-          {#if $preData.patientId}<div><dt>{$t.landing.patientId}</dt><dd>{$preData.patientId}</dd></div>{/if}
-          {#if $preData.age != null}<div><dt>{$t.landing.age}</dt><dd>{$preData.age}</dd></div>{/if}
-          {#if $preData.nihss != null}<div><dt>{$t.landing.nihss}</dt><dd>{$preData.nihss}</dd></div>{/if}
-          {#if $preData.ltsw != null}<div><dt>{$t.landing.ltsw}</dt><dd>{$preData.ltsw}h</dd></div>{/if}
-        </dl>
-        <div class="resume-actions">
-          <Button variant="ghost" onclick={discardPatient}>{#snippet children()}{$t.landing.discard}{/snippet}</Button>
-          <Button variant="primary" onclick={resume}>{#snippet children()}{$t.landing.resume}{/snippet}</Button>
-        </div>
-      {/snippet}
-    </Card>
+    <button class="resume" type="button" onclick={resume}>
+      <div class="resume-head">
+        <span class="resume-status">
+          <span class="dot" aria-hidden="true"></span>
+          <span>{$t.landing.inProgressTitle}</span>
+        </span>
+        <span class="resume-cta">{$t.landing.resume} →</span>
+      </div>
+      <div class="resume-meta">
+        <span class="elapsed">{elapsedLabel}</span>
+        <span class="since">da LTSW</span>
+      </div>
+      <div class="window">
+        <div class="window-fill" style="width: {Math.round(windowFrac * 100)}%"></div>
+      </div>
+    </button>
+    <button class="discard" type="button" onclick={() => { clearPatient(); clearSelection(); }}>
+      {$t.landing.discard}
+    </button>
   {/if}
 
-  <a href="/trials" use:link class="link-card">
-    <Card title={$t.landing.catalogTitle} subtitle={$t.landing.catalogSubtitle}>
-      {#snippet children()}<p class="muted">{$t.landing.catalogDesc}</p>{/snippet}
-    </Card>
-  </a>
+  <div class="spacer"></div>
+
+  <div class="footer-links">
+    <button class="footer-link" type="button" onclick={goCatalog}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      </svg>
+      <span>{$t.landing.catalogTitle}</span>
+    </button>
+    <button class="footer-link" type="button" onclick={goPast}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="7" r="4" />
+        <path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2" />
+      </svg>
+      <span>Pazienti inviati</span>
+    </button>
+  </div>
 </div>
 
 <style>
-  .hero {
-    text-align: center;
-    padding-block: var(--sp-6) var(--sp-6);
+  .page {
+    padding: 12px 24px 0;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 200px);
   }
-  .brand-mark {
-    width: 72px;
-    height: 72px;
-    margin: 0 auto var(--sp-4);
-    border-radius: 24px;
-    background: linear-gradient(135deg, var(--primary), var(--hemorrhagic));
+  .intro {
+    margin-top: 18px;
+    margin-bottom: 26px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.8px;
+    line-height: 1.12;
+    margin: 0;
+    color: var(--text);
+  }
+  .tagline {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 10px 0 0;
+    line-height: 1.4;
+  }
+
+  .hero {
+    border: none;
+    cursor: pointer;
+    border-radius: 22px;
+    padding: 22px;
+    background: var(--primary);
     color: var(--text-inverted);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 8px 22px rgba(45, 91, 215, 0.30);
+    font-family: inherit;
+    transition: transform var(--transition-fast), filter var(--transition-fast);
+  }
+  .hero:active { transform: scale(0.99); filter: brightness(0.96); }
+  .hero:focus-visible { outline: none; box-shadow: var(--focus-ring), 0 8px 22px rgba(45, 91, 215, 0.30); }
+  .hero-text { display: block; }
+  .hero-title {
+    display: block;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .hero-sub {
+    display: block;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 3px;
+  }
+  .hero-arrow {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .resume {
+    margin-top: 14px;
+    border: none;
+    border-radius: 20px;
+    padding: 18px;
+    background: var(--surface);
     box-shadow: var(--shadow-md);
-  }
-  h1 { font-size: var(--fs-3xl); margin: 0; }
-  .lead {
-    color: var(--text-muted);
-    margin: var(--sp-2) 0 0;
-    font-size: var(--fs-base);
-  }
-  .actions { display: flex; flex-direction: column; gap: var(--sp-4); }
-  .link-card {
-    text-decoration: none;
-    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text);
     transition: transform var(--transition-fast);
   }
-  .link-card:hover { text-decoration: none; transform: translateY(-2px); }
-  .muted { margin: 0; color: var(--text-muted); font-size: var(--fs-sm); }
-  .resume {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-    gap: var(--sp-3);
-    margin: 0 0 var(--sp-4);
+  .resume:active { transform: scale(0.99); }
+  .resume:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .resume-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 13px;
   }
-  .resume div { display: flex; flex-direction: column; gap: 2px; }
-  .resume dt {
-    font-size: var(--fs-xs);
+  .resume-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--success);
+  }
+  .resume-cta {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .resume-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .elapsed {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .since {
+    font-size: 12.5px;
     color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
   }
-  .resume dd { margin: 0; font-size: var(--fs-base); font-weight: var(--fw-semibold); }
-  .resume-actions { display: flex; gap: var(--sp-2); justify-content: flex-end; }
+  .window {
+    margin-top: 12px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .window-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width var(--transition-base);
+  }
+
+  .discard {
+    margin-top: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 8px;
+    cursor: pointer;
+    align-self: flex-end;
+  }
+  .discard:hover { color: var(--danger); }
+
+  .spacer { flex: 1; min-height: 24px; }
+
+  .footer-links {
+    display: flex;
+    margin-bottom: 8px;
+  }
+  .footer-link {
+    flex: 1;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 0;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 500;
+  }
+  .footer-link + .footer-link {
+    border-left: 1px solid var(--border);
+  }
+  .footer-link:hover { color: var(--text); }
 </style>
