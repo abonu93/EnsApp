@@ -14,14 +14,64 @@
   }
 }
 
-.stack > * + * {
-  margin-top: var(--sp-4);
+.stack > * + * { margin-top: var(--sp-4); }
+.stack-sm > * + * { margin-top: var(--sp-2); }
+.stack-lg > * + * { margin-top: var(--sp-6); }
+
+/* ===== Motion ===== */
+
+/* press: ogni click su elementi con .ens-press fa una micro-scale */
+.ens-press {
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+}
+.ens-press:active {
+  transform: scale(0.97);
+  filter: brightness(0.96);
 }
 
-.stack-sm > * + * {
-  margin-top: var(--sp-2);
+/* screen-in: fade + slight slide up quando una nuova schermata appare */
+@keyframes ens-screen-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ens-screen-in {
+  animation: ens-screen-in 280ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
-.stack-lg > * + * {
-  margin-top: var(--sp-6);
+/* rise: stagger per liste */
+@keyframes ens-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.ens-rise {
+  animation: ens-rise 320ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+/* sheet-up: bottom sheet */
+@keyframes ens-sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.ens-sheet-up {
+  animation: ens-sheet-up 320ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+/* fade */
+@keyframes ens-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.ens-fade {
+  animation: ens-fade 200ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ens-press,
+  .ens-screen-in,
+  .ens-rise,
+  .ens-sheet-up,
+  .ens-fade {
+    animation: none !important;
+    transition: none !important;
+  }
 }

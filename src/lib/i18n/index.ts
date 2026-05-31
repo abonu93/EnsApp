@@ -1,33 +1,38 @@
 // i18n minimale: store reattivo + funzione t() derived.
-// Persistito in localStorage. Default: italiano.
+// Persistito in localStorage. Default: spagnolo.
+// Lingue esposte: catalano, spagnolo, inglese.
+// (it.ts resta come master del Dictionary type ma non e' selezionabile)
 
 import { derived, writable } from "svelte/store";
 import { it, type Dictionary } from "./it";
 import { en } from "./en";
 import { es } from "./es";
+import { ca } from "./ca";
 
-export type Locale = "it" | "en" | "es";
+export type Locale = "ca" | "es" | "en";
 
 export const LOCALES: Array<{ code: Locale; label: string; flag: string }> = [
-  { code: "it", label: "Italiano", flag: "🇮🇹" },
-  { code: "en", label: "English", flag: "🇬🇧" },
   { code: "es", label: "Espanol", flag: "🇪🇸" },
+  { code: "ca", label: "Catala", flag: "🏴󠁥󠁳󠁣󠁴󠁿" },
+  { code: "en", label: "English", flag: "🇬🇧" },
 ];
 
-const DICTS: Record<Locale, Dictionary> = { it, en, es };
+const DICTS: Record<Locale, Dictionary> = { ca, es, en };
 
 const STORAGE_KEY = "ensapp:locale:v1";
+const DEFAULT_LOCALE: Locale = "es";
 
 function readInitial(): Locale {
-  if (typeof localStorage === "undefined") return "it";
+  if (typeof localStorage === "undefined") return DEFAULT_LOCALE;
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw === "it" || raw === "en" || raw === "es") return raw;
-  // Fallback al primo match con la lingua del browser
+  if (raw === "ca" || raw === "es" || raw === "en") return raw;
+  // Fallback al primo match con la lingua del browser (mappa it->es per compat retroattiva)
   if (typeof navigator !== "undefined") {
     const lang = navigator.language.slice(0, 2).toLowerCase();
-    if (lang === "en" || lang === "es") return lang;
+    if (lang === "ca") return "ca";
+    if (lang === "en") return "en";
   }
-  return "it";
+  return DEFAULT_LOCALE;
 }
 
 function applyToDocument(value: Locale): void {
@@ -59,3 +64,6 @@ export function cycleLocale(): void {
     return next.code;
   });
 }
+
+// Avoid tree-shaking it.ts away (it's our type schema)
+void it;

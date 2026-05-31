@@ -18,9 +18,9 @@ const browser = await chromium.launch({
 });
 
 const shots = [
-  { name: "01-landing-it", route: "/", viewport: { width: 390, height: 844 }, theme: "light", locale: "it" },
-  { name: "02-landing-en", route: "/", viewport: { width: 390, height: 844 }, theme: "light", locale: "en" },
-  { name: "03-landing-es", route: "/", viewport: { width: 390, height: 844 }, theme: "light", locale: "es" },
+  { name: "01-landing-es", route: "/", viewport: { width: 390, height: 844 }, theme: "light", locale: "es" },
+  { name: "02-landing-ca", route: "/", viewport: { width: 390, height: 844 }, theme: "light", locale: "ca" },
+  { name: "03-landing-en", route: "/", viewport: { width: 390, height: 844 }, theme: "light", locale: "en" },
   { name: "04-workflow-en", route: "/workflow", viewport: { width: 390, height: 844 }, theme: "light", locale: "en" },
   { name: "05-post-imaging-en", route: "/post-imaging", viewport: { width: 390, height: 1600 }, theme: "light", locale: "en" },
   { name: "06-summary-en", route: "/summary", viewport: { width: 390, height: 1200 }, theme: "light", locale: "en" },
@@ -39,7 +39,7 @@ for (const shot of shots) {
       localStorage.setItem("ensapp:theme:v1", theme);
       if (locale) localStorage.setItem("ensapp:locale:v1", locale);
     },
-    { theme: shot.theme, locale: shot.locale ?? "it" }
+    { theme: shot.theme, locale: shot.locale ?? "es" }
   );
   await page.goto(URL + "#" + shot.route, { waitUntil: "networkidle" });
   await page.evaluate(
@@ -47,7 +47,7 @@ for (const shot of shots) {
       document.documentElement.setAttribute("data-theme", theme);
       if (locale) document.documentElement.setAttribute("lang", locale);
     },
-    { theme: shot.theme, locale: shot.locale ?? "it" }
+    { theme: shot.theme, locale: shot.locale ?? "es" }
   );
   await page.waitForTimeout(250);
 

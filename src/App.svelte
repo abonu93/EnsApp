@@ -1,15 +1,19 @@
 <script lang="ts">
-  import Router from "svelte-spa-router";
+  import Router, { location } from "svelte-spa-router";
   import { routes, setupRouterA11y } from "$lib/router";
   import BottomNav from "$lib/components/BottomNav.svelte";
-  import { t, locale, LOCALES, cycleLocale } from "$lib/i18n";
+  import { t, locale, cycleLocale } from "$lib/i18n";
 
   setupRouterA11y();
+
+  // animKey forza il re-mount della sezione main ad ogni cambio di route
+  // per scatenare l'animazione ens-screen-in
+  const animKey = $derived($location);
 
   const navItems = $derived([
     { href: "/", label: $t.nav.home, icon: "home" as const },
     { href: "/workflow", label: $t.nav.new, icon: "user-plus" as const },
-    { href: "/saved", label: "Inviati", icon: "archive" as const },
+    { href: "/saved", label: $t.nav.saved, icon: "archive" as const },
     { href: "/trials", label: $t.nav.trials, icon: "list" as const },
   ]);
 </script>
@@ -34,7 +38,11 @@
 </header>
 
 <main id="main" tabindex="-1">
-  <Router {routes} />
+  {#key animKey}
+    <div class="ens-screen-in">
+      <Router {routes} />
+    </div>
+  {/key}
 </main>
 
 <BottomNav items={navItems} />

@@ -7,6 +7,9 @@
   import VesselPicker from "$lib/components/VesselPicker.svelte";
   import ToggleRow from "$lib/components/ToggleRow.svelte";
   import AspectsCells from "$lib/components/AspectsCells.svelte";
+  import HIchCard from "$lib/components/HIchCard.svelte";
+  import HVolDial from "$lib/components/HVolDial.svelte";
+  import HGcs from "$lib/components/HGcs.svelte";
   import { preData, postData, hemData } from "$lib/stores/patient";
   import { t } from "$lib/i18n";
   import type { VesselCode } from "$lib/domain/acute-rules";
@@ -17,18 +20,9 @@
 
   let strokeType = $state<StrokeType>(($postData.strokeType as StrokeType) ?? "");
   let candidate = $state<CandidateStatus>(($postData.candidate as CandidateStatus) ?? "");
-
-  // IVT unificato (mapped da ivtCandidate + contraTpa)
-  type IvtStatus = "" | "eligible-no-contra" | "eligible-with-contra" | "not-eligible";
-  function ivtFromStore(ivt: string | undefined, contra: string | undefined): IvtStatus {
-    if (ivt === "eligible" && contra === "yes") return "eligible-with-contra";
-    if (ivt === "eligible") return "eligible-no-contra";
-    if (ivt === "not eligible") return "not-eligible";
-    return "";
-  }
-  let ivtStatus = $state<IvtStatus>(ivtFromStore($postData.ivtCandidate, $postData.contraTpa));
-  const ivtCandidate = $derived<CandidateStatus>(ivtStatus === "not-eligible" ? "not eligible" : ivtStatus ? "eligible" : "");
-  const contraTpa = $derived<YN>(ivtStatus === "eligible-with-contra" ? "yes" : ivtStatus === "eligible-no-contra" ? "no" : "");
+  let ivtCandidate = $state<CandidateStatus>(($postData.ivtCandidate as CandidateStatus) ?? "");
+  // contraTpa rimane scollegato dalla UI (default "no" per non bloccare ORION)
+  const contraTpa: YN = "no";
 
   // Switches (Tandem, Tortuosity)
   let tandem = $state<boolean>($postData.tandem === "yes");
@@ -40,6 +34,7 @@
 
   // Hemorrhagic
   let hemVolume = $state<number | null>($hemData.hemVolume ?? null);
+  let volUnknown = $state<boolean>(false);
   let gcs = $state<number | null>($hemData.gcs ?? null);
   let ivh = $state<YN>(($hemData.ivh as YN) ?? "");
   let secondaryCause = $state<string>(($hemData.secondaryCause as string) ?? "");
@@ -99,11 +94,6 @@
     { value: "eligible" as const, label: "Eleggibile" },
     { value: "not eligible" as const, label: "Non eleggibile" },
   ]);
-  const ivtOpts = $derived([
-    { value: "eligible-no-contra" as const, label: "Si, no controind." },
-    { value: "eligible-with-contra" as const, label: "Si, con controind." },
-    { value: "not-eligible" as const, label: "Non eleggibile" },
-  ]);
   const ynOpts = $derived<{ value: "yes" | "no"; label: string }[]>([
     { value: "no", label: $t.common.no },
     { value: "yes", label: $t.common.yes },
@@ -143,6 +133,8 @@
       {#snippet children()}
         <div class="stack">
           <Segmented options={candidateOpts} bind:value={candidate} cols={2} label={$t.postImaging.candidateEvt} />
+          <div class="divider"></div>
+          <Segmented options={candidateOpts} bind:value={ivtCandidate} cols={2} label={$t.postImaging.candidateIvt} />
         </div>
       {/snippet}
     </Card>
@@ -151,23 +143,19 @@
       <Card title={$t.postImaging.evtTitle} subtitle={$t.postImaging.evtDesc}>
         {#snippet children()}
           <div class="stack">
-            <ToggleRow title={$t.postImaging.tandemLabel} bind:checked={tandem} />
-            <ToggleRow title={$t.postImaging.tortuosityLabel} sub={$t.postImaging.tortuosityHint} bind:checked={tortuosity} />
             <div class="field">
               <span class="lbl">{$t.postImaging.vesselsLabel}</span>
               <VesselPicker bind:value={targetVessels} />
             </div>
+            <div class="divider"></div>
+            <ToggleRow title={$t.postImaging.tandemLabel.replace('?', '')} bind:checked={tandem} />
+            <div class="divider"></div>
+            <ToggleRow title={$t.postImaging.tortuosityLabel.replace('?', '')} sub={$t.postImaging.tortuosityHint} bind:checked={tortuosity} />
             <div class="field">
               <span class="lbl">{$t.postImaging.aspectsLabel}</span>
               <AspectsCells bind:value={aspects} />
             </div>
           </div>
-        {/snippet}
-      </Card>
-
-      <Card>
-        {#snippet children()}
-          <Segmented options={ivtOpts} bind:value={ivtStatus} cols={1} label={$t.postImaging.candidateIvt} />
         {/snippet}
       </Card>
     {:else if showNonEvt}
@@ -180,29 +168,39 @@
   {/if}
 
   {#if isHem}
-    <Card title={$t.postImaging.hemTitle}>
+    <HIchCard patient={{ gcs, ivh: ivh === "yes", age: $preData.age, hemVolume, volUnknown }} />
+
+    <Card title="Severita">
       {#snippet children()}
         <div class="stack">
-          <label class="field">
-            <span class="lbl">{$t.postImaging.hemVolumeLabel} ({$t.postImaging.hemVolumeSuffix})</span>
-            <input class="input mono" type="number" min="0" step="0.1" value={hemVolume ?? ""} oninput={(e) => { const v = (e.currentTarget as HTMLInputElement).value; hemVolume = v === '' ? null : Number(v); }} />
-          </label>
-          <label class="field">
-            <span class="lbl">{$t.postImaging.gcsLabel} ({$t.postImaging.gcsHint})</span>
-            <input class="input mono" type="number" min="3" max="15" value={gcs ?? ""} oninput={(e) => { const v = (e.currentTarget as HTMLInputElement).value; gcs = v === '' ? null : Number(v); }} />
-          </label>
+          <HVolDial bind:value={hemVolume} bind:unknown={volUnknown} />
+          <div class="divider"></div>
           <div class="field">
-            <span class="lbl">{$t.postImaging.ivhLabel}</span>
-            <Segmented options={ynOpts} bind:value={ivh} cols={2} />
+            <span class="lbl">{$t.postImaging.gcsLabel}</span>
+            <HGcs bind:value={gcs} />
           </div>
+        </div>
+      {/snippet}
+    </Card>
+
+    <Card title="Pattern e causa">
+      {#snippet children()}
+        <div class="stack">
+          <ToggleRow title="Hemorragia isolata IVH" sub="Emorragia confinata al sistema ventricolare" checked={ivh === "yes"} onChange={(v) => ivh = v ? "yes" : "no"} />
+          <div class="divider"></div>
           <div class="field">
             <span class="lbl">{$t.postImaging.secondaryCauseLabel}</span>
             <Segmented options={secondaryOpts} bind:value={secondaryCause} cols={3} />
           </div>
-          <div class="field">
-            <span class="lbl">{$t.postImaging.seizureLabel}</span>
-            <Segmented options={ynOpts} bind:value={seizure} cols={2} />
-          </div>
+        </div>
+      {/snippet}
+    </Card>
+
+    <Card title="Fattori di eleggibilita">
+      {#snippet children()}
+        <div class="stack">
+          <ToggleRow title="Esclusione TXA" sub="Convulsioni / trombosi / ipersensibilita a TXA" checked={seizure === "yes"} onChange={(v) => seizure = v ? "yes" : "no"} />
+          <div class="divider"></div>
           <div class="field">
             <span class="lbl">{$t.postImaging.anticoagLabel}</span>
             <Segmented options={anticoagOpts} bind:value={anticoag} cols={2} />
@@ -240,7 +238,8 @@
     flex-direction: column;
     gap: 12px;
   }
-  .stack { display: flex; flex-direction: column; gap: 20px; }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+  .divider { border-top: 1px solid var(--border); }
   .field { display: flex; flex-direction: column; gap: 8px; }
   .lbl { font-size: 13.5px; font-weight: 600; color: var(--text-muted); }
   .input {

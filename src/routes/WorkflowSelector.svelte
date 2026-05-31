@@ -39,7 +39,7 @@
 
   <div class="opts">
     {#each choices as o (o.key)}
-      <button class="opt" type="button" onclick={() => pick(o.route)}>
+      <button class="opt ens-press ens-rise" type="button" onclick={() => pick(o.route)} style="animation-delay: 140ms">
         <div class="opt-top">
           <span class="opt-icon" style="background: {o.bg}; color: {o.accent}">
             {#if o.icon === "stetho"}

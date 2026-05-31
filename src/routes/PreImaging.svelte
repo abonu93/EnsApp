@@ -58,14 +58,6 @@
   }
   const win = $derived(windowInfo(ltswHrs));
 
-  // Presets per LTSW (now / -1h / -3h / -6h)
-  function setPreset(hoursAgo: number) {
-    const d = new Date(Date.now() - hoursAgo * 3_600_000);
-    // datetime-local accetta YYYY-MM-DDTHH:MM
-    const off = d.getTimezoneOffset() * 60_000;
-    ltswDate = new Date(d.getTime() - off).toISOString().slice(0, 16);
-  }
-
   const mrsOpts: { value: number; label: string }[] = [0, 1, 2, 3, 4, 5].map((v) => ({ value: v, label: String(v) }));
   const ynOpts = $derived<{ value: "yes" | "no"; label: string }[]>([
     { value: "no", label: $t.common.no },
@@ -117,13 +109,6 @@
     {#snippet children()}
       <div class="stack">
         <input class="input" type="datetime-local" bind:value={ltswDate} aria-label="LTSW" />
-
-        <div class="presets">
-          <button type="button" class="preset" onclick={() => setPreset(0)}>Adesso</button>
-          <button type="button" class="preset" onclick={() => setPreset(1)}>-1h</button>
-          <button type="button" class="preset" onclick={() => setPreset(3)}>-3h</button>
-          <button type="button" class="preset" onclick={() => setPreset(6)}>-6h</button>
-        </div>
 
         {#if ltswHrs !== undefined}
           <div class="elapsed">
@@ -224,26 +209,6 @@
     font-family: var(--font-mono);
     pointer-events: none;
   }
-
-  .presets {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-  }
-  .preset {
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text-muted);
-    border-radius: 10px;
-    padding: 10px 0;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-fast);
-  }
-  .preset:hover { border-color: var(--primary); color: var(--primary); }
-  .preset:focus-visible { outline: none; box-shadow: var(--focus-ring); }
 
   .elapsed {
     display: flex;

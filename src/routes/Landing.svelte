@@ -31,11 +31,11 @@
 
 <div class="page">
   <div class="intro">
-    <h1>Assegna un paziente<br />a un trial.</h1>
+    <h1>{$t.landing.heroTitle}</h1>
     <p class="tagline">{$t.landing.tagline}</p>
   </div>
 
-  <button class="hero" type="button" onclick={startNew}>
+  <button class="hero ens-press" type="button" onclick={startNew}>
     <span class="hero-text">
       <span class="hero-title">{$t.landing.newPatient}</span>
       <span class="hero-sub">{$t.workflow.eligibilityDesc}</span>
@@ -84,7 +84,7 @@
         <circle cx="12" cy="7" r="4" />
         <path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2" />
       </svg>
-      <span>Pazienti inviati</span>
+      <span>{$t.landing.pastPatients}</span>
     </button>
   </div>
 </div>
@@ -107,6 +107,7 @@
     line-height: 1.12;
     margin: 0;
     color: var(--text);
+    white-space: pre-line;
   }
   .tagline {
     font-size: 14px;
