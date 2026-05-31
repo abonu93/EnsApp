@@ -137,17 +137,29 @@ export interface SheetPatientRow {
  * Legge tutti i pazienti dal backend Apps Script (richiede un doGet
  * configurato lato Sheet). Ritorna [] se l'endpoint non risponde o
  * non e' configurato; non blocca l'app.
+ *
+ * Apps Script ritorna un 302 redirect verso script.googleusercontent.com
+ * che il browser segue automaticamente. Timeout 10s per evitare hang.
  */
 export async function fetchPatientsFromSheet(): Promise<SheetPatientRow[]> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10_000);
   try {
-    // L'endpoint doGet del GAS deve servire JSON con CORS abilitato:
-    // return ContentService.createTextOutput(JSON.stringify(rows))
-    //   .setMimeType(ContentService.MimeType.JSON);
-    const res = await fetch(GAS_URL + "?op=list", { method: "GET" });
-    if (!res.ok) return [];
+    const res = await fetch(GAS_URL + "?op=list", {
+      method: "GET",
+      signal: controller.signal,
+      // Lasciamo CORS attivo: Apps Script imposta Access-Control-Allow-Origin: *
+      // quando il deployment ha "Who has access: Anyone".
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) {
+      console.warn("fetchPatientsFromSheet: HTTP " + res.status);
+      return [];
+    }
     const data = await res.json();
     return Array.isArray(data) ? (data as SheetPatientRow[]) : [];
   } catch (e) {
+    clearTimeout(timeoutId);
     console.warn("fetchPatientsFromSheet error:", e);
     return [];
   }

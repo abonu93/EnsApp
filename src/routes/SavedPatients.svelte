@@ -45,10 +45,14 @@
     if (syncing) return;
     syncing = true;
     lastSyncError = false;
+    let rows: SheetPatientRow[] = [];
     try {
-      const rows = await fetchPatientsFromSheet();
+      rows = await fetchPatientsFromSheet();
       if (rows.length > 0) {
         mergeRemote(rows.map(rowToSaved));
+      } else {
+        // Sheet vuoto o backend non risponde: l'errore e' gia loggato in console
+        lastSyncError = true;
       }
     } catch {
       lastSyncError = true;
@@ -57,9 +61,13 @@
     }
   }
 
-  // Auto-sync on mount (non blocca: failure silenziosa, fallback a locale)
+  // Auto-sync solo al primo mount (non in loop)
+  let didInitialSync = false;
   $effect(() => {
-    syncFromSheet();
+    if (!didInitialSync) {
+      didInitialSync = true;
+      syncFromSheet();
+    }
   });
 
   type Tab = "patients" | "stats";
