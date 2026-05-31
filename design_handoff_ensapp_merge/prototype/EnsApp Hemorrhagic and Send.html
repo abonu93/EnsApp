@@ -1,0 +1,2627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EnsApp — Hemorrhagic & Send options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; height: 100%; background: #f0eee9; }
+  * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+  .ens-press { transition: transform .09s ease, filter .12s ease; -webkit-tap-highlight-color: transparent; }
+  .ens-press:hover { filter: brightness(0.985); }
+  .ens-press:active { transform: scale(0.97); filter: brightness(0.95); }
+  @keyframes ens-screen-in { from { opacity: 0; transform: translateY(-6px) } to { opacity: 1; transform: translateY(0) } }
+  .ens-screen-in { animation: ens-screen-in .28s ease both; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/babel">
+
+/* ===== ios-frame.jsx ===== */
+
+/* BEGIN USAGE */
+// iOS.jsx — Simplified iOS 26 (Liquid Glass) device frame
+// Based on the iOS 26 UI Kit + Figma status bar spec. No assets, no deps.
+// Exports (to window): IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard
+//
+// Usage — wrap your screen content in <IOSDevice> to get the bezel, status bar
+// and home indicator (props: title, dark, keyboard):
+//
+//   <IOSDevice title="Settings">
+//     ...your screen content...
+//   </IOSDevice>
+//   <IOSDevice dark title="Search" keyboard>…</IOSDevice>
+/* END USAGE */
+
+// ─────────────────────────────────────────────────────────────
+// Status bar
+// ─────────────────────────────────────────────────────────────
+function IOSStatusBar({ dark = false, time = '9:41' }) {
+  const c = dark ? '#fff' : '#000';
+  return (
+    <div style={{
+      display: 'flex', gap: 154, alignItems: 'center', justifyContent: 'center',
+      padding: '21px 24px 19px', boxSizing: 'border-box',
+      position: 'relative', zIndex: 20, width: '100%',
+    }}>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 1.5 }}>
+        <span style={{
+          fontFamily: '-apple-system, "SF Pro", system-ui', fontWeight: 590,
+          fontSize: 17, lineHeight: '22px', color: c,
+        }}>{time}</span>
+      </div>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 1, paddingRight: 1 }}>
+        <svg width="19" height="12" viewBox="0 0 19 12">
+          <rect x="0" y="7.5" width="3.2" height="4.5" rx="0.7" fill={c}/>
+          <rect x="4.8" y="5" width="3.2" height="7" rx="0.7" fill={c}/>
+          <rect x="9.6" y="2.5" width="3.2" height="9.5" rx="0.7" fill={c}/>
+          <rect x="14.4" y="0" width="3.2" height="12" rx="0.7" fill={c}/>
+        </svg>
+        <svg width="17" height="12" viewBox="0 0 17 12">
+          <path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill={c}/>
+          <path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill={c}/>
+          <circle cx="8.5" cy="10.5" r="1.5" fill={c}/>
+        </svg>
+        <svg width="27" height="13" viewBox="0 0 27 13">
+          <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke={c} strokeOpacity="0.35" fill="none"/>
+          <rect x="2" y="2" width="20" height="9" rx="2" fill={c}/>
+          <path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill={c} fillOpacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Liquid glass pill — blur + tint + shine
+// ─────────────────────────────────────────────────────────────
+function IOSGlassPill({ children, dark = false, style = {} }) {
+  return (
+    <div style={{
+      height: 44, minWidth: 44, borderRadius: 9999,
+      position: 'relative', overflow: 'hidden',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: dark
+        ? '0 2px 6px rgba(0,0,0,0.35), 0 6px 16px rgba(0,0,0,0.2)'
+        : '0 1px 3px rgba(0,0,0,0.07), 0 3px 10px rgba(0,0,0,0.06)',
+      ...style,
+    }}>
+      {/* blur + tint */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.28)' : 'rgba(255,255,255,0.5)',
+      }} />
+      {/* shine */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15), inset -1px -1px 1px rgba(255,255,255,0.08)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+      }} />
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', padding: '0 4px' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Navigation bar — glass pills + large title
+// ─────────────────────────────────────────────────────────────
+function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
+  const muted = dark ? 'rgba(255,255,255,0.6)' : '#404040';
+  const text = dark ? '#fff' : '#000';
+  const pillIcon = (content) => (
+    <IOSGlassPill dark={dark}>
+      <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {content}
+      </div>
+    </IOSGlassPill>
+  );
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', gap: 10,
+      paddingTop: 62, paddingBottom: 10, position: 'relative', zIndex: 5,
+    }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 16px',
+      }}>
+        {/* back chevron */}
+        {pillIcon(
+          <svg width="12" height="20" viewBox="0 0 12 20" fill="none" style={{ marginLeft: -1 }}>
+            <path d="M10 2L2 10l8 8" stroke={muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+        {/* trailing ellipsis */}
+        {trailingIcon && pillIcon(
+          <svg width="22" height="6" viewBox="0 0 22 6">
+            <circle cx="3" cy="3" r="2.5" fill={muted}/>
+            <circle cx="11" cy="3" r="2.5" fill={muted}/>
+            <circle cx="19" cy="3" r="2.5" fill={muted}/>
+          </svg>
+        )}
+      </div>
+      {/* large title */}
+      <div style={{
+        padding: '0 16px',
+        fontFamily: '-apple-system, system-ui',
+        fontSize: 34, fontWeight: 700, lineHeight: '41px',
+        color: text, letterSpacing: 0.4,
+      }}>{title}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Grouped list (inset card, r:26) + row (52px)
+// ─────────────────────────────────────────────────────────────
+function IOSListRow({ title, detail, icon, chevron = true, isLast = false, dark = false }) {
+  const text = dark ? '#fff' : '#000';
+  const sec = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const ter = dark ? 'rgba(235,235,245,0.3)' : 'rgba(60,60,67,0.3)';
+  const sep = dark ? 'rgba(84,84,88,0.65)' : 'rgba(60,60,67,0.12)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', minHeight: 52,
+      padding: '0 16px', position: 'relative',
+      fontFamily: '-apple-system, system-ui', fontSize: 17,
+      letterSpacing: -0.43,
+    }}>
+      {icon && (
+        <div style={{
+          width: 30, height: 30, borderRadius: 7, background: icon,
+          marginRight: 12, flexShrink: 0,
+        }} />
+      )}
+      <div style={{ flex: 1, color: text }}>{title}</div>
+      {detail && <span style={{ color: sec, marginRight: 6 }}>{detail}</span>}
+      {chevron && (
+        <svg width="8" height="14" viewBox="0 0 8 14" style={{ flexShrink: 0 }}>
+          <path d="M1 1l6 6-6 6" stroke={ter} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+      {!isLast && (
+        <div style={{
+          position: 'absolute', bottom: 0, right: 0,
+          left: icon ? 58 : 16, height: 0.5, background: sep,
+        }} />
+      )}
+    </div>
+  );
+}
+
+function IOSList({ header, children, dark = false }) {
+  const hc = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const bg = dark ? '#1C1C1E' : '#fff';
+  return (
+    <div>
+      {header && (
+        <div style={{
+          fontFamily: '-apple-system, system-ui', fontSize: 13,
+          color: hc, textTransform: 'uppercase',
+          padding: '8px 36px 6px', letterSpacing: -0.08,
+        }}>{header}</div>
+      )}
+      <div style={{
+        background: bg, borderRadius: 26,
+        margin: '0 16px', overflow: 'hidden',
+      }}>{children}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Device frame
+// ─────────────────────────────────────────────────────────────
+function IOSDevice({
+  children, width = 402, height = 874, dark = false,
+  title, keyboard = false,
+}) {
+  return (
+    <div style={{
+      width, height, borderRadius: 48, overflow: 'hidden',
+      position: 'relative', background: dark ? '#000' : '#F2F2F7',
+      boxShadow: '0 40px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.12)',
+      fontFamily: '-apple-system, system-ui, sans-serif',
+      WebkitFontSmoothing: 'antialiased',
+    }}>
+      {/* dynamic island */}
+      <div style={{
+        position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
+        width: 126, height: 37, borderRadius: 24, background: '#000', zIndex: 50,
+      }} />
+      {/* status bar (absolute) */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+        <IOSStatusBar dark={dark} />
+      </div>
+      {/* nav + content */}
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {title !== undefined && <IOSNavBar title={title} dark={dark} />}
+        <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
+        {keyboard && <IOSKeyboard dark={dark} />}
+      </div>
+      {/* home indicator — always on top */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60,
+        height: 34, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+        paddingBottom: 8, pointerEvents: 'none',
+      }}>
+        <div style={{
+          width: 139, height: 5, borderRadius: 100,
+          background: dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.25)',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Keyboard — iOS 26 liquid glass
+// ─────────────────────────────────────────────────────────────
+function IOSKeyboard({ dark = false }) {
+  const glyph = dark ? 'rgba(255,255,255,0.7)' : '#595959';
+  const sugg = dark ? 'rgba(255,255,255,0.6)' : '#333';
+  const keyBg = dark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.85)';
+
+  // special-key icons
+  const icons = {
+    shift: <svg width="19" height="17" viewBox="0 0 19 17"><path d="M9.5 1L1 9.5h4.5V16h8V9.5H18L9.5 1z" fill={glyph}/></svg>,
+    del: <svg width="23" height="17" viewBox="0 0 23 17"><path d="M7 1h13a2 2 0 012 2v11a2 2 0 01-2 2H7l-6-7.5L7 1z" fill="none" stroke={glyph} strokeWidth="1.6" strokeLinejoin="round"/><path d="M10 5l7 7M17 5l-7 7" stroke={glyph} strokeWidth="1.6" strokeLinecap="round"/></svg>,
+    ret: <svg width="20" height="14" viewBox="0 0 20 14"><path d="M18 1v6H4m0 0l4-4M4 7l4 4" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  };
+
+  const key = (content, { w, flex, ret, fs = 25, k } = {}) => (
+    <div key={k} style={{
+      height: 42, borderRadius: 8.5,
+      flex: flex ? 1 : undefined, width: w, minWidth: 0,
+      background: ret ? '#08f' : keyBg,
+      boxShadow: '0 1px 0 rgba(0,0,0,0.075)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: '-apple-system, "SF Compact", system-ui',
+      fontSize: fs, fontWeight: 458, color: ret ? '#fff' : glyph,
+    }}>{content}</div>
+  );
+
+  const row = (keys, pad = 0) => (
+    <div style={{ display: 'flex', gap: 6.5, justifyContent: 'center', padding: `0 ${pad}px` }}>
+      {keys.map(l => key(l, { flex: true, k: l }))}
+    </div>
+  );
+
+  return (
+    <div style={{
+      position: 'relative', zIndex: 15, borderRadius: 27, overflow: 'hidden',
+      padding: '11px 0 2px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      boxShadow: dark
+        ? '0 -2px 20px rgba(0,0,0,0.09)'
+        : '0 -1px 6px rgba(0,0,0,0.018), 0 -3px 20px rgba(0,0,0,0.012)',
+    }}>
+      {/* liquid glass bg — same recipe as nav pills */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.14)' : 'rgba(255,255,255,0.25)',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* autocorrect bar */}
+      <div style={{
+        display: 'flex', gap: 20, alignItems: 'center',
+        padding: '8px 22px 13px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {['"The"', 'the', 'to'].map((w, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && <div style={{ width: 1, height: 25, background: '#ccc', opacity: 0.3 }} />}
+            <div style={{
+              flex: 1, textAlign: 'center',
+              fontFamily: '-apple-system, system-ui', fontSize: 17,
+              color: sugg, letterSpacing: -0.43, lineHeight: '22px',
+            }}>{w}</div>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* key layout */}
+      <div style={{
+        display: 'flex', flexDirection: 'column', gap: 13,
+        padding: '0 6.5px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {row(['q','w','e','r','t','y','u','i','o','p'])}
+        {row(['a','s','d','f','g','h','j','k','l'], 20)}
+        <div style={{ display: 'flex', gap: 14.25, alignItems: 'center' }}>
+          {key(icons.shift, { w: 45, k: 'shift' })}
+          <div style={{ display: 'flex', gap: 6.5, flex: 1 }}>
+            {['z','x','c','v','b','n','m'].map(l => key(l, { flex: true, k: l }))}
+          </div>
+          {key(icons.del, { w: 45, k: 'del' })}
+        </div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {key('ABC', { w: 92.25, fs: 18, k: 'abc' })}
+          {key('', { flex: true, k: 'space' })}
+          {key(icons.ret, { w: 92.25, ret: true, k: 'ret' })}
+        </div>
+      </div>
+
+      {/* bottom spacer (emoji+mic area, icons omitted) */}
+      <div style={{ height: 56, width: '100%', position: 'relative' }} />
+    </div>
+  );
+}
+
+Object.assign(window, {
+  IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard,
+});
+
+
+
+/* ===== design-canvas.jsx ===== */
+
+/* BEGIN USAGE */
+// DesignCanvas.jsx — Figma-ish design canvas wrapper
+// Warm gray grid bg + Sections + Artboards + PostIt notes.
+// Exports (to window): DesignCanvas, DCSection, DCArtboard, DCPostIt.
+// Artboards are reorderable (grip-drag), deletable, labels/titles are
+// inline-editable, and any artboard can be opened in a fullscreen focus
+// overlay (←/→/Esc). State persists to a .design-canvas.state.json sidecar
+// via the host bridge. No assets, no deps.
+//
+// Usage:
+//   <DesignCanvas>
+//     <DCSection id="onboarding" title="Onboarding" subtitle="First-run variants">
+//       <DCArtboard id="a" label="A · Dusk" width={260} height={480}>…</DCArtboard>
+//       <DCArtboard id="b" label="B · Minimal" width={260} height={480}>…</DCArtboard>
+//     </DCSection>
+//   </DesignCanvas>
+//
+// Artboards are static design frames, not scroll regions — never use
+// height: 100% + overflow: auto/scroll on inner elements; size each artboard
+// to fit its content (explicit pixel height, or let it grow).
+/* END USAGE */
+
+const DC = {
+  bg: '#f0eee9',
+  grid: 'rgba(0,0,0,0.06)',
+  label: 'rgba(60,50,40,0.7)',
+  title: 'rgba(40,30,20,0.85)',
+  subtitle: 'rgba(60,50,40,0.6)',
+  postitBg: '#fef4a8',
+  postitText: '#5a4a2a',
+  font: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+};
+
+// One-time CSS injection (classes are dc-prefixed so they don't collide with
+// the hosted design's own styles).
+if (typeof document !== 'undefined' && !document.getElementById('dc-styles')) {
+  const s = document.createElement('style');
+  s.id = 'dc-styles';
+  s.textContent = [
+    '.dc-editable{cursor:text;outline:none;white-space:nowrap;border-radius:3px;padding:0 2px;margin:0 -2px}',
+    '.dc-editable:focus{background:#fff;box-shadow:0 0 0 1.5px #c96442}',
+    '[data-dc-slot]{transition:transform .18s cubic-bezier(.2,.7,.3,1)}',
+    '[data-dc-slot].dc-dragging{transition:none;z-index:10;pointer-events:none}',
+    '[data-dc-slot].dc-dragging .dc-card{box-shadow:0 12px 40px rgba(0,0,0,.25),0 0 0 2px #c96442;transform:scale(1.02)}',
+    // isolation:isolate contains artboard content's z-indexes so a
+    // z-indexed child (sticky navbar etc.) can't paint over .dc-header or
+    // the .dc-menu popover that drops into the top of the card.
+    '.dc-card{isolation:isolate;transition:box-shadow .15s,transform .15s}',
+    '.dc-card *{scrollbar-width:none}',
+    '.dc-card *::-webkit-scrollbar{display:none}',
+    // Per-artboard header: grip + label on the left, delete/expand on the
+    // right. Single flex row; when the artboard's on-screen width is too
+    // narrow for both the label yields (ellipsis, then hidden entirely below
+    // ~4ch via the container query) and the buttons stay on the row.
+    '.dc-header{position:absolute;bottom:100%;left:-4px;margin-bottom:calc(4px * var(--dc-inv-zoom,1));z-index:2;',
+    '  display:flex;align-items:center;container-type:inline-size}',
+    '.dc-labelrow{display:flex;align-items:center;gap:4px;height:24px;flex:1 1 auto;min-width:0}',
+    '.dc-grip{flex:0 0 auto;cursor:grab;display:flex;align-items:center;padding:5px 4px;border-radius:4px;transition:background .12s,opacity .12s}',
+    '.dc-grip:hover{background:rgba(0,0,0,.08)}',
+    '.dc-grip:active{cursor:grabbing}',
+    '.dc-labeltext{flex:1 1 auto;min-width:0;cursor:pointer;border-radius:4px;padding:3px 6px;',
+    '  display:flex;align-items:center;transition:background .12s;overflow:hidden}',
+    // Below ~4ch of label room: hide the label entirely, and drop the grip to
+    // hover-only (same reveal rule as .dc-btns) so a narrow header is clean
+    // until the card is moused.
+    '@container (max-width: 110px){',
+    '  .dc-labeltext{display:none}',
+    '  .dc-grip{opacity:0}',
+    '  [data-dc-slot]:hover .dc-grip{opacity:1}',
+    '}',
+    '.dc-labeltext:hover{background:rgba(0,0,0,.05)}',
+    '.dc-labeltext .dc-editable{overflow:hidden;text-overflow:ellipsis;max-width:100%}',
+    '.dc-labeltext .dc-editable:focus{overflow:visible;text-overflow:clip}',
+    '.dc-btns{flex:0 0 auto;margin-left:auto;display:flex;gap:2px;opacity:0;transition:opacity .12s}',
+    '[data-dc-slot]:hover .dc-btns,.dc-btns:has(.dc-menu){opacity:1}',
+    '.dc-expand,.dc-kebab{width:22px;height:22px;border-radius:5px;border:none;cursor:pointer;padding:0;',
+    '  background:transparent;color:rgba(60,50,40,.7);display:flex;align-items:center;justify-content:center;',
+    '  font:inherit;transition:background .12s,color .12s}',
+    '.dc-expand:hover,.dc-kebab:hover{background:rgba(0,0,0,.06);color:#2a251f}',
+    // Slot hosting an open menu floats above later siblings (which otherwise
+    // paint on top — same z-index:auto, later DOM order) so the popup isn't
+    // clipped by the next card.
+    '[data-dc-slot]:has(.dc-menu){z-index:10}',
+    '.dc-menu{position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border-radius:8px;',
+    '  box-shadow:0 8px 28px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.05);padding:4px;min-width:160px;z-index:10}',
+    '.dc-menu button{display:block;width:100%;padding:7px 10px;border:0;background:transparent;',
+    '  border-radius:5px;font-family:inherit;font-size:13px;font-weight:500;line-height:1.2;',
+    '  color:#29261b;cursor:pointer;text-align:left;transition:background .12s;white-space:nowrap}',
+    '.dc-menu button:hover{background:rgba(0,0,0,.05)}',
+    '.dc-menu hr{border:0;border-top:1px solid rgba(0,0,0,.08);margin:4px 2px}',
+    '.dc-menu .dc-danger{color:#c96442}',
+    '.dc-menu .dc-danger:hover{background:rgba(201,100,66,.1)}',
+    // Chrome (titles / labels / buttons) counter-scales against the viewport
+    // zoom so it stays a constant on-screen size. --dc-inv-zoom is set by
+    // DCViewport on every transform update and inherits to all descendants —
+    // any overlay inside the world (e.g. a TweaksPanel on an artboard) can use
+    // it the same way.
+    //
+    // The header uses transform:scale (out-of-flow, so layout impact doesn't
+    // matter) with its world-space width set to card-width / inv-zoom so that
+    // after counter-scaling its on-screen width exactly matches the card's —
+    // that's what lets the container query + text-overflow behave against the
+    // card's visible edge at every zoom level.
+    //
+    // The section head uses CSS zoom instead of transform so its layout box
+    // grows with the counter-scale, pushing the card row down — otherwise the
+    // constant-screen-size title would overflow into the (shrinking) world-
+    // space gap and overlap the artboard headers at low zoom.
+    '.dc-header{width:calc((100% + 4px) / var(--dc-inv-zoom,1));',
+    '  transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom left}',
+    '.dc-sectionhead{zoom:var(--dc-inv-zoom,1)}',
+  ].join('\n');
+  document.head.appendChild(s);
+}
+
+const DCCtx = React.createContext(null);
+
+// Recursively unwrap React.Fragment so <>…</> grouping doesn't hide
+// DCSection/DCArtboard children from the type-based walks below.
+function dcFlatten(children) {
+  const out = [];
+  React.Children.forEach(children, (c) => {
+    if (c && c.type === React.Fragment) out.push(...dcFlatten(c.props.children));
+    else out.push(c);
+  });
+  return out;
+}
+
+// ─────────────────────────────────────────────────────────────
+// DesignCanvas — stateful wrapper around the pan/zoom viewport.
+// Owns runtime state (per-section order, renamed titles/labels, hidden
+// artboards, focused artboard). Order/titles/labels/hidden persist to a
+// .design-canvas.state.json
+// sidecar next to the HTML. Reads go via plain fetch() so the saved
+// arrangement is visible anywhere the HTML + sidecar are served together
+// (omelette preview, direct link, downloaded zip). Writes go through the
+// host's window.omelette bridge — editing requires the omelette runtime.
+// Focus is ephemeral.
+// ─────────────────────────────────────────────────────────────
+const DC_STATE_FILE = '.design-canvas.state.json';
+
+function DesignCanvas({ children, minScale, maxScale, style }) {
+  const [state, setState] = React.useState({ sections: {}, focus: null });
+  // Hold rendering until the sidecar read settles so the saved order/titles
+  // appear on first paint (no source-order flash). didRead gates writes until
+  // the read settles so the empty initial state can't clobber a slow read;
+  // skipNextWrite suppresses the one echo-write that would otherwise follow
+  // hydration.
+  const [ready, setReady] = React.useState(false);
+  const didRead = React.useRef(false);
+  const skipNextWrite = React.useRef(false);
+
+  React.useEffect(() => {
+    let off = false;
+    fetch('./' + DC_STATE_FILE)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((saved) => {
+        if (off || !saved || !saved.sections) return;
+        skipNextWrite.current = true;
+        setState((s) => ({ ...s, sections: saved.sections }));
+      })
+      .catch(() => {})
+      .finally(() => { didRead.current = true; if (!off) setReady(true); });
+    const t = setTimeout(() => { if (!off) setReady(true); }, 150);
+    return () => { off = true; clearTimeout(t); };
+  }, []);
+
+  React.useEffect(() => {
+    if (!didRead.current) return;
+    if (skipNextWrite.current) { skipNextWrite.current = false; return; }
+    const t = setTimeout(() => {
+      window.omelette?.writeFile(DC_STATE_FILE, JSON.stringify({ sections: state.sections })).catch(() => {});
+    }, 250);
+    return () => clearTimeout(t);
+  }, [state.sections]);
+
+  // Build registries synchronously from children so FocusOverlay can read
+  // them in the same render. Fragments are flattened; wrapping in other
+  // elements still opts out of focus/reorder.
+  const registry = {};     // slotId -> { sectionId, artboard }
+  const sectionMeta = {};  // sectionId -> { title, subtitle, slotIds[] }
+  const sectionOrder = [];
+  dcFlatten(children).forEach((sec) => {
+    if (!sec || sec.type !== DCSection) return;
+    const sid = sec.props.id ?? sec.props.title;
+    if (!sid) return;
+    sectionOrder.push(sid);
+    const persisted = state.sections[sid] || {};
+    const abs = [];
+    dcFlatten(sec.props.children).forEach((ab) => {
+      if (!ab || ab.type !== DCArtboard) return;
+      const aid = ab.props.id ?? ab.props.label;
+      if (aid) abs.push([aid, ab]);
+    });
+    // hidden is scoped to one source revision — when the agent regenerates
+    // (artboard-ID set changes), prior deletes don't apply to new content.
+    const srcKey = abs.map(([k]) => k).join('\x1f');
+    const hidden = persisted.srcKey === srcKey ? (persisted.hidden || []) : [];
+    const srcIds = [];
+    abs.forEach(([aid, ab]) => {
+      if (hidden.includes(aid)) return;
+      registry[`${sid}/${aid}`] = { sectionId: sid, artboard: ab };
+      srcIds.push(aid);
+    });
+    const kept = (persisted.order || []).filter((k) => srcIds.includes(k));
+    sectionMeta[sid] = {
+      title: persisted.title ?? sec.props.title,
+      subtitle: sec.props.subtitle,
+      slotIds: [...kept, ...srcIds.filter((k) => !kept.includes(k))],
+    };
+  });
+
+  const api = React.useMemo(() => ({
+    state,
+    section: (id) => state.sections[id] || {},
+    patchSection: (id, p) => setState((s) => ({
+      ...s,
+      sections: { ...s.sections, [id]: { ...s.sections[id], ...(typeof p === 'function' ? p(s.sections[id] || {}) : p) } },
+    })),
+    setFocus: (slotId) => setState((s) => ({ ...s, focus: slotId })),
+  }), [state]);
+
+  // Esc exits focus; any outside pointerdown commits an in-progress rename.
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') api.setFocus(null); };
+    const onPd = (e) => {
+      const ae = document.activeElement;
+      if (ae && ae.isContentEditable && !ae.contains(e.target)) ae.blur();
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onPd, true);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onPd, true);
+    };
+  }, [api]);
+
+  return (
+    <DCCtx.Provider value={api}>
+      <DCViewport minScale={minScale} maxScale={maxScale} style={style}>{ready && children}</DCViewport>
+      {state.focus && registry[state.focus] && (
+        <DCFocusOverlay entry={registry[state.focus]} sectionMeta={sectionMeta} sectionOrder={sectionOrder} />
+      )}
+    </DCCtx.Provider>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// DCViewport — transform-based pan/zoom (internal)
+//
+// Input mapping (Figma-style):
+//   • trackpad pinch  → zoom   (ctrlKey wheel; Safari gesture* events)
+//   • trackpad scroll → pan    (two-finger)
+//   • mouse wheel     → zoom   (notched; distinguished from trackpad scroll)
+//   • middle-drag / primary-drag-on-bg → pan
+//
+// Transform state lives in a ref and is written straight to the DOM
+// (translate3d + will-change) so wheel ticks don't go through React —
+// keeps pans at 60fps on dense canvases.
+// ─────────────────────────────────────────────────────────────
+function DCViewport({ children, minScale = 0.1, maxScale = 8, style = {} }) {
+  const vpRef = React.useRef(null);
+  const worldRef = React.useRef(null);
+  const tf = React.useRef({ x: 0, y: 0, scale: 1 });
+  // Persist viewport across reloads so the user lands back where they were
+  // after an agent edit or browser refresh. The sandbox origin is already
+  // per-project; pathname keeps multiple canvas files in one project apart.
+  const tfKey = 'dc-viewport:' + location.pathname;
+  const saveT = React.useRef(0);
+
+  const lastPostedScale = React.useRef();
+  const apply = React.useCallback(() => {
+    const { x, y, scale } = tf.current;
+    const el = worldRef.current;
+    if (!el) return;
+    el.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+    // Exposed for zoom-invariant chrome (labels, buttons, TweaksPanel).
+    el.style.setProperty('--dc-inv-zoom', String(1 / scale));
+    // Keep the host toolbar's % readout in sync with the canvas scale. Pan
+    // ticks leave scale unchanged — skip the cross-frame post for those.
+    if (lastPostedScale.current !== scale) {
+      lastPostedScale.current = scale;
+      window.parent.postMessage({ type: '__dc_zoom', scale }, '*');
+    }
+    clearTimeout(saveT.current);
+    saveT.current = setTimeout(() => {
+      try { localStorage.setItem(tfKey, JSON.stringify(tf.current)); } catch {}
+    }, 200);
+  }, [tfKey]);
+
+  React.useLayoutEffect(() => {
+    const flush = () => {
+      clearTimeout(saveT.current);
+      try { localStorage.setItem(tfKey, JSON.stringify(tf.current)); } catch {}
+    };
+    try {
+      const s = JSON.parse(localStorage.getItem(tfKey) || 'null');
+      if (s && Number.isFinite(s.x) && Number.isFinite(s.y) && Number.isFinite(s.scale)) {
+        tf.current = { x: s.x, y: s.y, scale: Math.min(maxScale, Math.max(minScale, s.scale)) };
+        apply();
+      }
+    } catch {}
+    // Flush on pagehide and unmount so a reload within the 200ms debounce
+    // window doesn't drop the last pan/zoom.
+    window.addEventListener('pagehide', flush);
+    return () => { window.removeEventListener('pagehide', flush); flush(); };
+  }, []);
+
+  React.useEffect(() => {
+    const vp = vpRef.current;
+    if (!vp) return;
+
+    const zoomAt = (cx, cy, factor) => {
+      const r = vp.getBoundingClientRect();
+      const px = cx - r.left, py = cy - r.top;
+      const t = tf.current;
+      const next = Math.min(maxScale, Math.max(minScale, t.scale * factor));
+      const k = next / t.scale;
+      // --dc-inv-zoom consumers (.dc-sectionhead's CSS zoom, each section's
+      // marginBottom) reflow on every scale change, vertically shifting the
+      // world layout — so a world point mathematically pinned under the cursor
+      // drifts as you zoom (content creeps up on zoom-in, down on zoom-out).
+      // Anchor the DOM element under the cursor instead: record its screen Y,
+      // apply the transform + --dc-inv-zoom, then cancel whatever vertical
+      // drift the reflow introduced so it stays put on screen.
+      let marker = null, markerY0 = 0;
+      if (k !== 1) {
+        const hit = document.elementFromPoint(cx, cy);
+        marker = hit && hit.closest ? hit.closest('[data-dc-slot],[data-dc-section]') : null;
+        if (marker) markerY0 = marker.getBoundingClientRect().top;
+      }
+      // keep the world point under the cursor fixed
+      t.x = px - (px - t.x) * k;
+      t.y = py - (py - t.y) * k;
+      t.scale = next;
+      apply();
+      if (marker) {
+        // A pure zoom around (cx, cy) maps screen Y → cy + (Y - cy) * k. Any
+        // departure after the --dc-inv-zoom reflow is the layout drift.
+        const drift = marker.getBoundingClientRect().top - (cy + (markerY0 - cy) * k);
+        if (Math.abs(drift) > 0.1) { t.y -= drift; apply(); }
+      }
+    };
+
+    // Mouse-wheel vs trackpad-scroll heuristic. A physical wheel sends
+    // line-mode deltas (Firefox) or large integer pixel deltas with no X
+    // component (Chrome/Safari, typically multiples of 100/120). Trackpad
+    // two-finger scroll sends small/fractional pixel deltas, often with
+    // non-zero deltaX. ctrlKey is set by the browser for trackpad pinch.
+    const isMouseWheel = (e) =>
+      e.deltaMode !== 0 ||
+      (e.deltaX === 0 && Number.isInteger(e.deltaY) && Math.abs(e.deltaY) >= 40);
+
+    const onWheel = (e) => {
+      e.preventDefault();
+      if (isGesturing) return; // Safari: gesture* owns the pinch — discard concurrent wheels
+      if ((e.ctrlKey || e.metaKey) && !isMouseWheel(e)) {
+        // trackpad pinch, or ctrl/cmd + smooth-scroll mouse. Notched
+        // wheels fall through to the fixed-step branch below.
+        zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.01));
+      } else if (isMouseWheel(e)) {
+        // notched mouse wheel — fixed-ratio step per click
+        zoomAt(e.clientX, e.clientY, Math.exp(-Math.sign(e.deltaY) * 0.18));
+      } else {
+        // trackpad two-finger scroll — pan
+        tf.current.x -= e.deltaX;
+        tf.current.y -= e.deltaY;
+        apply();
+      }
+    };
+
+    // Safari sends native gesture* events for trackpad pinch with a smooth
+    // e.scale; preferring these over the ctrl+wheel fallback gives a much
+    // better feel there. No-ops on other browsers. Safari also fires
+    // ctrlKey wheel events during the same pinch — isGesturing makes
+    // onWheel drop those entirely so they neither zoom nor pan.
+    let gsBase = 1;
+    let isGesturing = false;
+    const onGestureStart = (e) => { e.preventDefault(); isGesturing = true; gsBase = tf.current.scale; };
+    const onGestureChange = (e) => {
+      e.preventDefault();
+      zoomAt(e.clientX, e.clientY, (gsBase * e.scale) / tf.current.scale);
+    };
+    const onGestureEnd = (e) => { e.preventDefault(); isGesturing = false; };
+
+    // Drag-pan: middle button anywhere, or primary button on canvas
+    // background (anything that isn't an artboard or an inline editor).
+    let drag = null;
+    const onPointerDown = (e) => {
+      const onBg = !e.target.closest('[data-dc-slot], .dc-editable');
+      if (!(e.button === 1 || (e.button === 0 && onBg))) return;
+      e.preventDefault();
+      vp.setPointerCapture(e.pointerId);
+      drag = { id: e.pointerId, lx: e.clientX, ly: e.clientY };
+      vp.style.cursor = 'grabbing';
+    };
+    const onPointerMove = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      tf.current.x += e.clientX - drag.lx;
+      tf.current.y += e.clientY - drag.ly;
+      drag.lx = e.clientX; drag.ly = e.clientY;
+      apply();
+    };
+    const onPointerUp = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      vp.releasePointerCapture(e.pointerId);
+      drag = null;
+      vp.style.cursor = '';
+    };
+
+    // Host-driven zoom (toolbar % menu). Zooms around viewport centre so the
+    // visible midpoint stays fixed — matching the host's iframe-zoom feel.
+    const onHostMsg = (e) => {
+      const d = e.data;
+      if (d && d.type === '__dc_set_zoom' && typeof d.scale === 'number') {
+        const r = vp.getBoundingClientRect();
+        zoomAt(r.left + r.width / 2, r.top + r.height / 2, d.scale / tf.current.scale);
+      } else if (d && d.type === '__dc_probe') {
+        // Host's [readyGen] reset asks whether a canvas is present; it
+        // fires on the iframe's native 'load', which for canvases with
+        // images/fonts is after our mount-time announce, so re-announce.
+        // Clear the pan-tick guard so apply() re-posts the current scale
+        // even if it's unchanged — the host just reset dcScale to 1.
+        window.parent.postMessage({ type: '__dc_present' }, '*');
+        lastPostedScale.current = undefined;
+        apply();
+      }
+    };
+    window.addEventListener('message', onHostMsg);
+    // Announce canvas mode so the host toolbar proxies its % control here
+    // instead of scaling the iframe element (which would just shrink the
+    // viewport window of an infinite canvas). The apply() that follows emits
+    // the initial __dc_zoom so the toolbar % is correct before first pinch.
+    // lastPostedScale reset mirrors the __dc_probe handler: the layout
+    // effect's restore-path apply() may already have posted the restored
+    // scale (before __dc_present), so clear the guard to re-post it in order.
+    window.parent.postMessage({ type: '__dc_present' }, '*');
+    lastPostedScale.current = undefined;
+    apply();
+
+    vp.addEventListener('wheel', onWheel, { passive: false });
+    vp.addEventListener('gesturestart', onGestureStart, { passive: false });
+    vp.addEventListener('gesturechange', onGestureChange, { passive: false });
+    vp.addEventListener('gestureend', onGestureEnd, { passive: false });
+    vp.addEventListener('pointerdown', onPointerDown);
+    vp.addEventListener('pointermove', onPointerMove);
+    vp.addEventListener('pointerup', onPointerUp);
+    vp.addEventListener('pointercancel', onPointerUp);
+    return () => {
+      window.removeEventListener('message', onHostMsg);
+      vp.removeEventListener('wheel', onWheel);
+      vp.removeEventListener('gesturestart', onGestureStart);
+      vp.removeEventListener('gesturechange', onGestureChange);
+      vp.removeEventListener('gestureend', onGestureEnd);
+      vp.removeEventListener('pointerdown', onPointerDown);
+      vp.removeEventListener('pointermove', onPointerMove);
+      vp.removeEventListener('pointerup', onPointerUp);
+      vp.removeEventListener('pointercancel', onPointerUp);
+    };
+  }, [apply, minScale, maxScale]);
+
+  const gridSvg = `url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M120 0H0v120' fill='none' stroke='${encodeURIComponent(DC.grid)}' stroke-width='1'/%3E%3C/svg%3E")`;
+  return (
+    <div
+      ref={vpRef}
+      className="design-canvas"
+      style={{
+        height: '100vh', width: '100vw',
+        background: DC.bg,
+        overflow: 'hidden',
+        overscrollBehavior: 'none',
+        touchAction: 'none',
+        position: 'relative',
+        fontFamily: DC.font,
+        boxSizing: 'border-box',
+        ...style,
+      }}
+    >
+      <div
+        ref={worldRef}
+        style={{
+          position: 'absolute', top: 0, left: 0,
+          transformOrigin: '0 0',
+          willChange: 'transform',
+          width: 'max-content', minWidth: '100%',
+          minHeight: '100%',
+          padding: '60px 0 80px',
+        }}
+      >
+        <div style={{ position: 'absolute', inset: -6000, backgroundImage: gridSvg, backgroundSize: '120px 120px', pointerEvents: 'none', zIndex: -1 }} />
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// DCSection — editable title + h-row of artboards in persisted order
+// ─────────────────────────────────────────────────────────────
+function DCSection({ id, title, subtitle, children, gap = 48 }) {
+  const ctx = React.useContext(DCCtx);
+  const sid = id ?? title;
+  const all = React.Children.toArray(dcFlatten(children));
+  const artboards = all.filter((c) => c && c.type === DCArtboard);
+  const rest = all.filter((c) => !(c && c.type === DCArtboard));
+  const sec = (ctx && sid && ctx.section(sid)) || {};
+  // Must match DesignCanvas's srcKey computation exactly (it filters falsy
+  // IDs), or onDelete persists a srcKey that DesignCanvas never recognizes.
+  const allIds = artboards.map((a) => a.props.id ?? a.props.label).filter(Boolean);
+  const srcKey = allIds.join('\x1f');
+  const hidden = sec.srcKey === srcKey ? (sec.hidden || []) : [];
+  const srcOrder = allIds.filter((k) => !hidden.includes(k));
+
+  const order = React.useMemo(() => {
+    const kept = (sec.order || []).filter((k) => srcOrder.includes(k));
+    return [...kept, ...srcOrder.filter((k) => !kept.includes(k))];
+  }, [sec.order, srcOrder.join('|')]);
+
+  const byId = Object.fromEntries(artboards.map((a) => [a.props.id ?? a.props.label, a]));
+
+  // marginBottom counter-scales so the on-screen gap between sections stays
+  // constant — otherwise at low zoom the (world-space) gap collapses while
+  // the screen-constant sectionhead below it doesn't, and the title reads as
+  // belonging to the section above. paddingBottom below is just enough for
+  // the 24px artboard-header (abs-positioned above each card) plus ~8px, so
+  // the title sits tight against its own row at every zoom.
+  return (
+    <div data-dc-section={sid}
+      style={{ marginBottom: 'calc(80px * var(--dc-inv-zoom, 1))', position: 'relative' }}>
+      <div style={{ padding: '0 60px' }}>
+        <div className="dc-sectionhead" style={{ paddingBottom: 36 }}>
+          <DCEditable tag="div" value={sec.title ?? title}
+            onChange={(v) => ctx && sid && ctx.patchSection(sid, { title: v })}
+            style={{ fontSize: 28, fontWeight: 600, color: DC.title, letterSpacing: -0.4, marginBottom: 6, display: 'inline-block' }} />
+          {subtitle && <div style={{ fontSize: 16, color: DC.subtitle }}>{subtitle}</div>}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+        {order.map((k) => (
+          <DCArtboardFrame key={k} sectionId={sid} artboard={byId[k]} order={order}
+            label={(sec.labels || {})[k] ?? byId[k].props.label}
+            onRename={(v) => ctx && ctx.patchSection(sid, (x) => ({ labels: { ...x.labels, [k]: v } }))}
+            onReorder={(next) => ctx && ctx.patchSection(sid, { order: next })}
+            onDelete={() => ctx && ctx.patchSection(sid, (x) => ({
+              hidden: [...(x.srcKey === srcKey ? (x.hidden || []) : []), k],
+              srcKey,
+            }))}
+            onFocus={() => ctx && ctx.setFocus(`${sid}/${k}`)} />
+        ))}
+      </div>
+      {rest}
+    </div>
+  );
+}
+
+// DCArtboard — marker; rendered by DCArtboardFrame via DCSection.
+function DCArtboard() { return null; }
+
+// Per-artboard export (kind: 'png' | 'html'). Both paths share the same
+// self-contained clone: computed styles baked in, @font-face / <img> /
+// inline-style background-image urls inlined as data URIs. PNG wraps the
+// clone in foreignObject→canvas at 3× the artboard's natural width×height
+// (same pipeline the host uses for page captures); HTML wraps it in a
+// minimal standalone document. Both are independent of viewport zoom.
+async function dcExport(node, w, h, name, kind) {
+  try { await document.fonts.ready; } catch {}
+  const toDataURL = (url) => fetch(url).then((r) => r.blob()).then((b) => new Promise((res) => {
+    const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => res(url); fr.readAsDataURL(b);
+  })).catch(() => url);
+
+  // Collect @font-face rules. ss.cssRules throws SecurityError on
+  // cross-origin sheets (e.g. fonts.googleapis.com) — in that case fetch
+  // the CSS text directly (those endpoints send ACAO:*) and regex-extract
+  // the blocks. @import and @media/@supports are walked so nested
+  // @font-face rules aren't missed.
+  const fontRules = [], pending = [], seen = new Set();
+  const scrapeCss = (href) => {
+    if (seen.has(href)) return; seen.add(href);
+    pending.push(fetch(href).then((r) => r.text()).then((css) => {
+      for (const m of css.match(/@font-face\s*{[^}]*}/g) || []) fontRules.push({ css: m, base: href });
+      for (const m of css.matchAll(/@import\s+(?:url\()?['"]?([^'")\s;]+)/g))
+        scrapeCss(new URL(m[1], href).href);
+    }).catch(() => {}));
+  };
+  const walk = (rules, base) => {
+    for (const r of rules) {
+      if (r.type === CSSRule.FONT_FACE_RULE) fontRules.push({ css: r.cssText, base });
+      else if (r.type === CSSRule.IMPORT_RULE && r.styleSheet) {
+        const ibase = r.styleSheet.href || base;
+        try { walk(r.styleSheet.cssRules, ibase); } catch { scrapeCss(ibase); }
+      } else if (r.cssRules) walk(r.cssRules, base);
+    }
+  };
+  for (const ss of document.styleSheets) {
+    const base = ss.href || location.href;
+    try { walk(ss.cssRules, base); } catch { if (ss.href) scrapeCss(ss.href); }
+  }
+  while (pending.length) await pending.shift();
+  const fontCss = (await Promise.all(fontRules.map(async (rule) => {
+    let out = rule.css, m; const re = /url\((['"]?)([^'")]+)\1\)/g;
+    while ((m = re.exec(rule.css))) {
+      if (m[2].indexOf('data:') === 0) continue;
+      let abs; try { abs = new URL(m[2], rule.base).href; } catch { continue; }
+      out = out.split(m[0]).join('url("' + await toDataURL(abs) + '")');
+    }
+    return out;
+  }))).join('\n');
+
+  const cloneStyled = (src) => {
+    if (src.nodeType === 8 || (src.nodeType === 1 && src.tagName === 'SCRIPT')) return document.createTextNode('');
+    const dst = src.cloneNode(false);
+    if (src.nodeType === 1) {
+      const cs = getComputedStyle(src); let txt = '';
+      for (let i = 0; i < cs.length; i++) txt += cs[i] + ':' + cs.getPropertyValue(cs[i]) + ';';
+      dst.setAttribute('style', txt + 'animation:none;transition:none;');
+      if (src.tagName === 'CANVAS') try { const im = document.createElement('img'); im.src = src.toDataURL(); im.setAttribute('style', txt); return im; } catch {}
+    }
+    for (let c = src.firstChild; c; c = c.nextSibling) dst.appendChild(cloneStyled(c));
+    return dst;
+  };
+  const clone = cloneStyled(node);
+  clone.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+  // Drop the card's own shadow/radius so the export is a flush w×h rect;
+  // the artboard's own background (if any) is already in the computed style.
+  clone.style.boxShadow = 'none'; clone.style.borderRadius = '0';
+
+  const jobs = [];
+  clone.querySelectorAll('img').forEach((el) => {
+    const s = el.getAttribute('src');
+    if (s && s.indexOf('data:') !== 0) jobs.push(toDataURL(el.src).then((d) => el.setAttribute('src', d)));
+  });
+  [clone, ...clone.querySelectorAll('*')].forEach((el) => {
+    const bg = el.style.backgroundImage; if (!bg) return;
+    let m; const re = /url\(["']?([^"')]+)["']?\)/g;
+    while ((m = re.exec(bg))) {
+      const tok = m[0], url = m[1];
+      if (url.indexOf('data:') === 0) continue;
+      jobs.push(toDataURL(url).then((d) => { el.style.backgroundImage = el.style.backgroundImage.split(tok).join('url("' + d + '")'); }));
+    }
+  });
+  await Promise.all(jobs);
+
+  const xml = new XMLSerializer().serializeToString(clone);
+  const save = (blob, ext) => {
+    if (!blob) return;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name + '.' + ext; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  };
+
+  if (kind === 'html') {
+    const html = '<!doctype html><html><head><meta charset="utf-8"><title>' + name + '</title>' +
+      (fontCss ? '<style>' + fontCss + '</style>' : '') +
+      '</head><body style="margin:0">' + xml + '</body></html>';
+    return save(new Blob([html], { type: 'text/html' }), 'html');
+  }
+
+  // PNG: the SVG's own width/height must be the output resolution — an
+  // <img>-loaded SVG rasterizes at its intrinsic size, so sizing it at 1×
+  // and ctx.scale()-ing up would just upscale a 1× bitmap. viewBox maps the
+  // w×h foreignObject onto the px·w × px·h SVG canvas so the browser renders
+  // the HTML at full resolution.
+  const px = 3;
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w * px + '" height="' + h * px +
+    '" viewBox="0 0 ' + w + ' ' + h + '"><foreignObject width="' + w + '" height="' + h + '">' +
+    (fontCss ? '<style><![CDATA[' + fontCss + ']]></style>' : '') + xml + '</foreignObject></svg>';
+  const img = new Image();
+  await new Promise((res, rej) => {
+    img.onload = res; img.onerror = () => rej(new Error('svg load failed'));
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  });
+  const cv = document.createElement('canvas');
+  cv.width = w * px; cv.height = h * px;
+  cv.getContext('2d').drawImage(img, 0, 0);
+  cv.toBlob((blob) => save(blob, 'png'), 'image/png');
+}
+
+function DCArtboardFrame({ sectionId, artboard, label, order, onRename, onReorder, onFocus, onDelete }) {
+  const { id: rawId, label: rawLabel, width = 260, height = 480, children, style = {} } = artboard.props;
+  const id = rawId ?? rawLabel;
+  const ref = React.useRef(null);
+  const cardRef = React.useRef(null);
+  const menuRef = React.useRef(null);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const [confirming, setConfirming] = React.useState(false);
+
+  // ⋯ menu: close on any outside pointerdown. Two-click delete lives inside
+  // the menu — first click arms the row, second commits; closing disarms.
+  React.useEffect(() => {
+    if (!menuOpen) { setConfirming(false); return; }
+    const off = (e) => { if (!menuRef.current || !menuRef.current.contains(e.target)) setMenuOpen(false); };
+    document.addEventListener('pointerdown', off, true);
+    return () => document.removeEventListener('pointerdown', off, true);
+  }, [menuOpen]);
+
+  const doExport = (kind) => {
+    setMenuOpen(false);
+    if (!cardRef.current) return;
+    const name = String(label || id || 'artboard').replace(/[^\w\s.-]+/g, '_');
+    dcExport(cardRef.current, width, height, name, kind)
+      .catch((e) => console.error('[design-canvas] export failed:', e));
+  };
+
+  // Live drag-reorder: dragged card sticks to cursor; siblings slide into
+  // their would-be slots in real time via transforms. DOM order only
+  // changes on drop.
+  const onGripDown = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    const me = ref.current;
+    // translateX is applied in local (pre-scale) space but pointer deltas and
+    // getBoundingClientRect().left are screen-space — divide by the viewport's
+    // current scale so the dragged card tracks the cursor at any zoom level.
+    const scale = me.getBoundingClientRect().width / me.offsetWidth || 1;
+    const peers = Array.from(document.querySelectorAll(`[data-dc-section="${sectionId}"] [data-dc-slot]`));
+    const homes = peers.map((el) => ({ el, id: el.dataset.dcSlot, x: el.getBoundingClientRect().left }));
+    const slotXs = homes.map((h) => h.x);
+    const startIdx = order.indexOf(id);
+    const startX = e.clientX;
+    let liveOrder = order.slice();
+    me.classList.add('dc-dragging');
+
+    const layout = () => {
+      for (const h of homes) {
+        if (h.id === id) continue;
+        const slot = liveOrder.indexOf(h.id);
+        h.el.style.transform = `translateX(${(slotXs[slot] - h.x) / scale}px)`;
+      }
+    };
+
+    const move = (ev) => {
+      const dx = ev.clientX - startX;
+      me.style.transform = `translateX(${dx / scale}px)`;
+      const cur = homes[startIdx].x + dx;
+      let nearest = 0, best = Infinity;
+      for (let i = 0; i < slotXs.length; i++) {
+        const d = Math.abs(slotXs[i] - cur);
+        if (d < best) { best = d; nearest = i; }
+      }
+      if (liveOrder.indexOf(id) !== nearest) {
+        liveOrder = order.filter((k) => k !== id);
+        liveOrder.splice(nearest, 0, id);
+        layout();
+      }
+    };
+
+    const up = () => {
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', up);
+      const finalSlot = liveOrder.indexOf(id);
+      me.classList.remove('dc-dragging');
+      me.style.transform = `translateX(${(slotXs[finalSlot] - homes[startIdx].x) / scale}px)`;
+      // After the settle transition, kill transitions + clear transforms +
+      // commit the reorder in the same frame so there's no visual snap-back.
+      setTimeout(() => {
+        for (const h of homes) { h.el.style.transition = 'none'; h.el.style.transform = ''; }
+        if (liveOrder.join('|') !== order.join('|')) onReorder(liveOrder);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          for (const h of homes) h.el.style.transition = '';
+        }));
+      }, 180);
+    };
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', up);
+  };
+
+  return (
+    <div ref={ref} data-dc-slot={id} style={{ position: 'relative', flexShrink: 0 }}>
+      <div className="dc-header" data-omelette-chrome="" style={{ color: DC.label }} onPointerDown={(e) => e.stopPropagation()}>
+        <div className="dc-labelrow">
+          <div className="dc-grip" onPointerDown={onGripDown} title="Drag to reorder">
+            <svg width="9" height="13" viewBox="0 0 9 13" fill="currentColor"><circle cx="2" cy="2" r="1.1"/><circle cx="7" cy="2" r="1.1"/><circle cx="2" cy="6.5" r="1.1"/><circle cx="7" cy="6.5" r="1.1"/><circle cx="2" cy="11" r="1.1"/><circle cx="7" cy="11" r="1.1"/></svg>
+          </div>
+          <div className="dc-labeltext" onClick={onFocus} title="Click to focus">
+            <DCEditable value={label} onChange={onRename} onClick={(e) => e.stopPropagation()}
+              style={{ fontSize: 15, fontWeight: 500, color: DC.label, lineHeight: 1 }} />
+          </div>
+        </div>
+        <div className="dc-btns">
+          <div ref={menuRef} style={{ position: 'relative' }}>
+            <button className="dc-kebab" title="More" onClick={() => setMenuOpen((o) => !o)}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="2.5" cy="6" r="1.1"/><circle cx="6" cy="6" r="1.1"/><circle cx="9.5" cy="6" r="1.1"/></svg>
+            </button>
+            {menuOpen && (
+              <div className="dc-menu" onPointerDown={(e) => e.stopPropagation()}>
+                <button onClick={() => doExport('png')}>Download PNG</button>
+                <button onClick={() => doExport('html')}>Download HTML</button>
+                <hr />
+                <button className="dc-danger"
+                  onClick={() => { if (confirming) { setMenuOpen(false); onDelete(); } else setConfirming(true); }}>
+                  {confirming ? 'Click again to delete' : 'Delete'}
+                </button>
+              </div>
+            )}
+          </div>
+          <button className="dc-expand" onClick={onFocus} title="Focus">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M7 1h4v4M5 11H1V7M11 1L7.5 4.5M1 11l3.5-3.5"/></svg>
+          </button>
+        </div>
+      </div>
+      <div ref={cardRef} className="dc-card"
+        style={{ borderRadius: 2, boxShadow: '0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)', overflow: 'hidden', width, height, background: '#fff', ...style }}>
+        {children || <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb', fontSize: 13, fontFamily: DC.font }}>{id}</div>}
+      </div>
+    </div>
+  );
+}
+
+// Inline rename — commits on blur or Enter.
+function DCEditable({ value, onChange, style, tag = 'span', onClick }) {
+  const T = tag;
+  return (
+    <T className="dc-editable" contentEditable suppressContentEditableWarning
+      onClick={onClick}
+      onPointerDown={(e) => e.stopPropagation()}
+      onBlur={(e) => onChange && onChange(e.currentTarget.textContent)}
+      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.currentTarget.blur(); } }}
+      style={style}>{value}</T>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Focus mode — overlay one artboard; ←/→ within section, ↑/↓ across
+// sections, Esc or backdrop click to exit.
+// ─────────────────────────────────────────────────────────────
+function DCFocusOverlay({ entry, sectionMeta, sectionOrder }) {
+  const ctx = React.useContext(DCCtx);
+  const { sectionId, artboard } = entry;
+  const sec = ctx.section(sectionId);
+  const meta = sectionMeta[sectionId];
+  const peers = meta.slotIds;
+  const aid = artboard.props.id ?? artboard.props.label;
+  const idx = peers.indexOf(aid);
+  const secIdx = sectionOrder.indexOf(sectionId);
+
+  const go = (d) => { const n = peers[(idx + d + peers.length) % peers.length]; if (n) ctx.setFocus(`${sectionId}/${n}`); };
+  const goSection = (d) => {
+    // Sections whose artboards are all deleted have slotIds:[] — step past
+    // them to the next non-empty section so ↑/↓ doesn't dead-end.
+    const n = sectionOrder.length;
+    for (let i = 1; i < n; i++) {
+      const ns = sectionOrder[(((secIdx + d * i) % n) + n) % n];
+      const first = sectionMeta[ns] && sectionMeta[ns].slotIds[0];
+      if (first) { ctx.setFocus(`${ns}/${first}`); return; }
+    }
+  };
+
+  React.useEffect(() => {
+    const k = (e) => {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); goSection(-1); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); goSection(1); }
+    };
+    document.addEventListener('keydown', k);
+    return () => document.removeEventListener('keydown', k);
+  });
+
+  const { width = 260, height = 480, children } = artboard.props;
+  const [vp, setVp] = React.useState({ w: window.innerWidth, h: window.innerHeight });
+  React.useEffect(() => { const r = () => setVp({ w: window.innerWidth, h: window.innerHeight }); window.addEventListener('resize', r); return () => window.removeEventListener('resize', r); }, []);
+  const scale = Math.max(0.1, Math.min((vp.w - 200) / width, (vp.h - 260) / height, 2));
+
+  const [ddOpen, setDd] = React.useState(false);
+  const Arrow = ({ dir, onClick }) => (
+    <button onClick={(e) => { e.stopPropagation(); onClick(); }}
+      style={{ position: 'absolute', top: '50%', [dir]: 28, transform: 'translateY(-50%)',
+        border: 'none', background: 'rgba(255,255,255,.08)', color: 'rgba(255,255,255,.9)',
+        width: 44, height: 44, borderRadius: 22, fontSize: 18, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .15s' }}
+      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,.18)')}
+      onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,.08)')}>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d={dir === 'left' ? 'M11 3L5 9l6 6' : 'M7 3l6 6-6 6'} /></svg>
+    </button>
+  );
+
+  // Portal to body so position:fixed is the real viewport regardless of any
+  // transform on DesignCanvas's ancestors (including the canvas zoom itself).
+  return ReactDOM.createPortal(
+    <div onClick={() => ctx.setFocus(null)}
+      onWheel={(e) => e.preventDefault()}
+      style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(24,20,16,.6)', backdropFilter: 'blur(14px)',
+        fontFamily: DC.font, color: '#fff' }}>
+
+      {/* top bar: section dropdown (left) · close (right) */}
+      <div onClick={(e) => e.stopPropagation()}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 72, display: 'flex', alignItems: 'flex-start', padding: '16px 20px 0', gap: 16 }}>
+        <div style={{ position: 'relative' }}>
+          <button onClick={() => setDd((o) => !o)}
+            style={{ border: 'none', background: 'transparent', color: '#fff', cursor: 'pointer', padding: '6px 8px',
+              borderRadius: 6, textAlign: 'left', fontFamily: 'inherit' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18, fontWeight: 600, letterSpacing: -0.3 }}>{meta.title}</span>
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" style={{ opacity: .7 }}><path d="M2 4l3.5 3.5L9 4"/></svg>
+            </span>
+            {meta.subtitle && <span style={{ display: 'block', fontSize: 13, opacity: .6, fontWeight: 400, marginTop: 2 }}>{meta.subtitle}</span>}
+          </button>
+          {ddOpen && (
+            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 4, background: '#2a251f', borderRadius: 8,
+              boxShadow: '0 8px 32px rgba(0,0,0,.4)', padding: 4, minWidth: 200, zIndex: 10 }}>
+              {sectionOrder.filter((sid) => sectionMeta[sid].slotIds.length).map((sid) => (
+                <button key={sid} onClick={() => { setDd(false); const f = sectionMeta[sid].slotIds[0]; if (f) ctx.setFocus(`${sid}/${f}`); }}
+                  style={{ display: 'block', width: '100%', textAlign: 'left', border: 'none', cursor: 'pointer',
+                    background: sid === sectionId ? 'rgba(255,255,255,.1)' : 'transparent', color: '#fff',
+                    padding: '8px 12px', borderRadius: 5, fontSize: 14, fontWeight: sid === sectionId ? 600 : 400, fontFamily: 'inherit' }}>
+                  {sectionMeta[sid].title}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <div style={{ flex: 1 }} />
+        <button onClick={() => ctx.setFocus(null)}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,.12)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          style={{ border: 'none', background: 'transparent', color: 'rgba(255,255,255,.7)', width: 32, height: 32,
+            borderRadius: 16, fontSize: 20, cursor: 'pointer', lineHeight: 1, transition: 'background .12s' }}>×</button>
+      </div>
+
+      {/* card centered, label + index below — only the card itself stops
+          propagation so any backdrop click (including the margins around
+          the card) exits focus */}
+      <div
+        style={{ position: 'absolute', top: 64, bottom: 56, left: 100, right: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+        <div onClick={(e) => e.stopPropagation()} style={{ width: width * scale, height: height * scale, position: 'relative' }}>
+          <div style={{ width, height, transform: `scale(${scale})`, transformOrigin: 'top left', background: '#fff', borderRadius: 2, overflow: 'hidden',
+            boxShadow: '0 20px 80px rgba(0,0,0,.4)' }}>
+            {children || <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb' }}>{aid}</div>}
+          </div>
+        </div>
+        <div onClick={(e) => e.stopPropagation()} style={{ fontSize: 14, fontWeight: 500, opacity: .85, textAlign: 'center' }}>
+          {(sec.labels || {})[aid] ?? artboard.props.label}
+          <span style={{ opacity: .5, marginLeft: 10, fontVariantNumeric: 'tabular-nums' }}>{idx + 1} / {peers.length}</span>
+        </div>
+      </div>
+
+      <Arrow dir="left" onClick={() => go(-1)} />
+      <Arrow dir="right" onClick={() => go(1)} />
+
+      {/* dots */}
+      <div onClick={(e) => e.stopPropagation()}
+        style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 8 }}>
+        {peers.map((p, i) => (
+          <button key={p} onClick={() => ctx.setFocus(`${sectionId}/${p}`)}
+            style={{ border: 'none', padding: 0, cursor: 'pointer', width: 6, height: 6, borderRadius: 3,
+              background: i === idx ? '#fff' : 'rgba(255,255,255,.3)' }} />
+        ))}
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Post-it — absolute-positioned sticky note
+// ─────────────────────────────────────────────────────────────
+function DCPostIt({ children, top, left, right, bottom, rotate = -2, width = 180 }) {
+  return (
+    <div style={{
+      position: 'absolute', top, left, right, bottom, width,
+      background: DC.postitBg, padding: '14px 16px',
+      fontFamily: '"Comic Sans MS", "Marker Felt", "Segoe Print", cursive',
+      fontSize: 14, lineHeight: 1.4, color: DC.postitText,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)',
+      transform: `rotate(${rotate}deg)`,
+      zIndex: 5,
+    }}>{children}</div>
+  );
+}
+
+Object.assign(window, { DesignCanvas, DCSection, DCArtboard, DCPostIt });
+
+
+
+
+/* ===== ensapp-shared.jsx ===== */
+// ensapp-shared.jsx — design tokens, i18n, icons, shared UI primitives
+// Exposed on window for the variant files + index mount.
+
+const ENS = {
+  bg:        '#F5F6F8',   // cool near-white app canvas
+  bgSunken:  '#EEF0F3',
+  surface:   '#FFFFFF',
+  surface2:  '#FAFBFC',
+  line:      '#E3E7ED',   // hairline
+  lineSoft:  '#EDEFF3',
+  ink:       '#0E1726',   // primary text (slate-900-ish)
+  ink2:      '#475067',   // secondary
+  ink3:      '#8A93A6',   // tertiary
+  primary:   '#2D5BD7',   // cobalt
+  primaryDk: '#1E45B0',
+  primaryBg: '#EAF0FD',
+  okFg:      '#0B8457', okBg: '#E6F4EE',
+  warnFg:    '#B5740C', warnBg: '#FBF1E2',
+  dangFg:    '#C4403E', dangBg: '#FBECEB',
+  // stroke pathway accents (subtle, desaturated)
+  isch:      '#2D5BD7', ischBg: '#EAF0FD',
+  hemo:      '#B23B5E', hemoBg: '#FBEBF0',
+  post:      '#0E8C8C', postBg: '#E4F4F4',
+  sans: "'IBM Plex Sans', -apple-system, system-ui, sans-serif",
+  mono: "'IBM Plex Mono', ui-monospace, monospace",
+};
+
+// ── i18n ──────────────────────────────────────────────────────
+const STR = {
+  en: {
+    tagline: 'Patient assignment to clinical trials',
+    taglineSub: 'Acute · hemorrhagic · post-acute',
+    newPatient: 'New patient', newEval: 'New evaluation',
+    quickPatient: 'Quick patient', quickDesc: 'Already-enrolled patient',
+    eligibility: 'Eligibility evaluation', eligDesc: 'Guided history + imaging',
+    trialsInfo: 'Trials info', trialsDesc: 'Inclusion / exclusion criteria',
+    activeSession: 'Active session', resume: 'Resume', discard: 'Discard',
+    sinceLtsw: 'since LTSW', window: 'window', toWindowEnd: 'to window close',
+    catalog: 'Trials catalog', catalogDesc: 'Browse criteria — no patient needed',
+    pastPatients: 'Past patients',
+    whatToDo: 'What would you like to do?', choosePath: 'Start by stroke pathway',
+    ischemic: 'Ischemic', hemorrhagic: 'Hemorrhagic', postAcute: 'Post-acute',
+    active: 'active', paused: 'paused', total: 'trials', enrolledToday: 'screened today',
+    recent: 'Recent patients', viewAll: 'View all', open: 'Open',
+    home: 'Home', tnew: 'New', trials: 'Trials',
+    draft: 'Draft', eligible: 'Eligible', screening: 'Screening',
+    age: 'age', nihss: 'NIHSS',
+    // flow
+    proceedHow: 'How do you want to proceed?',
+    checkElig: 'Check eligibility', checkEligDesc: 'Enter clinical data and find every trial this patient qualifies for.',
+    directEnroll: 'Direct enrollment', directEnrollDesc: 'You already know the trial — register the patient now.',
+    fullFlow: 'Guided', fast: 'Fast', cancel: 'Cancel',
+    step: 'Step', stepOf: 'of', back: 'Back', next: 'Next', review: 'Review',
+    preImaging: 'Pre-imaging', preImagingSub: 'Initial history before CT / MRI',
+    identification: 'Identification', prn: 'Patient record number',
+    clinical: 'Clinical', ageL: 'Age', years: 'yrs',
+    premrs: 'Pre-stroke mRS', ltsw: 'Time since last seen well',
+    windowL: 'Time window', tpaWin: 'IV thrombolysis', evtWin: 'Thrombectomy', windowClosed: 'Window closed',
+    strokeType: 'Stroke type', selectedTrial: 'Selected trial', selectTrial: 'Select trial…',
+    enroll: 'Enroll patient', enrolled: 'Patient enrolled',
+    eligibleTrials: 'Eligible trials', summarySub: 'Trials this patient can be included in',
+    notEligible: 'Not eligible', viewCriteria: 'View criteria', enrolledIn: 'Registered for',
+    matches: 'matching trials', basedOn: 'Based on', done: 'Done', goHome: 'Back to home',
+    selectTrials: 'Select all trials this patient will be enrolled in', selected: 'selected',
+    continueSummary: 'Review enrollment', enrollSummaryT: 'Enrollment summary', enrollSummarySub: 'Patient will be enrolled in the following trials',
+    patientL: 'Patient', trialsCount: 'trials', confirmEnroll: 'Confirm enrollment', editSelection: 'Edit selection',
+    enrolledInN: 'Enrolled in', noneSelected: 'No trial selected yet', tapToSelect: 'Tap the eligible trials above',
+    lastSeenWell: 'Last seen well', selectDateTime: 'Select date & time…', setTime: 'Set', nowL: 'Now',
+    wakeUp: 'Wake-up stroke', wakeUpDesc: 'WeTrust: allow LTSW up to 12 h if symptoms identified within 6 h.',
+    symptomsWithin: 'Symptoms identified within 6 h of awakening', fromLtsw: 'computed from LTSW', yes: 'Yes', no: 'No',
+    operational: 'Operational context', philips: 'Philips angiograph available?', doac: 'DOAC (NOAC) in the previous 48 h?', ace: 'ACE inhibitor (IECA) in therapy?',
+    preResultT: 'Pre-imaging result', proceedPost: 'Proceed with post-imaging evaluation.', continueL: 'Continue', notMeetA: 'Patient does not meet all', notMeetB: 'criteria.',
+    postImaging: 'Post-imaging', postImagingSub: 'Stroke type, candidacy and parameters',
+    strokeIschSub: 'LVO or non-LVO', strokeHemoSub: 'Spontaneous ICH',
+    candidacy: 'Treatment candidacy', evtCandidate: 'Candidate for thrombectomy (EVT)?', ivtCandidate: 'Candidate for IVT (thrombolysis)?',
+    evtParams: 'EVT parameters', evtParamsNote: 'Required for ATHENA, PIVOTAL, MOSTE and other EVT trials.',
+    tandem: 'Tandem occlusion?', tortuosity: 'Vessel tortuosity?', tortuosityNote: 'If unspecified, some trials show “Not indicated”.',
+    targetVessel: 'Target vessel', selectOneMore: 'Select one or more occluded vessels.', optional: 'optional',
+    severity: 'Severity', gcs: 'GCS', patternCause: 'Pattern & cause', isolatedIvh: 'Isolated to IVH', isolatedIvhSub: 'Intraventricular only',
+    secondaryCause: 'Secondary cause', eligFactors: 'Eligibility factors', txaExclL: 'Seizure / thrombosis / TXA hypersensitivity', anticoag: 'Anticoagulant therapy',
+    hemVolume: 'Hemorrhage volume', notAvailable: 'Not available', volPending: 'Volume not entered (CT pending)', largeHematoma: 'Large hematoma (≥ 30 mL)', dragVolume: 'Drag to set volume',
+    ichScore: 'ICH score', volPendingScore: 'Volume pending — could be +1 (≥30 mL)', mortality30: '30-day mortality ≈', live: 'live',
+    cNone: 'None', cTrauma: 'Trauma', cAvm: 'AVM', cAneurysm: 'Aneurysm', cTumor: 'Tumor', cOther: 'Other', aWarfarin: 'Warfarin', aHep: 'Heparin <24h', aDoac: 'DOAC',
+    sevSevere: 'Severe', sevModerate: 'Moderate', sevMild: 'Mild', coreLarge: 'Large core', coreModerate: 'Moderate', coreFavorable: 'Favorable',
+    sendRecord: 'Send record', sendSub: 'Review & submit to registry', patientRecord: 'Patient record', acuteTx: 'Acute treatments',
+    thrombectomyTx: 'Thrombectomy (TEV)', thrombolysisTx: 'Thrombolysis (TIV)', notesL: 'Notes', notesPh: 'Free notes…', msgPreview: 'Message preview',
+    sendToSheet: 'Send to Google Sheet', copyL: 'Copy', whatsappL: 'WhatsApp', treatments: 'Treatments', sent: 'Record sent', sentSub: 'Saved to registry · shared with team', typeL: 'Type',
+    hr: 'h', min: 'm', within: 'within',
+  },
+  es: {
+    tagline: 'Asignación de pacientes a ensayos clínicos',
+    taglineSub: 'Agudo · hemorrágico · post-agudo',
+    newPatient: 'Nuevo paciente', newEval: 'Nueva evaluación',
+    quickPatient: 'Paciente rápido', quickDesc: 'Paciente ya incluido',
+    eligibility: 'Evaluación de elegibilidad', eligDesc: 'Historia guiada + imagen',
+    trialsInfo: 'Info de ensayos', trialsDesc: 'Criterios inclusión / exclusión',
+    activeSession: 'Sesión activa', resume: 'Reanudar', discard: 'Descartar',
+    sinceLtsw: 'desde LTSW', window: 'ventana', toWindowEnd: 'al cierre de ventana',
+    catalog: 'Catálogo de ensayos', catalogDesc: 'Explorar criterios — sin paciente',
+    pastPatients: 'Pacientes anteriores',
+    whatToDo: '¿Qué quieres hacer?', choosePath: 'Empieza por la vía de ictus',
+    ischemic: 'Isquémico', hemorrhagic: 'Hemorrágico', postAcute: 'Post-agudo',
+    active: 'activos', paused: 'en pausa', total: 'ensayos', enrolledToday: 'evaluados hoy',
+    recent: 'Pacientes recientes', viewAll: 'Ver todos', open: 'Abrir',
+    home: 'Inicio', tnew: 'Nuevo', trials: 'Ensayos',
+    draft: 'Borrador', eligible: 'Elegible', screening: 'Cribado',
+    age: 'edad', nihss: 'NIHSS',
+    proceedHow: '¿Cómo quieres proceder?',
+    checkElig: 'Comprobar elegibilidad', checkEligDesc: 'Introduce datos clínicos y encuentra los ensayos para los que el paciente es elegible.',
+    directEnroll: 'Inscripción directa', directEnrollDesc: 'Ya sabes el ensayo — registra al paciente ahora.',
+    fullFlow: 'Guiado', fast: 'Rápido', cancel: 'Cancelar',
+    step: 'Paso', stepOf: 'de', back: 'Atrás', next: 'Siguiente', review: 'Revisar',
+    preImaging: 'Pre-imagen', preImagingSub: 'Historia inicial antes de TC / RM',
+    identification: 'Identificación', prn: 'Número de registro',
+    clinical: 'Clínica', ageL: 'Edad', years: 'años',
+    premrs: 'mRS previo', ltsw: 'Tiempo desde última vez bien',
+    windowL: 'Ventana temporal', tpaWin: 'Trombolisis IV', evtWin: 'Trombectomía', windowClosed: 'Ventana cerrada',
+    strokeType: 'Tipo de ictus', selectedTrial: 'Ensayo seleccionado', selectTrial: 'Selecciona ensayo…',
+    enroll: 'Incluir paciente', enrolled: 'Paciente incluido',
+    eligibleTrials: 'Ensayos elegibles', summarySub: 'Ensayos en los que el paciente puede incluirse',
+    notEligible: 'No elegible', viewCriteria: 'Ver criterios', enrolledIn: 'Registrado en',
+    matches: 'ensayos compatibles', basedOn: 'Según', done: 'Hecho', goHome: 'Volver al inicio',
+    selectTrials: 'Selecciona todos los ensayos en los que se incluirá al paciente', selected: 'seleccionados',
+    continueSummary: 'Revisar inclusión', enrollSummaryT: 'Resumen de inclusión', enrollSummarySub: 'El paciente se incluirá en los siguientes ensayos',
+    patientL: 'Paciente', trialsCount: 'ensayos', confirmEnroll: 'Confirmar inclusión', editSelection: 'Editar selección',
+    enrolledInN: 'Incluido en', noneSelected: 'Ningún ensayo seleccionado', tapToSelect: 'Toca los ensayos elegibles de arriba',
+    lastSeenWell: 'Última vez bien', selectDateTime: 'Elegir fecha y hora…', setTime: 'Fijar', nowL: 'Ahora',
+    wakeUp: 'Ictus del despertar', wakeUpDesc: 'WeTrust: permite LTSW hasta 12 h si los síntomas se identifican en 6 h.',
+    symptomsWithin: 'Síntomas identificados en 6 h del despertar', fromLtsw: 'calculado desde LTSW', yes: 'Sí', no: 'No',
+    operational: 'Contexto operativo', philips: '¿Angiógrafo Philips disponible?', doac: '¿ACOD (NACO) en las últimas 48 h?', ace: '¿IECA en tratamiento?',
+    preResultT: 'Resultado pre-imagen', proceedPost: 'Continúa con la evaluación post-imagen.', continueL: 'Continuar', notMeetA: 'El paciente no cumple todos los criterios de', notMeetB: '.',
+    postImaging: 'Post-imagen', postImagingSub: 'Tipo de ictus, candidatura y parámetros',
+    strokeIschSub: 'LVO o no-LVO', strokeHemoSub: 'HIC espontánea',
+    candidacy: 'Candidatura a tratamiento', evtCandidate: '¿Candidato a trombectomía (EVT)?', ivtCandidate: '¿Candidato a IVT (trombolisis)?',
+    evtParams: 'Parámetros EVT', evtParamsNote: 'Requerido para ATHENA, PIVOTAL, MOSTE y otros ensayos EVT.',
+    tandem: '¿Oclusión en tándem?', tortuosity: '¿Tortuosidad vascular?', tortuosityNote: 'Si no se especifica, algunos ensayos muestran “No indicado”.',
+    targetVessel: 'Vaso diana', selectOneMore: 'Selecciona uno o más vasos ocluidos.', optional: 'opcional',
+    severity: 'Gravedad', gcs: 'GCS', patternCause: 'Patrón y causa', isolatedIvh: 'Aislado a IVH', isolatedIvhSub: 'Solo intraventricular',
+    secondaryCause: 'Causa secundaria', eligFactors: 'Factores de elegibilidad', txaExclL: 'Crisis / trombosis / hipersensibilidad a TXA', anticoag: 'Terapia anticoagulante',
+    hemVolume: 'Volumen de hemorragia', notAvailable: 'No disponible', volPending: 'Volumen no introducido (TC pendiente)', largeHematoma: 'Hematoma grande (≥ 30 mL)', dragVolume: 'Desliza para fijar el volumen',
+    ichScore: 'Puntuación ICH', volPendingScore: 'Volumen pendiente — podría ser +1 (≥30 mL)', mortality30: 'Mortalidad a 30 días ≈', live: 'en vivo',
+    cNone: 'Ninguna', cTrauma: 'Trauma', cAvm: 'MAV', cAneurysm: 'Aneurisma', cTumor: 'Tumor', cOther: 'Otra', aWarfarin: 'Warfarina', aHep: 'Heparina <24h', aDoac: 'ACOD',
+    sevSevere: 'Grave', sevModerate: 'Moderado', sevMild: 'Leve', coreLarge: 'Core grande', coreModerate: 'Moderado', coreFavorable: 'Favorable',
+    sendRecord: 'Enviar registro', sendSub: 'Revisar y enviar al registro', patientRecord: 'Registro del paciente', acuteTx: 'Tratamientos agudos',
+    thrombectomyTx: 'Trombectomía (TEV)', thrombolysisTx: 'Trombolisis (TIV)', notesL: 'Notas', notesPh: 'Notas libres…', msgPreview: 'Vista previa del mensaje',
+    sendToSheet: 'Enviar a Google Sheet', copyL: 'Copiar', whatsappL: 'WhatsApp', treatments: 'Tratamientos', sent: 'Registro enviado', sentSub: 'Guardado en el registro · compartido con el equipo', typeL: 'Tipo',
+    hr: 'h', min: 'm', within: 'dentro de',
+  },
+};
+
+const LangCtx = React.createContext({ lang: 'en', setLang: () => {} });
+function useT() {
+  const { lang, setLang } = React.useContext(LangCtx);
+  return { lang, setLang, t: (k) => (STR[lang] && STR[lang][k]) || STR.en[k] || k };
+}
+
+// ── icons (simple line glyphs, currentColor) ──────────────────
+const I = {
+  logo: (s = 24, c = '#fff') => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12.5" r="7" stroke={c} strokeWidth="1.8" />
+      <path d="M12 8.5v4l2.6 1.7" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 5.2l2.2 1.7M19 5.2l-2.2 1.7" stroke={c} strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  ),
+  plus: (c) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke={c} strokeWidth="2" strokeLinecap="round" /></svg>,
+  person: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke={c} strokeWidth="1.8" /><path d="M5.5 19.5a6.5 6.5 0 0113 0" stroke={c} strokeWidth="1.8" strokeLinecap="round" /></svg>,
+  stetho: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 3v5a4 4 0 008 0V3" stroke={c} strokeWidth="1.8" strokeLinecap="round" /><path d="M10 16v1a4 4 0 008 0v-2" stroke={c} strokeWidth="1.8" strokeLinecap="round" /><circle cx="18" cy="11.5" r="2.2" stroke={c} strokeWidth="1.8" /></svg>,
+  book: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2 2 0 016 4h6v15H6a2 2 0 00-2 1.5V5.5z" stroke={c} strokeWidth="1.7" strokeLinejoin="round" /><path d="M20 5.5A2 2 0 0018 4h-6v15h6a2 2 0 012 1.5V5.5z" stroke={c} strokeWidth="1.7" strokeLinejoin="round" /></svg>,
+  bolt: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" stroke={c} strokeWidth="1.7" strokeLinejoin="round" /></svg>,
+  list: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" stroke={c} strokeWidth="1.9" strokeLinecap="round" /></svg>,
+  home: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 11l8-6.5 8 6.5" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M6 10v9h12v-9" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  chev: (c, s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  clock: (c, s = 15) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke={c} strokeWidth="1.8" /><path d="M12 7.5V12l3 2" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  globe: (c) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke={c} strokeWidth="1.7" /><path d="M3.5 12h17M12 3.5c2.5 2.4 2.5 14.6 0 17M12 3.5c-2.5 2.4-2.5 14.6 0 17" stroke={c} strokeWidth="1.7" /></svg>,
+};
+
+// ── device safe-area wrapper: header / scroll body / tab bar ──
+function Screen({ children, tab }) {
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      {children}
+      <TabBar active={tab} />
+    </div>
+  );
+}
+
+function TopBar({ children, sub }) {
+  const { lang, setLang, t } = useT();
+  return (
+    <div style={{ paddingTop: 56, paddingLeft: 18, paddingRight: 14, paddingBottom: 12, background: ENS.surface, borderBottom: `1px solid ${ENS.line}` }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 30, height: 30, borderRadius: 9, background: `linear-gradient(150deg, ${ENS.primary}, ${ENS.primaryDk})`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(13,32,80,.25)' }}>{I.logo(19)}</div>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: -0.3, lineHeight: 1 }}>EnsApp</div>
+            {sub && <div style={{ fontSize: 10.5, color: ENS.ink3, marginTop: 2, fontFamily: ENS.mono, letterSpacing: 0.2 }}>{sub}</div>}
+          </div>
+        </div>
+        <button className="ens-press" onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${ENS.line}`, background: ENS.surface, borderRadius: 8, padding: '7px 9px', cursor: 'pointer', color: ENS.ink2 }}>
+          {I.globe(ENS.ink3)}
+          <span style={{ fontSize: 12, fontWeight: 600, fontFamily: ENS.mono, color: ENS.ink }}>{lang.toUpperCase()}</span>
+        </button>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function TabBar({ active = 'home' }) {
+  const { t } = useT();
+  const items = [
+    ['home', I.home, t('home')],
+    ['new', I.plus, t('tnew')],
+    ['trials', I.list, t('trials')],
+  ];
+  return (
+    <div style={{ flexShrink: 0, display: 'flex', background: ENS.surface, borderTop: `1px solid ${ENS.line}`, paddingTop: 8, paddingBottom: 26 }}>
+      {items.map(([k, icon, label]) => {
+        const on = k === active;
+        const c = on ? ENS.primary : ENS.ink3;
+        return (
+          <div key={k} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 28 }}>
+              {k === 'new'
+                ? <div style={{ width: 34, height: 24, borderRadius: 7, background: on ? ENS.primary : ENS.bgSunken, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon(on ? '#fff' : ENS.ink3)}</div>
+                : icon(c)}
+            </div>
+            <span style={{ fontSize: 10.5, fontWeight: on ? 600 : 500, color: c }}>{label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// status chip
+function Chip({ kind, children }) {
+  const map = { active: [ENS.okFg, ENS.okBg], paused: [ENS.warnFg, ENS.warnBg], draft: [ENS.ink2, ENS.bgSunken], eligible: [ENS.okFg, ENS.okBg], screening: [ENS.primary, ENS.primaryBg] };
+  const [fg, bg] = map[kind] || map.draft;
+  return <span style={{ fontSize: 10.5, fontWeight: 600, color: fg, background: bg, padding: '2px 7px', borderRadius: 999, letterSpacing: 0.1, lineHeight: 1.5, whiteSpace: 'nowrap' }}>{children}</span>;
+}
+
+// live "time since" — measured-urgency element
+function useElapsed(startMinAgo) {
+  const [sec, setSec] = React.useState(startMinAgo * 60);
+  React.useEffect(() => { const id = setInterval(() => setSec((s) => s + 1), 1000); return () => clearInterval(id); }, []);
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return { sec, label: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` };
+}
+
+// window progress bar — calm blue, ambers near the end (measured)
+function WindowBar({ frac }) {
+  const near = frac > 0.72;
+  const c = near ? ENS.warnFg : ENS.primary;
+  const bg = near ? ENS.warnBg : ENS.primaryBg;
+  return (
+    <div style={{ height: 6, borderRadius: 999, background: bg, overflow: 'hidden' }}>
+      <div style={{ height: '100%', width: `${Math.min(100, frac * 100)}%`, background: c, borderRadius: 999, transition: 'width .5s linear' }} />
+    </div>
+  );
+}
+
+Object.assign(window, { ENS, STR, LangCtx, useT, I, Screen, TopBar, TabBar, Chip, useElapsed, WindowBar });
+
+
+
+/* ===== ensapp-home-min.jsx ===== */
+// ensapp-home-min.jsx — Minimal / modern direction
+// Two clean Homes: M1 "Focus" (one hero action) and M2 "List" (calm grouped list).
+// Shared minimal shell: borderless airy header + floating tab bar.
+
+function MinHeader() {
+  const { lang, setLang } = useT();
+  return (
+    <div style={{ paddingTop: 58, paddingLeft: 24, paddingRight: 20, paddingBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+        <div style={{ width: 26, height: 26, borderRadius: 8, background: ENS.primary, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{I.logo(17)}</div>
+        <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: -0.3 }}>EnsApp</span>
+      </div>
+      <button className="ens-press" onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
+        style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: ENS.ink3, fontSize: 12.5, fontWeight: 600, fontFamily: ENS.mono, letterSpacing: 0.3, padding: 6 }}>
+        {lang.toUpperCase()}
+      </button>
+    </div>
+  );
+}
+
+function MinTabBar({ active = 'home' }) {
+  const { t } = useT();
+  const items = [['home', I.home, t('home')], ['new', I.plus, t('tnew')], ['trials', I.list, t('trials')]];
+  return (
+    <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', paddingBottom: 24, paddingTop: 6 }}>
+      <div style={{ display: 'flex', gap: 4, background: ENS.surface, borderRadius: 999, padding: 6, boxShadow: '0 2px 8px rgba(16,24,40,.06), 0 1px 2px rgba(16,24,40,.05)' }}>
+        {items.map(([k, icon, label]) => {
+          const on = k === active;
+          return (
+            <div key={k} className="ens-press" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, padding: on ? '9px 16px' : '9px 13px', borderRadius: 999, background: on ? ENS.ink : 'transparent' }}>
+              {icon(on ? '#fff' : ENS.ink3)}
+              {on && <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{label}</span>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function MinShell({ children, tab }) {
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <MinHeader />
+      <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
+      <MinTabBar active={tab} />
+    </div>
+  );
+}
+
+const softShadow = '0 1px 2px rgba(16,24,40,.04), 0 6px 20px rgba(16,24,40,.06)';
+
+// ── M1 · Focus — one hero action, maximum air ──────────────────
+function HomeM1() {
+  const { t } = useT();
+  const { label } = useElapsed(112);
+  const frac = (112 * 60) / (4.5 * 3600);
+
+  return (
+    <MinShell tab="home">
+      <div style={{ padding: '12px 24px 0', display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+        {/* big calm intro */}
+        <div style={{ marginTop: 18, marginBottom: 26 }}>
+          <div style={{ fontSize: 28, fontWeight: 600, letterSpacing: -0.8, lineHeight: 1.12 }}>Assign a patient<br />to a trial.</div>
+          <div style={{ fontSize: 14, color: ENS.ink3, marginTop: 10, lineHeight: 1.4 }}>{t('tagline')}.</div>
+        </div>
+
+        {/* hero action */}
+        <button className="ens-press" style={{ border: 'none', cursor: 'pointer', borderRadius: 22, padding: '22px 22px', background: ENS.primary, color: '#fff', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 8px 22px rgba(45,91,215,.30)' }}>
+          <span>
+            <span style={{ display: 'block', fontSize: 19, fontWeight: 600, letterSpacing: -0.3 }}>{t('newPatient')}</span>
+            <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.8)', marginTop: 3 }}>{t('eligDesc')}</span>
+          </span>
+          <span style={{ width: 40, height: 40, borderRadius: 999, background: 'rgba(255,255,255,.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{I.chev('#fff', 20)}</span>
+        </button>
+
+        {/* continue session — calm, borderless tint */}
+        <div className="ens-press" style={{ cursor: 'pointer', marginTop: 14, borderRadius: 20, padding: 18, background: ENS.surface, boxShadow: softShadow }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 13 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 7, height: 7, borderRadius: 999, background: ENS.okFg }} />
+              <span style={{ fontSize: 14, fontWeight: 600 }}>{t('activeSession')}</span>
+            </span>
+            <span style={{ fontSize: 13.5, fontWeight: 600, color: ENS.primary }}>{t('resume')} →</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontFamily: ENS.mono, fontSize: 24, fontWeight: 500, letterSpacing: -0.4, fontVariantNumeric: 'tabular-nums' }}>{label}</span>
+            <span style={{ fontSize: 12.5, color: ENS.ink3 }}>{t('sinceLtsw')} · WeTrust</span>
+          </div>
+          <div style={{ marginTop: 12 }}><WindowBar frac={frac} /></div>
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        {/* quiet secondary links */}
+        <div style={{ display: 'flex', marginBottom: 8 }}>
+          {[[I.book, t('catalog')], [I.person, t('pastPatients')]].map(([icon, label2], i) => (
+            <button key={i} className="ens-press" style={{ flex: 1, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 0', color: ENS.ink2, fontFamily: ENS.sans, borderLeft: i ? `1px solid ${ENS.lineSoft}` : 'none' }}>
+              {icon(ENS.ink3)}
+              <span style={{ fontSize: 13.5, fontWeight: 500 }}>{label2}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </MinShell>
+  );
+}
+
+// ── M2 · List — calm grouped list, generous rows ───────────────
+function HomeM2() {
+  const { t } = useT();
+  const { label } = useElapsed(78);
+
+  const rows = [
+    { icon: I.person, title: t('newPatient'), desc: t('eligDesc'), accent: true },
+    { icon: I.bolt, title: t('quickPatient'), desc: t('quickDesc') },
+    { icon: I.book, title: t('trialsInfo'), desc: t('trialsDesc') },
+  ];
+
+  return (
+    <MinShell tab="home">
+      <div style={{ padding: '20px 24px 0' }}>
+
+        {/* title + quiet stat */}
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: -0.6 }}>{t('whatToDo')}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 9, fontFamily: ENS.mono, fontSize: 12.5, color: ENS.ink3 }}>
+            <span style={{ color: ENS.okFg, fontWeight: 600 }}>17 {t('active')}</span>
+            <span style={{ width: 3, height: 3, borderRadius: 999, background: ENS.ink3 }} />
+            <span>20 {t('total')}</span>
+          </div>
+        </div>
+
+        {/* resume — soft tinted */}
+        <div className="ens-press" style={{ cursor: 'pointer', borderRadius: 18, padding: '14px 16px', background: ENS.primaryBg, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+          <span style={{ width: 7, height: 7, borderRadius: 999, background: ENS.okFg, flexShrink: 0 }} />
+          <span style={{ flex: 1 }}>
+            <span style={{ display: 'block', fontSize: 13.5, fontWeight: 600, color: ENS.ink }}>{t('activeSession')}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+              <span style={{ fontFamily: ENS.mono, fontSize: 12, color: ENS.primaryDk, fontVariantNumeric: 'tabular-nums' }}>{label}</span>
+              <span style={{ fontSize: 11.5, color: ENS.ink2 }}>{t('sinceLtsw')} · WeTrust</span>
+            </span>
+          </span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: ENS.primary }}>{t('resume')} →</span>
+        </div>
+
+        {/* clean action list */}
+        <div style={{ background: ENS.surface, borderRadius: 20, boxShadow: softShadow, overflow: 'hidden' }}>
+          {rows.map((r, i) => (
+            <div key={r.title} className="ens-press" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 15, padding: '17px 18px', borderTop: i ? `1px solid ${ENS.lineSoft}` : 'none' }}>
+              <span style={{ width: 42, height: 42, borderRadius: 999, background: r.accent ? ENS.primaryBg : ENS.bgSunken, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{r.icon(r.accent ? ENS.primary : ENS.ink2)}</span>
+              <span style={{ flex: 1 }}>
+                <span style={{ display: 'block', fontSize: 15.5, fontWeight: 600, letterSpacing: -0.2 }}>{r.title}</span>
+                <span style={{ display: 'block', fontSize: 12.5, color: ENS.ink3, marginTop: 2 }}>{r.desc}</span>
+              </span>
+              {I.chev(ENS.ink3, 17)}
+            </div>
+          ))}
+        </div>
+      </div>
+    </MinShell>
+  );
+}
+
+Object.assign(window, { HomeM1, HomeM2, MinShell, MinHeader, MinTabBar, softShadow });
+
+
+
+/* ===== ensapp-proto-ui.jsx ===== */
+// ensapp-proto-ui.jsx — minimal form controls + chrome for the prototype
+// Exposes: AppHeader, BottomBar, Field, TextField, NumberField, NihssScale,
+//          Segmented, TimeSinceField, computeWindow, Sheet, TrialPicker
+
+// one-time range-slider styling (accent thumb/track)
+if (typeof document !== 'undefined' && !document.getElementById('ens-range-css')) {
+  const s = document.createElement('style');
+  s.id = 'ens-range-css';
+  s.textContent = `
+    input.ens-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;background:${ENS.lineSoft};outline:none;margin:0}
+    input.ens-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:999px;background:#fff;border:2px solid ${ENS.primary};box-shadow:0 1px 4px rgba(16,24,40,.18);cursor:pointer}
+    input.ens-range::-moz-range-thumb{width:26px;height:26px;border-radius:999px;background:#fff;border:2px solid ${ENS.primary};box-shadow:0 1px 4px rgba(16,24,40,.18);cursor:pointer}
+    .ens-input::placeholder{color:${ENS.ink3}}
+    .ens-input:focus{border-color:${ENS.primary};box-shadow:0 0 0 3px ${ENS.primaryBg}}
+  `;
+  document.head.appendChild(s);
+}
+
+function AppHeader({ title, sub, step, steps, onBack, onClose }) {
+  return (
+    <div style={{ paddingTop: 54, paddingLeft: 16, paddingRight: 16, paddingBottom: 12, background: ENS.bg }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: title ? 12 : 0 }}>
+        <button className="ens-press" onClick={onBack} style={{ width: 38, height: 38, borderRadius: 999, border: 'none', background: ENS.surface, boxShadow: softShadow, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke={ENS.ink} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </button>
+        <div style={{ flex: 1 }} />
+        {step != null && (
+          <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+            {Array.from({ length: steps }).map((_, i) => (
+              <span key={i} style={{ width: i === step ? 18 : 6, height: 6, borderRadius: 999, background: i <= step ? ENS.primary : ENS.line, transition: 'width .3s, background .3s' }} />
+            ))}
+          </div>
+        )}
+        {onClose && (
+          <button className="ens-press" onClick={onClose} style={{ width: 38, height: 38, borderRadius: 999, border: 'none', background: ENS.surface, boxShadow: softShadow, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke={ENS.ink2} strokeWidth="2" strokeLinecap="round" /></svg>
+          </button>
+        )}
+      </div>
+      {title && <div style={{ paddingLeft: 4 }}>
+        <div style={{ fontSize: 25, fontWeight: 600, letterSpacing: -0.6 }}>{title}</div>
+        {sub && <div style={{ fontSize: 13.5, color: ENS.ink3, marginTop: 4 }}>{sub}</div>}
+      </div>}
+    </div>
+  );
+}
+
+function BottomBar({ onBack, onNext, nextLabel, nextDisabled, backLabel }) {
+  const { t } = useT();
+  return (
+    <div style={{ flexShrink: 0, display: 'flex', gap: 10, padding: '12px 16px 28px', background: ENS.bg, borderTop: `1px solid ${ENS.lineSoft}` }}>
+      {onBack && (
+        <button className="ens-press" onClick={onBack} style={{ flex: '0 0 auto', minWidth: 96, border: 'none', background: ENS.surface, boxShadow: softShadow, borderRadius: 14, padding: '15px 18px', cursor: 'pointer', fontFamily: ENS.sans, fontSize: 15, fontWeight: 600, color: ENS.ink2 }}>{backLabel || t('back')}</button>
+      )}
+      <button className="ens-press" onClick={nextDisabled ? undefined : onNext} style={{ flex: 1, border: 'none', borderRadius: 14, padding: '15px 18px', cursor: nextDisabled ? 'default' : 'pointer', fontFamily: ENS.sans, fontSize: 15, fontWeight: 600, color: '#fff', background: nextDisabled ? '#AEBBD6' : ENS.primary, boxShadow: nextDisabled ? 'none' : '0 6px 16px rgba(45,91,215,.28)', transition: 'background .2s' }}>{nextLabel || t('next')}</button>
+    </div>
+  );
+}
+
+function Card({ children, style }) {
+  return <div style={{ background: ENS.surface, borderRadius: 18, boxShadow: softShadow, padding: 16, ...style }}>{children}</div>;
+}
+
+function Field({ label, hint, children }) {
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 600, color: ENS.ink2 }}>{label}</span>
+        {hint && <span style={{ fontSize: 11.5, color: ENS.ink3, fontFamily: ENS.mono }}>{hint}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function TextField({ value, onChange, placeholder, mono, unit }) {
+  return (
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      <input className="ens-input" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+        style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '13px 14px', fontSize: 16, fontFamily: mono ? ENS.mono : ENS.sans, color: ENS.ink, background: ENS.surface, outline: 'none', transition: 'border-color .15s, box-shadow .15s' }} />
+      {unit && <span style={{ position: 'absolute', right: 14, fontSize: 13, color: ENS.ink3, fontFamily: ENS.mono, pointerEvents: 'none' }}>{unit}</span>}
+    </div>
+  );
+}
+
+// NIHSS — large scale selector (slider + value + severity band)
+function NihssScale({ value, onChange }) {
+  const v = value == null ? 0 : value;
+  const bands = [[0, 0, 'No deficit', ENS.okFg], [1, 4, 'Minor', ENS.okFg], [5, 15, 'Moderate', ENS.warnFg], [16, 20, 'Mod–severe', ENS.warnFg], [21, 42, 'Severe', ENS.dangFg]];
+  const band = bands.find(([lo, hi]) => v >= lo && v <= hi) || bands[0];
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 12 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 38, fontWeight: 600, letterSpacing: -1, color: ENS.ink, lineHeight: 0.9 }}>{value == null ? '—' : v}</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: band[3], background: band[3] + '1A', padding: '4px 10px', borderRadius: 999 }}>{band[2]}</span>
+      </div>
+      <input className="ens-range" type="range" min="0" max="42" value={v} onChange={(e) => onChange(Number(e.target.value))} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontFamily: ENS.mono, fontSize: 10.5, color: ENS.ink3 }}>
+        <span>0</span><span>21</span><span>42</span>
+      </div>
+    </div>
+  );
+}
+
+function Segmented({ options, value, onChange, cols }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols || options.length}, 1fr)`, gap: 7 }}>
+      {options.map((o) => {
+        const val = typeof o === 'object' ? o.v : o;
+        const lab = typeof o === 'object' ? o.l : o;
+        const on = value === val;
+        return (
+          <button key={val} className="ens-press" onClick={() => onChange(val)} style={{ border: on ? `1.5px solid ${ENS.primary}` : `1px solid ${ENS.line}`, background: on ? ENS.primaryBg : ENS.surface, color: on ? ENS.primaryDk : ENS.ink2, borderRadius: 11, padding: '12px 4px', cursor: 'pointer', fontFamily: ENS.sans, fontSize: 14, fontWeight: 600, transition: 'all .15s' }}>{lab}</button>
+        );
+      })}
+    </div>
+  );
+}
+
+// time since LTSW → auto window classification
+function computeWindow(totalMin) {
+  if (totalMin == null) return null;
+  if (totalMin <= 270) return { key: 'tpaWin', tone: 'ok' };       // 4.5h IV thrombolysis
+  if (totalMin <= 360) return { key: 'evtWin', tone: 'ok' };       // 6h standard EVT
+  if (totalMin <= 1440) return { key: 'evtWin', tone: 'warn' };    // up to 24h selected EVT
+  return { key: 'windowClosed', tone: 'danger' };
+}
+
+function TimeSinceField({ hours, mins, onChange }) {
+  const { t } = useT();
+  const total = hours == null && mins == null ? null : (hours || 0) * 60 + (mins || 0);
+  const win = computeWindow(total);
+  const toneMap = { ok: [ENS.okFg, ENS.okBg], warn: [ENS.warnFg, ENS.warnBg], danger: [ENS.dangFg, ENS.dangBg] };
+  const Step = ({ val, unit, set }) => (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '6px 8px', background: ENS.surface }}>
+      <button className="ens-press" onClick={() => set(Math.max(0, (val || 0) - 1))} style={{ width: 34, height: 34, borderRadius: 9, border: 'none', background: ENS.bgSunken, cursor: 'pointer', fontSize: 20, color: ENS.ink2, lineHeight: 1 }}>−</button>
+      <span style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 19, fontWeight: 600, color: ENS.ink }}>{val == null ? '0' : val}</span>
+        <span style={{ fontSize: 11, color: ENS.ink3 }}>{unit}</span>
+      </span>
+      <button className="ens-press" onClick={() => set((val || 0) + 1)} style={{ width: 34, height: 34, borderRadius: 9, border: 'none', background: ENS.bgSunken, cursor: 'pointer', fontSize: 20, color: ENS.ink2, lineHeight: 1 }}>+</button>
+    </div>
+  );
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 9 }}>
+        <Step val={hours} unit={t('hr')} set={(x) => onChange(x, mins)} />
+        <Step val={mins} unit={t('min')} set={(x) => onChange(hours, x)} />
+      </div>
+      {win && (
+        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: toneMap[win.tone][1] }}>
+          {I.clock(toneMap[win.tone][0], 14)}
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: toneMap[win.tone][0] }}>
+            {win.key === 'windowClosed' ? t('windowClosed') : `${t('within')} ${t(win.key)} ${t('window')}`}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// bottom sheet
+function Sheet({ open, onClose, title, children }) {
+  if (!open) return null;
+  return (
+    <div onClick={onClose} style={{ position: 'absolute', inset: 0, zIndex: 40, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(14,23,38,.32)', animation: 'ens-fade .2s ease' }} />
+      <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', background: ENS.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: '10px 16px 30px', animation: 'ens-sheet-up .32s cubic-bezier(.2,.8,.2,1)', maxHeight: '76%', overflow: 'auto' }}>
+        <div style={{ width: 38, height: 5, borderRadius: 999, background: ENS.line, margin: '0 auto 14px' }} />
+        {title && <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 12, paddingLeft: 4 }}>{title}</div>}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { AppHeader, BottomBar, Card, Field, TextField, NihssScale, Segmented, computeWindow, TimeSinceField, Sheet });
+
+
+
+/* ===== ensapp-proto-ui2.jsx ===== */
+// ensapp-proto-ui2.jsx — richer controls: RadioCards, CheckGrid, CheckRow, DateTime calendar
+const { useState: useState2, useEffect: useEffect2 } = React;
+
+function humanAgo(ms, t) {
+  const m = Math.max(0, Math.round(ms / 60000));
+  const h = Math.floor(m / 60), mm = m % 60;
+  return h > 0 ? `${h}${t('hr')} ${mm}${t('min')}` : `${mm}${t('min')}`;
+}
+function fmtDateTime(ts) {
+  const d = new Date(ts);
+  const mo = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()];
+  const today = new Date(); const isToday = d.toDateString() === today.toDateString();
+  const hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0');
+  return `${isToday ? 'Today' : `${mo} ${d.getDate()}`} · ${hh}:${mn}`;
+}
+function windowFromDate(ts) { return ts ? computeWindow(Math.round((Date.now() - ts) / 60000)) : null; }
+
+// Big radio cards (Yes/No, stroke type, candidacy)
+function RadioCards({ options, value, onChange, cols = 2, green }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gap: 9 }}>
+      {options.map((o) => {
+        const on = value === o.v;
+        const g = green && o.v === 'yes';
+        const ac = g ? ENS.okFg : ENS.primary, bg = g ? ENS.okBg : ENS.primaryBg, fg = g ? ENS.okFg : ENS.primaryDk;
+        return (
+          <button key={o.v} className="ens-press" onClick={() => onChange(o.v)} style={{ textAlign: 'left', cursor: 'pointer', border: on ? `1.5px solid ${ac}` : `1px solid ${ENS.line}`, background: on ? bg : ENS.surface, borderRadius: 13, padding: '13px 14px', display: 'flex', alignItems: 'center', gap: 11, transition: 'all .15s' }}>
+            <span style={{ width: 20, height: 20, borderRadius: 999, border: on ? `6px solid ${ac}` : `2px solid ${ENS.line}`, background: ENS.surface, flexShrink: 0, transition: 'all .15s', boxSizing: 'border-box' }} />
+            <span style={{ minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600, color: on ? fg : ENS.ink, letterSpacing: -0.2 }}>{o.l}</span>
+              {o.sub && <span style={{ display: 'block', fontSize: 11.5, color: ENS.ink3, marginTop: 1 }}>{o.sub}</span>}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Multi-select check grid (target vessels)
+function CheckGrid({ options, values = [], onChange }) {
+  const toggle = (v) => { const s = new Set(values); s.has(v) ? s.delete(v) : s.add(v); onChange([...s]); };
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+      {options.map((o) => {
+        const on = values.includes(o.v);
+        return (
+          <button key={o.v} className="ens-press" onClick={() => toggle(o.v)} style={{ textAlign: 'left', cursor: 'pointer', border: on ? `1.5px solid ${ENS.primary}` : `1px solid ${ENS.line}`, background: on ? ENS.primaryBg : ENS.surface, borderRadius: 11, padding: '11px 12px', display: 'flex', alignItems: 'center', gap: 9 }}>
+            <span style={{ width: 18, height: 18, borderRadius: 5, border: on ? 'none' : `2px solid ${ENS.line}`, background: on ? ENS.primary : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxSizing: 'border-box' }}>
+              {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+            </span>
+            <span style={{ fontSize: 12.5, fontWeight: 600, color: on ? ENS.primaryDk : ENS.ink, lineHeight: 1.15 }}>{o.l}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Checkbox row (wake-up)
+function CheckRow({ checked, onChange, title, desc }) {
+  return (
+    <button className="ens-press" onClick={() => onChange(!checked)} style={{ width: '100%', textAlign: 'left', cursor: 'pointer', border: 'none', background: 'transparent', display: 'flex', gap: 12, padding: 0 }}>
+      <span style={{ width: 22, height: 22, borderRadius: 6, border: checked ? 'none' : `2px solid ${ENS.line}`, background: checked ? ENS.primary : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1, boxSizing: 'border-box' }}>
+        {checked && <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+      </span>
+      <span>
+        <span style={{ display: 'block', fontSize: 15, fontWeight: 600, color: ENS.ink }}>{title}</span>
+        {desc && <span style={{ display: 'block', fontSize: 12.5, color: ENS.ink3, marginTop: 3, lineHeight: 1.4 }}>{desc}</span>}
+      </span>
+    </button>
+  );
+}
+
+// ── LTSW date+time field with calendar sheet ───────────────────
+function DateTimeField({ value, onChange }) {
+  const { t } = useT();
+  const [open, setOpen] = useState2(false);
+  const win = windowFromDate(value);
+  const toneMap = { ok: [ENS.okFg, ENS.okBg], warn: [ENS.warnFg, ENS.warnBg], danger: [ENS.dangFg, ENS.dangBg] };
+  return (
+    <div>
+      <button className="ens-press" onClick={() => setOpen(true)} style={{ width: '100%', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '13px 14px', background: ENS.surface, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+        {I.clock(ENS.ink3, 18)}
+        <span style={{ flex: 1, textAlign: 'left', fontSize: 15, fontWeight: value ? 600 : 400, color: value ? ENS.ink : ENS.ink3 }}>{value ? fmtDateTime(value) : t('selectDateTime')}</span>
+        {value && <span style={{ fontFamily: ENS.mono, fontSize: 12, color: ENS.ink3 }}>{humanAgo(Date.now() - value, t)}</span>}
+      </button>
+      {win && (
+        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: toneMap[win.tone][1] }}>
+          {I.clock(toneMap[win.tone][0], 14)}
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: toneMap[win.tone][0] }}>{win.key === 'windowClosed' ? t('windowClosed') : `${t('within')} ${t(win.key)} ${t('window')}`}</span>
+        </div>
+      )}
+      <CalendarSheet open={open} onClose={() => setOpen(false)} value={value} onSet={(d) => { onChange(d); setOpen(false); }} />
+    </div>
+  );
+}
+
+function CalendarSheet({ open, onClose, value, onSet }) {
+  const { t } = useT();
+  const [view, setView] = useState2(new Date());
+  const [sel, setSel] = useState2(new Date());
+  useEffect2(() => {
+    if (open) {
+      const d = value ? new Date(value) : new Date(Date.now() - 2 * 3600000);
+      setSel(new Date(d)); setView(new Date(d.getFullYear(), d.getMonth(), 1));
+    }
+  }, [open]);
+  if (!open) return null;
+
+  const y = view.getFullYear(), m = view.getMonth();
+  const startDow = (new Date(y, m, 1).getDay() + 6) % 7; // Mon=0
+  const dim = new Date(y, m + 1, 0).getDate();
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const cells = [];
+  for (let i = 0; i < startDow; i++) cells.push(null);
+  for (let d = 1; d <= dim; d++) cells.push(d);
+  const monName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m];
+
+  const pickDay = (d) => { const n = new Date(sel); n.setFullYear(y, m, d); setSel(new Date(n)); };
+  const setHM = (h, mn) => { const n = new Date(sel); if (h != null) n.setHours(h); if (mn != null) n.setMinutes(mn); setSel(new Date(n)); };
+  const preset = (hrsAgo) => { setSel(new Date(Date.now() - hrsAgo * 3600000)); };
+  const navM = (delta) => setView(new Date(y, m + delta, 1));
+
+  const navBtn = (txt, fn) => <button className="ens-press" onClick={fn} style={{ width: 34, height: 34, borderRadius: 9, border: 'none', background: ENS.bgSunken, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{txt}</button>;
+
+  return (
+    <Sheet open={open} onClose={onClose} title={t('lastSeenWell')}>
+      {/* quick presets */}
+      <div style={{ display: 'flex', gap: 7, marginBottom: 14 }}>
+        {[['nowL', 0], ['−1 h', 1], ['−3 h', 3], ['−6 h', 6]].map(([lab, h]) => (
+          <button key={lab} className="ens-press" onClick={() => preset(h)} style={{ flex: 1, border: `1px solid ${ENS.line}`, background: ENS.surface, borderRadius: 10, padding: '9px 4px', cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: ENS.ink2, fontFamily: ENS.sans }}>{lab === 'nowL' ? t('nowL') : lab}</button>
+        ))}
+      </div>
+      {/* month nav */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        {navBtn(<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke={ENS.ink2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>, () => navM(-1))}
+        <span style={{ fontSize: 15, fontWeight: 600, fontFamily: ENS.sans }}>{monName} {y}</span>
+        {navBtn(<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke={ENS.ink2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>, () => navM(1))}
+      </div>
+      {/* weekday labels */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, marginBottom: 4 }}>
+        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <div key={i} style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: ENS.ink3 }}>{d}</div>)}
+      </div>
+      {/* days */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2 }}>
+        {cells.map((d, i) => {
+          if (d == null) return <div key={i} />;
+          const date = new Date(y, m, d);
+          const future = date > today;
+          const on = sel.getFullYear() === y && sel.getMonth() === m && sel.getDate() === d;
+          const isToday = date.getTime() === today.getTime();
+          return (
+            <button key={i} disabled={future} onClick={() => pickDay(d)} style={{ height: 38, border: 'none', borderRadius: 10, cursor: future ? 'default' : 'pointer', background: on ? ENS.primary : 'transparent', color: future ? ENS.line : on ? '#fff' : ENS.ink, fontFamily: ENS.mono, fontSize: 13.5, fontWeight: on || isToday ? 700 : 500, position: 'relative' }}>
+              {d}
+              {isToday && !on && <span style={{ position: 'absolute', bottom: 5, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: 999, background: ENS.primary }} />}
+            </button>
+          );
+        })}
+      </div>
+      {/* time */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 16 }}>
+        {[['h', sel.getHours(), 23, (v) => setHM((v + 24) % 24, null)], ['m', sel.getMinutes(), 59, (v) => setHM(null, (v + 60) % 60)]].map(([unit, val, max, set], i) => (
+          <div key={unit} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '6px 8px' }}>
+            <button className="ens-press" onClick={() => set(val - (unit === 'm' ? 5 : 1))} style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: ENS.bgSunken, cursor: 'pointer', fontSize: 19, color: ENS.ink2, lineHeight: 1 }}>−</button>
+            <span style={{ fontFamily: ENS.mono, fontSize: 18, fontWeight: 600 }}>{String(val).padStart(2, '0')}<span style={{ fontSize: 11, color: ENS.ink3 }}>{unit}</span></span>
+            <button className="ens-press" onClick={() => set(val + (unit === 'm' ? 5 : 1))} style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: ENS.bgSunken, cursor: 'pointer', fontSize: 19, color: ENS.ink2, lineHeight: 1 }}>+</button>
+          </div>
+        ))}
+      </div>
+      <button className="ens-press" onClick={() => onSet(sel.getTime())} style={{ width: '100%', marginTop: 16, border: 'none', borderRadius: 13, padding: '15px', cursor: 'pointer', background: ENS.primary, color: '#fff', fontFamily: ENS.sans, fontSize: 15, fontWeight: 600 }}>{t('setTime')} · {fmtDateTime(sel.getTime())}</button>
+    </Sheet>
+  );
+}
+
+// ── Reusable vessel picker (region drill-down · variant B) + switches ──
+const VLAB = { ica: 'ICA', icaT: 'ICA-T', m1: 'M1', m2pd: 'M2 prox', m2any: 'M2 any', m2gt: '>M2', a1: 'A1', a2: 'A2', a2gt: '>A2', basilar: 'Basilar', p1: 'P1', p2: 'P2', p2gt: '>P2', va: 'VA' };
+const GRP = { ica: ['ica', 'icaT'], mca: ['m1', 'm2pd', 'm2any', 'm2gt'], aca: ['a1', 'a2', 'a2gt'], post: ['va', 'basilar', 'p1', 'p2', 'p2gt'] };
+
+function Switch({ on, onChange }) {
+  return (
+    <button className="ens-press" onClick={() => onChange(!on)} style={{ width: 46, height: 28, borderRadius: 999, border: 'none', cursor: 'pointer', background: on ? ENS.primary : ENS.line, position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
+      <span style={{ position: 'absolute', top: 3, left: on ? 21 : 3, width: 22, height: 22, borderRadius: 999, background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,.25)', transition: 'left .2s' }} />
+    </button>
+  );
+}
+function ToggleRow({ title, sub, on, onChange }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <span style={{ flex: 1 }}>
+        <span style={{ display: 'block', fontSize: 14, fontWeight: 600, color: ENS.ink }}>{title}</span>
+        {sub && <span style={{ display: 'block', fontSize: 11.5, color: ENS.ink3, marginTop: 1 }}>{sub}</span>}
+      </span>
+      <Switch on={on} onChange={onChange} />
+    </div>
+  );
+}
+function VesselChip({ k, sel, onTap, block }) {
+  const on = sel.includes(k);
+  return (
+    <button className="ens-press" onClick={() => onTap(k)} style={{ cursor: 'pointer', border: on ? `1.5px solid ${ENS.primary}` : `1px solid ${ENS.line}`, background: on ? ENS.primary : ENS.surface, color: on ? '#fff' : ENS.ink, borderRadius: block ? 12 : 999, padding: block ? '13px 12px' : '8px 13px', fontSize: block ? 14 : 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .15s', width: block ? '100%' : 'auto' }}>
+      {on && <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+      {VLAB[k]}
+    </button>
+  );
+}
+function SelectedChips({ sel, onTap }) {
+  if (!sel.length) return <div style={{ fontSize: 12.5, color: ENS.ink3, fontStyle: 'italic' }}>No vessel selected yet</div>;
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      {sel.map((k) => (
+        <span key={k} className="ens-press" onClick={() => onTap(k)} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5, background: ENS.primaryBg, color: ENS.primaryDk, border: `1px solid ${ENS.primary}33`, borderRadius: 999, padding: '5px 7px 5px 11px', fontSize: 12.5, fontWeight: 600 }}>
+          {VLAB[k]}<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke={ENS.primaryDk} strokeWidth="2.4" strokeLinecap="round" /></svg>
+        </span>
+      ))}
+    </div>
+  );
+}
+function VesselPicker({ value = [], onChange }) {
+  const [region, setRegion] = React.useState('ica');
+  const tap = (k) => onChange(value.includes(k) ? value.filter((x) => x !== k) : [...value, k]);
+  const regions = [{ k: 'ica', l: 'ICA' }, { k: 'mca', l: 'MCA' }, { k: 'aca', l: 'ACA' }, { k: 'post', l: 'Posterior' }];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <SelectedChips sel={value} onTap={tap} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6, background: ENS.bgSunken, borderRadius: 12, padding: 4 }}>
+        {regions.map((r) => {
+          const on = region === r.k; const count = GRP[r.k].filter((v) => value.includes(v)).length;
+          return (
+            <button key={r.k} className="ens-press" onClick={() => setRegion(r.k)} style={{ cursor: 'pointer', border: 'none', borderRadius: 9, padding: '10px 4px', background: on ? ENS.surface : 'transparent', boxShadow: on ? '0 1px 3px rgba(16,24,40,.12)' : 'none', color: on ? ENS.ink : ENS.ink3, fontSize: 13, fontWeight: 600, position: 'relative' }}>
+              {r.l}
+              {count > 0 && <span style={{ position: 'absolute', top: 3, right: 5, width: 15, height: 15, borderRadius: 999, background: ENS.primary, color: '#fff', fontSize: 9.5, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{count}</span>}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {GRP[region].map((k) => <VesselChip key={k} k={k} sel={value} onTap={tap} block />)}
+      </div>
+    </div>
+  );
+}
+function AspectsCells({ value, onChange }) {
+  const { t } = useT();
+  const tone = (v) => v <= 5 ? ENS.dangFg : v <= 7 ? ENS.warnFg : ENS.okFg;
+  const lab = value == null ? '' : value <= 5 ? t('coreLarge') : value <= 7 ? t('coreModerate') : t('coreFavorable');
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 30, fontWeight: 600, letterSpacing: -1, color: value == null ? ENS.ink3 : tone(value) }}>{value == null ? '—' : value}<span style={{ fontSize: 14, color: ENS.ink3 }}>/10</span></span>
+        {lab && <span style={{ fontSize: 12, fontWeight: 600, color: tone(value), background: tone(value) + '1A', padding: '4px 10px', borderRadius: 999 }}>{lab}</span>}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(11,1fr)', gap: 4 }}>
+        {Array.from({ length: 11 }).map((_, i) => {
+          const on = value != null && i <= value;
+          return <button key={i} className="ens-press" onClick={() => onChange(i)} style={{ height: 34, borderRadius: 8, border: 'none', cursor: 'pointer', background: on ? tone(value) : ENS.bgSunken, color: on ? '#fff' : ENS.ink3, fontFamily: ENS.mono, fontSize: 12, fontWeight: 600, transition: 'background .12s' }}>{i}</button>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { humanAgo, fmtDateTime, windowFromDate, RadioCards, CheckGrid, CheckRow, DateTimeField, CalendarSheet, VLAB, GRP, Switch, ToggleRow, VesselChip, SelectedChips, VesselPicker, AspectsCells });
+
+
+
+/* ===== ensapp-hemo.jsx ===== */
+// ensapp-hemo.jsx — 3 design directions for Hemorrhagic parameters
+const { useState: uSH } = React;
+
+const CAUSE = [{ v: 'none', l: 'None' }, { v: 'trauma', l: 'Trauma' }, { v: 'avm', l: 'AVM' }, { v: 'aneurysm', l: 'Aneurysm' }, { v: 'tumor', l: 'Tumor' }, { v: 'other', l: 'Other' }];
+const ANTICO = [{ v: 'none', l: 'None' }, { v: 'warfarin', l: 'Warfarin' }, { v: 'hep', l: 'Heparin <24h' }, { v: 'doac', l: 'DOAC' }];
+
+function HShell({ title, sub, children }) {
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <AppHeader title={title} sub={sub} step={1} steps={3} onBack={() => {}} />
+      <div style={{ flex: 1, overflow: 'auto', padding: '6px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>
+      <BottomBar onBack={() => {}} onNext={() => {}} nextLabel="Review" />
+    </div>
+  );
+}
+const SH = ({ children, note }) => (
+  <div style={{ marginBottom: 12 }}>
+    <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.2 }}>{children}</div>
+    {note && <div style={{ fontSize: 11.5, color: ENS.ink3, marginTop: 3 }}>{note}</div>}
+  </div>
+);
+const Divider = () => <div style={{ borderTop: `1px solid ${ENS.lineSoft}` }} />;
+
+function VolumeField({ value, onChange }) {
+  const v = value == null ? 0 : value; const high = v >= 30;
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 30, fontWeight: 600, letterSpacing: -1, color: high ? ENS.warnFg : ENS.ink }}>{value == null ? '—' : v}<span style={{ fontSize: 14, color: ENS.ink3 }}> mL</span></span>
+        {high && <span style={{ fontSize: 12, fontWeight: 600, color: ENS.warnFg, background: ENS.warnBg, padding: '4px 10px', borderRadius: 999 }}>≥ 30 mL</span>}
+      </div>
+      <input className="ens-range" type="range" min="0" max="120" value={v} onChange={(e) => onChange(Number(e.target.value))} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontFamily: ENS.mono, fontSize: 10.5, color: ENS.ink3 }}><span>0</span><span>60</span><span>120</span></div>
+    </div>
+  );
+}
+function GcsScale({ value, onChange }) {
+  const v = value == null ? 15 : value; const tone = v <= 8 ? ENS.dangFg : v <= 12 ? ENS.warnFg : ENS.okFg; const lab = v <= 8 ? 'Severe' : v <= 12 ? 'Moderate' : 'Mild';
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 30, fontWeight: 600, color: value == null ? ENS.ink3 : tone }}>{value == null ? '—' : v}<span style={{ fontSize: 14, color: ENS.ink3 }}>/15</span></span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: tone, background: tone + '1A', padding: '4px 10px', borderRadius: 999 }}>{lab}</span>
+      </div>
+      <input className="ens-range" type="range" min="3" max="15" value={v} onChange={(e) => onChange(Number(e.target.value))} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontFamily: ENS.mono, fontSize: 10.5, color: ENS.ink3 }}><span>3</span><span>9</span><span>15</span></div>
+    </div>
+  );
+}
+function ichScore(vol, gcs, ivh, age) { let s = 0; if (gcs != null) { if (gcs <= 4) s += 2; else if (gcs <= 12) s += 1; } if ((vol || 0) >= 30) s += 1; if (ivh) s += 1; if ((age || 0) >= 80) s += 1; return s; }
+function IchCard({ vol, gcs, ivh }) {
+  const s = ichScore(vol, gcs, ivh, 72);
+  const mort = ['0%', '13%', '26%', '72%', '97%', '100%', '100%'][s] || '—';
+  const tone = s <= 1 ? ENS.okFg : s <= 2 ? ENS.warnFg : ENS.dangFg;
+  return (
+    <div style={{ borderRadius: 18, padding: 16, background: ENS.surface, boxShadow: softShadow, border: `1px solid ${tone}33`, display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{ width: 56, height: 56, borderRadius: 15, background: tone, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 23, fontWeight: 700, lineHeight: 1 }}>{s}</span><span style={{ fontSize: 8.5, opacity: .85 }}>/ 6</span>
+      </div>
+      <div>
+        <div style={{ fontSize: 14.5, fontWeight: 700, color: tone }}>ICH score {s}</div>
+        <div style={{ fontSize: 12, color: ENS.ink2, marginTop: 2 }}>30-day mortality ≈ {mort} · live estimate</div>
+      </div>
+    </div>
+  );
+}
+function Dial({ value, max = 120, onChange }) {
+  const v = value == null ? 0 : value; const r = 46, c = 2 * Math.PI * r, frac = Math.min(1, v / max); const high = v >= 30; const col = high ? ENS.warnFg : ENS.primary;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+      <div style={{ position: 'relative', width: 120, height: 120, flexShrink: 0 }}>
+        <svg width="120" height="120"><circle cx="60" cy="60" r={r} fill="none" stroke={ENS.lineSoft} strokeWidth="10" /><circle cx="60" cy="60" r={r} fill="none" stroke={col} strokeWidth="10" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - frac)} transform="rotate(-90 60 60)" style={{ transition: 'stroke-dashoffset .2s' }} /></svg>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}><span style={{ fontFamily: ENS.mono, fontSize: 24, fontWeight: 700, color: high ? ENS.warnFg : ENS.ink }}>{value == null ? '—' : v}</span><span style={{ fontSize: 11, color: ENS.ink3 }}>mL</span></div>
+      </div>
+      <div style={{ flex: 1 }}>
+        <input className="ens-range" type="range" min="0" max={max} value={v} onChange={(e) => onChange(Number(e.target.value))} />
+        <div style={{ marginTop: 10, fontSize: 12.5, color: high ? ENS.warnFg : ENS.ink3, fontWeight: high ? 600 : 400 }}>{high ? 'Large hematoma (≥ 30 mL)' : 'Drag to set volume'}</div>
+      </div>
+    </div>
+  );
+}
+function ChipSelect({ options, value, onChange }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+      {options.map((o) => {
+        const on = value === o.v;
+        return <button key={o.v} className="ens-press" onClick={() => onChange(o.v)} style={{ cursor: 'pointer', border: on ? `1.5px solid ${ENS.primary}` : `1px solid ${ENS.line}`, background: on ? ENS.primary : ENS.surface, color: on ? '#fff' : ENS.ink, borderRadius: 999, padding: '9px 14px', fontSize: 13.5, fontWeight: 600, transition: 'all .15s' }}>{o.l}</button>;
+      })}
+    </div>
+  );
+}
+function Stepper({ value, onChange, min = 0, max = 200, step = 1, unit }) {
+  const v = value == null ? min : value;
+  const b = (txt, fn) => <button className="ens-press" onClick={fn} style={{ width: 52, height: 52, borderRadius: 14, border: `1px solid ${ENS.line}`, background: ENS.surface, cursor: 'pointer', fontSize: 26, color: ENS.ink2, lineHeight: 1 }}>{txt}</button>;
+  const display = value == null ? '—' : (unit ? `${v} ${unit}` : `${v}`);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+      {b('−', () => onChange(Math.max(min, v - step)))}
+      <div style={{ flex: 1, textAlign: 'center', fontFamily: ENS.mono, fontSize: 34, fontWeight: 600, letterSpacing: -1 }}>{display}</div>
+      {b('+', () => onChange(Math.min(max, v + step)))}
+    </div>
+  );
+}
+
+// ═══ A · Live ICH score ════════════════════════════════════════
+function HemoA() {
+  const [vol, setVol] = uSH(34), [gcs, setGcs] = uSH(11), [ivh, setIvh] = uSH(false), [cause, setCause] = uSH('none'), [txa, setTxa] = uSH(false), [anti, setAnti] = uSH('warfarin');
+  return (
+    <HShell title="Hemorrhagic" sub="Spontaneous ICH parameters">
+      <div style={{ position: 'sticky', top: -6, zIndex: 3, paddingTop: 6, marginTop: -6, background: ENS.bg }}><IchCard vol={vol} gcs={gcs} ivh={ivh} /></div>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <SH>Severity</SH>
+        <Field label="Hemorrhage volume"><VolumeField value={vol} onChange={setVol} /></Field>
+        <Field label="GCS" hint="3–15"><GcsScale value={gcs} onChange={setGcs} /></Field>
+      </Card>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <SH>Pattern & cause</SH>
+        <ToggleRow title="Isolated to IVH" sub="Intraventricular only" on={ivh} onChange={setIvh} />
+        <Divider />
+        <Field label="Secondary cause"><RadioCards cols={2} options={CAUSE} value={cause} onChange={setCause} /></Field>
+      </Card>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <SH>Eligibility factors</SH>
+        <ToggleRow title="Seizure / thrombosis / TXA hypersensitivity" on={txa} onChange={setTxa} />
+        <Divider />
+        <Field label="Anticoagulant therapy"><RadioCards cols={2} options={ANTICO} value={anti} onChange={setAnti} /></Field>
+      </Card>
+    </HShell>
+  );
+}
+
+// ═══ B · Dial & chips ══════════════════════════════════════════
+function HemoB() {
+  const [vol, setVol] = uSH(42), [gcs, setGcs] = uSH(13), [ivh, setIvh] = uSH(false), [cause, setCause] = uSH('avm'), [txa, setTxa] = uSH(false), [anti, setAnti] = uSH('none');
+  return (
+    <HShell title="Hemorrhagic" sub="Spontaneous ICH parameters">
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <SH>Hemorrhage volume</SH>
+        <Dial value={vol} onChange={setVol} />
+        <Divider />
+        <Field label="GCS" hint="3–15"><GcsScale value={gcs} onChange={setGcs} /></Field>
+      </Card>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <SH>Pattern & cause</SH>
+        <ToggleRow title="Isolated to IVH" on={ivh} onChange={setIvh} />
+        <Divider />
+        <Field label="Secondary cause"><ChipSelect options={CAUSE} value={cause} onChange={setCause} /></Field>
+      </Card>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <SH>Eligibility factors</SH>
+        <ToggleRow title="Seizure / thrombosis / TXA hypersensitivity" on={txa} onChange={setTxa} />
+        <Divider />
+        <Field label="Anticoagulant therapy"><ChipSelect options={ANTICO} value={anti} onChange={setAnti} /></Field>
+      </Card>
+    </HShell>
+  );
+}
+
+// ═══ C · Compact steppers ══════════════════════════════════════
+function HemoC() {
+  const [vol, setVol] = uSH(34), [gcs, setGcs] = uSH(11), [ivh, setIvh] = uSH(false), [cause, setCause] = uSH('none'), [txa, setTxa] = uSH(false), [anti, setAnti] = uSH('doac');
+  return (
+    <HShell title="Hemorrhagic" sub="Spontaneous ICH parameters">
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <Field label="Hemorrhage volume" hint="mL"><Stepper value={vol} onChange={setVol} min={0} max={150} step={1} unit="mL" /></Field>
+        <Divider />
+        <Field label="GCS" hint="3–15"><Stepper value={gcs} onChange={setGcs} min={3} max={15} step={1} /></Field>
+      </Card>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <ToggleRow title="Isolated to IVH" on={ivh} onChange={setIvh} />
+        <Divider />
+        <Field label="Secondary cause"><ChipSelect options={CAUSE} value={cause} onChange={setCause} /></Field>
+        <Divider />
+        <ToggleRow title="Seizure / thrombosis / TXA hypersensitivity" on={txa} onChange={setTxa} />
+        <Divider />
+        <Field label="Anticoagulant therapy"><ChipSelect options={ANTICO} value={anti} onChange={setAnti} /></Field>
+      </Card>
+    </HShell>
+  );
+}
+
+Object.assign(window, { HemoA, HemoB, HemoC });
+
+
+
+/* ===== ensapp-send.jsx ===== */
+// ensapp-send.jsx — 3 design directions for the "Send patient record" screen
+const { useState: uSS } = React;
+
+const REC = { prn: '2025-00777', type: 'Ischemic', nihss: 14, trial: 'MOSTE', window: '3 h 12 m' };
+function buildMsg(tev, tiv, notes) {
+  let m = `EnsApp — patient record\nPRN ${REC.prn}\n${REC.type} · NIHSS ${REC.nihss}\nTrial: ${REC.trial}\nThrombectomy: ${tev ? 'Yes' : 'No'} · Thrombolysis: ${tiv ? 'Yes' : 'No'}`;
+  if (notes) m += `\nNotes: ${notes}`;
+  return m;
+}
+const SIcon = {
+  sheet: (c = '#fff') => <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke={c} strokeWidth="1.8" /><path d="M4 9h16M4 15h16M10 3v18" stroke={c} strokeWidth="1.6" /></svg>,
+  wa: (c = '#fff') => <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 19l1.3-3.7A7 7 0 1119 12a7 7 0 01-10.2 6.2L5 19z" stroke={c} strokeWidth="1.8" strokeLinejoin="round" /></svg>,
+  copy: (c = '#fff') => <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="8" y="8" width="12" height="12" rx="2" stroke={c} strokeWidth="1.8" /><path d="M5 16V5a1 1 0 011-1h9" stroke={c} strokeWidth="1.8" strokeLinecap="round" /></svg>,
+};
+
+function SendShell({ children, actions }) {
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <AppHeader title="Send record" sub="Review & submit to registry" onBack={() => {}} />
+      <div style={{ flex: 1, overflow: 'auto', padding: '6px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>
+      <div style={{ flexShrink: 0, padding: '12px 16px 28px', background: ENS.bg, borderTop: `1px solid ${ENS.lineSoft}` }}>{actions}</div>
+    </div>
+  );
+}
+const SH2 = ({ children }) => <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.2, marginBottom: 12 }}>{children}</div>;
+
+function TreatRow({ label, sub, on, onChange }) { return <ToggleRow title={label} sub={sub} on={on} onChange={onChange} />; }
+function Notes({ value, onChange }) {
+  return <textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder="Free notes…" rows={3} style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '12px 14px', fontSize: 14.5, fontFamily: ENS.sans, color: ENS.ink, background: ENS.surface, resize: 'none', outline: 'none' }} />;
+}
+
+// ═══ A · Receipt + WhatsApp-style preview ══════════════════════
+function SendA() {
+  const [tev, setTev] = uSS(true), [tiv, setTiv] = uSS(false), [notes, setNotes] = uSS('');
+  const rows = [['PRN', REC.prn], ['Type', `${REC.type} · NIHSS ${REC.nihss}`], ['Trial', REC.trial], ['Treatments', `${tev ? 'TEV' : ''}${tev && tiv ? ' + ' : ''}${tiv ? 'TIV' : ''}${!tev && !tiv ? 'None' : ''}`]];
+  return (
+    <SendShell actions={
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+        <button className="ens-press" style={{ border: 'none', borderRadius: 14, padding: '15px', cursor: 'pointer', background: ENS.primary, color: '#fff', fontSize: 15, fontWeight: 600, fontFamily: ENS.sans, boxShadow: '0 6px 16px rgba(45,91,215,.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>{SIcon.sheet()} Send to Google Sheet</button>
+        <div style={{ display: 'flex', gap: 9 }}>
+          {[['Copy', SIcon.copy], ['WhatsApp', SIcon.wa]].map(([l, ic]) => (
+            <button key={l} className="ens-press" style={{ flex: 1, border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '12px', cursor: 'pointer', background: ENS.surface, color: ENS.ink2, fontSize: 14, fontWeight: 600, fontFamily: ENS.sans, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>{ic(ENS.ink2)} {l}</button>
+          ))}
+        </div>
+      </div>
+    }>
+      <Card>
+        <SH2>Patient record</SH2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {rows.map(([k, v], i) => (
+            <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: i ? `1px solid ${ENS.lineSoft}` : 'none' }}>
+              <span style={{ fontSize: 13, color: ENS.ink3 }}>{k}</span>
+              <span style={{ fontSize: 13.5, fontWeight: 600, fontFamily: k === 'PRN' ? ENS.mono : ENS.sans }}>{v}</span>
+            </div>
+          ))}
+        </div>
+      </Card>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <SH2>Acute treatments</SH2>
+        <TreatRow label="Thrombectomy (TEV)" on={tev} onChange={setTev} />
+        <div style={{ borderTop: `1px solid ${ENS.lineSoft}` }} />
+        <TreatRow label="Thrombolysis (TIV)" on={tiv} onChange={setTiv} />
+      </Card>
+      <Card><SH2>Notes</SH2><Notes value={notes} onChange={setNotes} /></Card>
+      <div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: ENS.ink3, marginBottom: 8, paddingLeft: 4 }}>Message preview</div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ maxWidth: '88%', background: '#DCF8C6', borderRadius: '16px 16px 4px 16px', padding: '12px 14px', boxShadow: '0 1px 2px rgba(0,0,0,.08)' }}>
+            <pre style={{ margin: 0, fontFamily: ENS.mono, fontSize: 12, lineHeight: 1.5, color: '#0E3A1F', whiteSpace: 'pre-wrap' }}>{buildMsg(tev, tiv, notes)}</pre>
+            <div style={{ textAlign: 'right', fontSize: 10, color: '#5b7a5b', marginTop: 4 }}>09:41 ✓✓</div>
+          </div>
+        </div>
+      </div>
+    </SendShell>
+  );
+}
+
+// ═══ B · Channel-first ═════════════════════════════════════════
+function SendB() {
+  const [tev, setTev] = uSS(true), [tiv, setTiv] = uSS(false), [open, setOpen] = uSS(false);
+  const channels = [
+    { l: 'Google Sheet', sub: 'Append to registry', icon: SIcon.sheet, bg: '#0B8457', primary: true },
+    { l: 'WhatsApp', sub: 'Share with team', icon: SIcon.wa, bg: '#25D366' },
+    { l: 'Copy text', sub: 'To clipboard', icon: SIcon.copy, bg: ENS.ink },
+  ];
+  return (
+    <SendShell actions={<div style={{ fontSize: 12, color: ENS.ink3, textAlign: 'center' }}>Pick a destination above to submit</div>}>
+      <Card>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: ENS.primaryBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{I.person(ENS.primary)}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 700 }}>{REC.prn}</div>
+            <div style={{ fontSize: 12.5, color: ENS.ink3, marginTop: 1 }}>{REC.type} · NIHSS {REC.nihss} · {REC.trial}</div>
+          </div>
+        </div>
+      </Card>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <SH2>Acute treatments</SH2>
+        <TreatRow label="Thrombectomy (TEV)" on={tev} onChange={setTev} />
+        <div style={{ borderTop: `1px solid ${ENS.lineSoft}` }} />
+        <TreatRow label="Thrombolysis (TIV)" on={tiv} onChange={setTiv} />
+      </Card>
+      <div style={{ fontSize: 12, fontWeight: 600, color: ENS.ink3, padding: '4px 4px 0' }}>Send to</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {channels.map((ch) => (
+          <button key={ch.l} className="ens-press" style={{ cursor: 'pointer', border: ch.primary ? 'none' : `1px solid ${ENS.line}`, borderRadius: 16, padding: '15px 16px', background: ch.primary ? ENS.surface : ENS.surface, boxShadow: ch.primary ? softShadow : 'none', display: 'flex', alignItems: 'center', gap: 13, textAlign: 'left' }}>
+            <span style={{ width: 42, height: 42, borderRadius: 11, background: ch.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{ch.icon('#fff')}</span>
+            <span style={{ flex: 1 }}>
+              <span style={{ display: 'block', fontSize: 15.5, fontWeight: 700 }}>{ch.l}</span>
+              <span style={{ display: 'block', fontSize: 12.5, color: ENS.ink3, marginTop: 1 }}>{ch.sub}</span>
+            </span>
+            {I.chev(ENS.ink3, 18)}
+          </button>
+        ))}
+      </div>
+      <button className="ens-press" onClick={() => setOpen((o) => !o)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: ENS.primary, fontSize: 13.5, fontWeight: 600, fontFamily: ENS.sans, padding: '4px 0' }}>{open ? 'Hide preview' : 'Preview message'}</button>
+      {open && <Card className="ens-screen-in"><pre style={{ margin: 0, fontFamily: ENS.mono, fontSize: 12, lineHeight: 1.5, color: ENS.ink2, whiteSpace: 'pre-wrap' }}>{buildMsg(tev, tiv, '')}</pre></Card>}
+    </SendShell>
+  );
+}
+
+// ═══ C · Preview-centric document ══════════════════════════════
+function SendC() {
+  const [tev, setTev] = uSS(true), [tiv, setTiv] = uSS(true), [notes, setNotes] = uSS('');
+  const tchip = (label, on, set) => (
+    <button className="ens-press" onClick={() => set(!on)} style={{ flex: 1, cursor: 'pointer', border: on ? `1.5px solid ${ENS.okFg}` : `1px solid ${ENS.line}`, background: on ? ENS.okBg : ENS.surface, color: on ? ENS.okFg : ENS.ink2, borderRadius: 12, padding: '12px 8px', fontSize: 13.5, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+      <span style={{ width: 16, height: 16, borderRadius: 5, border: on ? 'none' : `2px solid ${ENS.line}`, background: on ? ENS.okFg : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{on && <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" /></svg>}</span>
+      {label}
+    </button>
+  );
+  return (
+    <SendShell actions={
+      <div style={{ display: 'flex', gap: 9 }}>
+        <button className="ens-press" style={{ width: 52, border: `1px solid ${ENS.line}`, borderRadius: 13, background: ENS.surface, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{SIcon.copy(ENS.ink2)}</button>
+        <button className="ens-press" style={{ width: 52, border: `1px solid ${ENS.line}`, borderRadius: 13, background: ENS.surface, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{SIcon.wa('#25D366')}</button>
+        <button className="ens-press" style={{ flex: 1, border: 'none', borderRadius: 13, padding: '15px', cursor: 'pointer', background: ENS.primary, color: '#fff', fontSize: 15, fontWeight: 600, fontFamily: ENS.sans, boxShadow: '0 6px 16px rgba(45,91,215,.28)' }}>Send to Sheet</button>
+      </div>
+    }>
+      <Card style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '13px 16px', borderBottom: `1px solid ${ENS.lineSoft}`, display: 'flex', alignItems: 'center', gap: 9 }}>
+          <span style={{ width: 26, height: 26, borderRadius: 8, background: ENS.primary, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{SIcon.sheet('#fff')}</span>
+          <span style={{ fontSize: 14, fontWeight: 700 }}>Record to submit</span>
+        </div>
+        <pre style={{ margin: 0, padding: '16px', fontFamily: ENS.mono, fontSize: 13, lineHeight: 1.7, color: ENS.ink, whiteSpace: 'pre-wrap' }}>{buildMsg(tev, tiv, notes)}</pre>
+      </Card>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <SH2>Acute treatments</SH2>
+        <div style={{ display: 'flex', gap: 9 }}>{tchip('Thrombectomy', tev, setTev)}{tchip('Thrombolysis', tiv, setTiv)}</div>
+      </Card>
+      <Card><SH2>Notes</SH2><Notes value={notes} onChange={setNotes} /></Card>
+    </SendShell>
+  );
+}
+
+Object.assign(window, { SendA, SendB, SendC });
+
+
+
+  const { useState } = React;
+  const boardStyle = { background: 'transparent', boxShadow: 'none', borderRadius: 0, overflow: 'visible', width: 390, height: 844 };
+  const Phone = ({ children }) => <IOSDevice width={390} height={844}>{children}</IOSDevice>;
+
+  function App() {
+    const [lang, setLang] = useState('en');
+    return (
+      <LangCtx.Provider value={{ lang, setLang }}>
+        <DesignCanvas>
+          <DCSection id="hemo" title="Hemorrhagic parameters" subtitle="Three cooler takes on the ICH branch — all interactive">
+            <DCArtboard id="ha" label="A · Live ICH score" width={390} height={844} style={boardStyle}><Phone><HemoA /></Phone></DCArtboard>
+            <DCArtboard id="hb" label="B · Dial & chips" width={390} height={844} style={boardStyle}><Phone><HemoB /></Phone></DCArtboard>
+            <DCArtboard id="hc" label="C · Compact steppers" width={390} height={844} style={boardStyle}><Phone><HemoC /></Phone></DCArtboard>
+          </DCSection>
+          <DCSection id="send" title="Send patient record" subtitle="Three ways to review & submit (Sheet · WhatsApp · Copy)">
+            <DCArtboard id="sa" label="A · Receipt + preview" width={390} height={844} style={boardStyle}><Phone><SendA /></Phone></DCArtboard>
+            <DCArtboard id="sb" label="B · Channel-first" width={390} height={844} style={boardStyle}><Phone><SendB /></Phone></DCArtboard>
+            <DCArtboard id="sc" label="C · Document preview" width={390} height={844} style={boardStyle}><Phone><SendC /></Phone></DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      </LangCtx.Provider>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+</script>
+</body>
+</html>
