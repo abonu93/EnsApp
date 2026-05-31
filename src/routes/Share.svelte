@@ -14,6 +14,7 @@
   import { addSavedPatient } from "$lib/stores/savedPatients";
   import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm } from "$lib/domain/sheet-payload";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
+  import { fmtHoursAsClock } from "$lib/utils/time";
   import { announce } from "$lib/a11y/liveRegion";
   import { t } from "$lib/i18n";
 
@@ -52,7 +53,7 @@
     if ($preData.age != null) lines.push(`Age: ${$preData.age}`);
     if ($preData.nihss != null) lines.push(`NIHSS: ${$preData.nihss}`);
     if ($preData.premrs != null) lines.push(`pre-mRS: ${$preData.premrs}`);
-    if ($preData.ltsw != null) lines.push(`LTSW: ${$preData.ltsw.toFixed(1)}h`);
+    if ($preData.ltsw != null) lines.push(`LTSW: ${fmtHoursAsClock($preData.ltsw)}`);
     if ($postData.strokeType) lines.push(`Stroke type: ${$postData.strokeType}`);
 
     if ($selectedStudies.length > 0) {

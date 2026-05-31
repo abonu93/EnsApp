@@ -315,6 +315,15 @@ export const it = {
     sendDirect: "Invia direttamente",
     sentSuccess: "Inviato",
     goHome: "Vai alla home",
+    trialsEnrolled: "Trial arruolati",
+    trialsEligibleNotEnrolled: "Eleggibili non arruolati",
+    edit: "Modifica",
+    deleteAction: "Elimina",
+    notFound: "Non trovato",
+    notInLocalArchive: "Paziente non in archivio locale",
+    syncToFetch: "Sincronizza la lista per scaricare il paziente dal Sheet.",
+    missedShort: "missed",
+    cloudPill: "cloud",
   },
 };
 

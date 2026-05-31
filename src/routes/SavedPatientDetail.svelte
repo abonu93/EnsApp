@@ -9,6 +9,7 @@
   import { preData, postData, hemData } from "$lib/stores/patient";
   import { selectedStudies, studyOutcomes, notesText, selectedChronic } from "$lib/stores/trialSelection";
   import { t } from "$lib/i18n";
+  import { fmtHoursAsClock } from "$lib/utils/time";
 
   interface Props { params?: { id?: string } }
   let { params }: Props = $props();
@@ -41,11 +42,11 @@
 </script>
 
 {#if !patient}
-  <AppHeader title="Non trovato" sub="Paziente non in archivio locale" onBack={() => push("/saved")} />
+  <AppHeader title={$t.extras.notFound} sub={$t.extras.notInLocalArchive} onBack={() => push("/saved")} />
   <div class="body">
     <Card>
       {#snippet children()}
-        <p class="muted">Sincronizza la lista per scaricare il paziente dal Sheet.</p>
+        <p class="muted">{$t.extras.syncToFetch}</p>
       {/snippet}
     </Card>
   </div>
@@ -81,14 +82,14 @@
             <div><dt>pre-mRS</dt><dd>{patient.snapshot.pre.premrs}</dd></div>
           {/if}
           {#if patient.snapshot.pre.ltsw != null}
-            <div><dt>LTSW</dt><dd>{patient.snapshot.pre.ltsw}h</dd></div>
+            <div><dt>LTSW</dt><dd>{fmtHoursAsClock(patient.snapshot.pre.ltsw)}</dd></div>
           {/if}
         </dl>
       {/snippet}
     </Card>
 
     {#if patient.trials.length > 0}
-      <Card title="Trial arruolati">
+      <Card title={$t.extras.trialsEnrolled}>
         {#snippet children()}
           <ul class="chip-list">
             {#each patient.trials as name}
@@ -100,7 +101,7 @@
     {/if}
 
     {#if patient.missed && patient.missed.length > 0}
-      <Card title={`Eleggibili non arruolati (${patient.missed.length})`}>
+      <Card title={`${$t.extras.trialsEligibleNotEnrolled} (${patient.missed.length})`}>
         {#snippet children()}
           <ul class="chip-list">
             {#each patient.missed as name}
@@ -143,14 +144,14 @@
           <polyline points="3 6 5 6 21 6" />
           <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
         </svg>
-        Elimina
+        {$t.extras.deleteAction}
       </button>
       <button class="action-btn primary" type="button" onclick={modify}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
         </svg>
-        Modifica
+        {$t.extras.edit}
       </button>
     </div>
   </div>

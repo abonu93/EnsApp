@@ -8,6 +8,7 @@
   import Switch from "$lib/components/Switch.svelte";
   import DateTimeField from "$lib/components/DateTimeField.svelte";
   import { preData, hoursSince } from "$lib/stores/patient";
+  import { fmtHoursAsClock } from "$lib/utils/time";
   import { t } from "$lib/i18n";
 
   type YN = "yes" | "no" | "";
@@ -113,7 +114,7 @@
 
         {#if ltswHrs !== undefined}
           <div class="elapsed">
-            <span class="elapsed-val">{ltswHrs.toFixed(1)}h</span>
+            <span class="elapsed-val">{fmtHoursAsClock(ltswHrs)}</span>
             <span class="elapsed-lbl">da LTSW</span>
           </div>
           {#if win}
