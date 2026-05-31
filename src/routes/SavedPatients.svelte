@@ -11,6 +11,8 @@
 
   let syncing = $state(false);
   let lastSyncError = $state(false);
+  let lastSyncOk = $state(false);
+  let lastSyncCount = $state<number | null>(null);
 
   function rowToSaved(r: SheetPatientRow): SavedPatient {
     const id = r.id || r.timestamp || String(Math.random()).slice(2);
@@ -45,20 +47,18 @@
     if (syncing) return;
     syncing = true;
     lastSyncError = false;
-    let rows: SheetPatientRow[] = [];
-    try {
-      rows = await fetchPatientsFromSheet();
-      if (rows.length > 0) {
-        mergeRemote(rows.map(rowToSaved));
-      } else {
-        // Sheet vuoto o backend non risponde: l'errore e' gia loggato in console
-        lastSyncError = true;
+    lastSyncOk = false;
+    const result = await fetchPatientsFromSheet();
+    if (result.ok) {
+      if (result.rows.length > 0) {
+        mergeRemote(result.rows.map(rowToSaved));
       }
-    } catch {
+      lastSyncOk = true;
+      lastSyncCount = result.rows.length;
+    } else {
       lastSyncError = true;
-    } finally {
-      syncing = false;
     }
+    syncing = false;
   }
 
   // Auto-sync solo al primo mount (non in loop)
@@ -134,7 +134,11 @@
     </svg>
     {syncing ? "Sync..." : "Sync"}
   </button>
-  {#if lastSyncError}<span class="err">Sync failed - showing local only</span>{/if}
+  {#if lastSyncError}
+    <span class="err">Sync failed — showing local only</span>
+  {:else if lastSyncOk && lastSyncCount !== null}
+    <span class="ok">Sync OK · {lastSyncCount} remoti</span>
+  {/if}
 </div>
 
 <div class="body">
@@ -455,6 +459,11 @@
   .err {
     color: var(--warn);
     font-size: 12px;
+  }
+  .ok {
+    color: var(--success);
+    font-size: 12px;
+    font-weight: 600;
   }
   .trials-enrolled { color: var(--success); font-weight: 600; }
   .trials-missed { color: var(--warn); font-weight: 600; }

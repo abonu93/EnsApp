@@ -133,34 +133,35 @@ export interface SheetPatientRow {
   [trialKey: string]: unknown;
 }
 
+export type FetchResult =
+  | { ok: true; rows: SheetPatientRow[] }
+  | { ok: false; reason: string };
+
 /**
  * Legge tutti i pazienti dal backend Apps Script (richiede un doGet
- * configurato lato Sheet). Ritorna [] se l'endpoint non risponde o
- * non e' configurato; non blocca l'app.
- *
- * Apps Script ritorna un 302 redirect verso script.googleusercontent.com
- * che il browser segue automaticamente. Timeout 10s per evitare hang.
+ * configurato lato Sheet). Distingue tra "fetch OK ma sheet vuoto"
+ * (ok: true, rows: []) e "errore di rete/CORS/HTTP" (ok: false).
+ * Timeout 10s per evitare hang dietro al redirect 302 di Apps Script.
  */
-export async function fetchPatientsFromSheet(): Promise<SheetPatientRow[]> {
+export async function fetchPatientsFromSheet(): Promise<FetchResult> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10_000);
   try {
     const res = await fetch(GAS_URL + "?op=list", {
       method: "GET",
       signal: controller.signal,
-      // Lasciamo CORS attivo: Apps Script imposta Access-Control-Allow-Origin: *
-      // quando il deployment ha "Who has access: Anyone".
     });
     clearTimeout(timeoutId);
     if (!res.ok) {
-      console.warn("fetchPatientsFromSheet: HTTP " + res.status);
-      return [];
+      return { ok: false, reason: "HTTP " + res.status };
     }
     const data = await res.json();
-    return Array.isArray(data) ? (data as SheetPatientRow[]) : [];
+    const rows = Array.isArray(data) ? (data as SheetPatientRow[]) : [];
+    return { ok: true, rows };
   } catch (e) {
     clearTimeout(timeoutId);
+    const msg = e instanceof Error ? e.message : String(e);
     console.warn("fetchPatientsFromSheet error:", e);
-    return [];
+    return { ok: false, reason: msg };
   }
 }
