@@ -120,9 +120,13 @@
       TIV: tiv,
       Notes: $notesText,
       // Missed opportunities per analisi statistica backend
+      // Tre nomi diversi per coprire schemi diversi del foglio:
+      missed: missed.join(","),
+      eligible: eligibleNow.join(","),
+      source: "guided",
+      // Compat retroattiva (camelCase) per fogli con quei nomi:
       missedTrials: missed,
       eligibleAtSubmit: eligibleNow,
-      source: "guided",
       timestamp: new Date().toISOString(),
     };
     await sendToSheet(payload);

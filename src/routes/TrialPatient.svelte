@@ -113,6 +113,9 @@
       strokeType,
       ...buildTrialsForSheet([trial], outcomes),
       Notes: notes,
+      // Per il quick patient non c'e' calcolo di eligibility, quindi:
+      missed: "",
+      eligible: "",
       source: "quick-patient",
       timestamp: new Date().toISOString(),
     };

@@ -53,6 +53,15 @@
     return enrolled;
   }
 
+  /** Estrae la lista trial missed (eleggibili non arruolati) da varie chiavi
+   *  che il foglio puo' usare: missed (CSV) | missed_trials | missedTrials | missed[] */
+  function parseMissed(rec: Record<string, unknown>): string[] {
+    const raw = rec.missed ?? rec.missed_trials ?? rec.missedTrials;
+    if (Array.isArray(raw)) return raw.map((x) => String(x).trim()).filter(Boolean);
+    if (typeof raw === "string") return raw.split(",").map((s) => s.trim()).filter(Boolean);
+    return [];
+  }
+
   function num(v: unknown): number | undefined {
     if (v == null || v === "") return undefined;
     const n = Number(v);
@@ -80,7 +89,7 @@
       age: num(rec.Age ?? rec.age),
       nihss: num(rec.NIHSS ?? rec.nihss),
       trials,
-      missed: Array.isArray(r.missed) ? r.missed : [],
+      missed: parseMissed(rec),
       remote: true,
       snapshot: {
         pre: {
