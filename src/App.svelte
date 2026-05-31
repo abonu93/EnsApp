@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Router, { location } from "svelte-spa-router";
+  import Router, { location, link } from "svelte-spa-router";
   import { routes, setupRouterA11y } from "$lib/router";
   import BottomNav from "$lib/components/BottomNav.svelte";
   import { t, locale, cycleLocale } from "$lib/i18n";
@@ -21,7 +21,7 @@
 <a href="#main" class="skip-link">{$t.common.skipToContent}</a>
 
 <header class="hdr">
-  <a href="/" class="brand">
+  <a href="/" use:link class="brand">
     <span class="brand-dot" aria-hidden="true">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 2v6" />

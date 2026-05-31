@@ -24,7 +24,7 @@ const shots = [
   { name: "04-workflow-en", route: "/workflow", viewport: { width: 390, height: 844 }, theme: "light", locale: "en" },
   { name: "05-post-imaging-en", route: "/post-imaging", viewport: { width: 390, height: 1600 }, theme: "light", locale: "en" },
   { name: "06-summary-en", route: "/summary", viewport: { width: 390, height: 1200 }, theme: "light", locale: "en" },
-  { name: "07-share-es-dark", route: "/share", viewport: { width: 390, height: 1400 }, theme: "dark", locale: "es" },
+  { name: "07-quick-patient-es", route: "/trial-patient", viewport: { width: 390, height: 1800 }, theme: "light", locale: "es" },
 ];
 
 for (const shot of shots) {

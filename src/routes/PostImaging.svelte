@@ -24,6 +24,10 @@
   // contraTpa rimane scollegato dalla UI (default "no" per non bloccare ORION)
   const contraTpa: YN = "no";
 
+  // LVO derivato da candidate: se candidato a trombectomia eleggibile,
+  // l'occlusione di grosso vaso e' implicitamente confermata.
+  const lvo = $derived<YN>(candidate === "eligible" ? "yes" : candidate === "not eligible" ? "no" : "");
+
   // Switches (Tandem, Tortuosity)
   let tandem = $state<boolean>($postData.tandem === "yes");
   let tortuosity = $state<boolean>($postData.tortuosity === "yes");
@@ -53,6 +57,7 @@
       strokeType,
       candidate: candidate || undefined,
       ivtCandidate: ivtCandidate || undefined,
+      lvo: lvo || undefined,
       tandem: tandem ? "yes" : "no",
       tortuosity: tortuosity ? "yes" : "no",
       targetVessels,

@@ -306,6 +306,15 @@ export const it = {
     causeOther: "Altro",
     anticoagHep: "Eparina <24h",
     regionPosterior: "Posteriori",
+    quickSubtitle: "Inserimento rapido senza valutazione eligibility.",
+    quickTrialLabel: "Trial assegnato",
+    quickTrialPlaceholder: "Seleziona un trial...",
+    quickArmLabel: "Braccio",
+    quickIntervention: "Intervento",
+    quickControl: "Controllo",
+    sendDirect: "Invia direttamente",
+    sentSuccess: "Inviato",
+    goHome: "Vai alla home",
   },
 };
 
