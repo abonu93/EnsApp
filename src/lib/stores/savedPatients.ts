@@ -37,7 +37,7 @@ export interface SavedPatient {
   };
 }
 
-const MAX_ENTRIES = 50;
+const MAX_ENTRIES = 500;
 
 export const savedPatients = persisted<SavedPatient[]>({
   key: "ensapp:saved:v1",

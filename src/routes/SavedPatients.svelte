@@ -14,30 +14,94 @@
   let lastSyncOk = $state(false);
   let lastSyncCount = $state<number | null>(null);
 
+  // Mapping nome colonna nel Sheet → nome display dell'app per i trial.
+  // Le colonne reali del foglio (header riga 1) sono usate come chiavi.
+  const SHEET_TO_DISPLAY: Record<string, string> = {
+    "WeTrust": "WeTrust",
+    "MARSS": "MARSS",
+    "ATHENA": "ATHENA",
+    "VANISH": "VANISH",
+    "PIVOTAL": "PIVOTAL",
+    "MOSTE": "MOSTE",
+    "FASTEST": "FASTEST",
+    "TICH3": "TICH-3",
+    "LIBREXIA": "Librexia",
+    "TWIN2WIN": "TWIN-2-WIN 2",
+    "ARTEMIS": "ARTEMIS",
+    "HYBERNIA": "HYBERNIA",
+    "DONESYMPLE": "DONE SYMPLE",
+    "SAFERDOAC": "SAFER-DOAC",
+    "SHIONOGI": "SHIONOGI",
+    "SOVATELTIDE": "SOVATELTIDE",
+    "ORION": "ORION",
+    "PROMISE": "PROMISE",
+    "DO  IT": "DO-IT", // attenzione: due spazi nel foglio originale
+    "DO IT": "DO-IT",  // anche con uno spazio (resilienza)
+    "DOIT": "DO-IT",
+    "NiVO": "NiVO",
+    "NIVO": "NiVO",
+    "REMEDY": "REMEDY",
+  };
+
+  function readTrialsFromRow(r: SheetPatientRow): string[] {
+    const enrolled: string[] = [];
+    for (const [sheetCol, display] of Object.entries(SHEET_TO_DISPLAY)) {
+      const v = (r as Record<string, unknown>)[sheetCol];
+      if (v == null) continue;
+      const s = String(v).trim().toLowerCase();
+      if (s === "" || s === "no" || s === "0" || s === "false") continue;
+      if (!enrolled.includes(display)) enrolled.push(display);
+    }
+    return enrolled;
+  }
+
+  function num(v: unknown): number | undefined {
+    if (v == null || v === "") return undefined;
+    const n = Number(v);
+    return Number.isNaN(n) ? undefined : n;
+  }
+
+  function str(v: unknown): string | undefined {
+    if (v == null) return undefined;
+    const s = String(v).trim();
+    return s === "" ? undefined : s;
+  }
+
   function rowToSaved(r: SheetPatientRow): SavedPatient {
-    const id = r.id || r.timestamp || String(Math.random()).slice(2);
+    const rec = r as Record<string, unknown>;
+    const ts = rec.Timestamp ?? rec.timestamp;
+    const savedAt = ts instanceof Date ? ts.toISOString() : (typeof ts === "string" ? ts : new Date().toISOString());
+    const id = String(rec.id ?? ts ?? Math.random().toString(36).slice(2));
+    const trials = (r.trials && r.trials.length > 0 ? r.trials : readTrialsFromRow(r))
+      .map((t) => SHEET_TO_DISPLAY[t] ?? t);
     return {
       id,
-      savedAt: r.timestamp || new Date().toISOString(),
-      patientId: r.patientId,
-      strokeType: (r.strokeType as SavedPatient["strokeType"]) ?? "",
-      age: typeof r.age === "number" ? r.age : undefined,
-      nihss: typeof r.nihss === "number" ? r.nihss : undefined,
-      trials: Array.isArray(r.trials) ? r.trials : [],
+      savedAt,
+      patientId: str(rec.N_patient ?? rec.patientId),
+      strokeType: (rec.strokeType as SavedPatient["strokeType"]) ?? "",
+      age: num(rec.Age ?? rec.age),
+      nihss: num(rec.NIHSS ?? rec.nihss),
+      trials,
       missed: Array.isArray(r.missed) ? r.missed : [],
       remote: true,
       snapshot: {
-        pre: { patientId: r.patientId, age: r.age, nihss: r.nihss, premrs: r.premrs, ltsw: r.ltsw },
-        post: { strokeType: (r.strokeType as "ischemic" | "hemorrhagic" | "") || undefined },
+        pre: {
+          patientId: str(rec.N_patient ?? rec.patientId),
+          age: num(rec.Age ?? rec.age),
+          nihss: num(rec.NIHSS ?? rec.nihss),
+          premrs: num(rec.pre_mRS ?? rec.premrs),
+          ltsw: num(rec.LTSW_h ?? rec.ltsw),
+        },
+        post: { strokeType: (rec.strokeType as "ischemic" | "hemorrhagic" | "") || undefined },
         hem: {},
-        studies: Array.isArray(r.trials) ? r.trials : [],
+        studies: trials,
         outcomes: {},
         chronic: [],
-        notes: r.Notes ?? "",
+        notes: str(rec.Notes) ?? "",
         extras: {
-          tev: (r.TEV as "Yes" | "No" | undefined) || undefined,
-          mtici: (r.mTICI as string) || undefined,
-          tiv: (r.TIV as "Yes" | "No" | undefined) || undefined,
+          tev: (rec.TEV as "Yes" | "No" | undefined) || undefined,
+          mtici: str(rec.mTICI),
+          tiv: (rec.TIV as "Yes" | "No" | undefined) || undefined,
         },
       },
     };
@@ -91,6 +155,15 @@
   function remove(id: string, label: string) {
     if (confirm(`${$t.extras.savedRemoveConfirm} "${label}"?`)) removeSavedPatient(id);
   }
+
+  const PAGE_SIZE = 10;
+  let page = $state(1);
+  const pageCount = $derived(Math.max(1, Math.ceil($savedPatients.length / PAGE_SIZE)));
+  // Clamp page se diminuisce
+  $effect(() => {
+    if (page > pageCount) page = pageCount;
+  });
+  const pageItems = $derived($savedPatients.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE));
 
   // Statistics derived
   const total = $derived($savedPatients.length);
@@ -160,8 +233,11 @@
         {/snippet}
       </Card>
     {:else}
+      <div class="page-meta">
+        <span>{($savedPatients.length === 0) ? 0 : ((page - 1) * PAGE_SIZE + 1)}–{Math.min(page * PAGE_SIZE, $savedPatients.length)} di {$savedPatients.length}</span>
+      </div>
       <ul class="saved-list ens-screen-in">
-        {#each $savedPatients as p (p.id)}
+        {#each pageItems as p (p.id)}
           <li>
             <Card>
               {#snippet children()}
@@ -198,6 +274,21 @@
           </li>
         {/each}
       </ul>
+      {#if pageCount > 1}
+        <div class="pager">
+          <button class="page-btn" type="button" onclick={() => (page = Math.max(1, page - 1))} disabled={page === 1} aria-label="Pagina precedente">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <span class="page-info">{page} / {pageCount}</span>
+          <button class="page-btn" type="button" onclick={() => (page = Math.min(pageCount, page + 1))} disabled={page === pageCount} aria-label="Pagina successiva">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+      {/if}
     {/if}
   {:else}
     <!-- STATISTICS -->
@@ -467,4 +558,42 @@
   }
   .trials-enrolled { color: var(--success); font-weight: 600; }
   .trials-missed { color: var(--warn); font-weight: 600; }
+  .page-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 4px;
+    font-family: var(--font-mono);
+  }
+  .pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 12px;
+    padding-block: 8px;
+  }
+  .page-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+  }
+  .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .page-info {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    min-width: 60px;
+    text-align: center;
+  }
 </style>
