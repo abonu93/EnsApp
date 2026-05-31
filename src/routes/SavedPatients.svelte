@@ -27,7 +27,7 @@
   }
 
   function remove(id: string, label: string) {
-    if (confirm(`Rimuovere "${label}"?`)) removeSavedPatient(id);
+    if (confirm(`${$t.extras.savedRemoveConfirm} "${label}"?`)) removeSavedPatient(id);
   }
 
   // Statistics derived
@@ -53,16 +53,16 @@
   const maxTrialCount = $derived(trialStats[0]?.count ?? 0);
 </script>
 
-<AppHeader title="Pazienti inviati" sub="Storico locale - tap per riaprire" onBack={() => push("/")} />
+<AppHeader title={$t.landing.pastPatients} sub={$t.extras.savedSubtitle} onBack={() => push("/")} />
 
 <div class="body">
   <div class="tabs" role="tablist">
     <button class="tab" class:on={tab === "patients"} role="tab" aria-selected={tab === "patients"} onclick={() => (tab = "patients")}>
-      Pazienti
+      {$t.extras.tabPatients}
       {#if total > 0}<span class="cnt">{total}</span>{/if}
     </button>
     <button class="tab" class:on={tab === "stats"} role="tab" aria-selected={tab === "stats"} onclick={() => (tab = "stats")}>
-      Statistiche
+      {$t.extras.tabStats}
     </button>
   </div>
 
@@ -70,7 +70,7 @@
     {#if $savedPatients.length === 0}
       <Card>
         {#snippet children()}
-          <p class="empty">Nessun paziente salvato ancora.</p>
+          <p class="empty">{$t.extras.savedEmpty}</p>
         {/snippet}
       </Card>
     {:else}
@@ -82,7 +82,7 @@
                 <div class="saved-row">
                   <button class="saved-main ens-press" type="button" onclick={() => reopen(p)} aria-label={`Riapri ${p.patientId ?? p.id}`}>
                     <div class="saved-head">
-                      <strong>{p.patientId || "(senza ID)"}</strong>
+                      <strong>{p.patientId || $t.extras.senza}</strong>
                       {#if p.strokeType}
                         <Pill tone={p.strokeType === "ischemic" ? "ischemic" : "hemorrhagic"}>
                           {#snippet children()}{p.strokeType}{/snippet}
@@ -90,7 +90,7 @@
                       {/if}
                     </div>
                     <div class="saved-meta">
-                      {#if p.age != null}<span>Eta {p.age}</span>{/if}
+                      {#if p.age != null}<span>{$t.extras.age} {p.age}</span>{/if}
                       {#if p.nihss != null}<span>NIHSS {p.nihss}</span>{/if}
                       {#if p.trials.length > 0}<span>{p.trials.join(", ")}</span>{/if}
                     </div>
@@ -114,35 +114,35 @@
     {#if total === 0}
       <Card>
         {#snippet children()}
-          <p class="empty">Nessun dato ancora disponibile.</p>
+          <p class="empty">{$t.extras.statNoData}</p>
         {/snippet}
       </Card>
     {:else}
       <div class="metrics ens-screen-in">
         <div class="metric">
           <div class="metric-val">{total}</div>
-          <div class="metric-lbl">Screened</div>
+          <div class="metric-lbl">{$t.extras.statScreened}</div>
         </div>
         <div class="metric">
           <div class="metric-val tone-success">{enrolledCount}</div>
-          <div class="metric-lbl">Enrolled</div>
+          <div class="metric-lbl">{$t.extras.statEnrolled}</div>
         </div>
         <div class="metric">
           <div class="metric-val">{enrollmentRate}%</div>
-          <div class="metric-lbl">Rate</div>
+          <div class="metric-lbl">{$t.extras.statRate}</div>
         </div>
         <div class="metric">
           <div class="metric-val tone-ischemic">{ischemicCount}</div>
-          <div class="metric-lbl">Ischemico</div>
+          <div class="metric-lbl">{$t.extras.statIschemic}</div>
         </div>
         <div class="metric">
           <div class="metric-val tone-hemorrhagic">{hemCount}</div>
-          <div class="metric-lbl">Emorragico</div>
+          <div class="metric-lbl">{$t.extras.statHemorrhagic}</div>
         </div>
       </div>
 
       {#if trialStats.length > 0}
-        <Card title="Arruolamenti per trial">
+        <Card title={$t.extras.statEnrollmentsByTrial}>
           {#snippet children()}
             <ul class="bars">
               {#each trialStats as ts (ts.name)}

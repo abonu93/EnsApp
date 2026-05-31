@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from "$lib/i18n";
   // Live ICH score (0-6) calcolato dai parametri emorragici.
   // Se volume sconosciuto, mostra range "base-(base+1)".
   interface Patient {
@@ -37,12 +38,12 @@
     <span class="den">/ 6</span>
   </div>
   <div class="info">
-    <div class="title tone-{tone}">ICH Score {display}</div>
+    <div class="title tone-{tone}">{$t.extras.ichScore} {display}</div>
     <div class="sub">
       {#if s.volKnown}
-        Mortalita a 30gg: <strong>{MORTALITY[s.base]}</strong>
+        {$t.extras.mortality30} <strong>{MORTALITY[s.base]}</strong>
       {:else}
-        Volume in attesa — score parziale
+        {$t.extras.volPendingScore}
       {/if}
     </div>
   </div>

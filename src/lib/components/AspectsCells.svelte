@@ -1,5 +1,6 @@
 <script lang="ts">
   // ASPECTS 0-10 colored cells (red <=5, amber <=7, green >=8).
+  import { t } from "$lib/i18n";
   interface Props {
     value: number | null;
     onChange?: (v: number) => void;
@@ -12,12 +13,12 @@
     if (v <= 7) return "warn";
     return "success";
   }
-  function label(v: number | null): string {
-    if (v == null) return "";
-    if (v <= 5) return "Core esteso";
-    if (v <= 7) return "Core moderato";
-    return "Core favorevole";
-  }
+  const aspectsLabel = $derived.by(() => {
+    if (value == null) return "";
+    if (value <= 5) return $t.extras.coreLarge;
+    if (value <= 7) return $t.extras.coreModerate;
+    return $t.extras.coreFavorable;
+  });
 
   function set(i: number) {
     value = i;
@@ -31,7 +32,7 @@
       {value == null ? "—" : value}<span class="den">/10</span>
     </span>
     {#if value != null}
-      <span class="badge tone-{tone(value)}">{label(value)}</span>
+      <span class="badge tone-{tone(value)}">{aspectsLabel}</span>
     {/if}
   </div>
   <div class="grid" role="radiogroup" aria-label="ASPECTS">

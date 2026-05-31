@@ -6,6 +6,7 @@
   import NihssScale from "$lib/components/NihssScale.svelte";
   import Segmented from "$lib/components/Segmented.svelte";
   import Switch from "$lib/components/Switch.svelte";
+  import DateTimeField from "$lib/components/DateTimeField.svelte";
   import { preData, hoursSince } from "$lib/stores/patient";
   import { t } from "$lib/i18n";
 
@@ -51,10 +52,10 @@
   function windowInfo(hours: number | undefined): { tone: "success" | "warn" | "danger"; label: string } | null {
     if (hours === undefined) return null;
     const min = hours * 60;
-    if (min <= 270) return { tone: "success", label: "Finestra trombolisi IV" };
-    if (min <= 360) return { tone: "success", label: "Finestra EVT standard" };
-    if (min <= 1440) return { tone: "warn", label: "Finestra EVT selezionata (<=24h)" };
-    return { tone: "danger", label: "Finestra chiusa" };
+    if (min <= 270) return { tone: "success", label: $t.extras.windowIv };
+    if (min <= 360) return { tone: "success", label: $t.extras.windowEvt };
+    if (min <= 1440) return { tone: "warn", label: $t.extras.windowEvtSelected };
+    return { tone: "danger", label: $t.extras.windowClosed };
   }
   const win = $derived(windowInfo(ltswHrs));
 
@@ -105,10 +106,10 @@
     {/snippet}
   </Card>
 
-  <Card title="Last seen well">
+  <Card title={$t.preImaging.ltswLabel}>
     {#snippet children()}
       <div class="stack">
-        <input class="input" type="datetime-local" bind:value={ltswDate} aria-label="LTSW" />
+        <DateTimeField id="pre-ltsw" bind:value={ltswDate} label={$t.preImaging.ltswLabel} />
 
         {#if ltswHrs !== undefined}
           <div class="elapsed">
@@ -137,7 +138,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
             </svg>
-            <span>Sintomi entro 6h: <strong>{symptomsWithin6h ? $t.common.yes : $t.common.no}</strong></span>
+            <span>{$t.extras.symptomsWithin6h}: <strong>{symptomsWithin6h ? $t.common.yes : $t.common.no}</strong></span>
           </div>
         {/if}
       </div>

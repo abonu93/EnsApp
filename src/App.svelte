@@ -50,15 +50,16 @@
 <style>
   :global(html) {
     background: var(--bg);
-    /* Spazio per pill nav floating + safe area */
-    padding-bottom: calc(var(--bottom-nav-h) + 24px + env(safe-area-inset-bottom, 0));
+    padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0));
   }
   :global(body) {
     background: var(--bg);
+    margin: 0;
   }
 
   .hdr {
-    padding: 58px 20px 4px 24px;
+    padding: env(safe-area-inset-top, 12px) 20px 4px 24px;
+    padding-top: max(12px, env(safe-area-inset-top, 12px));
     display: flex;
     align-items: center;
     justify-content: space-between;

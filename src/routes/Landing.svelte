@@ -52,13 +52,13 @@
       <div class="resume-head">
         <span class="resume-status">
           <span class="dot" aria-hidden="true"></span>
-          <span>{$t.landing.inProgressTitle}</span>
+          <span>{$t.extras.activeSession}</span>
         </span>
         <span class="resume-cta">{$t.landing.resume} →</span>
       </div>
       <div class="resume-meta">
         <span class="elapsed">{elapsedLabel}</span>
-        <span class="since">da LTSW</span>
+        <span class="since">{$t.extras.sinceLtsw}</span>
       </div>
       <div class="window">
         <div class="window-fill" style="width: {Math.round(windowFrac * 100)}%"></div>

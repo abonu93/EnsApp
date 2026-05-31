@@ -1,5 +1,6 @@
 <script lang="ts">
   // GCS 3-15 slider con value mono + severity badge.
+  import { t } from "$lib/i18n";
   interface Props {
     value: number | null;
     onChange?: (v: number) => void;
@@ -12,13 +13,9 @@
     if (v <= 12) return "warn";
     return "success";
   }
-  function bandLabel(v: number): string {
-    if (v <= 8) return "Severo";
-    if (v <= 12) return "Moderato";
-    return "Lieve";
-  }
   const v = $derived(value == null ? 15 : value);
   const tone = $derived(bandTone(v));
+  const label = $derived(v <= 8 ? $t.extras.gcsSevere : v <= 12 ? $t.extras.gcsModerate : $t.extras.gcsMild);
 
   function onInput(e: Event) {
     const n = Number((e.currentTarget as HTMLInputElement).value);
@@ -32,7 +29,7 @@
     <span class="val tone-{tone}">
       {value == null ? "—" : v}<span class="den">/15</span>
     </span>
-    <span class="band tone-{tone}">{bandLabel(v)}</span>
+    <span class="band tone-{tone}">{label}</span>
   </div>
   <input class="range tone-{tone}" type="range" min="3" max="15" value={v} oninput={onInput} aria-label="GCS" />
   <div class="ticks"><span>3</span><span>9</span><span>15</span></div>

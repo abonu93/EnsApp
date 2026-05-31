@@ -91,8 +91,8 @@
     { value: "hemorrhagic" as const, label: $t.postImaging.hemorrhagic },
   ]);
   const candidateOpts = $derived([
-    { value: "eligible" as const, label: "Eleggibile" },
-    { value: "not eligible" as const, label: "Non eleggibile" },
+    { value: "eligible" as const, label: $t.postImaging.candidateEligible },
+    { value: "not eligible" as const, label: $t.postImaging.candidateNotEligible },
   ]);
   const ynOpts = $derived<{ value: "yes" | "no"; label: string }[]>([
     { value: "no", label: $t.common.no },
@@ -170,7 +170,7 @@
   {#if isHem}
     <HIchCard patient={{ gcs, ivh: ivh === "yes", age: $preData.age, hemVolume, volUnknown }} />
 
-    <Card title="Severita">
+    <Card title={$t.extras.severity}>
       {#snippet children()}
         <div class="stack">
           <HVolDial bind:value={hemVolume} bind:unknown={volUnknown} />
@@ -183,10 +183,10 @@
       {/snippet}
     </Card>
 
-    <Card title="Pattern e causa">
+    <Card title={$t.extras.patternCause}>
       {#snippet children()}
         <div class="stack">
-          <ToggleRow title="Hemorragia isolata IVH" sub="Emorragia confinata al sistema ventricolare" checked={ivh === "yes"} onChange={(v) => ivh = v ? "yes" : "no"} />
+          <ToggleRow title={$t.extras.isolatedIvh} sub={$t.extras.isolatedIvhSub} checked={ivh === "yes"} onChange={(v) => ivh = v ? "yes" : "no"} />
           <div class="divider"></div>
           <div class="field">
             <span class="lbl">{$t.postImaging.secondaryCauseLabel}</span>
@@ -196,10 +196,10 @@
       {/snippet}
     </Card>
 
-    <Card title="Fattori di eleggibilita">
+    <Card title={$t.extras.eligFactors}>
       {#snippet children()}
         <div class="stack">
-          <ToggleRow title="Esclusione TXA" sub="Convulsioni / trombosi / ipersensibilita a TXA" checked={seizure === "yes"} onChange={(v) => seizure = v ? "yes" : "no"} />
+          <ToggleRow title={$t.extras.txaExcl} sub={$t.extras.txaExclSub} checked={seizure === "yes"} onChange={(v) => seizure = v ? "yes" : "no"} />
           <div class="divider"></div>
           <div class="field">
             <span class="lbl">{$t.postImaging.anticoagLabel}</span>

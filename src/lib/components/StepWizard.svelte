@@ -33,7 +33,7 @@
   <ProgressBar {steps} {current} />
   <div class="wizard-body">{@render children()}</div>
   <div class="wizard-actions">
-    <Button variant="secondary" fullWidth onclick={onPrev} disabled={isFirst}>Indietro</Button>
+    <Button variant="secondary" fullWidth onclick={onPrev} disabled={isFirst}>{"<"}</Button>
     <Button variant="primary" fullWidth onclick={onNext} disabled={!canGoNext}>
       {isLast ? "Conferma" : nextLabel}
     </Button>

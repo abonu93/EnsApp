@@ -53,12 +53,12 @@
   const selectedCount = $derived($selectedStudies.length);
 </script>
 
-<AppHeader title="Risultati" sub={`${eligibleItems.length} ${eligibleItems.length === 1 ? 'trial eleggibile' : 'trial eleggibili'}`} step={2} steps={3} onBack={() => push("/post-imaging")} />
+<AppHeader title={$t.extras.results} sub={`${eligibleItems.length} ${$t.extras.eligibleTrialsCount}`} step={2} steps={3} onBack={() => push("/post-imaging")} />
 
 <div class="body">
   {#if eligibleItems.length === 0}
-    <Card title="Nessun trial eleggibile">
-      {#snippet children()}<p class="muted">Il paziente non soddisfa i criteri di nessun trial attivo.</p>{/snippet}
+    <Card title={$t.extras.noEligibleTitle}>
+      {#snippet children()}<p class="muted">{$t.extras.noEligibleDesc}</p>{/snippet}
     </Card>
   {:else}
     <div class="list">
@@ -86,7 +86,7 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class:rot={showIneligible}>
         <polyline points="9 18 15 12 9 6" />
       </svg>
-      {showIneligible ? "Nascondi" : "Mostra"} non eleggibili ({ineligibleItems.length})
+      {showIneligible ? $t.extras.hide : $t.extras.show} {$t.common.notEligible.toLowerCase()} ({ineligibleItems.length})
     </button>
 
     {#if showIneligible}
@@ -98,11 +98,11 @@
               <li class="inel">
                 <div class="inel-head">
                   <strong>{item.display}</strong>
-                  <Pill tone="danger">{#snippet children()}Non elegg.{/snippet}</Pill>
+                  <Pill tone="danger">{#snippet children()}{$t.common.notEligible}{/snippet}</Pill>
                 </div>
                 {#if fails.length > 0}
                   <details class="reasons">
-                    <summary>Criteri mancanti ({fails.length})</summary>
+                    <summary>{$t.extras.criteriaMissing} ({fails.length})</summary>
                     <ul>{#each fails as f}<li>{f}</li>{/each}</ul>
                   </details>
                 {/if}
@@ -120,7 +120,7 @@
 <BottomBar
   onBack={() => push("/post-imaging")}
   onNext={() => push("/share")}
-  nextLabel={selectedCount > 0 ? `Revisione · ${selectedCount}` : "Continua senza selezione"}
+  nextLabel={selectedCount > 0 ? `${$t.extras.review} · ${selectedCount}` : $t.extras.continueWithoutSelection}
 />
 
 <style>

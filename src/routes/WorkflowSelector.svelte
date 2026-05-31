@@ -8,7 +8,7 @@
       key: "check",
       title: $t.workflow.eligibilityTitle,
       desc: $t.workflow.eligibilityDesc,
-      tag: "Guidato",
+      tag: $t.extras.guidedTag,
       accent: "var(--primary)",
       bg: "var(--primary-soft)",
       route: "/pre-imaging",
@@ -16,9 +16,9 @@
     },
     {
       key: "direct",
-      title: "Arruolamento diretto",
-      desc: "Inserimento rapido per paziente gia' deciso",
-      tag: "Veloce",
+      title: $t.extras.directEnroll,
+      desc: $t.extras.directEnrollDesc,
+      tag: $t.extras.fastTag,
       accent: "var(--post-acute)",
       bg: "var(--post-acute-soft)",
       route: "/trial-patient",
@@ -34,7 +34,7 @@
 <div class="page">
   <div class="intro">
     <h2>{$t.landing.newPatient}</h2>
-    <p>Come vuoi procedere?</p>
+    <p>{$t.extras.proceedHow}</p>
   </div>
 
   <div class="opts">

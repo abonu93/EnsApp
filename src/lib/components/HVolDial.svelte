@@ -1,5 +1,6 @@
 <script lang="ts">
   // Radial dial per volume emorragia (0-120 mL). "Not available" toggle disabilita.
+  import { t } from "$lib/i18n";
   interface Props {
     value: number | null;
     unknown: boolean;
@@ -29,14 +30,14 @@
 
 <div class="vol">
   <div class="head">
-    <span class="lbl">Volume emorragia</span>
+    <span class="lbl">{$t.extras.volumeTitle}</span>
     <button class="not-avail" class:on={unknown} type="button" onclick={toggleUnknown}>
       <span class="box" aria-hidden="true">
         {#if unknown}
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
         {/if}
       </span>
-      Non disponibile
+      {$t.extras.notAvailable}
     </button>
   </div>
   <div class="body" class:unknown>
@@ -72,7 +73,7 @@
         aria-label="Volume mL"
       />
       <div class="hint" class:high>
-        {unknown ? "Volume da definire" : high ? "Ematoma esteso (>=30 mL)" : "Trascina o tap sul cerchio"}
+        {unknown ? $t.extras.volPending : high ? $t.extras.largeHematoma : $t.extras.dragVolume}
       </div>
     </div>
   </div>

@@ -186,7 +186,7 @@
     {/if}
   {/each}
 
-  <Card title="Trattamenti in acuto">
+  <Card title={$t.extras.acuteTreatments}>
     {#snippet children()}
       <div class="form-stack">
         <RadioGroup id="share-tev" label="Trombectomia (TEV)?" name="tev" columns={2} bind:value={tev} options={ynOpts} />

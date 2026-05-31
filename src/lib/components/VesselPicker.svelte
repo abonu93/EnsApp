@@ -4,6 +4,7 @@
   // per i selezionati.
   import type { VesselCode } from "$lib/domain/acute-rules";
   import { VESSEL_OPTIONS } from "$lib/domain/vessels";
+  import { t } from "$lib/i18n";
 
   interface Props {
     value: VesselCode[];
@@ -41,7 +42,7 @@
 <div class="picker">
   <div class="chips">
     {#if value.length === 0}
-      <span class="empty">Nessun vaso selezionato</span>
+      <span class="empty">{$t.extras.vesselsNone}</span>
     {:else}
       {#each value as k (k)}
         <button class="chip-sel" type="button" onclick={() => tap(k)}>
