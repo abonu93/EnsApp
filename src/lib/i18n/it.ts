@@ -298,6 +298,14 @@ export const it = {
     directEnroll: "Arruolamento diretto",
     directEnrollDesc: "Inserimento rapido per paziente gia' deciso",
     skipToContent: "Vai al contenuto",
+    causeNone: "Nessuna",
+    causeTrauma: "Trauma",
+    causeAVM: "AVM",
+    causeAneurysm: "Aneurisma",
+    causeTumor: "Tumore",
+    causeOther: "Altro",
+    anticoagHep: "Eparina <24h",
+    regionPosterior: "Posteriori",
   },
 };
 

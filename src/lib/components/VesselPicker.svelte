@@ -14,12 +14,12 @@
 
   type Region = "ica" | "mca" | "aca" | "post";
 
-  const REGIONS: Array<{ key: Region; label: string; codes: VesselCode[] }> = [
+  const REGIONS = $derived<Array<{ key: Region; label: string; codes: VesselCode[] }>>([
     { key: "ica", label: "ICA", codes: ["ica-intracranial", "ica-terminal"] },
     { key: "mca", label: "MCA", codes: ["m1", "m2-proxdom", "m2-any", "gt-m2"] },
     { key: "aca", label: "ACA", codes: ["a1", "a2", "gt-a2"] },
-    { key: "post", label: "Posteriori", codes: ["va", "basilar", "p1", "p2", "gt-p2"] },
-  ];
+    { key: "post", label: $t.extras.regionPosterior, codes: ["va", "basilar", "p1", "p2", "gt-p2"] },
+  ]);
 
   const LABEL = Object.fromEntries(VESSEL_OPTIONS.map((o) => [o.value, o.label])) as Record<VesselCode, string>;
 
@@ -31,10 +31,12 @@
     onChange?.(next);
   }
 
-  function countFor(r: Region): number {
+  const counts = $derived.by(() => {
     const set = new Set(value);
-    return REGIONS.find((x) => x.key === r)!.codes.filter((c) => set.has(c)).length;
-  }
+    return Object.fromEntries(
+      REGIONS.map((r) => [r.key, r.codes.filter((c) => set.has(c)).length])
+    ) as Record<Region, number>;
+  });
 
   const currentList = $derived(REGIONS.find((r) => r.key === region)!.codes);
 </script>
@@ -58,7 +60,7 @@
   <div class="tabs" role="tablist">
     {#each REGIONS as r (r.key)}
       {@const on = region === r.key}
-      {@const cnt = countFor(r.key)}
+      {@const cnt = counts[r.key]}
       <button class="tab" class:on type="button" role="tab" aria-selected={on} onclick={() => (region = r.key)}>
         {r.label}
         {#if cnt > 0}<span class="cnt">{cnt}</span>{/if}

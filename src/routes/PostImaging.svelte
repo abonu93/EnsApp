@@ -98,20 +98,20 @@
     { value: "no", label: $t.common.no },
     { value: "yes", label: $t.common.yes },
   ]);
-  const secondaryOpts = [
-    { value: "None", label: "Nessuna" },
-    { value: "Traumatic", label: "Trauma" },
-    { value: "AVM", label: "AVM" },
-    { value: "Aneurysm", label: "Aneurisma" },
-    { value: "Tumor", label: "Tumore" },
-    { value: "Other", label: "Altro" },
-  ];
-  const anticoagOpts = [
-    { value: "none", label: "Nessuna" },
+  const secondaryOpts = $derived([
+    { value: "None", label: $t.extras.causeNone },
+    { value: "Traumatic", label: $t.extras.causeTrauma },
+    { value: "AVM", label: $t.extras.causeAVM },
+    { value: "Aneurysm", label: $t.extras.causeAneurysm },
+    { value: "Tumor", label: $t.extras.causeTumor },
+    { value: "Other", label: $t.extras.causeOther },
+  ]);
+  const anticoagOpts = $derived([
+    { value: "none", label: $t.extras.causeNone },
     { value: "warfarin", label: "Warfarin" },
-    { value: "heparin", label: "Hep <24h" },
+    { value: "heparin", label: $t.extras.anticoagHep },
     { value: "doac", label: "DOAC" },
-  ];
+  ]);
 
   const canSubmit = $derived(
     (isIschemic && candidate !== "" && (showEvt ? targetVessels.length > 0 : lesionConfirmed !== "")) ||

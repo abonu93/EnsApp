@@ -297,5 +297,13 @@ export const es: Dictionary = {
     directEnroll: "Reclutamiento directo",
     directEnrollDesc: "Entrada rapida para paciente ya decidido",
     skipToContent: "Ir al contenido",
+    causeNone: "Ninguna",
+    causeTrauma: "Trauma",
+    causeAVM: "AVM",
+    causeAneurysm: "Aneurisma",
+    causeTumor: "Tumor",
+    causeOther: "Otra",
+    anticoagHep: "Heparina <24h",
+    regionPosterior: "Posterior",
   },
 };
