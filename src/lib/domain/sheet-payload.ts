@@ -106,3 +106,49 @@ export async function sendToSheet(payload: unknown): Promise<void> {
     console.warn("sendToSheet error:", e);
   }
 }
+
+/**
+ * Forma minimale di un record letto dal backend (Apps Script doGet).
+ * I campi sono opzionali per resilienza: il backend puo' evolvere
+ * senza rompere il client.
+ */
+export interface SheetPatientRow {
+  id?: string;
+  timestamp?: string;
+  patientId?: string;
+  age?: number;
+  nihss?: number;
+  premrs?: number;
+  ltsw?: number;
+  strokeType?: string;
+  /** Trial arruolati: ["WeTrust","ATHENA",...] */
+  trials?: string[];
+  /** Missed trials: eligibili NON arruolati. */
+  missed?: string[];
+  TEV?: string;
+  mTICI?: string;
+  TIV?: string;
+  Notes?: string;
+  /** Per ogni SHEET_TRIAL_KEYS contiene "no" | "si" | "intervention" | "control". */
+  [trialKey: string]: unknown;
+}
+
+/**
+ * Legge tutti i pazienti dal backend Apps Script (richiede un doGet
+ * configurato lato Sheet). Ritorna [] se l'endpoint non risponde o
+ * non e' configurato; non blocca l'app.
+ */
+export async function fetchPatientsFromSheet(): Promise<SheetPatientRow[]> {
+  try {
+    // L'endpoint doGet del GAS deve servire JSON con CORS abilitato:
+    // return ContentService.createTextOutput(JSON.stringify(rows))
+    //   .setMimeType(ContentService.MimeType.JSON);
+    const res = await fetch(GAS_URL + "?op=list", { method: "GET" });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? (data as SheetPatientRow[]) : [];
+  } catch (e) {
+    console.warn("fetchPatientsFromSheet error:", e);
+    return [];
+  }
+}

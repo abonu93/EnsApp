@@ -13,8 +13,25 @@
   } from "$lib/stores/trialSelection";
   import { addSavedPatient } from "$lib/stores/savedPatients";
   import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm } from "$lib/domain/sheet-payload";
+  import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
   import { announce } from "$lib/a11y/liveRegion";
   import { t } from "$lib/i18n";
+
+  // Trial eleggibili calcolati al momento dell'invio, per identificare
+  // quelli "missed" (eleggibili ma non selezionati dall'utente).
+  function eligibleNamesNow(): string[] {
+    const e = $acuteEligibility;
+    const h = $hemEligibility;
+    const map: Array<[string, boolean]> = [
+      ["WeTrust", e.weTrust], ["ATHENA", e.athena], ["VANISH", e.vanish], ["PIVOTAL", e.pivotal],
+      ["PROMISE", e.promise], ["MOSTE", e.moste], ["TWIN-2-WIN 2", e.twin2win2], ["ARTEMIS", e.artemis],
+      ["HYBERNIA", e.hybernia], ["DONE SYMPLE", e.doneSymple], ["SHIONOGI", e.shionogi],
+      ["SOVATELTIDE", e.sovateltide], ["ORION", e.orion], ["NiVO", e.nivo],
+      ["DO-IT", e.doit], ["REMEDY", e.remedy],
+      ["FASTEST", h.fastest.eligible], ["TICH-3", h.tich3],
+    ];
+    return map.filter(([, ok]) => ok).map(([n]) => n);
+  }
 
   let saving = $state(false);
   let saved = $state(false);
@@ -86,6 +103,10 @@
     if (saving) return;
     saving = true;
     const sheetTrials = buildTrialsForSheet($selectedStudies, $studyOutcomes);
+    const eligibleNow = eligibleNamesNow();
+    const enrolledSet = new Set($selectedStudies);
+    const missed = eligibleNow.filter((name) => !enrolledSet.has(name));
+
     const payload = {
       patientId: $preData.patientId,
       age: $preData.age,
@@ -98,6 +119,10 @@
       mTICI: showMtici ? mtici : "",
       TIV: tiv,
       Notes: $notesText,
+      // Missed opportunities per analisi statistica backend
+      missedTrials: missed,
+      eligibleAtSubmit: eligibleNow,
+      source: "guided",
       timestamp: new Date().toISOString(),
     };
     await sendToSheet(payload);
@@ -109,6 +134,7 @@
       age: $preData.age,
       nihss: $preData.nihss,
       trials: [...$selectedStudies],
+      missed,
       snapshot: {
         pre: { ...$preData },
         post: { ...$postData },

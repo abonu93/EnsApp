@@ -16,6 +16,13 @@ export interface SavedPatient {
   nihss?: number;
   /** Trial selezionati (display name). */
   trials: string[];
+  /**
+   * Trial per cui il paziente era eleggibile ma NON e' stato arruolato
+   * (missed opportunities, per analisi statistica).
+   */
+  missed?: string[];
+  /** True se questo record arriva dal backend remoto, non dal device locale. */
+  remote?: boolean;
   /** Snapshot completo per la ri-apertura. */
   snapshot: {
     pre: PreData;
@@ -58,4 +65,21 @@ export function removeSavedPatient(id: string): void {
 
 export function clearSaved(): void {
   savedPatients.clear();
+}
+
+/**
+ * Merge una lista di pazienti remoti (da Google Sheet) con quelli locali.
+ * Strategia: i remoti sostituiscono i locali con stesso `id`.
+ * I locali senza match remoto restano (es. salvataggi offline non ancora
+ * sincronizzati al backend). I remoti senza match locale vengono aggiunti.
+ */
+export function mergeRemote(remote: SavedPatient[]): void {
+  savedPatients.update((local) => {
+    const byId = new Map<string, SavedPatient>();
+    for (const p of local) byId.set(p.id, p);
+    for (const r of remote) byId.set(r.id, { ...r, remote: true });
+    const merged = Array.from(byId.values());
+    merged.sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
+    return merged.slice(0, MAX_ENTRIES);
+  });
 }

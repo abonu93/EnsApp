@@ -3,10 +3,64 @@
   import AppHeader from "$lib/components/AppHeader.svelte";
   import Card from "$lib/components/Card.svelte";
   import Pill from "$lib/components/Pill.svelte";
-  import { savedPatients, removeSavedPatient, type SavedPatient } from "$lib/stores/savedPatients";
+  import { savedPatients, removeSavedPatient, mergeRemote, type SavedPatient } from "$lib/stores/savedPatients";
   import { preData, postData, hemData } from "$lib/stores/patient";
   import { selectedStudies, studyOutcomes, notesText, selectedChronic } from "$lib/stores/trialSelection";
+  import { fetchPatientsFromSheet, type SheetPatientRow } from "$lib/domain/sheet-payload";
   import { t } from "$lib/i18n";
+
+  let syncing = $state(false);
+  let lastSyncError = $state(false);
+
+  function rowToSaved(r: SheetPatientRow): SavedPatient {
+    const id = r.id || r.timestamp || String(Math.random()).slice(2);
+    return {
+      id,
+      savedAt: r.timestamp || new Date().toISOString(),
+      patientId: r.patientId,
+      strokeType: (r.strokeType as SavedPatient["strokeType"]) ?? "",
+      age: typeof r.age === "number" ? r.age : undefined,
+      nihss: typeof r.nihss === "number" ? r.nihss : undefined,
+      trials: Array.isArray(r.trials) ? r.trials : [],
+      missed: Array.isArray(r.missed) ? r.missed : [],
+      remote: true,
+      snapshot: {
+        pre: { patientId: r.patientId, age: r.age, nihss: r.nihss, premrs: r.premrs, ltsw: r.ltsw },
+        post: { strokeType: (r.strokeType as "ischemic" | "hemorrhagic" | "") || undefined },
+        hem: {},
+        studies: Array.isArray(r.trials) ? r.trials : [],
+        outcomes: {},
+        chronic: [],
+        notes: r.Notes ?? "",
+        extras: {
+          tev: (r.TEV as "Yes" | "No" | undefined) || undefined,
+          mtici: (r.mTICI as string) || undefined,
+          tiv: (r.TIV as "Yes" | "No" | undefined) || undefined,
+        },
+      },
+    };
+  }
+
+  async function syncFromSheet() {
+    if (syncing) return;
+    syncing = true;
+    lastSyncError = false;
+    try {
+      const rows = await fetchPatientsFromSheet();
+      if (rows.length > 0) {
+        mergeRemote(rows.map(rowToSaved));
+      }
+    } catch {
+      lastSyncError = true;
+    } finally {
+      syncing = false;
+    }
+  }
+
+  // Auto-sync on mount (non blocca: failure silenziosa, fallback a locale)
+  $effect(() => {
+    syncFromSheet();
+  });
 
   type Tab = "patients" | "stats";
   let tab = $state<Tab>("patients");
@@ -37,23 +91,43 @@
   const enrolledCount = $derived($savedPatients.filter((p) => p.trials.length > 0).length);
   const enrollmentRate = $derived(total > 0 ? Math.round((enrolledCount / total) * 100) : 0);
 
-  // Distribuzione per trial
+  const missedCount = $derived(
+    $savedPatients.reduce((n, p) => n + (p.missed?.length ?? 0), 0)
+  );
+
+  // Distribuzione per trial: enrolled + missed (per stacked bar)
   const trialStats = $derived.by(() => {
-    const map = new Map<string, number>();
-    for (const p of $savedPatients) {
-      for (const trial of p.trials) {
-        map.set(trial, (map.get(trial) ?? 0) + 1);
-      }
+    const map = new Map<string, { enrolled: number; missed: number }>();
+    function add(name: string, kind: "enrolled" | "missed") {
+      const cur = map.get(name) ?? { enrolled: 0, missed: 0 };
+      cur[kind] += 1;
+      map.set(name, cur);
     }
-    const arr = Array.from(map.entries()).map(([name, count]) => ({ name, count }));
-    arr.sort((a, b) => b.count - a.count);
+    for (const p of $savedPatients) {
+      for (const trial of p.trials) add(trial, "enrolled");
+      for (const trial of p.missed ?? []) add(trial, "missed");
+    }
+    const arr = Array.from(map.entries()).map(([name, c]) => ({ name, ...c, total: c.enrolled + c.missed }));
+    arr.sort((a, b) => b.total - a.total);
     return arr;
   });
 
-  const maxTrialCount = $derived(trialStats[0]?.count ?? 0);
+  const maxTrialCount = $derived(trialStats[0]?.total ?? 0);
 </script>
 
-<AppHeader title={$t.landing.pastPatients} sub={$t.extras.savedSubtitle} onBack={() => push("/")} />
+<AppHeader title={$t.landing.pastPatients} sub={syncing ? "..." : $t.extras.savedSubtitle} onBack={() => push("/")} />
+
+<div class="sync-bar">
+  <button class="sync-btn" type="button" onclick={syncFromSheet} disabled={syncing} aria-label="Sync">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class:spin={syncing}>
+      <polyline points="23 4 23 10 17 10" />
+      <polyline points="1 20 1 14 7 14" />
+      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+    </svg>
+    {syncing ? "Sync..." : "Sync"}
+  </button>
+  {#if lastSyncError}<span class="err">Sync failed - showing local only</span>{/if}
+</div>
 
 <div class="body">
   <div class="tabs" role="tablist">
@@ -88,11 +162,15 @@
                           {#snippet children()}{p.strokeType}{/snippet}
                         </Pill>
                       {/if}
+                      {#if p.remote}
+                        <Pill tone="info">{#snippet children()}cloud{/snippet}</Pill>
+                      {/if}
                     </div>
                     <div class="saved-meta">
                       {#if p.age != null}<span>{$t.extras.age} {p.age}</span>{/if}
                       {#if p.nihss != null}<span>NIHSS {p.nihss}</span>{/if}
-                      {#if p.trials.length > 0}<span>{p.trials.join(", ")}</span>{/if}
+                      {#if p.trials.length > 0}<span class="trials-enrolled">{p.trials.join(", ")}</span>{/if}
+                      {#if p.missed && p.missed.length > 0}<span class="trials-missed">{p.missed.length} missed</span>{/if}
                     </div>
                     <small class="saved-date">{formatDate(p.savedAt)}</small>
                   </button>
@@ -128,6 +206,10 @@
           <div class="metric-lbl">{$t.extras.statEnrolled}</div>
         </div>
         <div class="metric">
+          <div class="metric-val tone-warn">{missedCount}</div>
+          <div class="metric-lbl">Missed</div>
+        </div>
+        <div class="metric">
           <div class="metric-val">{enrollmentRate}%</div>
           <div class="metric-lbl">{$t.extras.statRate}</div>
         </div>
@@ -146,18 +228,28 @@
           {#snippet children()}
             <ul class="bars">
               {#each trialStats as ts (ts.name)}
-                {@const pct = (ts.count / Math.max(1, maxTrialCount)) * 100}
+                {@const totalPct = (ts.total / Math.max(1, maxTrialCount)) * 100}
+                {@const enrolledPct = ts.total ? (ts.enrolled / ts.total) * totalPct : 0}
+                {@const missedPct = totalPct - enrolledPct}
                 <li class="bar">
                   <div class="bar-lbl">
                     <span class="bar-name">{ts.name}</span>
-                    <span class="bar-cnt">{ts.count}</span>
+                    <span class="bar-cnt">
+                      <span class="cnt-enr">{ts.enrolled}</span>
+                      {#if ts.missed > 0}<span class="cnt-mis">+{ts.missed}</span>{/if}
+                    </span>
                   </div>
                   <div class="bar-track">
-                    <div class="bar-fill" style="width: {pct}%"></div>
+                    <div class="bar-fill enr" style="width: {enrolledPct}%"></div>
+                    <div class="bar-fill mis" style="width: {missedPct}%"></div>
                   </div>
                 </li>
               {/each}
             </ul>
+            <div class="legend">
+              <span><span class="dot enr"></span> Enrolled</span>
+              <span><span class="dot mis"></span> Missed (eligible non arruolato)</span>
+            </div>
           {/snippet}
         </Card>
       {/if}
@@ -296,10 +388,66 @@
     border-radius: 999px;
     overflow: hidden;
   }
+  .bar-track {
+    display: flex;
+    gap: 2px;
+  }
   .bar-fill {
     height: 100%;
-    background: var(--success);
     border-radius: 999px;
     transition: width var(--transition-base);
   }
+  .bar-fill.enr { background: var(--success); }
+  .bar-fill.mis { background: var(--warn); }
+  .cnt-enr { color: var(--success); font-weight: 700; }
+  .cnt-mis { color: var(--warn); font-weight: 700; margin-left: 4px; }
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+  .legend .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    margin-right: 4px;
+    vertical-align: 1px;
+  }
+  .legend .dot.enr { background: var(--success); }
+  .legend .dot.mis { background: var(--warn); }
+  .sync-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px 6px;
+  }
+  .sync-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: 999px;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 32px;
+  }
+  .sync-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+  .sync-btn:disabled { opacity: 0.55; cursor: wait; }
+  .sync-btn .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .err {
+    color: var(--warn);
+    font-size: 12px;
+  }
+  .trials-enrolled { color: var(--success); font-weight: 600; }
+  .trials-missed { color: var(--warn); font-weight: 600; }
 </style>
