@@ -1,0 +1,12 @@
+name = "ensapp-assistant"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# Variabili non segrete (la chiave API NON va qui: usa `wrangler secret`).
+[vars]
+PROVIDER = "gemini"
+GEMINI_MODEL = "gemini-2.0-flash"
+# Origini consentite (CORS), separate da virgola. Vuoto = qualsiasi (solo dev).
+# In produzione impostare es:
+# ALLOWED_ORIGINS = "http://localhost:5173,https://USERNAME.github.io"
+ALLOWED_ORIGINS = ""

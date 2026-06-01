@@ -32,6 +32,7 @@
     { href: "/workflow", label: $t.nav.new, icon: "user-plus" as const },
     { href: "/saved", label: $t.nav.saved, icon: "archive" as const },
     { href: "/trials", label: $t.nav.trials, icon: "list" as const },
+    { href: "/assistant", label: $t.nav.assistant, icon: "chat" as const },
   ]);
 </script>
 
