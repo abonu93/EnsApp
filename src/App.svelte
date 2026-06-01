@@ -3,7 +3,22 @@
   import { routes, setupRouterA11y } from "$lib/router";
   import BottomNav from "$lib/components/BottomNav.svelte";
   import Logo from "$lib/components/Logo.svelte";
+  import Splash from "$lib/components/Splash.svelte";
   import { t, locale, cycleLocale } from "$lib/i18n";
+
+  // Splash visibile al primo load di sessione. Lo skip persiste in
+  // sessionStorage (cosi' tornando indietro non si rivede di continuo,
+  // ma riappare al prossimo lancio della PWA).
+  const SPLASH_KEY = "eligo:splash:seen";
+  let showSplash = $state(
+    typeof sessionStorage !== "undefined" && !sessionStorage.getItem(SPLASH_KEY)
+  );
+  function dismissSplash() {
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem(SPLASH_KEY, "1");
+    }
+    showSplash = false;
+  }
 
   setupRouterA11y();
 
@@ -18,6 +33,10 @@
     { href: "/trials", label: $t.nav.trials, icon: "list" as const },
   ]);
 </script>
+
+{#if showSplash}
+  <Splash onDone={dismissSplash} />
+{/if}
 
 <a href="#main" class="skip-link">{$t.common.skipToContent}</a>
 
