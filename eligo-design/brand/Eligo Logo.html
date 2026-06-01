@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Eligo — Logo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --primary:#4F8FBC; --p700:#2E6B8E; --deep:#1C4E6C; --tint:#ABD2E6; --tint4:#7FB4D4;
+    --ink:#0F212A; --sub:#4D6572; --bg:#E9F4F9; --surface:#fff; --line:#DBEBF1;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+  html,body{margin:0;background:#EAF1F4;font-family:'Hanken Grotesk',system-ui,sans-serif;color:var(--ink);}
+  .wrap{max-width:1180px;margin:0 auto;padding:58px 48px 90px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.16em;color:var(--primary);font-weight:600;}
+  h1{font-size:40px;font-weight:800;letter-spacing:-.035em;margin:13px 0 10px;}
+  .lede{font-size:16.5px;color:var(--sub);max-width:640px;line-height:1.5;margin:0;font-weight:500;}
+  .sect{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--sub);margin:50px 0 18px;display:flex;align-items:center;gap:12px;}
+  .sect::after{content:"";flex:1;height:1px;background:var(--line);}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:22px;}
+
+  /* hero */
+  .hero{display:flex;align-items:center;gap:34px;padding:40px 44px;margin-top:34px;}
+  .heroTile{width:148px;height:148px;border-radius:38px;background:linear-gradient(155deg,var(--primary),var(--deep));display:flex;align-items:center;justify-content:center;box-shadow:0 3px 6px rgba(13,40,60,.18),0 26px 50px -16px rgba(79,143,188,.6);flex-shrink:0;}
+  .heroWm{font-size:74px;font-weight:800;letter-spacing:-.05em;line-height:.85;}
+  .heroTag{font-size:18px;color:var(--sub);font-weight:500;margin-top:14px;white-space:nowrap;}
+  .heroCap{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--primary);letter-spacing:.08em;margin-top:16px;font-weight:600;}
+
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .cols4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;}
+  .pad{padding:30px 26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:170px;}
+  .clabel{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--sub);letter-spacing:.06em;}
+
+  .lhoriz{display:flex;align-items:center;gap:14px;}
+  .lhoriz .wm{font-size:30px;font-weight:800;letter-spacing:-.04em;}
+  .lstack{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .lstack .wm{font-size:26px;font-weight:800;letter-spacing:-.04em;}
+  .miniTile{width:54px;height:54px;border-radius:15px;background:linear-gradient(155deg,var(--primary),var(--deep));display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(13,40,60,.18),0 9px 18px -9px rgba(79,143,188,.5);}
+
+  .sw-light{background:var(--bg);}
+  .sw-deep{background:linear-gradient(155deg,var(--primary),var(--deep));}
+  .sw-white{background:#fff;border:1px solid var(--line);}
+  .sw-ink{background:var(--ink);}
+  .treat{border-radius:16px;display:flex;align-items:center;justify-content:center;height:120px;}
+  .treatWrap{display:flex;flex-direction:column;gap:10px;}
+
+  /* sizes */
+  .sizes{display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap;padding:34px 30px;}
+  .sizeItem{display:flex;flex-direction:column;align-items:center;gap:9px;}
+  .sizeTile{border-radius:22%;background:linear-gradient(155deg,var(--primary),var(--deep));display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(13,40,60,.16),0 8px 18px -10px rgba(79,143,188,.5);}
+  .sizeItem span{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--sub);}
+
+  /* palette */
+  .ramp{display:flex;border-radius:14px;overflow:hidden;border:1px solid var(--line);}
+  .rchip{flex:1;height:70px;display:flex;align-items:flex-end;padding:8px;}
+  .rchip span{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">ELIGO · LOGO</div>
+  <h1>The Eligo mark</h1>
+  <p class="lede">Two overlapping sets, the matching cohort filled at their intersection — patient meets trial. Final mark, in Glacier.</p>
+
+  <div class="card hero">
+    <div class="heroTile" id="heroTile"></div>
+    <div>
+      <div class="heroWm">Eligo</div>
+      <div class="heroTag">Trial eligibility, in seconds</div>
+      <div class="heroCap">MARK · OVERLAP / BOLD</div>
+    </div>
+  </div>
+
+  <div class="sect">LOCKUPS</div>
+  <div class="cols3">
+    <div class="card pad"><div class="lhoriz"><div class="miniTile" id="lh"></div><div class="wm">Eligo</div></div><div class="clabel">HORIZONTAL</div></div>
+    <div class="card pad"><div class="lstack"><div class="miniTile" id="ls"></div><div class="wm">Eligo</div></div><div class="clabel">STACKED</div></div>
+    <div class="card pad"><div class="miniTile" id="lo" style="width:64px;height:64px;border-radius:18px"></div><div class="clabel">ICON ONLY</div></div>
+  </div>
+
+  <div class="sect">COLOUR TREATMENTS</div>
+  <div class="cols4" id="treats"></div>
+
+  <div class="sect">SIZES &amp; FAVICON</div>
+  <div class="card sizes" id="sizes"></div>
+
+  <div class="sect">GLACIER</div>
+  <div class="card" style="padding:24px 26px">
+    <div class="ramp" id="ramp"></div>
+  </div>
+</div>
+
+<script>
+const C = { primary:'#4F8FBC', p700:'#2E6B8E', deep:'#1C4E6C', tint:'#ABD2E6', tint4:'#7FB4D4', ink:'#0F212A' };
+
+// modes: color | reverse | mono | flat
+function tones(mode){
+  if(mode==='reverse') return { a:'#fff', b:'rgba(255,255,255,.74)', lens:'rgba(255,255,255,.92)' };
+  if(mode==='mono')    return { a:C.ink, b:'rgba(15,33,42,.5)', lens:C.ink };
+  if(mode==='flat')    return { a:C.primary, b:C.primary, lens:C.primary };
+  return { a:C.primary, b:C.p700, lens:C.deep };
+}
+function lensPath(cxA,cxB,r){
+  const d=(cxB-cxA)/2, yo=Math.sqrt(Math.max(0,r*r-d*d));
+  return `M32,${(32-yo).toFixed(2)} A${r},${r} 0 0 1 32,${(32+yo).toFixed(2)} A${r},${r} 0 0 1 32,${(32-yo).toFixed(2)} Z`;
+}
+// THE mark — Overlap · Bold
+function mark(size, mode){
+  const k=tones(mode);
+  const cxA=25,cxB=39,r=14,w=6.5;
+  const g = `<path d="${lensPath(cxA,cxB,r)}" fill="${k.lens}"/>
+    <circle cx="${cxA}" cy="32" r="${r}" fill="none" stroke="${k.a}" stroke-width="${w}"/>
+    <circle cx="${cxB}" cy="32" r="${r}" fill="none" stroke="${k.b}" stroke-width="${w}"/>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 64 64" style="display:block">${g}</svg>`;
+}
+
+document.getElementById('heroTile').innerHTML = mark(86, 'reverse');
+document.getElementById('lh').innerHTML = mark(34, 'reverse');
+document.getElementById('ls').innerHTML = mark(34, 'reverse');
+document.getElementById('lo').innerHTML = mark(40, 'reverse');
+
+// colour treatments
+const TREATS = [
+  { cls:'sw-white', mode:'color',   lab:'PRIMARY · on light' },
+  { cls:'sw-deep',  mode:'reverse', lab:'REVERSED · on brand' },
+  { cls:'sw-light', mode:'flat',    lab:'ONE-COLOUR' },
+  { cls:'sw-ink',   mode:'reverse', lab:'WHITE · on ink' },
+];
+document.getElementById('treats').innerHTML = TREATS.map(t => `
+  <div class="treatWrap">
+    <div class="treat ${t.cls}">${mark(64, t.mode)}</div>
+    <div class="clabel" style="text-align:center">${t.lab}</div>
+  </div>`).join('');
+// also a monochrome ink on light as a 5th? keep 4 tidy; add ink mark into one-colour card swap:
+document.querySelectorAll('.treat')[2].innerHTML = mark(64,'flat');
+
+// sizes
+const SIZES = [120, 76, 56, 40, 32];
+document.getElementById('sizes').innerHTML = SIZES.map(s => `
+  <div class="sizeItem">
+    <div class="sizeTile" style="width:${s}px;height:${s}px">${mark(Math.round(s*0.62), 'reverse')}</div>
+    <span>${s}px</span>
+  </div>`).join('') + `
+  <div class="sizeItem">
+    <div class="sizeTile" style="width:32px;height:32px;border-radius:7px">${mark(20,'reverse')}</div>
+    <span>favicon 32</span>
+  </div>
+  <div class="sizeItem">
+    <div class="sizeTile" style="width:16px;height:16px;border-radius:4px">${mark(11,'reverse')}</div>
+    <span>16</span>
+  </div>`;
+
+// palette ramp
+const RAMP = [['#173B52','#fff'],['#1C4E6C','#fff'],['#2E6B8E','#fff'],['#4F8FBC','#fff'],['#7FB4D4','#0F212A'],['#ABD2E6','#0F212A'],['#CDE5F0','#0F212A'],['#E9F4F9','#0F212A']];
+document.getElementById('ramp').innerHTML = RAMP.map(([hex,fg]) => `<div class="rchip" style="background:${hex};color:${fg}"><span>${hex}</span></div>`).join('');
+</script>
+</body>
+</html>

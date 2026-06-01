@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Eligo — Stroke pathway system</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{ --ink:#0F212A; --sub:#4D6572; --line:#DBEBF1; --surface:#fff; --bg:#E9F4F9; }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+  html,body{margin:0;background:#EAF1F4;font-family:'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);}
+  .wrap{max-width:1180px;margin:0 auto;padding:58px 48px 88px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.16em;color:#3F82AE;font-weight:600;}
+  h1{font-family:'Hanken Grotesk',sans-serif;font-size:38px;font-weight:800;letter-spacing:-.035em;margin:13px 0 10px;}
+  .lede{font-size:16px;color:var(--sub);max-width:660px;line-height:1.5;margin:0;font-weight:500;}
+  .sect{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--sub);margin:48px 0 18px;display:flex;align-items:center;gap:12px;}
+  .sect::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  .pcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow:hidden;}
+  .band{padding:22px 24px;display:flex;align-items:center;gap:14px;color:#fff;}
+  .band .ic{width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;}
+  .band .nm{font-family:'Hanken Grotesk',sans-serif;font-size:21px;font-weight:800;letter-spacing:-.02em;}
+  .band .sb{font-family:'IBM Plex Mono',monospace;font-size:10.5px;opacity:.82;margin-top:3px;letter-spacing:.04em;}
+  .pbody{padding:22px 24px;display:flex;flex-direction:column;gap:18px;}
+  .swrow{display:flex;gap:10px;}
+  .sw{flex:1;border-radius:11px;padding:10px;display:flex;flex-direction:column;gap:24px;border:1px solid var(--line);}
+  .sw .lab{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--sub);}
+  .sw .hex{font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:600;}
+  .exrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .chip{font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;white-space:nowrap;display:inline-flex;align-items:center;}
+  .badge{font-size:11px;font-weight:700;padding:5px 11px;border-radius:999px;color:#fff;letter-spacing:.02em;white-space:nowrap;}
+  .trial{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;}
+  .trial .bar{width:4px;height:34px;border-radius:3px;}
+  .trial .tt{font-size:13.5px;font-weight:700;}
+  .trial .ts{font-size:11px;color:var(--sub);font-family:'IBM Plex Mono',monospace;margin-top:2px;}
+
+  .taglinebar{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 22px;}
+  .taglinebar .seg{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;}
+  .dot{width:11px;height:11px;border-radius:50%;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">ELIGO · STROKE PATHWAY SYSTEM</div>
+  <h1>The three pathways, retuned for Glacier</h1>
+  <p class="lede">One harmonised triad — equal weight and saturation, distinct hue — so ischemic, hemorrhagic and post-acute read as one family alongside the blue brand, never as clashing colours.</p>
+
+  <div class="sect">PATHWAYS</div>
+  <div class="grid" id="grid"></div>
+
+  <div class="sect">TOGETHER</div>
+  <div class="taglinebar" id="tag"></div>
+</div>
+
+<script>
+const PATHS = [
+  { id:'isch', name:'Ischemic',    sub:'ACUTE · LVO / NON-LVO',  fg:'#3F82AE', bg:'#E7F1F8', icon:'occlusion',
+    trial:'WeTrust', tstat:'< 6 h · imaging' },
+  { id:'hemo', name:'Hemorrhagic', sub:'ACUTE · SPONTANEOUS ICH', fg:'#C0675C', bg:'#F8EAE7', icon:'drop',
+    trial:'STITCH', tstat:'< 72 h · evacuation' },
+  { id:'post', name:'Post-acute',  sub:'RECOVERY · REHAB',        fg:'#4A9A86', bg:'#E6F3EF', icon:'recovery',
+    trial:'PROMISE', tstat:'< 7 d · recovery' },
+];
+
+function icon(kind, c){
+  if(kind==='occlusion') return `<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="${c}" stroke-width="2.4"/><circle cx="12" cy="12" r="3.1" fill="${c}"/></svg>`;
+  if(kind==='drop')      return `<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3.5 C 16.4 9.5 16.6 13.4 12 19 C 7.4 13.4 7.6 9.5 12 3.5 Z" fill="${c}"/></svg>`;
+  if(kind==='recovery')  return `<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 16 L10.5 9.5 L14 13 L19 6.5" stroke="${c}" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 6.5 H19 V10.5" stroke="${c}" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  return '';
+}
+
+document.getElementById('grid').innerHTML = PATHS.map(p => `
+  <div class="pcard">
+    <div class="band" style="background:linear-gradient(150deg, ${p.fg}, ${shade(p.fg)})">
+      <div class="ic">${icon(p.icon, '#fff')}</div>
+      <div><div class="nm">${p.name}</div><div class="sb">${p.sub}</div></div>
+    </div>
+    <div class="pbody">
+      <div class="swrow">
+        <div class="sw" style="background:${p.fg}"><span class="lab" style="color:rgba(255,255,255,.7)">ACCENT</span><span class="hex" style="color:#fff">${p.fg}</span></div>
+        <div class="sw" style="background:${p.bg}"><span class="lab">SURFACE</span><span class="hex" style="color:${p.fg}">${p.bg}</span></div>
+      </div>
+      <div class="exrow">
+        <span class="chip" style="background:${p.bg};color:${p.fg}">${icon(p.icon,p.fg).replace('width="26" height="26"','width="13" height="13" style="vertical-align:-2px;margin-right:5px;display:inline-block"')}${p.name}</span>
+        <span class="badge" style="background:${p.fg}">${p.name}</span>
+      </div>
+      <div class="trial">
+        <div class="bar" style="background:${p.fg}"></div>
+        <div style="flex:1"><div class="tt">${p.trial}</div><div class="ts">${p.tstat}</div></div>
+        <span class="chip" style="background:${p.bg};color:${p.fg};font-size:10.5px">trial</span>
+      </div>
+    </div>
+  </div>`).join('');
+
+document.getElementById('tag').innerHTML = `
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--sub)">TAGLINE</span>
+  ` + PATHS.map(p => `<span class="seg" style="color:${p.fg}"><span class="dot" style="background:${p.fg}"></span>${p.name}</span>`).join('<span style="color:#C3D2DA">·</span>');
+
+function shade(hex){
+  // darken ~22% for the gradient end
+  const n=parseInt(hex.slice(1),16); let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  r=Math.round(r*.7); g=Math.round(g*.7); b=Math.round(b*.7);
+  return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+</script>
+</body>
+</html>

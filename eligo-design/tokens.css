@@ -1,0 +1,39 @@
+:root {
+  /* Brand / Glacier */
+  --eligo-primary:     #4F8FBC;
+  --eligo-primary-dk:  #1C4E6C;
+  --eligo-primary-bg:  #E5F1F8;
+
+  /* Surfaces */
+  --eligo-bg:          #EFF5F8;
+  --eligo-bg-sunken:   #E5EFF4;
+  --eligo-surface:     #FFFFFF;
+  --eligo-surface-2:   #F7FAFC;
+  --eligo-line:        #DBEBF1;
+  --eligo-line-soft:   #E9F1F5;
+
+  /* Text */
+  --eligo-ink:         #0F212A;
+  --eligo-ink-2:       #44606E;
+  --eligo-ink-3:       #7F97A3;
+
+  /* Status */
+  --eligo-ok-fg:   #2E9E7B; --eligo-ok-bg:   #E4F4EE;
+  --eligo-warn-fg: #B5832C; --eligo-warn-bg: #F7EFDE;
+  --eligo-danger-fg: #C8524C; --eligo-danger-bg: #F8E9E8;
+
+  /* Stroke pathways */
+  --eligo-isch-fg: #3F82AE; --eligo-isch-bg: #E7F1F8;
+  --eligo-hemo-fg: #C0675C; --eligo-hemo-bg: #F8EAE7;
+  --eligo-post-fg: #4A9A86; --eligo-post-bg: #E6F3EF;
+
+  /* Type */
+  --eligo-font-display: "Hanken Grotesk", system-ui, sans-serif;
+  --eligo-font-sans: "IBM Plex Sans", -apple-system, system-ui, sans-serif;
+  --eligo-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* Radius */
+  --eligo-radius-card: 22px;
+  --eligo-radius-control: 13px;
+  --eligo-radius-tile: 38px;
+}
