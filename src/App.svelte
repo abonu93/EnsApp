@@ -4,6 +4,7 @@
   import BottomNav from "$lib/components/BottomNav.svelte";
   import Logo from "$lib/components/Logo.svelte";
   import Splash from "$lib/components/Splash.svelte";
+  import InstallPrompt from "$lib/components/InstallPrompt.svelte";
   import { t, locale, cycleLocale } from "$lib/i18n";
 
   // Splash visibile al primo load di sessione. Lo skip persiste in
@@ -37,6 +38,8 @@
 {#if showSplash}
   <Splash onDone={dismissSplash} />
 {/if}
+
+<InstallPrompt />
 
 <a href="#main" class="skip-link">{$t.common.skipToContent}</a>
 

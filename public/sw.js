@@ -2,7 +2,7 @@
 // Strategia: passthrough alla rete con cache stub.
 // Chrome richiede un SW registrato per offrire "Installa app".
 
-const VERSION = "v1";
+const VERSION = "v2-eligo";
 const SHELL_CACHE = "ensapp-shell-" + VERSION;
 
 self.addEventListener("install", (event) => {

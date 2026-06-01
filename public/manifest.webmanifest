@@ -1,13 +1,14 @@
 {
+  "id": "/EnsApp/?eligo=v1",
   "name": "Eligo - Trial eligibility, in seconds",
   "short_name": "Eligo",
   "description": "Stroke clinical-trial eligibility matching.",
   "lang": "es",
-  "start_url": "./",
+  "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#EFF5F8",
+  "background_color": "#4F8FBC",
   "theme_color": "#4F8FBC",
   "icons": [
     {
