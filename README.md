@@ -1,52 +1,80 @@
 # EnsApp - Clinical Trial Assignment
 
-Applicazione web per supportare l'assegnazione dei pazienti agli studi clinici.
+Web app per assegnare pazienti con ictus (acuto / emorragico / post-acuto) ai trial clinici disponibili. Mobile-first, accessibile WCAG 2.1 AA, tri-lingua IT/EN/ES.
 
-## Obiettivo della riorganizzazione
+## Stack
 
-Il progetto era monolitico (`index.html` con HTML/CSS/JS nello stesso file). Ora e stato separato in moduli per facilitare manutenzione, debug e sviluppo incrementale.
+- **Frontend**: Svelte 5 + Vite 6 + TypeScript strict
+- **Routing**: svelte-spa-router (hash-based, deploy ovunque sia static hosting)
+- **Stato**: Svelte stores con persistenza localStorage (TTL 24h, versioning)
+- **i18n**: dizionari it/en/es senza dipendenze, locale persistito
+- **Testing**: Vitest (unit + golden + parity) + Playwright (E2E + axe-core a11y)
+- **Bundle**: ~60 kB gz (budget 100 kB)
 
-## Struttura attuale
+## Avvio
 
-- `index.html`: solo markup e inclusione asset
-- `css/app.css`: stili dell'app
-- `js/app-data.js`: costanti e configurazioni (trial, link, mapping sheet)
-- `js/app-state.js`: stato globale dell'app
-- `js/app-navigation.js`: navigazione pagine e dettaglio criteri trial
-- `js/app-eligibility.js`: logica pre/post imaging e eligibility acuta
-- `js/app-post-acute.js`: logica post-acuta (Librexia)
-- `js/app-share.js`: costruzione messaggi e salvataggio in sheet (flusso acuto/chronic)
-- `js/app-trial-patient.js`: flusso "patient from trial"
-- `js/app-modal-reset.js`: modal, reset stato e info
-- `js/domain/acute-rules.js`: regole pure per eligibility ischemica
-- `js/domain/hemorrhagic-rules.js`: regole pure per eligibility emorragica
-- `tests/domain/*.test.js`: test automatici delle regole pure
-- `docs/`: documentazione di lavoro
+```bash
+npm install
+npm run dev            # dev server (Vite, hot reload)
+```
 
-## Come avviare
+Apri http://localhost:5173
 
-1. Apri `index.html` nel browser.
-2. Verifica i flussi principali:
-   - Nuovo paziente (pre + post imaging)
-   - Summary e selezione studi
-   - Share/Save Google Sheet
-   - Flusso post-acuto
-   - Flusso da Trial
+## Comandi
 
-## Test automatici
+```bash
+npm run check          # type check
+npm test               # 211 unit + golden + parity (Vitest)
+npm run test:e2e       # 18 E2E + a11y mobile (Playwright)
+npm run test:all       # gate completo
+npm run build          # build prod
+npm run preview        # serve dist/
+```
 
-Prerequisito: Node.js installato.
+## Struttura
 
-1. Esegui `npm test`
-2. I test coprono le regole pure in `js/domain/`
+```
+src/
+  routes/              # 13 schermate SPA
+  lib/
+    components/        # 14 componenti atomici accessibili
+    stores/            # patient, eligibility (derived), trialSelection, theme, locale
+    domain/            # acute-rules, hemorrhagic-rules, trials-info, sheet-payload, vessels
+    validation/        # framework + rules atomiche
+    i18n/              # it/en/es
+    router/            # mappa route + focus management
+    a11y/              # focus trap, live region
+    styles/            # tokens (light/dark), reset, global
+tests/
+  domain/              # unit + golden cases (regressione clinica vs legacy)
+  validation/          # framework
+  e2e/                 # Playwright: a11y + flussi clinici + sheet intercept
+tools/
+  generate-golden-cases.mjs   # rigenera fixture dal codice legacy
+  screenshot.mjs              # snapshot visivi
+legacy/                # codice originale (read-only, rimosso a fine Fase 4)
+```
 
 ## Branch del repository
 
 - **`main`** -> versione **live** (produzione). Sempre stabile.
-- **`develop`** -> versione **di lavoro** (integrazione). Qui confluiscono le modifiche prima di andare in produzione.
+- **`develop`** -> branch di **integrazione**. Qui confluiscono le modifiche prima di andare in produzione.
 - **`feature/...`** / **`fix/...`** -> branch temporanei per ogni task, creati da `develop`.
 
-Per il flusso completo vedi [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md#branching-strategy).
+Flusso completo in [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+
+## CI / CD
+
+Su ogni PR, GitHub Actions esegue (workflow `.github/workflows/ci.yml`):
+- `npm run check` + `npm test` + `npm run build`
+- `npm run test:e2e` (a11y scan WCAG 2.1 AA su 11 route + 5 test funzionali)
+
+Push su `develop` o `main` deploya preview su GitHub Pages (`pages.yml`).
+
+## Vincoli clinici invarianti
+
+- Le regole di dominio in `src/lib/domain/{acute,hemorrhagic}-rules.ts` sono porting 1:1 del codice legacy. **NON** modificare la semantica senza aggiornare anche `tests/domain/fixtures/golden-cases.json` e verificare con almeno 10 casi clinici reali.
+- Il payload `buildTrialsForSheet` -> Apps Script ha snapshot parity test contro il codice legacy in `tests/domain/sheet-payload.test.ts`. **NON** modificare lo shape senza coordinarsi con il backend.
 
 ## Documentazione di supporto
 

@@ -1,0 +1,2592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EnsApp — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; min-height: 100%; background: #eceef2; }
+  * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+  .ens-press { transition: transform .09s ease, filter .12s ease; -webkit-tap-highlight-color: transparent; }
+  .ens-press:hover { filter: brightness(0.985); }
+  .ens-press:active { transform: scale(0.97); filter: brightness(0.95); }
+
+  /* shared entrance helpers */
+  @keyframes ens-fade { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes ens-sheet-up { from { transform: translateY(100%) } to { transform: translateY(0) } }
+  @keyframes ens-rise { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
+  .ens-rise { animation: ens-rise .55s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes ens-pop { 0% { transform: scale(.4); opacity: 0 } 60% { transform: scale(1.1) } 100% { transform: scale(1); opacity: 1 } }
+  .ens-pop { animation: ens-pop .55s cubic-bezier(.2,.9,.3,1.5) both; }
+  @keyframes ens-screen-in { from { opacity: 0; transform: translateX(26px) } to { opacity: 1; transform: translateX(0) } }
+  .ens-screen-in { animation: ens-screen-in .34s cubic-bezier(.2,.8,.2,1) both; }
+
+  /* transition variants for the New-patient → choice overlay */
+  .ens-tr-sheet  { animation: ens-sheet-up .46s cubic-bezier(.2,.85,.25,1) both; }
+
+  @keyframes ens-reveal { from { clip-path: circle(0% at var(--ox,50%) var(--oy,60%)) } to { clip-path: circle(150% at var(--ox,50%) var(--oy,60%)) } }
+  .ens-tr-reveal { animation: ens-reveal .6s cubic-bezier(.3,.7,.3,1) both; }
+
+  @keyframes ens-split { from { clip-path: inset(49.5% 0 49.5% 0) } to { clip-path: inset(0 0 0 0) } }
+  .ens-tr-split { animation: ens-split .52s cubic-bezier(.2,.85,.25,1) both; }
+
+  @keyframes ens-zoom { from { transform: scale(.18); opacity: 0; border-radius: 24px } 40% { opacity: 1 } to { transform: scale(1); opacity: 1; border-radius: 0 } }
+  .ens-tr-zoom { transform-origin: var(--ox,50%) var(--oy,50%); animation: ens-zoom .52s cubic-bezier(.2,.8,.25,1) both; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel">
+
+/* ===== ios-frame.jsx ===== */
+
+/* BEGIN USAGE */
+// iOS.jsx — Simplified iOS 26 (Liquid Glass) device frame
+// Based on the iOS 26 UI Kit + Figma status bar spec. No assets, no deps.
+// Exports (to window): IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard
+//
+// Usage — wrap your screen content in <IOSDevice> to get the bezel, status bar
+// and home indicator (props: title, dark, keyboard):
+//
+//   <IOSDevice title="Settings">
+//     ...your screen content...
+//   </IOSDevice>
+//   <IOSDevice dark title="Search" keyboard>…</IOSDevice>
+/* END USAGE */
+
+// ─────────────────────────────────────────────────────────────
+// Status bar
+// ─────────────────────────────────────────────────────────────
+function IOSStatusBar({ dark = false, time = '9:41' }) {
+  const c = dark ? '#fff' : '#000';
+  return (
+    <div style={{
+      display: 'flex', gap: 154, alignItems: 'center', justifyContent: 'center',
+      padding: '21px 24px 19px', boxSizing: 'border-box',
+      position: 'relative', zIndex: 20, width: '100%',
+    }}>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 1.5 }}>
+        <span style={{
+          fontFamily: '-apple-system, "SF Pro", system-ui', fontWeight: 590,
+          fontSize: 17, lineHeight: '22px', color: c,
+        }}>{time}</span>
+      </div>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 1, paddingRight: 1 }}>
+        <svg width="19" height="12" viewBox="0 0 19 12">
+          <rect x="0" y="7.5" width="3.2" height="4.5" rx="0.7" fill={c}/>
+          <rect x="4.8" y="5" width="3.2" height="7" rx="0.7" fill={c}/>
+          <rect x="9.6" y="2.5" width="3.2" height="9.5" rx="0.7" fill={c}/>
+          <rect x="14.4" y="0" width="3.2" height="12" rx="0.7" fill={c}/>
+        </svg>
+        <svg width="17" height="12" viewBox="0 0 17 12">
+          <path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill={c}/>
+          <path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill={c}/>
+          <circle cx="8.5" cy="10.5" r="1.5" fill={c}/>
+        </svg>
+        <svg width="27" height="13" viewBox="0 0 27 13">
+          <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke={c} strokeOpacity="0.35" fill="none"/>
+          <rect x="2" y="2" width="20" height="9" rx="2" fill={c}/>
+          <path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill={c} fillOpacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Liquid glass pill — blur + tint + shine
+// ─────────────────────────────────────────────────────────────
+function IOSGlassPill({ children, dark = false, style = {} }) {
+  return (
+    <div style={{
+      height: 44, minWidth: 44, borderRadius: 9999,
+      position: 'relative', overflow: 'hidden',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: dark
+        ? '0 2px 6px rgba(0,0,0,0.35), 0 6px 16px rgba(0,0,0,0.2)'
+        : '0 1px 3px rgba(0,0,0,0.07), 0 3px 10px rgba(0,0,0,0.06)',
+      ...style,
+    }}>
+      {/* blur + tint */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.28)' : 'rgba(255,255,255,0.5)',
+      }} />
+      {/* shine */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15), inset -1px -1px 1px rgba(255,255,255,0.08)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+      }} />
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', padding: '0 4px' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Navigation bar — glass pills + large title
+// ─────────────────────────────────────────────────────────────
+function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
+  const muted = dark ? 'rgba(255,255,255,0.6)' : '#404040';
+  const text = dark ? '#fff' : '#000';
+  const pillIcon = (content) => (
+    <IOSGlassPill dark={dark}>
+      <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {content}
+      </div>
+    </IOSGlassPill>
+  );
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', gap: 10,
+      paddingTop: 62, paddingBottom: 10, position: 'relative', zIndex: 5,
+    }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 16px',
+      }}>
+        {/* back chevron */}
+        {pillIcon(
+          <svg width="12" height="20" viewBox="0 0 12 20" fill="none" style={{ marginLeft: -1 }}>
+            <path d="M10 2L2 10l8 8" stroke={muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+        {/* trailing ellipsis */}
+        {trailingIcon && pillIcon(
+          <svg width="22" height="6" viewBox="0 0 22 6">
+            <circle cx="3" cy="3" r="2.5" fill={muted}/>
+            <circle cx="11" cy="3" r="2.5" fill={muted}/>
+            <circle cx="19" cy="3" r="2.5" fill={muted}/>
+          </svg>
+        )}
+      </div>
+      {/* large title */}
+      <div style={{
+        padding: '0 16px',
+        fontFamily: '-apple-system, system-ui',
+        fontSize: 34, fontWeight: 700, lineHeight: '41px',
+        color: text, letterSpacing: 0.4,
+      }}>{title}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Grouped list (inset card, r:26) + row (52px)
+// ─────────────────────────────────────────────────────────────
+function IOSListRow({ title, detail, icon, chevron = true, isLast = false, dark = false }) {
+  const text = dark ? '#fff' : '#000';
+  const sec = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const ter = dark ? 'rgba(235,235,245,0.3)' : 'rgba(60,60,67,0.3)';
+  const sep = dark ? 'rgba(84,84,88,0.65)' : 'rgba(60,60,67,0.12)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', minHeight: 52,
+      padding: '0 16px', position: 'relative',
+      fontFamily: '-apple-system, system-ui', fontSize: 17,
+      letterSpacing: -0.43,
+    }}>
+      {icon && (
+        <div style={{
+          width: 30, height: 30, borderRadius: 7, background: icon,
+          marginRight: 12, flexShrink: 0,
+        }} />
+      )}
+      <div style={{ flex: 1, color: text }}>{title}</div>
+      {detail && <span style={{ color: sec, marginRight: 6 }}>{detail}</span>}
+      {chevron && (
+        <svg width="8" height="14" viewBox="0 0 8 14" style={{ flexShrink: 0 }}>
+          <path d="M1 1l6 6-6 6" stroke={ter} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+      {!isLast && (
+        <div style={{
+          position: 'absolute', bottom: 0, right: 0,
+          left: icon ? 58 : 16, height: 0.5, background: sep,
+        }} />
+      )}
+    </div>
+  );
+}
+
+function IOSList({ header, children, dark = false }) {
+  const hc = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const bg = dark ? '#1C1C1E' : '#fff';
+  return (
+    <div>
+      {header && (
+        <div style={{
+          fontFamily: '-apple-system, system-ui', fontSize: 13,
+          color: hc, textTransform: 'uppercase',
+          padding: '8px 36px 6px', letterSpacing: -0.08,
+        }}>{header}</div>
+      )}
+      <div style={{
+        background: bg, borderRadius: 26,
+        margin: '0 16px', overflow: 'hidden',
+      }}>{children}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Device frame
+// ─────────────────────────────────────────────────────────────
+function IOSDevice({
+  children, width = 402, height = 874, dark = false,
+  title, keyboard = false,
+}) {
+  return (
+    <div style={{
+      width, height, borderRadius: 48, overflow: 'hidden',
+      position: 'relative', background: dark ? '#000' : '#F2F2F7',
+      boxShadow: '0 40px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.12)',
+      fontFamily: '-apple-system, system-ui, sans-serif',
+      WebkitFontSmoothing: 'antialiased',
+    }}>
+      {/* dynamic island */}
+      <div style={{
+        position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
+        width: 126, height: 37, borderRadius: 24, background: '#000', zIndex: 50,
+      }} />
+      {/* status bar (absolute) */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+        <IOSStatusBar dark={dark} />
+      </div>
+      {/* nav + content */}
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {title !== undefined && <IOSNavBar title={title} dark={dark} />}
+        <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
+        {keyboard && <IOSKeyboard dark={dark} />}
+      </div>
+      {/* home indicator — always on top */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60,
+        height: 34, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+        paddingBottom: 8, pointerEvents: 'none',
+      }}>
+        <div style={{
+          width: 139, height: 5, borderRadius: 100,
+          background: dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.25)',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Keyboard — iOS 26 liquid glass
+// ─────────────────────────────────────────────────────────────
+function IOSKeyboard({ dark = false }) {
+  const glyph = dark ? 'rgba(255,255,255,0.7)' : '#595959';
+  const sugg = dark ? 'rgba(255,255,255,0.6)' : '#333';
+  const keyBg = dark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.85)';
+
+  // special-key icons
+  const icons = {
+    shift: <svg width="19" height="17" viewBox="0 0 19 17"><path d="M9.5 1L1 9.5h4.5V16h8V9.5H18L9.5 1z" fill={glyph}/></svg>,
+    del: <svg width="23" height="17" viewBox="0 0 23 17"><path d="M7 1h13a2 2 0 012 2v11a2 2 0 01-2 2H7l-6-7.5L7 1z" fill="none" stroke={glyph} strokeWidth="1.6" strokeLinejoin="round"/><path d="M10 5l7 7M17 5l-7 7" stroke={glyph} strokeWidth="1.6" strokeLinecap="round"/></svg>,
+    ret: <svg width="20" height="14" viewBox="0 0 20 14"><path d="M18 1v6H4m0 0l4-4M4 7l4 4" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  };
+
+  const key = (content, { w, flex, ret, fs = 25, k } = {}) => (
+    <div key={k} style={{
+      height: 42, borderRadius: 8.5,
+      flex: flex ? 1 : undefined, width: w, minWidth: 0,
+      background: ret ? '#08f' : keyBg,
+      boxShadow: '0 1px 0 rgba(0,0,0,0.075)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: '-apple-system, "SF Compact", system-ui',
+      fontSize: fs, fontWeight: 458, color: ret ? '#fff' : glyph,
+    }}>{content}</div>
+  );
+
+  const row = (keys, pad = 0) => (
+    <div style={{ display: 'flex', gap: 6.5, justifyContent: 'center', padding: `0 ${pad}px` }}>
+      {keys.map(l => key(l, { flex: true, k: l }))}
+    </div>
+  );
+
+  return (
+    <div style={{
+      position: 'relative', zIndex: 15, borderRadius: 27, overflow: 'hidden',
+      padding: '11px 0 2px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      boxShadow: dark
+        ? '0 -2px 20px rgba(0,0,0,0.09)'
+        : '0 -1px 6px rgba(0,0,0,0.018), 0 -3px 20px rgba(0,0,0,0.012)',
+    }}>
+      {/* liquid glass bg — same recipe as nav pills */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.14)' : 'rgba(255,255,255,0.25)',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* autocorrect bar */}
+      <div style={{
+        display: 'flex', gap: 20, alignItems: 'center',
+        padding: '8px 22px 13px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {['"The"', 'the', 'to'].map((w, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && <div style={{ width: 1, height: 25, background: '#ccc', opacity: 0.3 }} />}
+            <div style={{
+              flex: 1, textAlign: 'center',
+              fontFamily: '-apple-system, system-ui', fontSize: 17,
+              color: sugg, letterSpacing: -0.43, lineHeight: '22px',
+            }}>{w}</div>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* key layout */}
+      <div style={{
+        display: 'flex', flexDirection: 'column', gap: 13,
+        padding: '0 6.5px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {row(['q','w','e','r','t','y','u','i','o','p'])}
+        {row(['a','s','d','f','g','h','j','k','l'], 20)}
+        <div style={{ display: 'flex', gap: 14.25, alignItems: 'center' }}>
+          {key(icons.shift, { w: 45, k: 'shift' })}
+          <div style={{ display: 'flex', gap: 6.5, flex: 1 }}>
+            {['z','x','c','v','b','n','m'].map(l => key(l, { flex: true, k: l }))}
+          </div>
+          {key(icons.del, { w: 45, k: 'del' })}
+        </div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {key('ABC', { w: 92.25, fs: 18, k: 'abc' })}
+          {key('', { flex: true, k: 'space' })}
+          {key(icons.ret, { w: 92.25, ret: true, k: 'ret' })}
+        </div>
+      </div>
+
+      {/* bottom spacer (emoji+mic area, icons omitted) */}
+      <div style={{ height: 56, width: '100%', position: 'relative' }} />
+    </div>
+  );
+}
+
+Object.assign(window, {
+  IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard,
+});
+
+
+/* ===== ensapp-shared.jsx ===== */
+// ensapp-shared.jsx — design tokens, i18n, icons, shared UI primitives
+// Exposed on window for the variant files + index mount.
+
+const ENS = {
+  bg:        '#F5F6F8',   // cool near-white app canvas
+  bgSunken:  '#EEF0F3',
+  surface:   '#FFFFFF',
+  surface2:  '#FAFBFC',
+  line:      '#E3E7ED',   // hairline
+  lineSoft:  '#EDEFF3',
+  ink:       '#0E1726',   // primary text (slate-900-ish)
+  ink2:      '#475067',   // secondary
+  ink3:      '#8A93A6',   // tertiary
+  primary:   '#2D5BD7',   // cobalt
+  primaryDk: '#1E45B0',
+  primaryBg: '#EAF0FD',
+  okFg:      '#0B8457', okBg: '#E6F4EE',
+  warnFg:    '#B5740C', warnBg: '#FBF1E2',
+  dangFg:    '#C4403E', dangBg: '#FBECEB',
+  // stroke pathway accents (subtle, desaturated)
+  isch:      '#2D5BD7', ischBg: '#EAF0FD',
+  hemo:      '#B23B5E', hemoBg: '#FBEBF0',
+  post:      '#0E8C8C', postBg: '#E4F4F4',
+  sans: "'IBM Plex Sans', -apple-system, system-ui, sans-serif",
+  mono: "'IBM Plex Mono', ui-monospace, monospace",
+};
+
+// ── i18n ──────────────────────────────────────────────────────
+const STR = {
+  en: {
+    tagline: 'Patient assignment to clinical trials',
+    taglineSub: 'Acute · hemorrhagic · post-acute',
+    newPatient: 'New patient', newEval: 'New evaluation',
+    quickPatient: 'Quick patient', quickDesc: 'Already-enrolled patient',
+    eligibility: 'Eligibility evaluation', eligDesc: 'Guided history + imaging',
+    trialsInfo: 'Trials info', trialsDesc: 'Inclusion / exclusion criteria',
+    activeSession: 'Active session', resume: 'Resume', discard: 'Discard',
+    sinceLtsw: 'since LTSW', window: 'window', toWindowEnd: 'to window close',
+    catalog: 'Trials catalog', catalogDesc: 'Browse criteria — no patient needed',
+    pastPatients: 'Past patients',
+    whatToDo: 'What would you like to do?', choosePath: 'Start by stroke pathway',
+    ischemic: 'Ischemic', hemorrhagic: 'Hemorrhagic', postAcute: 'Post-acute',
+    active: 'active', paused: 'paused', total: 'trials', enrolledToday: 'screened today',
+    recent: 'Recent patients', viewAll: 'View all', open: 'Open',
+    home: 'Home', tnew: 'New', trials: 'Trials',
+    draft: 'Draft', eligible: 'Eligible', screening: 'Screening',
+    age: 'age', nihss: 'NIHSS',
+    // flow
+    proceedHow: 'How do you want to proceed?',
+    checkElig: 'Check eligibility', checkEligDesc: 'Enter clinical data and find every trial this patient qualifies for.',
+    directEnroll: 'Direct enrollment', directEnrollDesc: 'You already know the trial — register the patient now.',
+    fullFlow: 'Guided', fast: 'Fast', cancel: 'Cancel',
+    step: 'Step', stepOf: 'of', back: 'Back', next: 'Next', review: 'Review',
+    preImaging: 'Pre-imaging', preImagingSub: 'Initial history before CT / MRI',
+    identification: 'Identification', prn: 'Patient record number',
+    clinical: 'Clinical', ageL: 'Age', years: 'yrs',
+    premrs: 'Pre-stroke mRS', ltsw: 'Time since last seen well',
+    windowL: 'Time window', tpaWin: 'IV thrombolysis', evtWin: 'Thrombectomy', windowClosed: 'Window closed',
+    strokeType: 'Stroke type', selectedTrial: 'Selected trial', selectTrial: 'Select trial…',
+    enroll: 'Enroll patient', enrolled: 'Patient enrolled',
+    eligibleTrials: 'Eligible trials', summarySub: 'Trials this patient can be included in',
+    notEligible: 'Not eligible', viewCriteria: 'View criteria', enrolledIn: 'Registered for',
+    matches: 'matching trials', basedOn: 'Based on', done: 'Done', goHome: 'Back to home',
+    selectTrials: 'Select all trials this patient will be enrolled in', selected: 'selected',
+    continueSummary: 'Review enrollment', enrollSummaryT: 'Enrollment summary', enrollSummarySub: 'Patient will be enrolled in the following trials',
+    patientL: 'Patient', trialsCount: 'trials', confirmEnroll: 'Confirm enrollment', editSelection: 'Edit selection',
+    enrolledInN: 'Enrolled in', noneSelected: 'No trial selected yet', tapToSelect: 'Tap the eligible trials above',
+    lastSeenWell: 'Last seen well', selectDateTime: 'Select date & time…', setTime: 'Set', nowL: 'Now',
+    clinicalTrials: 'Clinical trials', totalLabel: 'total', searchTrials: 'name, category, intervention…', allFilter: 'All',
+    catalogBack: 'Catalog', keyCriteria: 'Key criteria', windowCol: 'Window', ageCol: 'Age', premrsCol: 'pre-mRS', nihssCol: 'NIHSS', aspectsCol: 'ASPECTS',
+    imagingL: 'Imaging', interventionL: 'Intervention', treatmentL: 'Treatment', thrombolyticL: 'Thrombolytic', thrombectomyL2: 'Thrombectomy', preEvtLabs: 'Pre-EVT labs', consentL: 'Consent',
+    statusActive: 'active', statusPaused: 'paused', noTrials: 'No trials match your search.',
+    tabPatients: 'Patients', tabStats: 'Statistics', screened: 'Screened', enrolledStat: 'Enrolled', missedStat: 'Missed eligible', enrollRate: 'Enrollment rate',
+    enrollByTrial: 'Enrollment by trial', missedOpp: 'Missed opportunities', needsReview: 'To review', reviewedL: 'Reviewed',
+    eligibleNotEnrolled: 'Eligible — not enrolled', missedBadge: 'missed', markReviewed: 'Mark as reviewed', reviewedDone: 'Reviewed ✓', enrollNow: 'Enroll now',
+    caseReview: 'Case review', patientsCount: 'patients', enrollmentsCount: 'enrollments', filterMissed: 'With misses', allP: 'All', missedHint: 'Patient qualified but was not enrolled.',
+    wakeUp: 'Wake-up stroke', wakeUpDesc: 'WeTrust: allow LTSW up to 12 h if symptoms identified within 6 h.',
+    symptomsWithin: 'Symptoms identified within 6 h of awakening', fromLtsw: 'computed from LTSW', yes: 'Yes', no: 'No',
+    operational: 'Operational context', philips: 'Philips angiograph available?', doac: 'DOAC (NOAC) in the previous 48 h?', ace: 'ACE inhibitor (IECA) in therapy?',
+    preResultT: 'Pre-imaging result', proceedPost: 'Proceed with post-imaging evaluation.', continueL: 'Continue', notMeetA: 'Patient does not meet all', notMeetB: 'criteria.',
+    postImaging: 'Post-imaging', postImagingSub: 'Stroke type, candidacy and parameters',
+    strokeIschSub: 'LVO or non-LVO', strokeHemoSub: 'Spontaneous ICH',
+    candidacy: 'Treatment candidacy', evtCandidate: 'Candidate for thrombectomy (EVT)?', ivtCandidate: 'Candidate for IVT (thrombolysis)?',
+    evtParams: 'EVT parameters', evtParamsNote: 'Required for ATHENA, PIVOTAL, MOSTE and other EVT trials.',
+    tandem: 'Tandem occlusion?', tortuosity: 'Vessel tortuosity?', tortuosityNote: 'If unspecified, some trials show “Not indicated”.',
+    targetVessel: 'Target vessel', selectOneMore: 'Select one or more occluded vessels.', optional: 'optional',
+    severity: 'Severity', gcs: 'GCS', patternCause: 'Pattern & cause', isolatedIvh: 'Isolated to IVH', isolatedIvhSub: 'Intraventricular only',
+    secondaryCause: 'Secondary cause', eligFactors: 'Eligibility factors', txaExclL: 'Seizure / thrombosis / TXA hypersensitivity', anticoag: 'Anticoagulant therapy',
+    hemVolume: 'Hemorrhage volume', notAvailable: 'Not available', volPending: 'Volume not entered (CT pending)', largeHematoma: 'Large hematoma (≥ 30 mL)', dragVolume: 'Drag to set volume',
+    ichScore: 'ICH score', volPendingScore: 'Volume pending — could be +1 (≥30 mL)', mortality30: '30-day mortality ≈', live: 'live',
+    cNone: 'None', cTrauma: 'Trauma', cAvm: 'AVM', cAneurysm: 'Aneurysm', cTumor: 'Tumor', cOther: 'Other', aWarfarin: 'Warfarin', aHep: 'Heparin <24h', aDoac: 'DOAC',
+    sevSevere: 'Severe', sevModerate: 'Moderate', sevMild: 'Mild', coreLarge: 'Large core', coreModerate: 'Moderate', coreFavorable: 'Favorable',
+    sendRecord: 'Send record', sendSub: 'Review & submit to registry', patientRecord: 'Patient record', acuteTx: 'Acute treatments',
+    thrombectomyTx: 'Thrombectomy (TEV)', thrombolysisTx: 'Thrombolysis (TIV)', notesL: 'Notes', notesPh: 'Free notes…', msgPreview: 'Message preview',
+    sendToSheet: 'Send to Google Sheet', copyL: 'Copy', whatsappL: 'WhatsApp', treatments: 'Treatments', sent: 'Record sent', sentSub: 'Saved to registry · shared with team', typeL: 'Type',
+    hr: 'h', min: 'm', within: 'within',
+  },
+  es: {
+    tagline: 'Asignación de pacientes a ensayos clínicos',
+    taglineSub: 'Agudo · hemorrágico · post-agudo',
+    newPatient: 'Nuevo paciente', newEval: 'Nueva evaluación',
+    quickPatient: 'Paciente rápido', quickDesc: 'Paciente ya incluido',
+    eligibility: 'Evaluación de elegibilidad', eligDesc: 'Historia guiada + imagen',
+    trialsInfo: 'Info de ensayos', trialsDesc: 'Criterios inclusión / exclusión',
+    activeSession: 'Sesión activa', resume: 'Reanudar', discard: 'Descartar',
+    sinceLtsw: 'desde LTSW', window: 'ventana', toWindowEnd: 'al cierre de ventana',
+    catalog: 'Catálogo de ensayos', catalogDesc: 'Explorar criterios — sin paciente',
+    pastPatients: 'Pacientes anteriores',
+    whatToDo: '¿Qué quieres hacer?', choosePath: 'Empieza por la vía de ictus',
+    ischemic: 'Isquémico', hemorrhagic: 'Hemorrágico', postAcute: 'Post-agudo',
+    active: 'activos', paused: 'en pausa', total: 'ensayos', enrolledToday: 'evaluados hoy',
+    recent: 'Pacientes recientes', viewAll: 'Ver todos', open: 'Abrir',
+    home: 'Inicio', tnew: 'Nuevo', trials: 'Ensayos',
+    draft: 'Borrador', eligible: 'Elegible', screening: 'Cribado',
+    age: 'edad', nihss: 'NIHSS',
+    proceedHow: '¿Cómo quieres proceder?',
+    checkElig: 'Comprobar elegibilidad', checkEligDesc: 'Introduce datos clínicos y encuentra los ensayos para los que el paciente es elegible.',
+    directEnroll: 'Inscripción directa', directEnrollDesc: 'Ya sabes el ensayo — registra al paciente ahora.',
+    fullFlow: 'Guiado', fast: 'Rápido', cancel: 'Cancelar',
+    step: 'Paso', stepOf: 'de', back: 'Atrás', next: 'Siguiente', review: 'Revisar',
+    preImaging: 'Pre-imagen', preImagingSub: 'Historia inicial antes de TC / RM',
+    identification: 'Identificación', prn: 'Número de registro',
+    clinical: 'Clínica', ageL: 'Edad', years: 'años',
+    premrs: 'mRS previo', ltsw: 'Tiempo desde última vez bien',
+    windowL: 'Ventana temporal', tpaWin: 'Trombolisis IV', evtWin: 'Trombectomía', windowClosed: 'Ventana cerrada',
+    strokeType: 'Tipo de ictus', selectedTrial: 'Ensayo seleccionado', selectTrial: 'Selecciona ensayo…',
+    enroll: 'Incluir paciente', enrolled: 'Paciente incluido',
+    eligibleTrials: 'Ensayos elegibles', summarySub: 'Ensayos en los que el paciente puede incluirse',
+    notEligible: 'No elegible', viewCriteria: 'Ver criterios', enrolledIn: 'Registrado en',
+    matches: 'ensayos compatibles', basedOn: 'Según', done: 'Hecho', goHome: 'Volver al inicio',
+    selectTrials: 'Selecciona todos los ensayos en los que se incluirá al paciente', selected: 'seleccionados',
+    continueSummary: 'Revisar inclusión', enrollSummaryT: 'Resumen de inclusión', enrollSummarySub: 'El paciente se incluirá en los siguientes ensayos',
+    patientL: 'Paciente', trialsCount: 'ensayos', confirmEnroll: 'Confirmar inclusión', editSelection: 'Editar selección',
+    enrolledInN: 'Incluido en', noneSelected: 'Ningún ensayo seleccionado', tapToSelect: 'Toca los ensayos elegibles de arriba',
+    lastSeenWell: 'Última vez bien', selectDateTime: 'Elegir fecha y hora…', setTime: 'Fijar', nowL: 'Ahora',
+    clinicalTrials: 'Ensayos clínicos', totalLabel: 'en total', searchTrials: 'nombre, categoría, intervención…', allFilter: 'Todos',
+    catalogBack: 'Catálogo', keyCriteria: 'Criterios clave', windowCol: 'Ventana', ageCol: 'Edad', premrsCol: 'mRS previo', nihssCol: 'NIHSS', aspectsCol: 'ASPECTS',
+    imagingL: 'Imagen', interventionL: 'Intervención', treatmentL: 'Tratamiento', thrombolyticL: 'Trombolítico', thrombectomyL2: 'Trombectomía', preEvtLabs: 'Analítica pre-EVT', consentL: 'Consentimiento',
+    statusActive: 'activo', statusPaused: 'en pausa', noTrials: 'Ningún ensayo coincide con la búsqueda.',
+    tabPatients: 'Pacientes', tabStats: 'Estadísticas', screened: 'Evaluados', enrolledStat: 'Incluidos', missedStat: 'Elegibles no incluidos', enrollRate: 'Tasa de inclusión',
+    enrollByTrial: 'Inclusión por ensayo', missedOpp: 'Oportunidades perdidas', needsReview: 'Por revisar', reviewedL: 'Revisado',
+    eligibleNotEnrolled: 'Elegible — no incluido', missedBadge: 'no incluido', markReviewed: 'Marcar como revisado', reviewedDone: 'Revisado ✓', enrollNow: 'Incluir ahora',
+    caseReview: 'Revisión del caso', patientsCount: 'pacientes', enrollmentsCount: 'inclusiones', filterMissed: 'Con omisiones', allP: 'Todos', missedHint: 'El paciente cumplía pero no fue incluido.',
+    wakeUp: 'Ictus del despertar', wakeUpDesc: 'WeTrust: permite LTSW hasta 12 h si los síntomas se identifican en 6 h.',
+    symptomsWithin: 'Síntomas identificados en 6 h del despertar', fromLtsw: 'calculado desde LTSW', yes: 'Sí', no: 'No',
+    operational: 'Contexto operativo', philips: '¿Angiógrafo Philips disponible?', doac: '¿ACOD (NACO) en las últimas 48 h?', ace: '¿IECA en tratamiento?',
+    preResultT: 'Resultado pre-imagen', proceedPost: 'Continúa con la evaluación post-imagen.', continueL: 'Continuar', notMeetA: 'El paciente no cumple todos los criterios de', notMeetB: '.',
+    postImaging: 'Post-imagen', postImagingSub: 'Tipo de ictus, candidatura y parámetros',
+    strokeIschSub: 'LVO o no-LVO', strokeHemoSub: 'HIC espontánea',
+    candidacy: 'Candidatura a tratamiento', evtCandidate: '¿Candidato a trombectomía (EVT)?', ivtCandidate: '¿Candidato a IVT (trombolisis)?',
+    evtParams: 'Parámetros EVT', evtParamsNote: 'Requerido para ATHENA, PIVOTAL, MOSTE y otros ensayos EVT.',
+    tandem: '¿Oclusión en tándem?', tortuosity: '¿Tortuosidad vascular?', tortuosityNote: 'Si no se especifica, algunos ensayos muestran “No indicado”.',
+    targetVessel: 'Vaso diana', selectOneMore: 'Selecciona uno o más vasos ocluidos.', optional: 'opcional',
+    severity: 'Gravedad', gcs: 'GCS', patternCause: 'Patrón y causa', isolatedIvh: 'Aislado a IVH', isolatedIvhSub: 'Solo intraventricular',
+    secondaryCause: 'Causa secundaria', eligFactors: 'Factores de elegibilidad', txaExclL: 'Crisis / trombosis / hipersensibilidad a TXA', anticoag: 'Terapia anticoagulante',
+    hemVolume: 'Volumen de hemorragia', notAvailable: 'No disponible', volPending: 'Volumen no introducido (TC pendiente)', largeHematoma: 'Hematoma grande (≥ 30 mL)', dragVolume: 'Desliza para fijar el volumen',
+    ichScore: 'Puntuación ICH', volPendingScore: 'Volumen pendiente — podría ser +1 (≥30 mL)', mortality30: 'Mortalidad a 30 días ≈', live: 'en vivo',
+    cNone: 'Ninguna', cTrauma: 'Trauma', cAvm: 'MAV', cAneurysm: 'Aneurisma', cTumor: 'Tumor', cOther: 'Otra', aWarfarin: 'Warfarina', aHep: 'Heparina <24h', aDoac: 'ACOD',
+    sevSevere: 'Grave', sevModerate: 'Moderado', sevMild: 'Leve', coreLarge: 'Core grande', coreModerate: 'Moderado', coreFavorable: 'Favorable',
+    sendRecord: 'Enviar registro', sendSub: 'Revisar y enviar al registro', patientRecord: 'Registro del paciente', acuteTx: 'Tratamientos agudos',
+    thrombectomyTx: 'Trombectomía (TEV)', thrombolysisTx: 'Trombolisis (TIV)', notesL: 'Notas', notesPh: 'Notas libres…', msgPreview: 'Vista previa del mensaje',
+    sendToSheet: 'Enviar a Google Sheet', copyL: 'Copiar', whatsappL: 'WhatsApp', treatments: 'Tratamientos', sent: 'Registro enviado', sentSub: 'Guardado en el registro · compartido con el equipo', typeL: 'Tipo',
+    hr: 'h', min: 'm', within: 'dentro de',
+  },
+};
+
+const LangCtx = React.createContext({ lang: 'en', setLang: () => {} });
+function useT() {
+  const { lang, setLang } = React.useContext(LangCtx);
+  return { lang, setLang, t: (k) => (STR[lang] && STR[lang][k]) || STR.en[k] || k };
+}
+
+// ── icons (simple line glyphs, currentColor) ──────────────────
+const I = {
+  logo: (s = 24, c = '#fff') => (
+    <svg width={s} height={s} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12.5" r="7" stroke={c} strokeWidth="1.8" />
+      <path d="M12 8.5v4l2.6 1.7" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 5.2l2.2 1.7M19 5.2l-2.2 1.7" stroke={c} strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  ),
+  plus: (c) => <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke={c} strokeWidth="2" strokeLinecap="round" /></svg>,
+  person: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke={c} strokeWidth="1.8" /><path d="M5.5 19.5a6.5 6.5 0 0113 0" stroke={c} strokeWidth="1.8" strokeLinecap="round" /></svg>,
+  stetho: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 3v5a4 4 0 008 0V3" stroke={c} strokeWidth="1.8" strokeLinecap="round" /><path d="M10 16v1a4 4 0 008 0v-2" stroke={c} strokeWidth="1.8" strokeLinecap="round" /><circle cx="18" cy="11.5" r="2.2" stroke={c} strokeWidth="1.8" /></svg>,
+  book: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2 2 0 016 4h6v15H6a2 2 0 00-2 1.5V5.5z" stroke={c} strokeWidth="1.7" strokeLinejoin="round" /><path d="M20 5.5A2 2 0 0018 4h-6v15h6a2 2 0 012 1.5V5.5z" stroke={c} strokeWidth="1.7" strokeLinejoin="round" /></svg>,
+  bolt: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" stroke={c} strokeWidth="1.7" strokeLinejoin="round" /></svg>,
+  list: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" stroke={c} strokeWidth="1.9" strokeLinecap="round" /></svg>,
+  home: (c) => <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 11l8-6.5 8 6.5" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M6 10v9h12v-9" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  chev: (c, s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  clock: (c, s = 15) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke={c} strokeWidth="1.8" /><path d="M12 7.5V12l3 2" stroke={c} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+  globe: (c) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke={c} strokeWidth="1.7" /><path d="M3.5 12h17M12 3.5c2.5 2.4 2.5 14.6 0 17M12 3.5c-2.5 2.4-2.5 14.6 0 17" stroke={c} strokeWidth="1.7" /></svg>,
+};
+
+// ── device safe-area wrapper: header / scroll body / tab bar ──
+function Screen({ children, tab }) {
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      {children}
+      <TabBar active={tab} />
+    </div>
+  );
+}
+
+function TopBar({ children, sub }) {
+  const { lang, setLang, t } = useT();
+  return (
+    <div style={{ paddingTop: 56, paddingLeft: 18, paddingRight: 14, paddingBottom: 12, background: ENS.surface, borderBottom: `1px solid ${ENS.line}` }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 30, height: 30, borderRadius: 9, background: `linear-gradient(150deg, ${ENS.primary}, ${ENS.primaryDk})`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(13,32,80,.25)' }}>{I.logo(19)}</div>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: -0.3, lineHeight: 1 }}>EnsApp</div>
+            {sub && <div style={{ fontSize: 10.5, color: ENS.ink3, marginTop: 2, fontFamily: ENS.mono, letterSpacing: 0.2 }}>{sub}</div>}
+          </div>
+        </div>
+        <button className="ens-press" onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${ENS.line}`, background: ENS.surface, borderRadius: 8, padding: '7px 9px', cursor: 'pointer', color: ENS.ink2 }}>
+          {I.globe(ENS.ink3)}
+          <span style={{ fontSize: 12, fontWeight: 600, fontFamily: ENS.mono, color: ENS.ink }}>{lang.toUpperCase()}</span>
+        </button>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function TabBar({ active = 'home' }) {
+  const { t } = useT();
+  const items = [
+    ['home', I.home, t('home')],
+    ['new', I.plus, t('tnew')],
+    ['trials', I.list, t('trials')],
+  ];
+  return (
+    <div style={{ flexShrink: 0, display: 'flex', background: ENS.surface, borderTop: `1px solid ${ENS.line}`, paddingTop: 8, paddingBottom: 26 }}>
+      {items.map(([k, icon, label]) => {
+        const on = k === active;
+        const c = on ? ENS.primary : ENS.ink3;
+        return (
+          <div key={k} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 28 }}>
+              {k === 'new'
+                ? <div style={{ width: 34, height: 24, borderRadius: 7, background: on ? ENS.primary : ENS.bgSunken, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon(on ? '#fff' : ENS.ink3)}</div>
+                : icon(c)}
+            </div>
+            <span style={{ fontSize: 10.5, fontWeight: on ? 600 : 500, color: c }}>{label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// status chip
+function Chip({ kind, children }) {
+  const map = { active: [ENS.okFg, ENS.okBg], paused: [ENS.warnFg, ENS.warnBg], draft: [ENS.ink2, ENS.bgSunken], eligible: [ENS.okFg, ENS.okBg], screening: [ENS.primary, ENS.primaryBg] };
+  const [fg, bg] = map[kind] || map.draft;
+  return <span style={{ fontSize: 10.5, fontWeight: 600, color: fg, background: bg, padding: '2px 7px', borderRadius: 999, letterSpacing: 0.1, lineHeight: 1.5, whiteSpace: 'nowrap' }}>{children}</span>;
+}
+
+// live "time since" — measured-urgency element
+function useElapsed(startMinAgo) {
+  const [sec, setSec] = React.useState(startMinAgo * 60);
+  React.useEffect(() => { const id = setInterval(() => setSec((s) => s + 1), 1000); return () => clearInterval(id); }, []);
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return { sec, label: `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` };
+}
+
+// window progress bar — calm blue, ambers near the end (measured)
+function WindowBar({ frac }) {
+  const near = frac > 0.72;
+  const c = near ? ENS.warnFg : ENS.primary;
+  const bg = near ? ENS.warnBg : ENS.primaryBg;
+  return (
+    <div style={{ height: 6, borderRadius: 999, background: bg, overflow: 'hidden' }}>
+      <div style={{ height: '100%', width: `${Math.min(100, frac * 100)}%`, background: c, borderRadius: 999, transition: 'width .5s linear' }} />
+    </div>
+  );
+}
+
+Object.assign(window, { ENS, STR, LangCtx, useT, I, Screen, TopBar, TabBar, Chip, useElapsed, WindowBar });
+
+
+/* ===== ensapp-home-min.jsx ===== */
+// ensapp-home-min.jsx — Minimal / modern direction
+// Two clean Homes: M1 "Focus" (one hero action) and M2 "List" (calm grouped list).
+// Shared minimal shell: borderless airy header + floating tab bar.
+
+function MinHeader() {
+  const { lang, setLang } = useT();
+  return (
+    <div style={{ paddingTop: 58, paddingLeft: 24, paddingRight: 20, paddingBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+        <div style={{ width: 26, height: 26, borderRadius: 8, background: ENS.primary, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{I.logo(17)}</div>
+        <span style={{ fontSize: 16, fontWeight: 600, letterSpacing: -0.3 }}>EnsApp</span>
+      </div>
+      <button className="ens-press" onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
+        style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: ENS.ink3, fontSize: 12.5, fontWeight: 600, fontFamily: ENS.mono, letterSpacing: 0.3, padding: 6 }}>
+        {lang.toUpperCase()}
+      </button>
+    </div>
+  );
+}
+
+function MinTabBar({ active = 'home', onNav }) {
+  const { t } = useT();
+  const items = [['home', I.home, t('home')], ['new', I.plus, t('tnew')], ['trials', I.list, t('trials')]];
+  return (
+    <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', paddingBottom: 24, paddingTop: 6 }}>
+      <div style={{ display: 'flex', gap: 4, background: ENS.surface, borderRadius: 999, padding: 6, boxShadow: '0 2px 8px rgba(16,24,40,.06), 0 1px 2px rgba(16,24,40,.05)' }}>
+        {items.map(([k, icon, label]) => {
+          const on = k === active;
+          return (
+            <div key={k} className="ens-press" onClick={() => onNav && onNav(k)} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7, padding: on ? '9px 16px' : '9px 13px', borderRadius: 999, background: on ? ENS.ink : 'transparent' }}>
+              {icon(on ? '#fff' : ENS.ink3)}
+              {on && <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{label}</span>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function MinShell({ children, tab, onNav }) {
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <MinHeader />
+      <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
+      <MinTabBar active={tab} onNav={onNav} />
+    </div>
+  );
+}
+
+const softShadow = '0 1px 2px rgba(16,24,40,.04), 0 6px 20px rgba(16,24,40,.06)';
+
+// ── M1 · Focus — one hero action, maximum air ──────────────────
+function HomeM1() {
+  const { t } = useT();
+  const { label } = useElapsed(112);
+  const frac = (112 * 60) / (4.5 * 3600);
+
+  return (
+    <MinShell tab="home">
+      <div style={{ padding: '12px 24px 0', display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+        {/* big calm intro */}
+        <div style={{ marginTop: 18, marginBottom: 26 }}>
+          <div style={{ fontSize: 28, fontWeight: 600, letterSpacing: -0.8, lineHeight: 1.12 }}>Assign a patient<br />to a trial.</div>
+          <div style={{ fontSize: 14, color: ENS.ink3, marginTop: 10, lineHeight: 1.4 }}>{t('tagline')}.</div>
+        </div>
+
+        {/* hero action */}
+        <button className="ens-press" style={{ border: 'none', cursor: 'pointer', borderRadius: 22, padding: '22px 22px', background: ENS.primary, color: '#fff', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 8px 22px rgba(45,91,215,.30)' }}>
+          <span>
+            <span style={{ display: 'block', fontSize: 19, fontWeight: 600, letterSpacing: -0.3 }}>{t('newPatient')}</span>
+            <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.8)', marginTop: 3 }}>{t('eligDesc')}</span>
+          </span>
+          <span style={{ width: 40, height: 40, borderRadius: 999, background: 'rgba(255,255,255,.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{I.chev('#fff', 20)}</span>
+        </button>
+
+        {/* continue session — calm, borderless tint */}
+        <div className="ens-press" style={{ cursor: 'pointer', marginTop: 14, borderRadius: 20, padding: 18, background: ENS.surface, boxShadow: softShadow }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 13 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 7, height: 7, borderRadius: 999, background: ENS.okFg }} />
+              <span style={{ fontSize: 14, fontWeight: 600 }}>{t('activeSession')}</span>
+            </span>
+            <span style={{ fontSize: 13.5, fontWeight: 600, color: ENS.primary }}>{t('resume')} →</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontFamily: ENS.mono, fontSize: 24, fontWeight: 500, letterSpacing: -0.4, fontVariantNumeric: 'tabular-nums' }}>{label}</span>
+            <span style={{ fontSize: 12.5, color: ENS.ink3 }}>{t('sinceLtsw')} · WeTrust</span>
+          </div>
+          <div style={{ marginTop: 12 }}><WindowBar frac={frac} /></div>
+        </div>
+
+        <div style={{ flex: 1 }} />
+
+        {/* quiet secondary links */}
+        <div style={{ display: 'flex', marginBottom: 8 }}>
+          {[[I.book, t('catalog')], [I.person, t('pastPatients')]].map(([icon, label2], i) => (
+            <button key={i} className="ens-press" style={{ flex: 1, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 0', color: ENS.ink2, fontFamily: ENS.sans, borderLeft: i ? `1px solid ${ENS.lineSoft}` : 'none' }}>
+              {icon(ENS.ink3)}
+              <span style={{ fontSize: 13.5, fontWeight: 500 }}>{label2}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </MinShell>
+  );
+}
+
+// ── M2 · List — calm grouped list, generous rows ───────────────
+function HomeM2() {
+  const { t } = useT();
+  const { label } = useElapsed(78);
+
+  const rows = [
+    { icon: I.person, title: t('newPatient'), desc: t('eligDesc'), accent: true },
+    { icon: I.bolt, title: t('quickPatient'), desc: t('quickDesc') },
+    { icon: I.book, title: t('trialsInfo'), desc: t('trialsDesc') },
+  ];
+
+  return (
+    <MinShell tab="home">
+      <div style={{ padding: '20px 24px 0' }}>
+
+        {/* title + quiet stat */}
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: -0.6 }}>{t('whatToDo')}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 9, fontFamily: ENS.mono, fontSize: 12.5, color: ENS.ink3 }}>
+            <span style={{ color: ENS.okFg, fontWeight: 600 }}>17 {t('active')}</span>
+            <span style={{ width: 3, height: 3, borderRadius: 999, background: ENS.ink3 }} />
+            <span>20 {t('total')}</span>
+          </div>
+        </div>
+
+        {/* resume — soft tinted */}
+        <div className="ens-press" style={{ cursor: 'pointer', borderRadius: 18, padding: '14px 16px', background: ENS.primaryBg, display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+          <span style={{ width: 7, height: 7, borderRadius: 999, background: ENS.okFg, flexShrink: 0 }} />
+          <span style={{ flex: 1 }}>
+            <span style={{ display: 'block', fontSize: 13.5, fontWeight: 600, color: ENS.ink }}>{t('activeSession')}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+              <span style={{ fontFamily: ENS.mono, fontSize: 12, color: ENS.primaryDk, fontVariantNumeric: 'tabular-nums' }}>{label}</span>
+              <span style={{ fontSize: 11.5, color: ENS.ink2 }}>{t('sinceLtsw')} · WeTrust</span>
+            </span>
+          </span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: ENS.primary }}>{t('resume')} →</span>
+        </div>
+
+        {/* clean action list */}
+        <div style={{ background: ENS.surface, borderRadius: 20, boxShadow: softShadow, overflow: 'hidden' }}>
+          {rows.map((r, i) => (
+            <div key={r.title} className="ens-press" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 15, padding: '17px 18px', borderTop: i ? `1px solid ${ENS.lineSoft}` : 'none' }}>
+              <span style={{ width: 42, height: 42, borderRadius: 999, background: r.accent ? ENS.primaryBg : ENS.bgSunken, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{r.icon(r.accent ? ENS.primary : ENS.ink2)}</span>
+              <span style={{ flex: 1 }}>
+                <span style={{ display: 'block', fontSize: 15.5, fontWeight: 600, letterSpacing: -0.2 }}>{r.title}</span>
+                <span style={{ display: 'block', fontSize: 12.5, color: ENS.ink3, marginTop: 2 }}>{r.desc}</span>
+              </span>
+              {I.chev(ENS.ink3, 17)}
+            </div>
+          ))}
+        </div>
+      </div>
+    </MinShell>
+  );
+}
+
+Object.assign(window, { HomeM1, HomeM2, MinShell, MinHeader, MinTabBar, softShadow });
+
+
+/* ===== ensapp-proto-ui.jsx ===== */
+// ensapp-proto-ui.jsx — minimal form controls + chrome for the prototype
+// Exposes: AppHeader, BottomBar, Field, TextField, NumberField, NihssScale,
+//          Segmented, TimeSinceField, computeWindow, Sheet, TrialPicker
+
+// one-time range-slider styling (accent thumb/track)
+if (typeof document !== 'undefined' && !document.getElementById('ens-range-css')) {
+  const s = document.createElement('style');
+  s.id = 'ens-range-css';
+  s.textContent = `
+    input.ens-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;background:${ENS.lineSoft};outline:none;margin:0}
+    input.ens-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:999px;background:#fff;border:2px solid ${ENS.primary};box-shadow:0 1px 4px rgba(16,24,40,.18);cursor:pointer}
+    input.ens-range::-moz-range-thumb{width:26px;height:26px;border-radius:999px;background:#fff;border:2px solid ${ENS.primary};box-shadow:0 1px 4px rgba(16,24,40,.18);cursor:pointer}
+    .ens-input::placeholder{color:${ENS.ink3}}
+    .ens-input:focus{border-color:${ENS.primary};box-shadow:0 0 0 3px ${ENS.primaryBg}}
+  `;
+  document.head.appendChild(s);
+}
+
+function AppHeader({ title, sub, step, steps, onBack, onClose }) {
+  return (
+    <div style={{ paddingTop: 54, paddingLeft: 16, paddingRight: 16, paddingBottom: 12, background: ENS.bg }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: title ? 12 : 0 }}>
+        <button className="ens-press" onClick={onBack} style={{ width: 38, height: 38, borderRadius: 999, border: 'none', background: ENS.surface, boxShadow: softShadow, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke={ENS.ink} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </button>
+        <div style={{ flex: 1 }} />
+        {step != null && (
+          <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+            {Array.from({ length: steps }).map((_, i) => (
+              <span key={i} style={{ width: i === step ? 18 : 6, height: 6, borderRadius: 999, background: i <= step ? ENS.primary : ENS.line, transition: 'width .3s, background .3s' }} />
+            ))}
+          </div>
+        )}
+        {onClose && (
+          <button className="ens-press" onClick={onClose} style={{ width: 38, height: 38, borderRadius: 999, border: 'none', background: ENS.surface, boxShadow: softShadow, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke={ENS.ink2} strokeWidth="2" strokeLinecap="round" /></svg>
+          </button>
+        )}
+      </div>
+      {title && <div style={{ paddingLeft: 4 }}>
+        <div style={{ fontSize: 25, fontWeight: 600, letterSpacing: -0.6 }}>{title}</div>
+        {sub && <div style={{ fontSize: 13.5, color: ENS.ink3, marginTop: 4 }}>{sub}</div>}
+      </div>}
+    </div>
+  );
+}
+
+function BottomBar({ onBack, onNext, nextLabel, nextDisabled, backLabel }) {
+  const { t } = useT();
+  return (
+    <div style={{ flexShrink: 0, display: 'flex', gap: 10, padding: '12px 16px 28px', background: ENS.bg, borderTop: `1px solid ${ENS.lineSoft}` }}>
+      {onBack && (
+        <button className="ens-press" onClick={onBack} style={{ flex: '0 0 auto', minWidth: 96, border: 'none', background: ENS.surface, boxShadow: softShadow, borderRadius: 14, padding: '15px 18px', cursor: 'pointer', fontFamily: ENS.sans, fontSize: 15, fontWeight: 600, color: ENS.ink2 }}>{backLabel || t('back')}</button>
+      )}
+      <button className="ens-press" onClick={nextDisabled ? undefined : onNext} style={{ flex: 1, border: 'none', borderRadius: 14, padding: '15px 18px', cursor: nextDisabled ? 'default' : 'pointer', fontFamily: ENS.sans, fontSize: 15, fontWeight: 600, color: '#fff', background: nextDisabled ? '#AEBBD6' : ENS.primary, boxShadow: nextDisabled ? 'none' : '0 6px 16px rgba(45,91,215,.28)', transition: 'background .2s' }}>{nextLabel || t('next')}</button>
+    </div>
+  );
+}
+
+function Card({ children, style }) {
+  return <div style={{ background: ENS.surface, borderRadius: 18, boxShadow: softShadow, padding: 16, ...style }}>{children}</div>;
+}
+
+function Field({ label, hint, children }) {
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 600, color: ENS.ink2 }}>{label}</span>
+        {hint && <span style={{ fontSize: 11.5, color: ENS.ink3, fontFamily: ENS.mono }}>{hint}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function TextField({ value, onChange, placeholder, mono, unit }) {
+  return (
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      <input className="ens-input" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+        style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '13px 14px', fontSize: 16, fontFamily: mono ? ENS.mono : ENS.sans, color: ENS.ink, background: ENS.surface, outline: 'none', transition: 'border-color .15s, box-shadow .15s' }} />
+      {unit && <span style={{ position: 'absolute', right: 14, fontSize: 13, color: ENS.ink3, fontFamily: ENS.mono, pointerEvents: 'none' }}>{unit}</span>}
+    </div>
+  );
+}
+
+// NIHSS — large scale selector (slider + value + severity band)
+function NihssScale({ value, onChange }) {
+  const v = value == null ? 0 : value;
+  const bands = [[0, 0, 'No deficit', ENS.okFg], [1, 4, 'Minor', ENS.okFg], [5, 15, 'Moderate', ENS.warnFg], [16, 20, 'Mod–severe', ENS.warnFg], [21, 42, 'Severe', ENS.dangFg]];
+  const band = bands.find(([lo, hi]) => v >= lo && v <= hi) || bands[0];
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 12 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 38, fontWeight: 600, letterSpacing: -1, color: ENS.ink, lineHeight: 0.9 }}>{value == null ? '—' : v}</span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: band[3], background: band[3] + '1A', padding: '4px 10px', borderRadius: 999 }}>{band[2]}</span>
+      </div>
+      <input className="ens-range" type="range" min="0" max="42" value={v} onChange={(e) => onChange(Number(e.target.value))} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontFamily: ENS.mono, fontSize: 10.5, color: ENS.ink3 }}>
+        <span>0</span><span>21</span><span>42</span>
+      </div>
+    </div>
+  );
+}
+
+function Segmented({ options, value, onChange, cols }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols || options.length}, 1fr)`, gap: 7 }}>
+      {options.map((o) => {
+        const val = typeof o === 'object' ? o.v : o;
+        const lab = typeof o === 'object' ? o.l : o;
+        const on = value === val;
+        return (
+          <button key={val} className="ens-press" onClick={() => onChange(val)} style={{ border: on ? `1.5px solid ${ENS.primary}` : `1px solid ${ENS.line}`, background: on ? ENS.primaryBg : ENS.surface, color: on ? ENS.primaryDk : ENS.ink2, borderRadius: 11, padding: '12px 4px', cursor: 'pointer', fontFamily: ENS.sans, fontSize: 14, fontWeight: 600, transition: 'all .15s' }}>{lab}</button>
+        );
+      })}
+    </div>
+  );
+}
+
+// time since LTSW → auto window classification
+function computeWindow(totalMin) {
+  if (totalMin == null) return null;
+  if (totalMin <= 270) return { key: 'tpaWin', tone: 'ok' };       // 4.5h IV thrombolysis
+  if (totalMin <= 360) return { key: 'evtWin', tone: 'ok' };       // 6h standard EVT
+  if (totalMin <= 1440) return { key: 'evtWin', tone: 'warn' };    // up to 24h selected EVT
+  return { key: 'windowClosed', tone: 'danger' };
+}
+
+function TimeSinceField({ hours, mins, onChange }) {
+  const { t } = useT();
+  const total = hours == null && mins == null ? null : (hours || 0) * 60 + (mins || 0);
+  const win = computeWindow(total);
+  const toneMap = { ok: [ENS.okFg, ENS.okBg], warn: [ENS.warnFg, ENS.warnBg], danger: [ENS.dangFg, ENS.dangBg] };
+  const Step = ({ val, unit, set }) => (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '6px 8px', background: ENS.surface }}>
+      <button className="ens-press" onClick={() => set(Math.max(0, (val || 0) - 1))} style={{ width: 34, height: 34, borderRadius: 9, border: 'none', background: ENS.bgSunken, cursor: 'pointer', fontSize: 20, color: ENS.ink2, lineHeight: 1 }}>−</button>
+      <span style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 19, fontWeight: 600, color: ENS.ink }}>{val == null ? '0' : val}</span>
+        <span style={{ fontSize: 11, color: ENS.ink3 }}>{unit}</span>
+      </span>
+      <button className="ens-press" onClick={() => set((val || 0) + 1)} style={{ width: 34, height: 34, borderRadius: 9, border: 'none', background: ENS.bgSunken, cursor: 'pointer', fontSize: 20, color: ENS.ink2, lineHeight: 1 }}>+</button>
+    </div>
+  );
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 9 }}>
+        <Step val={hours} unit={t('hr')} set={(x) => onChange(x, mins)} />
+        <Step val={mins} unit={t('min')} set={(x) => onChange(hours, x)} />
+      </div>
+      {win && (
+        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: toneMap[win.tone][1] }}>
+          {I.clock(toneMap[win.tone][0], 14)}
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: toneMap[win.tone][0] }}>
+            {win.key === 'windowClosed' ? t('windowClosed') : `${t('within')} ${t(win.key)} ${t('window')}`}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// bottom sheet
+function Sheet({ open, onClose, title, children }) {
+  if (!open) return null;
+  return (
+    <div onClick={onClose} style={{ position: 'absolute', inset: 0, zIndex: 40, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(14,23,38,.32)', animation: 'ens-fade .2s ease' }} />
+      <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', background: ENS.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: '10px 16px 30px', animation: 'ens-sheet-up .32s cubic-bezier(.2,.8,.2,1)', maxHeight: '76%', overflow: 'auto' }}>
+        <div style={{ width: 38, height: 5, borderRadius: 999, background: ENS.line, margin: '0 auto 14px' }} />
+        {title && <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 12, paddingLeft: 4 }}>{title}</div>}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { AppHeader, BottomBar, Card, Field, TextField, NihssScale, Segmented, computeWindow, TimeSinceField, Sheet });
+
+
+/* ===== ensapp-proto-ui2.jsx ===== */
+// ensapp-proto-ui2.jsx — richer controls: RadioCards, CheckGrid, CheckRow, DateTime calendar
+const { useState: useState2, useEffect: useEffect2 } = React;
+
+function humanAgo(ms, t) {
+  const m = Math.max(0, Math.round(ms / 60000));
+  const h = Math.floor(m / 60), mm = m % 60;
+  return h > 0 ? `${h}${t('hr')} ${mm}${t('min')}` : `${mm}${t('min')}`;
+}
+function fmtDateTime(ts) {
+  const d = new Date(ts);
+  const mo = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()];
+  const today = new Date(); const isToday = d.toDateString() === today.toDateString();
+  const hh = String(d.getHours()).padStart(2, '0'), mn = String(d.getMinutes()).padStart(2, '0');
+  return `${isToday ? 'Today' : `${mo} ${d.getDate()}`} · ${hh}:${mn}`;
+}
+function windowFromDate(ts) { return ts ? computeWindow(Math.round((Date.now() - ts) / 60000)) : null; }
+
+// Big radio cards (Yes/No, stroke type, candidacy)
+function RadioCards({ options, value, onChange, cols = 2, green }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols},1fr)`, gap: 9 }}>
+      {options.map((o) => {
+        const on = value === o.v;
+        const g = green && o.v === 'yes';
+        const ac = g ? ENS.okFg : ENS.primary, bg = g ? ENS.okBg : ENS.primaryBg, fg = g ? ENS.okFg : ENS.primaryDk;
+        return (
+          <button key={o.v} className="ens-press" onClick={() => onChange(o.v)} style={{ textAlign: 'left', cursor: 'pointer', border: on ? `1.5px solid ${ac}` : `1px solid ${ENS.line}`, background: on ? bg : ENS.surface, borderRadius: 13, padding: '13px 14px', display: 'flex', alignItems: 'center', gap: 11, transition: 'all .15s' }}>
+            <span style={{ width: 20, height: 20, borderRadius: 999, border: on ? `6px solid ${ac}` : `2px solid ${ENS.line}`, background: ENS.surface, flexShrink: 0, transition: 'all .15s', boxSizing: 'border-box' }} />
+            <span style={{ minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 14.5, fontWeight: 600, color: on ? fg : ENS.ink, letterSpacing: -0.2 }}>{o.l}</span>
+              {o.sub && <span style={{ display: 'block', fontSize: 11.5, color: ENS.ink3, marginTop: 1 }}>{o.sub}</span>}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Multi-select check grid (target vessels)
+function CheckGrid({ options, values = [], onChange }) {
+  const toggle = (v) => { const s = new Set(values); s.has(v) ? s.delete(v) : s.add(v); onChange([...s]); };
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 9 }}>
+      {options.map((o) => {
+        const on = values.includes(o.v);
+        return (
+          <button key={o.v} className="ens-press" onClick={() => toggle(o.v)} style={{ textAlign: 'left', cursor: 'pointer', border: on ? `1.5px solid ${ENS.primary}` : `1px solid ${ENS.line}`, background: on ? ENS.primaryBg : ENS.surface, borderRadius: 11, padding: '11px 12px', display: 'flex', alignItems: 'center', gap: 9 }}>
+            <span style={{ width: 18, height: 18, borderRadius: 5, border: on ? 'none' : `2px solid ${ENS.line}`, background: on ? ENS.primary : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxSizing: 'border-box' }}>
+              {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+            </span>
+            <span style={{ fontSize: 12.5, fontWeight: 600, color: on ? ENS.primaryDk : ENS.ink, lineHeight: 1.15 }}>{o.l}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Checkbox row (wake-up)
+function CheckRow({ checked, onChange, title, desc }) {
+  return (
+    <button className="ens-press" onClick={() => onChange(!checked)} style={{ width: '100%', textAlign: 'left', cursor: 'pointer', border: 'none', background: 'transparent', display: 'flex', gap: 12, padding: 0 }}>
+      <span style={{ width: 22, height: 22, borderRadius: 6, border: checked ? 'none' : `2px solid ${ENS.line}`, background: checked ? ENS.primary : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1, boxSizing: 'border-box' }}>
+        {checked && <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+      </span>
+      <span>
+        <span style={{ display: 'block', fontSize: 15, fontWeight: 600, color: ENS.ink }}>{title}</span>
+        {desc && <span style={{ display: 'block', fontSize: 12.5, color: ENS.ink3, marginTop: 3, lineHeight: 1.4 }}>{desc}</span>}
+      </span>
+    </button>
+  );
+}
+
+// ── LTSW date+time field with calendar sheet ───────────────────
+function DateTimeField({ value, onChange }) {
+  const { t } = useT();
+  const [open, setOpen] = useState2(false);
+  const win = windowFromDate(value);
+  const toneMap = { ok: [ENS.okFg, ENS.okBg], warn: [ENS.warnFg, ENS.warnBg], danger: [ENS.dangFg, ENS.dangBg] };
+  return (
+    <div>
+      <button className="ens-press" onClick={() => setOpen(true)} style={{ width: '100%', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '13px 14px', background: ENS.surface, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
+        {I.clock(ENS.ink3, 18)}
+        <span style={{ flex: 1, textAlign: 'left', fontSize: 15, fontWeight: value ? 600 : 400, color: value ? ENS.ink : ENS.ink3 }}>{value ? fmtDateTime(value) : t('selectDateTime')}</span>
+        {value && <span style={{ fontFamily: ENS.mono, fontSize: 12, color: ENS.ink3 }}>{humanAgo(Date.now() - value, t)}</span>}
+      </button>
+      {win && (
+        <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: toneMap[win.tone][1] }}>
+          {I.clock(toneMap[win.tone][0], 14)}
+          <span style={{ fontSize: 12.5, fontWeight: 600, color: toneMap[win.tone][0] }}>{win.key === 'windowClosed' ? t('windowClosed') : `${t('within')} ${t(win.key)} ${t('window')}`}</span>
+        </div>
+      )}
+      <CalendarSheet open={open} onClose={() => setOpen(false)} value={value} onSet={(d) => { onChange(d); setOpen(false); }} />
+    </div>
+  );
+}
+
+function CalendarSheet({ open, onClose, value, onSet }) {
+  const { t } = useT();
+  const [view, setView] = useState2(new Date());
+  const [sel, setSel] = useState2(new Date());
+  useEffect2(() => {
+    if (open) {
+      const d = value ? new Date(value) : new Date(Date.now() - 2 * 3600000);
+      setSel(new Date(d)); setView(new Date(d.getFullYear(), d.getMonth(), 1));
+    }
+  }, [open]);
+  if (!open) return null;
+
+  const y = view.getFullYear(), m = view.getMonth();
+  const startDow = (new Date(y, m, 1).getDay() + 6) % 7; // Mon=0
+  const dim = new Date(y, m + 1, 0).getDate();
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const cells = [];
+  for (let i = 0; i < startDow; i++) cells.push(null);
+  for (let d = 1; d <= dim; d++) cells.push(d);
+  const monName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m];
+
+  const pickDay = (d) => { const n = new Date(sel); n.setFullYear(y, m, d); setSel(new Date(n)); };
+  const setHM = (h, mn) => { const n = new Date(sel); if (h != null) n.setHours(h); if (mn != null) n.setMinutes(mn); setSel(new Date(n)); };
+  const preset = (hrsAgo) => { setSel(new Date(Date.now() - hrsAgo * 3600000)); };
+  const navM = (delta) => setView(new Date(y, m + delta, 1));
+
+  const navBtn = (txt, fn) => <button className="ens-press" onClick={fn} style={{ width: 34, height: 34, borderRadius: 9, border: 'none', background: ENS.bgSunken, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{txt}</button>;
+
+  return (
+    <Sheet open={open} onClose={onClose} title={t('lastSeenWell')}>
+      {/* quick presets */}
+      <div style={{ display: 'flex', gap: 7, marginBottom: 14 }}>
+        {[['nowL', 0], ['−1 h', 1], ['−3 h', 3], ['−6 h', 6]].map(([lab, h]) => (
+          <button key={lab} className="ens-press" onClick={() => preset(h)} style={{ flex: 1, border: `1px solid ${ENS.line}`, background: ENS.surface, borderRadius: 10, padding: '9px 4px', cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: ENS.ink2, fontFamily: ENS.sans }}>{lab === 'nowL' ? t('nowL') : lab}</button>
+        ))}
+      </div>
+      {/* month nav */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+        {navBtn(<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke={ENS.ink2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>, () => navM(-1))}
+        <span style={{ fontSize: 15, fontWeight: 600, fontFamily: ENS.sans }}>{monName} {y}</span>
+        {navBtn(<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke={ENS.ink2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>, () => navM(1))}
+      </div>
+      {/* weekday labels */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2, marginBottom: 4 }}>
+        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <div key={i} style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: ENS.ink3 }}>{d}</div>)}
+      </div>
+      {/* days */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 2 }}>
+        {cells.map((d, i) => {
+          if (d == null) return <div key={i} />;
+          const date = new Date(y, m, d);
+          const future = date > today;
+          const on = sel.getFullYear() === y && sel.getMonth() === m && sel.getDate() === d;
+          const isToday = date.getTime() === today.getTime();
+          return (
+            <button key={i} disabled={future} onClick={() => pickDay(d)} style={{ height: 38, border: 'none', borderRadius: 10, cursor: future ? 'default' : 'pointer', background: on ? ENS.primary : 'transparent', color: future ? ENS.line : on ? '#fff' : ENS.ink, fontFamily: ENS.mono, fontSize: 13.5, fontWeight: on || isToday ? 700 : 500, position: 'relative' }}>
+              {d}
+              {isToday && !on && <span style={{ position: 'absolute', bottom: 5, left: '50%', transform: 'translateX(-50%)', width: 4, height: 4, borderRadius: 999, background: ENS.primary }} />}
+            </button>
+          );
+        })}
+      </div>
+      {/* time */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 16 }}>
+        {[['h', sel.getHours(), 23, (v) => setHM((v + 24) % 24, null)], ['m', sel.getMinutes(), 59, (v) => setHM(null, (v + 60) % 60)]].map(([unit, val, max, set], i) => (
+          <div key={unit} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '6px 8px' }}>
+            <button className="ens-press" onClick={() => set(val - (unit === 'm' ? 5 : 1))} style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: ENS.bgSunken, cursor: 'pointer', fontSize: 19, color: ENS.ink2, lineHeight: 1 }}>−</button>
+            <span style={{ fontFamily: ENS.mono, fontSize: 18, fontWeight: 600 }}>{String(val).padStart(2, '0')}<span style={{ fontSize: 11, color: ENS.ink3 }}>{unit}</span></span>
+            <button className="ens-press" onClick={() => set(val + (unit === 'm' ? 5 : 1))} style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: ENS.bgSunken, cursor: 'pointer', fontSize: 19, color: ENS.ink2, lineHeight: 1 }}>+</button>
+          </div>
+        ))}
+      </div>
+      <button className="ens-press" onClick={() => onSet(sel.getTime())} style={{ width: '100%', marginTop: 16, border: 'none', borderRadius: 13, padding: '15px', cursor: 'pointer', background: ENS.primary, color: '#fff', fontFamily: ENS.sans, fontSize: 15, fontWeight: 600 }}>{t('setTime')} · {fmtDateTime(sel.getTime())}</button>
+    </Sheet>
+  );
+}
+
+// ── Reusable vessel picker (region drill-down · variant B) + switches ──
+const VLAB = { ica: 'ICA', icaT: 'ICA-T', m1: 'M1', m2pd: 'M2 prox', m2any: 'M2 any', m2gt: '>M2', a1: 'A1', a2: 'A2', a2gt: '>A2', basilar: 'Basilar', p1: 'P1', p2: 'P2', p2gt: '>P2', va: 'VA' };
+const GRP = { ica: ['ica', 'icaT'], mca: ['m1', 'm2pd', 'm2any', 'm2gt'], aca: ['a1', 'a2', 'a2gt'], post: ['va', 'basilar', 'p1', 'p2', 'p2gt'] };
+
+function Switch({ on, onChange }) {
+  return (
+    <button className="ens-press" onClick={() => onChange(!on)} style={{ width: 46, height: 28, borderRadius: 999, border: 'none', cursor: 'pointer', background: on ? ENS.primary : ENS.line, position: 'relative', transition: 'background .2s', flexShrink: 0 }}>
+      <span style={{ position: 'absolute', top: 3, left: on ? 21 : 3, width: 22, height: 22, borderRadius: 999, background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,.25)', transition: 'left .2s' }} />
+    </button>
+  );
+}
+function ToggleRow({ title, sub, on, onChange }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <span style={{ flex: 1 }}>
+        <span style={{ display: 'block', fontSize: 14, fontWeight: 600, color: ENS.ink }}>{title}</span>
+        {sub && <span style={{ display: 'block', fontSize: 11.5, color: ENS.ink3, marginTop: 1 }}>{sub}</span>}
+      </span>
+      <Switch on={on} onChange={onChange} />
+    </div>
+  );
+}
+function VesselChip({ k, sel, onTap, block }) {
+  const on = sel.includes(k);
+  return (
+    <button className="ens-press" onClick={() => onTap(k)} style={{ cursor: 'pointer', border: on ? `1.5px solid ${ENS.primary}` : `1px solid ${ENS.line}`, background: on ? ENS.primary : ENS.surface, color: on ? '#fff' : ENS.ink, borderRadius: block ? 12 : 999, padding: block ? '13px 12px' : '8px 13px', fontSize: block ? 14 : 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'all .15s', width: block ? '100%' : 'auto' }}>
+      {on && <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+      {VLAB[k]}
+    </button>
+  );
+}
+function SelectedChips({ sel, onTap }) {
+  if (!sel.length) return <div style={{ fontSize: 12.5, color: ENS.ink3, fontStyle: 'italic' }}>No vessel selected yet</div>;
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      {sel.map((k) => (
+        <span key={k} className="ens-press" onClick={() => onTap(k)} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5, background: ENS.primaryBg, color: ENS.primaryDk, border: `1px solid ${ENS.primary}33`, borderRadius: 999, padding: '5px 7px 5px 11px', fontSize: 12.5, fontWeight: 600 }}>
+          {VLAB[k]}<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke={ENS.primaryDk} strokeWidth="2.4" strokeLinecap="round" /></svg>
+        </span>
+      ))}
+    </div>
+  );
+}
+function VesselPicker({ value = [], onChange }) {
+  const [region, setRegion] = React.useState('ica');
+  const tap = (k) => onChange(value.includes(k) ? value.filter((x) => x !== k) : [...value, k]);
+  const regions = [{ k: 'ica', l: 'ICA' }, { k: 'mca', l: 'MCA' }, { k: 'aca', l: 'ACA' }, { k: 'post', l: 'Posterior' }];
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <SelectedChips sel={value} onTap={tap} />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6, background: ENS.bgSunken, borderRadius: 12, padding: 4 }}>
+        {regions.map((r) => {
+          const on = region === r.k; const count = GRP[r.k].filter((v) => value.includes(v)).length;
+          return (
+            <button key={r.k} className="ens-press" onClick={() => setRegion(r.k)} style={{ cursor: 'pointer', border: 'none', borderRadius: 9, padding: '10px 4px', background: on ? ENS.surface : 'transparent', boxShadow: on ? '0 1px 3px rgba(16,24,40,.12)' : 'none', color: on ? ENS.ink : ENS.ink3, fontSize: 13, fontWeight: 600, position: 'relative' }}>
+              {r.l}
+              {count > 0 && <span style={{ position: 'absolute', top: 3, right: 5, width: 15, height: 15, borderRadius: 999, background: ENS.primary, color: '#fff', fontSize: 9.5, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{count}</span>}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {GRP[region].map((k) => <VesselChip key={k} k={k} sel={value} onTap={tap} block />)}
+      </div>
+    </div>
+  );
+}
+function AspectsCells({ value, onChange }) {
+  const { t } = useT();
+  const tone = (v) => v <= 5 ? ENS.dangFg : v <= 7 ? ENS.warnFg : ENS.okFg;
+  const lab = value == null ? '' : value <= 5 ? t('coreLarge') : value <= 7 ? t('coreModerate') : t('coreFavorable');
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 30, fontWeight: 600, letterSpacing: -1, color: value == null ? ENS.ink3 : tone(value) }}>{value == null ? '—' : value}<span style={{ fontSize: 14, color: ENS.ink3 }}>/10</span></span>
+        {lab && <span style={{ fontSize: 12, fontWeight: 600, color: tone(value), background: tone(value) + '1A', padding: '4px 10px', borderRadius: 999 }}>{lab}</span>}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(11,1fr)', gap: 4 }}>
+        {Array.from({ length: 11 }).map((_, i) => {
+          const on = value != null && i <= value;
+          return <button key={i} className="ens-press" onClick={() => onChange(i)} style={{ height: 34, borderRadius: 8, border: 'none', cursor: 'pointer', background: on ? tone(value) : ENS.bgSunken, color: on ? '#fff' : ENS.ink3, fontFamily: ENS.mono, fontSize: 12, fontWeight: 600, transition: 'background .12s' }}>{i}</button>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { humanAgo, fmtDateTime, windowFromDate, RadioCards, CheckGrid, CheckRow, DateTimeField, CalendarSheet, VLAB, GRP, Switch, ToggleRow, VesselChip, SelectedChips, VesselPicker, AspectsCells });
+
+
+/* ===== ensapp-hemo-final.jsx ===== */
+// ensapp-hemo-final.jsx — chosen hemorrhagic design: A layout + B radial dial,
+// live ICH score, volume can be left "not available".
+// Exposes: HemoParams({ patient, set })  +  hIchScore
+const HCAUSE = [{ v: 'none', l: 'cNone' }, { v: 'trauma', l: 'cTrauma' }, { v: 'avm', l: 'cAvm' }, { v: 'aneurysm', l: 'cAneurysm' }, { v: 'tumor', l: 'cTumor' }, { v: 'other', l: 'cOther' }];
+const HANTICO = [{ v: 'none', l: 'cNone' }, { v: 'warfarin', l: 'aWarfarin' }, { v: 'hep', l: 'aHep' }, { v: 'doac', l: 'aDoac' }];
+
+function hIchScore(p) {
+  // returns { base, maxBonus } — base assumes unknown volume = 0 contribution
+  let base = 0;
+  const gcs = p.gcs == null ? 15 : p.gcs;
+  if (gcs <= 4) base += 2; else if (gcs <= 12) base += 1;
+  if (p.ivh) base += 1;
+  if ((Number(p.age) || 0) >= 80) base += 1;
+  const volKnown = !p.volUnknown && p.ich != null;
+  if (volKnown && p.ich >= 30) base += 1;
+  const maxBonus = volKnown ? 0 : 1; // unknown volume could add +1
+  return { base, maxBonus, volKnown };
+}
+
+function HIchCard({ patient }) {
+  const { t } = useT();
+  const { base, maxBonus, volKnown } = hIchScore(patient);
+  const mort = ['0%', '13%', '26%', '72%', '97%', '100%', '100%'];
+  const tone = base <= 1 ? ENS.okFg : base <= 2 ? ENS.warnFg : ENS.dangFg;
+  return (
+    <div style={{ borderRadius: 18, padding: 16, background: ENS.surface, boxShadow: softShadow, border: `1px solid ${tone}33`, display: 'flex', alignItems: 'center', gap: 14 }}>
+      <div style={{ width: 56, height: 56, borderRadius: 15, background: tone, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 22, fontWeight: 700, lineHeight: 1 }}>{maxBonus ? `${base}–${base + maxBonus}` : base}</span>
+        <span style={{ fontSize: 8, opacity: .85 }}>/ 6</span>
+      </div>
+      <div>
+        <div style={{ fontSize: 14.5, fontWeight: 700, color: tone }}>{t('ichScore')} {maxBonus ? `${base}–${base + maxBonus}` : base}</div>
+        <div style={{ fontSize: 12, color: ENS.ink2, marginTop: 2 }}>
+          {volKnown
+            ? <>{t('mortality30')} {mort[base]} · {t('live')}</>
+            : <>{t('volPendingScore')}</>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// radial volume dial (from B) with a "not available" state
+function HVolDial({ value, unknown, onChange, onUnknown }) {
+  const { t } = useT();
+  const v = value == null ? 0 : value, max = 120;
+  const r = 44, c = 2 * Math.PI * r, frac = unknown ? 0 : Math.min(1, v / max);
+  const high = !unknown && v >= 30;
+  const col = unknown ? ENS.line : high ? ENS.warnFg : ENS.primary;
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 600, color: ENS.ink2 }}>{t('hemVolume')}</span>
+        <button className="ens-press" onClick={() => onUnknown(!unknown)} style={{ cursor: 'pointer', border: unknown ? `1.5px solid ${ENS.primary}` : `1px solid ${ENS.line}`, background: unknown ? ENS.primaryBg : ENS.surface, color: unknown ? ENS.primaryDk : ENS.ink3, borderRadius: 999, padding: '5px 11px', fontSize: 11.5, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ width: 14, height: 14, borderRadius: 4, border: unknown ? 'none' : `2px solid ${ENS.line}`, background: unknown ? ENS.primary : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{unknown && <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}</span>
+          {t('notAvailable')}
+        </button>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 18, opacity: unknown ? 0.55 : 1, transition: 'opacity .2s' }}>
+        <div style={{ position: 'relative', width: 116, height: 116, flexShrink: 0 }}>
+          <svg width="116" height="116"><circle cx="58" cy="58" r={r} fill="none" stroke={ENS.lineSoft} strokeWidth="10" /><circle cx="58" cy="58" r={r} fill="none" stroke={col} strokeWidth="10" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - frac)} transform="rotate(-90 58 58)" style={{ transition: 'stroke-dashoffset .2s, stroke .2s' }} /></svg>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontFamily: ENS.mono, fontSize: 23, fontWeight: 700, color: unknown ? ENS.ink3 : high ? ENS.warnFg : ENS.ink }}>{unknown ? '—' : v}</span>
+            <span style={{ fontSize: 10.5, color: ENS.ink3 }}>mL</span>
+          </div>
+        </div>
+        <div style={{ flex: 1 }}>
+          <input className="ens-range" type="range" min="0" max={max} value={v} disabled={unknown} onChange={(e) => onChange(Number(e.target.value))} style={{ opacity: unknown ? 0.5 : 1 }} />
+          <div style={{ marginTop: 10, fontSize: 12.5, color: high ? ENS.warnFg : ENS.ink3, fontWeight: high ? 600 : 400 }}>{unknown ? t('volPending') : high ? t('largeHematoma') : t('dragVolume')}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HGcs({ value, onChange }) {
+  const { t } = useT();
+  const v = value == null ? 15 : value; const tone = v <= 8 ? ENS.dangFg : v <= 12 ? ENS.warnFg : ENS.okFg; const lab = v <= 8 ? t('sevSevere') : v <= 12 ? t('sevModerate') : t('sevMild');
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span style={{ fontFamily: ENS.mono, fontSize: 30, fontWeight: 600, color: value == null ? ENS.ink3 : tone }}>{value == null ? '—' : v}<span style={{ fontSize: 14, color: ENS.ink3 }}>/15</span></span>
+        <span style={{ fontSize: 12, fontWeight: 600, color: tone, background: tone + '1A', padding: '4px 10px', borderRadius: 999 }}>{lab}</span>
+      </div>
+      <input className="ens-range" type="range" min="3" max="15" value={v} onChange={(e) => onChange(Number(e.target.value))} />
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontFamily: ENS.mono, fontSize: 10.5, color: ENS.ink3 }}><span>3</span><span>9</span><span>15</span></div>
+    </div>
+  );
+}
+
+const HHead = ({ children }) => <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.2 }}>{children}</div>;
+const HDiv = () => <div style={{ borderTop: `1px solid ${ENS.lineSoft}` }} />;
+
+function HemoParams({ patient, set }) {
+  const { t } = useT();
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} className="ens-screen-in">
+      <div style={{ position: 'sticky', top: -6, zIndex: 3, paddingTop: 6, marginTop: -6, background: ENS.bg }}>
+        <HIchCard patient={patient} />
+      </div>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <HHead>{t('severity')}</HHead>
+        <HVolDial value={patient.ich} unknown={!!patient.volUnknown} onChange={(v) => set({ ich: v, volUnknown: false })} onUnknown={(u) => set({ volUnknown: u })} />
+        <Field label={t('gcs')} hint="3–15"><HGcs value={patient.gcs} onChange={(v) => set({ gcs: v })} /></Field>
+      </Card>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <HHead>{t('patternCause')}</HHead>
+        <ToggleRow title={t('isolatedIvh')} sub={t('isolatedIvhSub')} on={!!patient.ivh} onChange={(v) => set({ ivh: v })} />
+        <HDiv />
+        <Field label={t('secondaryCause')}><RadioCards cols={2} options={HCAUSE.map((o) => ({ v: o.v, l: t(o.l) }))} value={patient.cause || 'none'} onChange={(v) => set({ cause: v })} /></Field>
+      </Card>
+      <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <HHead>{t('eligFactors')}</HHead>
+        <ToggleRow title={t('txaExclL')} on={!!patient.txaExcl} onChange={(v) => set({ txaExcl: v })} />
+        <HDiv />
+        <Field label={t('anticoag')}><RadioCards cols={2} options={HANTICO.map((o) => ({ v: o.v, l: t(o.l) }))} value={patient.anti || 'none'} onChange={(v) => set({ anti: v })} /></Field>
+      </Card>
+    </div>
+  );
+}
+
+Object.assign(window, { HemoParams, hIchScore });
+
+
+/* ===== ensapp-send-final.jsx ===== */
+// ensapp-send-final.jsx — wired "Send record" step (variant A: receipt + WhatsApp preview)
+// Exposes: SendRecord({ patient, trials, onBack, onSent })
+const SRIcon = {
+  sheet: (c = '#fff') => <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="16" height="18" rx="2" stroke={c} strokeWidth="1.8" /><path d="M4 9h16M4 15h16M10 3v18" stroke={c} strokeWidth="1.6" /></svg>,
+  wa: (c = '#fff') => <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 19l1.3-3.7A7 7 0 1119 12a7 7 0 01-10.2 6.2L5 19z" stroke={c} strokeWidth="1.8" strokeLinejoin="round" /></svg>,
+  copy: (c = '#fff') => <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="8" y="8" width="12" height="12" rx="2" stroke={c} strokeWidth="1.8" /><path d="M5 16V5a1 1 0 011-1h9" stroke={c} strokeWidth="1.8" strokeLinecap="round" /></svg>,
+};
+
+function SendRecord({ patient, trials, onBack, onSent }) {
+  const { t } = useT();
+  const [tev, setTev] = React.useState(patient.evtCandidate === 'yes');
+  const [tiv, setTiv] = React.useState(patient.ivtCandidate === 'yes');
+  const [notes, setNotes] = React.useState('');
+  const list = Array.isArray(trials) ? trials : (trials ? [trials] : []);
+  const typeLabel = patient.strokeType === 'hemo' ? t('hemorrhagic') : t('ischemic');
+
+  function buildMsg() {
+    let m = `EnsApp — ${t('patientRecord')}\nPRN ${patient.prn || '—'}\n${typeLabel} · NIHSS ${patient.nihss == null ? '—' : patient.nihss}\n${t('enrolledInN')}: ${list.join(', ') || '—'}\nTEV: ${tev ? t('yes') : t('no')} · TIV: ${tiv ? t('yes') : t('no')}`;
+    if (notes) m += `\n${t('notesL')}: ${notes}`;
+    return m;
+  }
+  const txLabel = `${tev ? 'TEV' : ''}${tev && tiv ? ' + ' : ''}${tiv ? 'TIV' : ''}${!tev && !tiv ? t('no') : ''}`;
+  const rows = [
+    [t('prn'), patient.prn || '—', true],
+    [t('typeL'), `${typeLabel} · NIHSS ${patient.nihss == null ? '—' : patient.nihss}`, false],
+    [t('enrolledInN'), list.join(', ') || '—', false],
+    [t('treatments'), txLabel, false],
+  ];
+
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <AppHeader title={t('sendRecord')} sub={t('sendSub')} onBack={onBack} />
+      <div style={{ flex: 1, overflow: 'auto', padding: '6px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <Card>
+          <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.2, marginBottom: 12 }}>{t('patientRecord')}</div>
+          {rows.map(([k, v, mono], i) => (
+            <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '9px 0', borderTop: i ? `1px solid ${ENS.lineSoft}` : 'none' }}>
+              <span style={{ fontSize: 13, color: ENS.ink3, flexShrink: 0 }}>{k}</span>
+              <span style={{ fontSize: 13.5, fontWeight: 600, fontFamily: mono ? ENS.mono : ENS.sans, textAlign: 'right' }}>{v}</span>
+            </div>
+          ))}
+        </Card>
+
+        <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.2 }}>{t('acuteTx')}</div>
+          <ToggleRow title={t('thrombectomyTx')} on={tev} onChange={setTev} />
+          <div style={{ borderTop: `1px solid ${ENS.lineSoft}` }} />
+          <ToggleRow title={t('thrombolysisTx')} on={tiv} onChange={setTiv} />
+        </Card>
+
+        <Card>
+          <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.2, marginBottom: 12 }}>{t('notesL')}</div>
+          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('notesPh')} rows={3} style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '12px 14px', fontSize: 14.5, fontFamily: ENS.sans, color: ENS.ink, background: ENS.surface, resize: 'none', outline: 'none' }} />
+        </Card>
+
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: ENS.ink3, marginBottom: 8, paddingLeft: 4 }}>{t('msgPreview')}</div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ maxWidth: '90%', background: '#DCF8C6', borderRadius: '16px 16px 4px 16px', padding: '12px 14px', boxShadow: '0 1px 2px rgba(0,0,0,.08)' }}>
+              <pre style={{ margin: 0, fontFamily: ENS.mono, fontSize: 12, lineHeight: 1.5, color: '#0E3A1F', whiteSpace: 'pre-wrap' }}>{buildMsg()}</pre>
+              <div style={{ textAlign: 'right', fontSize: 10, color: '#5b7a5b', marginTop: 4 }}>09:41 ✓✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ flexShrink: 0, padding: '12px 16px 28px', background: ENS.bg, borderTop: `1px solid ${ENS.lineSoft}` }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+          <button className="ens-press" onClick={onSent} style={{ border: 'none', borderRadius: 14, padding: '15px', cursor: 'pointer', background: ENS.primary, color: '#fff', fontSize: 15, fontWeight: 600, fontFamily: ENS.sans, boxShadow: '0 6px 16px rgba(45,91,215,.28)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>{SRIcon.sheet()} {t('sendToSheet')}</button>
+          <div style={{ display: 'flex', gap: 9 }}>
+            {[[t('copyL'), SRIcon.copy], [t('whatsappL'), SRIcon.wa]].map(([l, ic]) => (
+              <button key={l} className="ens-press" onClick={onSent} style={{ flex: 1, border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '12px', cursor: 'pointer', background: ENS.surface, color: ENS.ink2, fontSize: 14, fontWeight: 600, fontFamily: ENS.sans, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>{ic(ENS.ink2)} {l}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { SendRecord });
+
+
+/* ===== ensapp-catalog.jsx ===== */
+// ensapp-catalog.jsx — Trials catalog (list + detail), minimal style
+// Exposes: TrialCatalog({ onOpen, onNav }), TrialDetail({ trial, onBack, onNav })
+
+const CATALOG = [
+  { id: 'WeTrust', cat: 'isch', status: 'active', label: 'Imaging / workflow',
+    window: '< 6 h  ·  wake-up: LSW < 12 h (symptoms < 6 h)', age: '≥ 18 y', mrs: '0–2', nihss: '≥ 10', aspects: '—',
+    imaging: 'Direct-to-angio OR multimodal CT pathway.',
+    intervention: 'Cone-beam CT software (vs standard workup).',
+    tx: { thrombolytic: 'Optional', thrombectomy: 'Yes', preEvtLabs: 'No', consent: 'Deferred' },
+    notes: ['Exclusion examples: low GCS, INR > 3, seizure at onset.'] },
+  { id: 'MOSTE', cat: 'isch', status: 'active', label: 'EVT strategy',
+    window: '< 23 h', age: '≥ 18 y', mrs: '0–2', nihss: '0–5', aspects: '≥ 6',
+    imaging: 'CT/CTA — confirmed LVO, small established core.',
+    intervention: 'Thrombectomy vs best medical therapy in low-NIHSS LVO.',
+    tx: { thrombolytic: 'Allowed', thrombectomy: 'Randomized', preEvtLabs: 'Yes', consent: 'Required' },
+    notes: ['Pre-mRS ≤ 2 required.', 'Excludes posterior circulation.'] },
+  { id: 'ATHENA', cat: 'isch', status: 'paused', label: 'EVT device',
+    window: '< 24 h', age: '≥ 18 y', mrs: '0–3', nihss: '≥ 8', aspects: '≥ 6',
+    imaging: 'CTA-confirmed large-vessel occlusion.',
+    intervention: 'Next-gen stent-retriever vs standard device.',
+    tx: { thrombolytic: 'Optional', thrombectomy: 'Yes', preEvtLabs: 'Yes', consent: 'Required' },
+    notes: ['Enrollment paused — site requalification in progress.'] },
+  { id: 'PIVOTAL', cat: 'isch', status: 'active', label: 'EVT aspiration',
+    window: '< 8 h', age: '≥ 18 y', mrs: '0–2', nihss: '≥ 6', aspects: '≥ 6',
+    imaging: 'LVO on CTA; favorable core on perfusion.',
+    intervention: 'Direct aspiration first-pass technique (ADAPT).',
+    tx: { thrombolytic: 'Optional', thrombectomy: 'Yes', preEvtLabs: 'No', consent: 'Deferred' },
+    notes: ['Large-vessel target required (ICA-T, M1, basilar).'] },
+  { id: 'PROMISE', cat: 'post', status: 'active', label: 'Post-acute recovery',
+    window: '< 7 d', age: '18–80 y', mrs: '0–2', nihss: 'any', aspects: '—',
+    imaging: 'MRI at day 5–7 post-stroke.',
+    intervention: 'Structured rehab + non-invasive neuromodulation.',
+    tx: { thrombolytic: '—', thrombectomy: '—', preEvtLabs: 'No', consent: 'Required' },
+    notes: ['Functionally independent before stroke.'] },
+  { id: 'STITCH', cat: 'hemo', status: 'paused', label: 'Hematoma evacuation',
+    window: '< 72 h', age: '≥ 18 y', mrs: '0–3', nihss: 'any', aspects: '—',
+    imaging: 'Spontaneous supratentorial ICH, 30–60 mL.',
+    intervention: 'Minimally-invasive surgical evacuation vs medical.',
+    tx: { thrombolytic: '—', thrombectomy: '—', preEvtLabs: 'Yes', consent: 'Required' },
+    notes: ['Excludes secondary causes (AVM, aneurysm, tumor).'] },
+];
+const catColor = () => ({ isch: [ENS.isch, ENS.ischBg], hemo: [ENS.hemo, ENS.hemoBg], post: [ENS.post, ENS.postBg] });
+
+function StatusPill({ status }) {
+  const { t } = useT();
+  const active = status === 'active';
+  const fg = active ? ENS.okFg : ENS.warnFg, bg = active ? ENS.okBg : ENS.warnBg;
+  return <span style={{ fontSize: 11.5, fontWeight: 600, color: fg, background: bg, padding: '3px 10px', borderRadius: 999, whiteSpace: 'nowrap' }}>{active ? t('statusActive') : t('statusPaused')}</span>;
+}
+
+// ── Catalog list ───────────────────────────────────────────────
+function TrialCatalog({ onOpen, onNav }) {
+  const { t } = useT();
+  const [q, setQ] = React.useState('');
+  const [filter, setFilter] = React.useState('all');
+  const cc = catColor();
+  const filters = [['all', t('allFilter')], ['isch', t('ischemic')], ['hemo', t('hemorrhagic')], ['post', t('postAcute')]];
+  const list = CATALOG.filter((tr) => {
+    if (filter !== 'all' && tr.cat !== filter) return false;
+    const s = q.trim().toLowerCase();
+    return !s || tr.id.toLowerCase().includes(s) || tr.cat.includes(s) || tr.label.toLowerCase().includes(s);
+  });
+
+  return (
+    <MinShell tab="trials" onNav={onNav}>
+      <div style={{ padding: '14px 20px 8px' }}>
+        <div style={{ fontSize: 27, fontWeight: 600, letterSpacing: -0.7 }}>{t('clinicalTrials')}</div>
+        <div style={{ fontSize: 13.5, color: ENS.ink3, marginTop: 4 }}><span style={{ fontFamily: ENS.mono }}>{CATALOG.length}</span> {t('totalLabel')}</div>
+        {/* search */}
+        <div style={{ position: 'relative', marginTop: 16 }}>
+          <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke={ENS.ink3} strokeWidth="1.8" /><path d="M16 16l4 4" stroke={ENS.ink3} strokeWidth="1.8" strokeLinecap="round" /></svg>
+          </span>
+          <input className="ens-input" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('searchTrials')}
+            style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${ENS.line}`, borderRadius: 13, padding: '13px 14px 13px 38px', fontSize: 15, fontFamily: ENS.sans, color: ENS.ink, background: ENS.surface, outline: 'none' }} />
+        </div>
+        {/* filter chips */}
+        <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+          {filters.map(([k, lab]) => {
+            const on = filter === k;
+            return <button key={k} className="ens-press" onClick={() => setFilter(k)} style={{ cursor: 'pointer', whiteSpace: 'nowrap', border: on ? 'none' : `1px solid ${ENS.line}`, background: on ? ENS.primary : ENS.surface, color: on ? '#fff' : ENS.ink2, borderRadius: 999, padding: '9px 16px', fontSize: 13.5, fontWeight: 600, fontFamily: ENS.sans, transition: 'all .15s' }}>{lab}</button>;
+          })}
+        </div>
+      </div>
+
+      <div style={{ padding: '6px 20px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {list.map((tr) => {
+          const [cfg, cbg] = cc[tr.cat];
+          return (
+            <button key={tr.id} className="ens-press" onClick={() => onOpen(tr.id)} style={{ textAlign: 'left', cursor: 'pointer', border: 'none', borderRadius: 18, padding: 18, background: ENS.surface, boxShadow: softShadow, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 17, fontWeight: 700, letterSpacing: -0.3 }}>{tr.id}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: cfg, background: cbg, padding: '2px 9px', borderRadius: 999 }}>{tr.cat}</span>
+                <span style={{ flex: 1 }} />
+                <StatusPill status={tr.status} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ flex: 1, fontSize: 13.5, color: ENS.ink2 }}>{tr.label}</span>
+                {I.chev(ENS.ink3, 16)}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, marginTop: 2, fontFamily: ENS.mono, fontSize: 11.5, color: ENS.ink3 }}>
+                <span style={{ whiteSpace: 'nowrap' }}><b style={{ color: ENS.ink2, fontWeight: 600 }}>{t('windowCol')}</b> {tr.window.split('·')[0].trim()}</span>
+                <span style={{ whiteSpace: 'nowrap' }}><b style={{ color: ENS.ink2, fontWeight: 600 }}>NIHSS</b> {tr.nihss}</span>
+              </div>
+            </button>
+          );
+        })}
+        {!list.length && <div style={{ fontSize: 13.5, color: ENS.ink3, fontStyle: 'italic', padding: '16px 4px', textAlign: 'center' }}>{t('noTrials')}</div>}
+      </div>
+    </MinShell>
+  );
+}
+
+// ── Trial detail ───────────────────────────────────────────────
+function DetailCard({ title, children }) {
+  return (
+    <div style={{ background: ENS.surface, borderRadius: 18, boxShadow: softShadow, overflow: 'hidden' }}>
+      <div style={{ padding: '14px 16px 12px', fontSize: 15, fontWeight: 700, letterSpacing: -0.2 }}>{title}</div>
+      <div style={{ padding: '0 16px 4px' }}>{children}</div>
+    </div>
+  );
+}
+function Row({ k, v, last }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 14, padding: '11px 0', borderTop: `1px solid ${ENS.lineSoft}` }}>
+      <span style={{ fontSize: 13, color: ENS.ink3, flexShrink: 0 }}>{k}</span>
+      <span style={{ fontSize: 13.5, fontWeight: 600, fontFamily: ENS.mono, textAlign: 'right', color: ENS.ink }}>{v}</span>
+    </div>
+  );
+}
+
+function TrialDetail({ trial, onBack, onNav }) {
+  const { t } = useT();
+  const tr = CATALOG.find((x) => x.id === trial) || CATALOG[0];
+  const cc = catColor();
+  const [cfg, cbg] = cc[tr.cat];
+  return (
+    <MinShell tab="trials" onNav={onNav}>
+      <div style={{ padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <button className="ens-press" onClick={onBack} style={{ alignSelf: 'flex-start', border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, color: ENS.primary, fontFamily: ENS.sans, fontSize: 14, fontWeight: 600, padding: '4px 0' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke={ENS.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          {t('catalogBack')}
+        </button>
+        <div>
+          <div style={{ fontSize: 27, fontWeight: 700, letterSpacing: -0.6 }}>{tr.id}</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
+            <StatusPill status={tr.status} />
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: cfg, background: cbg, padding: '3px 10px', borderRadius: 999 }}>{tr.cat}</span>
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: ENS.ink2, background: ENS.bgSunken, padding: '3px 10px', borderRadius: 999 }}>{tr.label}</span>
+          </div>
+        </div>
+
+        <DetailCard title={t('keyCriteria')}>
+          <Row k={t('windowCol')} v={tr.window} />
+          <Row k={t('ageCol')} v={tr.age} />
+          <Row k={t('premrsCol')} v={tr.mrs} />
+          <Row k={t('nihssCol')} v={tr.nihss} />
+          <Row k={t('aspectsCol')} v={tr.aspects} />
+        </DetailCard>
+
+        <DetailCard title={t('imagingL')}>
+          <div style={{ padding: '0 0 14px', fontSize: 13.5, color: ENS.ink2, lineHeight: 1.5 }}>{tr.imaging}</div>
+        </DetailCard>
+
+        <DetailCard title={t('interventionL')}>
+          <div style={{ padding: '0 0 14px', fontSize: 13.5, color: ENS.ink2, lineHeight: 1.5 }}>{tr.intervention}</div>
+        </DetailCard>
+
+        <DetailCard title={t('treatmentL')}>
+          <Row k={t('thrombolyticL')} v={tr.tx.thrombolytic} />
+          <Row k={t('thrombectomyL2')} v={tr.tx.thrombectomy} />
+          <Row k={t('preEvtLabs')} v={tr.tx.preEvtLabs} />
+          <Row k={t('consentL')} v={tr.tx.consent} />
+        </DetailCard>
+
+        <DetailCard title={t('notesL')}>
+          <div style={{ padding: '0 0 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {tr.notes.map((n, i) => (
+              <div key={i} style={{ display: 'flex', gap: 9, fontSize: 13, color: ENS.ink2, lineHeight: 1.45 }}>
+                <span style={{ color: ENS.ink3, flexShrink: 0 }}>•</span><span>{n}</span>
+              </div>
+            ))}
+          </div>
+        </DetailCard>
+      </div>
+    </MinShell>
+  );
+}
+
+Object.assign(window, { CATALOG, TrialCatalog, TrialDetail });
+
+
+/* ===== ensapp-past.jsx ===== */
+// ensapp-past.jsx — Past patients: case-review list, statistics, case detail
+// Exposes: PastPatients({ onOpen, onNav }), PatientReview({ id, onBack, onNav })
+// Relies on CATALOG (ensapp-catalog), ENS/useT/I (shared), MinShell/softShadow (home-min)
+
+const PATIENTS = [
+  { id: '2025-00318', date: 'May 28', age: 71, type: 'isch', nihss: 14, reviewed: false, enrolled: ['WeTrust'], eligible: ['WeTrust', 'ATHENA', 'PIVOTAL'] },
+  { id: '2025-00316', date: 'May 28', age: 66, type: 'isch', nihss: 4,  reviewed: true,  enrolled: ['MOSTE'], eligible: ['MOSTE'] },
+  { id: '2025-00311', date: 'May 27', age: 58, type: 'hemo', nihss: 22, reviewed: false, enrolled: [], eligible: ['STITCH'] },
+  { id: '2025-00309', date: 'May 27', age: 74, type: 'isch', nihss: 9,  reviewed: false, enrolled: ['PROMISE'], eligible: ['PROMISE', 'PIVOTAL'] },
+  { id: '2025-00305', date: 'May 26', age: 63, type: 'isch', nihss: 18, reviewed: true,  enrolled: ['WeTrust', 'ATHENA'], eligible: ['WeTrust', 'ATHENA'] },
+  { id: '2025-00302', date: 'May 26', age: 80, type: 'isch', nihss: 6,  reviewed: false, enrolled: [], eligible: ['PIVOTAL'] },
+  { id: '2025-00298', date: 'May 25', age: 69, type: 'hemo', nihss: 12, reviewed: true,  enrolled: ['STITCH'], eligible: ['STITCH'] },
+  { id: '2025-00295', date: 'May 25', age: 55, type: 'isch', nihss: 3,  reviewed: true,  enrolled: ['MOSTE'], eligible: ['MOSTE'] },
+];
+const missedOf = (p) => p.eligible.filter((x) => !p.enrolled.includes(x));
+const pcc = () => ({ isch: [ENS.isch, ENS.ischBg], hemo: [ENS.hemo, ENS.hemoBg], post: [ENS.post, ENS.postBg] });
+const trMeta = (id) => CATALOG.find((x) => x.id === id) || { id, cat: 'isch', label: '' };
+
+function computeStats() {
+  const screened = PATIENTS.length;
+  const enrolledP = PATIENTS.filter((p) => p.enrolled.length > 0).length;
+  const missedP = PATIENTS.filter((p) => missedOf(p).length > 0).length;
+  const missedTotal = PATIENTS.reduce((a, p) => a + missedOf(p).length, 0);
+  const perTrial = {};
+  CATALOG.forEach((tr) => { perTrial[tr.id] = { id: tr.id, cat: tr.cat, enrolled: 0, missed: 0 }; });
+  PATIENTS.forEach((p) => {
+    p.enrolled.forEach((id) => { if (perTrial[id]) perTrial[id].enrolled++; });
+    missedOf(p).forEach((id) => { if (perTrial[id]) perTrial[id].missed++; });
+  });
+  const bars = Object.values(perTrial).filter((b) => b.enrolled + b.missed > 0).sort((a, b) => (b.enrolled + b.missed) - (a.enrolled + a.missed));
+  return { screened, enrolledP, missedP, missedTotal, rate: Math.round((enrolledP / screened) * 100), bars };
+}
+
+// ── shared bits ────────────────────────────────────────────────
+function TrialChip({ id, tone }) {
+  const cc = pcc(); const m = trMeta(id); const [cfg, cbg] = cc[m.cat];
+  const map = { ok: [ENS.okFg, ENS.okBg], warn: [ENS.warnFg, ENS.warnBg], grey: [ENS.ink2, ENS.bgSunken] };
+  const [fg, bg] = map[tone] || [cfg, cbg];
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12.5, fontWeight: 600, color: fg, background: bg, padding: '5px 11px', borderRadius: 999 }}>
+      {tone === 'ok' && <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke={fg} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+      {tone === 'warn' && <span style={{ fontSize: 13, lineHeight: 1 }}>!</span>}
+      {id}
+    </span>
+  );
+}
+
+// ── List + Statistics ──────────────────────────────────────────
+function PastPatients({ onOpen, onNav }) {
+  const { t } = useT();
+  const [view, setView] = React.useState('patients');
+  const cc = pcc();
+  const stats = computeStats();
+
+  const Seg = () => (
+    <div style={{ display: 'flex', gap: 4, background: ENS.bgSunken, borderRadius: 12, padding: 4, margin: '0 20px' }}>
+      {[['patients', t('tabPatients')], ['stats', t('tabStats')]].map(([k, lab]) => {
+        const on = view === k;
+        return <button key={k} className="ens-press" onClick={() => setView(k)} style={{ flex: 1, cursor: 'pointer', border: 'none', borderRadius: 9, padding: '10px 4px', background: on ? ENS.surface : 'transparent', boxShadow: on ? '0 1px 3px rgba(16,24,40,.12)' : 'none', color: on ? ENS.ink : ENS.ink3, fontSize: 13.5, fontWeight: 600, fontFamily: ENS.sans }}>{lab}</button>;
+      })}
+    </div>
+  );
+
+  return (
+    <MinShell tab="trials" onNav={onNav}>
+      <div style={{ padding: '14px 20px 12px' }}>
+        <div style={{ fontSize: 27, fontWeight: 600, letterSpacing: -0.7 }}>{t('pastPatients')}</div>
+        <div style={{ fontSize: 13.5, color: ENS.ink3, marginTop: 4 }}><span style={{ fontFamily: ENS.mono }}>{PATIENTS.length}</span> {t('patientsCount')}</div>
+      </div>
+      <Seg />
+
+      {view === 'patients' ? (
+        <div style={{ padding: '14px 20px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {PATIENTS.map((p) => {
+            const [cfg, cbg] = cc[p.type]; const missed = missedOf(p);
+            return (
+              <button key={p.id} className="ens-press" onClick={() => onOpen(p.id)} style={{ textAlign: 'left', cursor: 'pointer', border: 'none', borderRadius: 18, padding: 16, background: ENS.surface, boxShadow: softShadow, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                  <span style={{ fontFamily: ENS.mono, fontSize: 14.5, fontWeight: 600 }}>{p.id}</span>
+                  <span style={{ fontSize: 10.5, fontWeight: 600, color: cfg, background: cbg, padding: '2px 8px', borderRadius: 999 }}>{p.type}</span>
+                  <span style={{ flex: 1 }} />
+                  {p.reviewed
+                    ? <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11.5, fontWeight: 600, color: ENS.ink3 }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke={ENS.ink3} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>{t('reviewedL')}</span>
+                    : <span style={{ fontSize: 11, fontWeight: 700, color: ENS.primary, background: ENS.primaryBg, padding: '3px 9px', borderRadius: 999 }}>{t('needsReview')}</span>}
+                </div>
+                <div style={{ display: 'flex', gap: 14, fontFamily: ENS.mono, fontSize: 11.5, color: ENS.ink3 }}>
+                  <span>{p.date}</span><span>NIHSS {p.nihss}</span><span>{p.age}y</span>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                  {p.enrolled.length ? p.enrolled.map((id) => <TrialChip key={id} id={id} tone="ok" />)
+                    : <span style={{ fontSize: 12.5, color: ENS.ink3, fontStyle: 'italic' }}>—</span>}
+                  {missed.length > 0 && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: ENS.warnFg, background: ENS.warnBg, padding: '5px 10px', borderRadius: 999 }}>{missed.length} {t('missedBadge')}</span>}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <StatsView stats={stats} />
+      )}
+    </MinShell>
+  );
+}
+
+// ── Statistics view ────────────────────────────────────────────
+function StatsView({ stats }) {
+  const { t } = useT();
+  const cc = pcc();
+  const maxBar = Math.max(...stats.bars.map((b) => b.enrolled + b.missed), 1);
+  const metric = (val, lab, fg) => (
+    <div style={{ flex: 1, background: ENS.surface, borderRadius: 16, boxShadow: softShadow, padding: '14px 14px' }}>
+      <div style={{ fontFamily: ENS.mono, fontSize: 26, fontWeight: 600, letterSpacing: -0.5, color: fg, lineHeight: 1 }}>{val}</div>
+      <div style={{ fontSize: 11.5, color: ENS.ink3, marginTop: 6, lineHeight: 1.2 }}>{lab}</div>
+    </div>
+  );
+  return (
+    <div style={{ padding: '16px 20px 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', gap: 10 }}>
+        {metric(stats.screened, t('screened'), ENS.ink)}
+        {metric(stats.enrolledP, t('enrolledStat'), ENS.okFg)}
+      </div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        {metric(stats.missedP, t('missedStat'), ENS.warnFg)}
+        {metric(stats.rate + '%', t('enrollRate'), ENS.primary)}
+      </div>
+
+      {/* enrollment by trial */}
+      <div style={{ background: ENS.surface, borderRadius: 18, boxShadow: softShadow, padding: 18 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.2, marginBottom: 4 }}>{t('enrollByTrial')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16, fontSize: 11.5, color: ENS.ink3 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: ENS.okFg }} />{t('enrolledStat')}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: ENS.warnFg }} />{t('missedBadge')}</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
+          {stats.bars.map((b) => (
+            <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ width: 64, fontSize: 12.5, fontWeight: 600, flexShrink: 0 }}>{b.id}</span>
+              <div style={{ flex: 1, height: 22, borderRadius: 7, background: ENS.bgSunken, overflow: 'hidden', display: 'flex' }}>
+                {b.enrolled > 0 && <div style={{ width: `${(b.enrolled / maxBar) * 100}%`, background: ENS.okFg }} />}
+                {b.missed > 0 && <div style={{ width: `${(b.missed / maxBar) * 100}%`, background: ENS.warnFg }} />}
+              </div>
+              <span style={{ width: 30, textAlign: 'right', fontFamily: ENS.mono, fontSize: 12, color: ENS.ink2, flexShrink: 0 }}>{b.enrolled + b.missed}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* missed opportunities callout */}
+      {stats.missedTotal > 0 && (
+        <div style={{ background: ENS.warnBg, borderRadius: 18, padding: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <span style={{ width: 22, height: 22, borderRadius: 999, background: ENS.warnFg, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700 }}>!</span>
+            <span style={{ fontSize: 15, fontWeight: 700, color: ENS.warnFg, letterSpacing: -0.2 }}>{t('missedOpp')}</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+            {stats.bars.filter((b) => b.missed > 0).map((b) => (
+              <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#7a4d09' }}>
+                <span style={{ fontFamily: ENS.mono, fontWeight: 700 }}>{b.missed}×</span>
+                <span style={{ fontWeight: 600 }}>{b.id}</span>
+                <span style={{ opacity: .75 }}>{trMeta(b.id).label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Case review (patient detail) ───────────────────────────────
+function PatientReview({ id, onBack, onNav }) {
+  const { t } = useT();
+  const p = PATIENTS.find((x) => x.id === id) || PATIENTS[0];
+  const [reviewed, setReviewed] = React.useState(p.reviewed);
+  const cc = pcc(); const [cfg, cbg] = cc[p.type];
+  const missed = missedOf(p);
+  const notElig = CATALOG.filter((tr) => !p.eligible.includes(tr.id));
+
+  const Sec = ({ title, count, color, children }) => (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, paddingLeft: 2 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, color: color || ENS.ink2 }}>{title}</span>
+        {count != null && <span style={{ fontFamily: ENS.mono, fontSize: 11.5, color: ENS.ink3 }}>{count}</span>}
+      </div>
+      {children}
+    </div>
+  );
+
+  return (
+    <MinShell tab="trials" onNav={onNav}>
+      <div style={{ padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <button className="ens-press" onClick={onBack} style={{ alignSelf: 'flex-start', border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, color: ENS.primary, fontFamily: ENS.sans, fontSize: 14, fontWeight: 600, padding: '4px 0' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke={ENS.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          {t('pastPatients')}
+        </button>
+
+        {/* header */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontFamily: ENS.mono, fontSize: 22, fontWeight: 700, letterSpacing: -0.4 }}>{p.id}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: cfg, background: cbg, padding: '2px 9px', borderRadius: 999 }}>{p.type}</span>
+          </div>
+          <div style={{ display: 'flex', gap: 14, marginTop: 8, fontFamily: ENS.mono, fontSize: 12, color: ENS.ink3 }}>
+            <span>{p.date}</span><span>NIHSS {p.nihss}</span><span>{p.age}y</span>
+          </div>
+        </div>
+
+        {/* enrolled */}
+        <Sec title={t('enrolledInN')} count={p.enrolled.length} color={ENS.okFg}>
+          {p.enrolled.length ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+              {p.enrolled.map((tid) => {
+                const m = trMeta(tid);
+                return (
+                  <div key={tid} style={{ display: 'flex', alignItems: 'center', gap: 11, background: ENS.surface, borderRadius: 14, boxShadow: softShadow, padding: '13px 14px', border: `1px solid ${ENS.okFg}33` }}>
+                    <span style={{ width: 30, height: 30, borderRadius: 9, background: ENS.okBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke={ENS.okFg} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
+                    <span style={{ flex: 1 }}><span style={{ fontSize: 15, fontWeight: 700 }}>{m.id}</span><span style={{ display: 'block', fontSize: 12, color: ENS.ink3, marginTop: 1 }}>{m.label}</span></span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : <div style={{ fontSize: 13, color: ENS.ink3, fontStyle: 'italic', padding: '2px 2px 0' }}>—</div>}
+        </Sec>
+
+        {/* eligible — not enrolled (missed) */}
+        {missed.length > 0 && (
+          <Sec title={t('eligibleNotEnrolled')} count={missed.length} color={ENS.warnFg}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+              {missed.map((tid) => {
+                const m = trMeta(tid);
+                return (
+                  <div key={tid} style={{ background: ENS.warnBg, borderRadius: 14, padding: '13px 14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+                      <span style={{ width: 30, height: 30, borderRadius: 9, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: ENS.warnFg, fontWeight: 700, fontSize: 16 }}>!</span>
+                      <span style={{ flex: 1 }}><span style={{ fontSize: 15, fontWeight: 700, color: '#7a4d09' }}>{m.id}</span><span style={{ display: 'block', fontSize: 12, color: ENS.warnFg, marginTop: 1 }}>{m.label}{m.status === 'paused' ? ' · paused' : ''}</span></span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: 11.5, color: ENS.ink3, marginTop: 8, paddingLeft: 2 }}>{t('missedHint')}</div>
+          </Sec>
+        )}
+
+        {/* not eligible */}
+        <Sec title={t('notEligible')} count={notElig.length}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+            {notElig.map((tr) => <span key={tr.id} style={{ fontSize: 12.5, fontWeight: 600, color: ENS.ink3, background: ENS.bgSunken, padding: '6px 11px', borderRadius: 999 }}>{tr.id}</span>)}
+          </div>
+        </Sec>
+      </div>
+
+      {/* review action */}
+      <div style={{ flexShrink: 0, padding: '12px 20px 16px' }}>
+        <button className="ens-press" onClick={() => setReviewed(true)} disabled={reviewed} style={{ width: '100%', border: reviewed ? `1px solid ${ENS.line}` : 'none', borderRadius: 14, padding: '15px', cursor: reviewed ? 'default' : 'pointer', background: reviewed ? ENS.surface : ENS.ink, color: reviewed ? ENS.okFg : '#fff', fontFamily: ENS.sans, fontSize: 15, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          {reviewed && <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke={ENS.okFg} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+          {reviewed ? t('reviewedDone') : t('markReviewed')}
+        </button>
+      </div>
+    </MinShell>
+  );
+}
+
+Object.assign(window, { PATIENTS, PastPatients, PatientReview });
+
+
+/* ===== ensapp-proto-screens.jsx ===== */
+// ensapp-proto-screens.jsx — Check-eligibility workflow (minimal style)
+// Exposes: HomeFinal, ChoiceContent, StepPreImaging, PreImagingResult,
+//          StepPostImaging, ResultsScreen, QuickPatient, EnrollConfirm, TRIALS
+
+const TRIALS = [
+  { id: 'WeTrust', cat: 'isch', label: 'Imaging / workflow', win: '< 6 h', nihss: '≥ 10' },
+  { id: 'MOSTE',   cat: 'isch', label: 'EVT strategy',        win: '< 23 h', nihss: '0–5' },
+  { id: 'ATHENA',  cat: 'isch', label: 'EVT device',          win: '< 24 h', nihss: '≥ 8' },
+  { id: 'PIVOTAL', cat: 'isch', label: 'EVT aspiration',      win: '< 8 h',  nihss: '≥ 6' },
+  { id: 'PROMISE', cat: 'post', label: 'Post-acute recovery', win: '< 7 d',  nihss: 'any' },
+  { id: 'STITCH',  cat: 'hemo', label: 'Hematoma evacuation', win: '< 72 h', nihss: 'any' },
+];
+const CAT_COLOR = () => ({ isch: [ENS.isch, ENS.ischBg], hemo: [ENS.hemo, ENS.hemoBg], post: [ENS.post, ENS.postBg] });
+const VESSELS = [
+  { v: 'ica', l: 'Intracranial ICA (no T)' }, { v: 'icaT', l: 'Terminal ICA (ICA-T)' },
+  { v: 'm1', l: 'M1' }, { v: 'm2pd', l: 'M2 proximal / dominant' },
+  { v: 'm2any', l: 'Any M2' }, { v: 'm2gt', l: '> M2' },
+  { v: 'a1', l: 'A1' }, { v: 'a2', l: 'A2' }, { v: 'a2gt', l: '> A2' },
+  { v: 'basilar', l: 'Basilar' }, { v: 'p1', l: 'P1' }, { v: 'p2', l: 'P2' },
+  { v: 'p2gt', l: '> P2' }, { v: 'va', l: 'VA' },
+];
+const LARGE_VESSEL = ['ica', 'icaT', 'm1', 'm2pd', 'basilar'];
+
+function winMin(p) { return p.ltsw ? Math.round((Date.now() - p.ltsw) / 60000) : 99999; }
+function wakeOK6(p) { // wake-up: symptoms within 6h of awakening (proxy: window <= 6h+buffer)
+  return p.wakeUp ? winMin(p) <= 720 : false;
+}
+
+// ── Home (final M1, wired) ─────────────────────────────────────
+function HomeFinal({ onNew, onCatalog, onPast, onNav }) {
+  const { t } = useT();
+  const { label } = useElapsed(112);
+  const frac = (112 * 60) / (4.5 * 3600);
+  return (
+    <MinShell tab="home" onNav={onNav}>
+      <div style={{ padding: '12px 24px 0', display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div style={{ marginTop: 18, marginBottom: 26 }}>
+          <div style={{ fontSize: 28, fontWeight: 600, letterSpacing: -0.8, lineHeight: 1.12 }}>Assign a patient<br />to a trial.</div>
+          <div style={{ fontSize: 14, color: ENS.ink3, marginTop: 10, lineHeight: 1.4 }}>{t('tagline')}.</div>
+        </div>
+        <button id="ens-hero" className="ens-press" onClick={onNew} style={{ border: 'none', cursor: 'pointer', borderRadius: 22, padding: '22px', background: ENS.primary, color: '#fff', textAlign: 'left', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0 8px 22px rgba(45,91,215,.30)' }}>
+          <span>
+            <span style={{ display: 'block', fontSize: 19, fontWeight: 600, letterSpacing: -0.3 }}>{t('newPatient')}</span>
+            <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.8)', marginTop: 3 }}>{t('eligDesc')}</span>
+          </span>
+          <span style={{ width: 40, height: 40, borderRadius: 999, background: 'rgba(255,255,255,.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{I.chev('#fff', 20)}</span>
+        </button>
+        <div className="ens-press" style={{ cursor: 'pointer', marginTop: 14, borderRadius: 20, padding: 18, background: ENS.surface, boxShadow: softShadow }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 13 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ width: 7, height: 7, borderRadius: 999, background: ENS.okFg }} />
+              <span style={{ fontSize: 14, fontWeight: 600 }}>{t('activeSession')}</span>
+            </span>
+            <span style={{ fontSize: 13.5, fontWeight: 600, color: ENS.primary }}>{t('resume')} →</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontFamily: ENS.mono, fontSize: 24, fontWeight: 500, letterSpacing: -0.4, fontVariantNumeric: 'tabular-nums' }}>{label}</span>
+            <span style={{ fontSize: 12.5, color: ENS.ink3 }}>{t('sinceLtsw')} · WeTrust</span>
+          </div>
+          <div style={{ marginTop: 12 }}><WindowBar frac={frac} /></div>
+        </div>
+        <div style={{ flex: 1 }} />
+        <div style={{ display: 'flex', marginBottom: 8 }}>
+          {[[I.book, t('catalog'), onCatalog], [I.person, t('pastPatients'), onPast]].map(([icon, label2, fn], i) => (
+            <button key={i} className="ens-press" onClick={fn || undefined} style={{ flex: 1, border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 0', color: ENS.ink2, fontFamily: ENS.sans, borderLeft: i ? `1px solid ${ENS.lineSoft}` : 'none' }}>
+              {icon(ENS.ink3)}<span style={{ fontSize: 13.5, fontWeight: 500 }}>{label2}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </MinShell>
+  );
+}
+
+// ── Choice content ─────────────────────────────────────────────
+function ChoiceContent({ onPick, stagger }) {
+  const { t } = useT();
+  const opts = [
+    { key: 'check', icon: I.stetho, title: t('checkElig'), desc: t('checkEligDesc'), tag: t('fullFlow'), accent: ENS.primary, bg: ENS.primaryBg },
+    { key: 'direct', icon: I.bolt, title: t('directEnroll'), desc: t('directEnrollDesc'), tag: t('fast'), accent: ENS.post, bg: ENS.postBg },
+  ];
+  return (
+    <div style={{ padding: '8px 22px 0' }}>
+      <div className="ens-rise" style={{ animationDelay: '60ms', marginBottom: 22 }}>
+        <div style={{ fontSize: 24, fontWeight: 600, letterSpacing: -0.6 }}>{t('newPatient')}</div>
+        <div style={{ fontSize: 14, color: ENS.ink3, marginTop: 6 }}>{t('proceedHow')}</div>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {opts.map((o, i) => (
+          <button key={o.key} className={stagger ? 'ens-rise' : ''} onClick={() => onPick(o.key)}
+            style={{ animationDelay: `${140 + i * 90}ms`, textAlign: 'left', cursor: 'pointer', border: `1px solid ${ENS.line}`, borderRadius: 20, padding: 20, background: ENS.surface, boxShadow: softShadow, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ width: 48, height: 48, borderRadius: 14, background: o.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{o.icon(o.accent)}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase', color: o.accent, background: o.bg, padding: '4px 10px', borderRadius: 999 }}>{o.tag}</span>
+            </div>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: -0.3, display: 'flex', alignItems: 'center', gap: 7 }}>{o.title} {I.chev(ENS.ink3, 16)}</div>
+              <div style={{ fontSize: 13.5, color: ENS.ink3, marginTop: 5, lineHeight: 1.45 }}>{o.desc}</div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({ children, note }) {
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.2 }}>{children}</div>
+      {note && <div style={{ fontSize: 12, color: ENS.ink3, marginTop: 3, lineHeight: 1.4 }}>{note}</div>}
+    </div>
+  );
+}
+
+// ── Step 1 · Pre-imaging (history + context) ───────────────────
+function StepPreImaging({ patient, set, onBack, onNext }) {
+  const { t } = useT();
+  const ok = patient.age && patient.nihss != null && patient.mrs != null && patient.ltsw;
+  const within6 = wakeOK6(patient);
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <AppHeader title={t('preImaging')} sub={t('preImagingSub')} step={0} steps={3} onBack={onBack} />
+      <div style={{ flex: 1, overflow: 'auto', padding: '6px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <Card><Field label={t('identification')}><TextField mono value={patient.prn || ''} onChange={(v) => set({ prn: v })} placeholder="2025-00123" /></Field></Card>
+
+        <Card style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <SectionTitle>{t('clinical')}</SectionTitle>
+          <Field label={t('ageL')} hint="18–110"><TextField mono unit={t('years')} value={patient.age || ''} onChange={(v) => set({ age: v.replace(/[^0-9]/g, '') })} placeholder="—" /></Field>
+          <Field label={t('nihss')} hint="0–42"><NihssScale value={patient.nihss} onChange={(v) => set({ nihss: v })} /></Field>
+          <Field label={t('premrs')} hint="0–5"><Segmented cols={6} options={[0, 1, 2, 3, 4, 5]} value={patient.mrs} onChange={(v) => set({ mrs: v })} /></Field>
+        </Card>
+
+        <Card style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <Field label={t('lastSeenWell')}><DateTimeField value={patient.ltsw} onChange={(v) => set({ ltsw: v })} /></Field>
+          <div style={{ borderTop: `1px solid ${ENS.lineSoft}`, paddingTop: 16 }}>
+            <CheckRow checked={!!patient.wakeUp} onChange={(v) => set({ wakeUp: v })} title={t('wakeUp')} desc={t('wakeUpDesc')} />
+            {patient.wakeUp && (
+              <div style={{ marginTop: 12, display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px', borderRadius: 12, background: within6 ? ENS.okBg : ENS.warnBg }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, marginTop: 1 }}><path d="M5 12l4 4 10-10" stroke={within6 ? ENS.okFg : ENS.warnFg} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <span style={{ fontSize: 12.5, color: within6 ? ENS.okFg : ENS.warnFg, lineHeight: 1.4 }}>
+                  <b>{t('symptomsWithin')}: {within6 ? t('yes') : t('no')}</b><br /><span style={{ opacity: .8, fontSize: 11.5 }}>({t('fromLtsw')})</span>
+                </span>
+              </div>
+            )}
+          </div>
+        </Card>
+
+        <Card style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <SectionTitle>{t('operational')}</SectionTitle>
+          {[['philips', 'philips'], ['doac', 'doac'], ['ace', 'ace']].map(([key, lab]) => (
+            <Field key={key} label={t(lab)}>
+              <RadioCards options={[{ v: 'no', l: t('no') }, { v: 'yes', l: t('yes') }]} value={patient[key]} onChange={(v) => set({ [key]: v })} />
+            </Field>
+          ))}
+        </Card>
+      </div>
+      <BottomBar onBack={onBack} onNext={onNext} nextDisabled={!ok} />
+    </div>
+  );
+}
+
+// ── Pre-imaging result (interstitial checkpoint) ───────────────
+function PreImagingResult({ patient, onBack, onNext }) {
+  const { t } = useT();
+  const n = Number(patient.nihss) || 0;
+  const w = winMin(patient);
+  const weTrust = n >= 10 && (w <= 360 || wakeOK6(patient));
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <AppHeader title={t('preResultT')} onBack={onBack} />
+      <div style={{ flex: 1, overflow: 'auto', padding: '4px 18px 16px' }}>
+        <div style={{ borderRadius: 18, padding: 18, background: ENS.surface, boxShadow: softShadow, border: weTrust ? `1px solid ${ENS.okFg}33` : `1px solid ${ENS.line}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: 17, fontWeight: 700 }}>WeTrust</span>
+            {weTrust
+              ? <span style={{ fontSize: 12, fontWeight: 700, color: ENS.okFg, background: ENS.okBg, padding: '4px 10px', borderRadius: 999 }}>{t('eligible')}</span>
+              : <span style={{ fontSize: 12, fontWeight: 700, color: ENS.dangFg, background: ENS.dangBg, padding: '4px 10px', borderRadius: 999 }}>{t('notEligible')}</span>}
+          </div>
+          <div style={{ fontSize: 13.5, color: ENS.ink2, lineHeight: 1.5 }}>
+            {weTrust
+              ? <>Meets pre-imaging criteria. {t('proceedPost')}</>
+              : <>{t('notMeetA')} WeTrust {t('notMeetB')} {t('proceedPost')}</>}
+          </div>
+        </div>
+      </div>
+      <BottomBar onBack={onBack} onNext={onNext} nextLabel={t('continueL')} />
+    </div>
+  );
+}
+
+// ── Step 2 · Post-imaging ──────────────────────────────────────
+function StepPostImaging({ patient, set, onBack, onNext }) {
+  const { t } = useT();
+  const isch = patient.strokeType === 'isch';
+  const evt = patient.evtCandidate === 'yes';
+  let ok = !!patient.strokeType;
+  if (isch) { ok = ok && !!patient.evtCandidate; if (evt) ok = ok && (patient.vessels || []).length > 0 && patient.aspects != null; }
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <AppHeader title={t('postImaging')} sub={t('postImagingSub')} step={1} steps={3} onBack={onBack} />
+      <div style={{ flex: 1, overflow: 'auto', padding: '6px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <Card>
+          <Field label={t('strokeType')}>
+            <RadioCards options={[{ v: 'isch', l: t('ischemic'), sub: t('strokeIschSub') }, { v: 'hemo', l: t('hemorrhagic'), sub: t('strokeHemoSub') }]} value={patient.strokeType} onChange={(v) => set({ strokeType: v })} />
+          </Field>
+        </Card>
+
+        {isch && (
+          <Card className="ens-screen-in" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Field label={t('evtCandidate')}>
+              <RadioCards green options={[{ v: 'yes', l: t('eligible') }, { v: 'no', l: t('notEligible') }]} value={patient.evtCandidate} onChange={(v) => set({ evtCandidate: v })} />
+            </Field>
+            <div style={{ borderTop: `1px solid ${ENS.lineSoft}` }} />
+            <Field label={t('ivtCandidate')}>
+              <RadioCards green options={[{ v: 'yes', l: t('yes') }, { v: 'no', l: t('no') }]} value={patient.ivtCandidate} onChange={(v) => set({ ivtCandidate: v })} />
+            </Field>
+          </Card>
+        )}
+
+        {isch && evt && (
+          <Card style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <SectionTitle note={t('evtParamsNote')}>{t('evtParams')}</SectionTitle>
+            <Field label={t('targetVessel')}>
+              <VesselPicker value={patient.vessels || []} onChange={(v) => set({ vessels: v })} />
+              <div style={{ fontSize: 11, color: ENS.ink3, marginTop: 8 }}>{t('selectOneMore')}</div>
+            </Field>
+            <div style={{ borderTop: `1px solid ${ENS.lineSoft}`, paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <ToggleRow title={t('tandem').replace('?', '')} on={!!patient.tandem} onChange={(v) => set({ tandem: v })} />
+              <div style={{ borderTop: `1px solid ${ENS.lineSoft}` }} />
+              <ToggleRow title={t('tortuosity').replace('?', '')} sub={t('tortuosityNote')} on={!!patient.tortuosity} onChange={(v) => set({ tortuosity: v })} />
+            </div>
+            <div style={{ borderTop: `1px solid ${ENS.lineSoft}`, paddingTop: 16 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 600, color: ENS.ink2, marginBottom: 12 }}>ASPECTS</div>
+              <AspectsCells value={patient.aspects} onChange={(v) => set({ aspects: v })} />
+            </div>
+          </Card>
+        )}
+
+        {patient.strokeType === 'hemo' && <HemoParams patient={patient} set={set} />}
+      </div>
+      <BottomBar onBack={onBack} onNext={onNext} nextLabel={t('review')} nextDisabled={!ok} />
+    </div>
+  );
+}
+
+// ── eligibility engine (final) ─────────────────────────────────
+function evalTrials(p) {
+  const w = winMin(p); const n = Number(p.nihss) || 0;
+  const evt = p.evtCandidate === 'yes';
+  const bigVessel = (p.vessels || []).some((v) => LARGE_VESSEL.includes(v));
+  const isch = p.strokeType === 'isch', hemo = p.strokeType === 'hemo';
+  const out = [];
+  for (const tr of TRIALS) {
+    let elig = false, reason = '';
+    if (tr.id === 'WeTrust') { elig = isch && n >= 10 && (w <= 360 || wakeOK6(p)); reason = !isch ? 'Not ischemic' : n < 10 ? 'NIHSS < 10' : 'Outside 6 h window'; }
+    else if (tr.id === 'MOSTE') { elig = isch && evt && n <= 5 && w <= 1380; reason = !evt ? 'Not EVT candidate' : n > 5 ? 'NIHSS > 5' : 'Outside 23 h'; }
+    else if (tr.id === 'ATHENA') { elig = isch && evt && n >= 8 && w <= 1440 && bigVessel; reason = !evt ? 'Not EVT candidate' : !bigVessel ? 'No large-vessel target' : n < 8 ? 'NIHSS < 8' : 'Outside 24 h'; }
+    else if (tr.id === 'PIVOTAL') { elig = isch && evt && n >= 6 && w <= 480 && bigVessel; reason = !evt ? 'Not EVT candidate' : !bigVessel ? 'No large-vessel target' : 'Outside 8 h / NIHSS < 6'; }
+    else if (tr.id === 'PROMISE') { elig = isch && (p.mrs != null && p.mrs <= 2); reason = !isch ? 'Not ischemic' : 'Pre-mRS > 2'; }
+    else if (tr.id === 'STITCH') { elig = hemo; reason = 'Ischemic stroke'; }
+    out.push({ ...tr, elig, reason });
+  }
+  return out.sort((a, b) => (b.elig - a.elig));
+}
+
+// ── Results — multi-select eligible trials ─────────────────────
+function ResultsScreen({ patient, selected, onToggle, onBack, onHome, onReview }) {
+  const { t } = useT();
+  const res = React.useMemo(() => evalTrials(patient), [patient]);
+  const cc = CAT_COLOR();
+  const nElig = res.filter((r) => r.elig).length;
+  const sel = selected || [];
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <AppHeader step={2} steps={4} onBack={onBack} onClose={onHome} />
+      <div style={{ flex: 1, overflow: 'auto', padding: '0 18px 16px' }}>
+        <div style={{ marginBottom: 16, paddingLeft: 4 }}>
+          <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: -0.6 }}>{t('eligibleTrials')}</div>
+          <div style={{ fontSize: 13.5, color: ENS.ink3, marginTop: 5 }}>{t('selectTrials')}</div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: 12, background: nElig ? ENS.okBg : ENS.warnBg, color: nElig ? ENS.okFg : ENS.warnFg, padding: '6px 12px', borderRadius: 999, fontSize: 13, fontWeight: 600 }}>
+            <span style={{ fontFamily: ENS.mono, fontSize: 15 }}>{nElig}</span> {t('matches')}
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+          {res.map((r) => {
+            const [cfg, cbg] = cc[r.cat];
+            const on = sel.includes(r.id);
+            return (
+              <button key={r.id} className={r.elig ? 'ens-press' : ''} onClick={r.elig ? () => onToggle(r.id) : undefined}
+                style={{ textAlign: 'left', cursor: r.elig ? 'pointer' : 'default', borderRadius: 18, padding: 16, background: on ? ENS.okBg : ENS.surface, boxShadow: softShadow, opacity: r.elig ? 1 : 0.6, border: on ? `1.5px solid ${ENS.okFg}` : r.elig ? `1px solid ${ENS.okFg}33` : `1px solid ${ENS.line}`, transition: 'all .15s' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+                  {r.elig && (
+                    <span style={{ width: 24, height: 24, borderRadius: 8, border: on ? 'none' : `2px solid ${ENS.line}`, background: on ? ENS.okFg : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxSizing: 'border-box', transition: 'all .15s' }}>
+                      {on && <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                    </span>
+                  )}
+                  <span style={{ fontSize: 16.5, fontWeight: 700, letterSpacing: -0.2 }}>{r.id}</span>
+                  <span style={{ fontSize: 10.5, fontWeight: 600, color: cfg, background: cbg, padding: '2px 8px', borderRadius: 999 }}>{r.cat}</span>
+                  <span style={{ flex: 1 }} />
+                  {!r.elig && <span style={{ fontSize: 12, fontWeight: 600, color: ENS.ink3 }}>{t('notEligible')}</span>}
+                </div>
+                <div style={{ fontSize: 12.5, color: ENS.ink2, marginTop: 8, marginLeft: r.elig ? 35 : 0 }}>{r.label}</div>
+                <div style={{ display: 'flex', gap: 14, marginTop: 6, marginLeft: r.elig ? 35 : 0, fontFamily: ENS.mono, fontSize: 11, color: ENS.ink3 }}><span>{t('window')} {r.win}</span><span>NIHSS {r.nihss}</span></div>
+                {!r.elig && <div style={{ marginTop: 10, fontSize: 12, color: ENS.dangFg, background: ENS.dangBg, padding: '7px 11px', borderRadius: 9, display: 'inline-block' }}>{r.reason}</div>}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <BottomBar onNext={sel.length ? onReview : undefined} nextDisabled={!sel.length}
+        nextLabel={sel.length ? `${t('continueSummary')} · ${sel.length}` : t('noneSelected')} />
+    </div>
+  );
+}
+
+// ── Enrollment summary (multi-trial) ───────────────────────────
+function EnrollSummary({ patient, selected, onBack, onConfirm }) {
+  const { t } = useT();
+  const cc = CAT_COLOR();
+  const sel = (selected || []).map((id) => TRIALS.find((x) => x.id === id)).filter(Boolean);
+  const rows = [
+    [t('prn'), patient.prn || '—'],
+    [t('strokeType'), patient.strokeType === 'hemo' ? t('hemorrhagic') : t('ischemic')],
+    [t('nihss'), patient.nihss == null ? '—' : String(patient.nihss)],
+  ];
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <AppHeader title={t('enrollSummaryT')} sub={t('enrollSummarySub')} step={3} steps={4} onBack={onBack} />
+      <div style={{ flex: 1, overflow: 'auto', padding: '6px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <Card>
+          <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, color: ENS.ink3, marginBottom: 10 }}>{t('patientL')}</div>
+          {rows.map(([k, v], i) => (
+            <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: i ? `1px solid ${ENS.lineSoft}` : 'none' }}>
+              <span style={{ fontSize: 13, color: ENS.ink3 }}>{k}</span>
+              <span style={{ fontSize: 13.5, fontWeight: 600, fontFamily: k === t('prn') ? ENS.mono : ENS.sans }}>{v}</span>
+            </div>
+          ))}
+        </Card>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 4px 0' }}>
+          <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, color: ENS.ink3 }}>{t('enrolledInN')}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: ENS.okFg, background: ENS.okBg, padding: '2px 9px', borderRadius: 999, fontFamily: ENS.mono }}>{sel.length} {t('trialsCount')}</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {sel.map((tr) => {
+            const [cfg, cbg] = cc[tr.cat];
+            return (
+              <div key={tr.id} style={{ borderRadius: 16, padding: '14px 16px', background: ENS.surface, boxShadow: softShadow, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ width: 34, height: 34, borderRadius: 10, background: ENS.okBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke={ENS.okFg} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </span>
+                <span style={{ flex: 1 }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 16, fontWeight: 700 }}>{tr.id}</span>
+                    <span style={{ fontSize: 10.5, fontWeight: 600, color: cfg, background: cbg, padding: '2px 8px', borderRadius: 999 }}>{tr.cat}</span>
+                  </span>
+                  <span style={{ display: 'block', fontSize: 12, color: ENS.ink3, marginTop: 2 }}>{tr.label}</span>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <BottomBar onBack={onBack} backLabel={t('editSelection')} onNext={onConfirm} nextLabel={t('confirmEnroll')} />
+    </div>
+  );
+}
+
+// ── Direct enrollment (trial-first, multi-select + search) ─────
+function QuickPatient({ patient, set, selected, onToggle, onBack, onReview }) {
+  const { t } = useT();
+  const [q, setQ] = React.useState('');
+  const cc = CAT_COLOR();
+  const sel = selected || [];
+  const groups = [
+    { cat: 'isch', label: t('ischemic') },
+    { cat: 'hemo', label: t('hemorrhagic') },
+    { cat: 'post', label: t('postAcute') },
+  ];
+  const match = (tr) => {
+    const s = q.trim().toLowerCase();
+    return !s || tr.id.toLowerCase().includes(s) || tr.label.toLowerCase().includes(s);
+  };
+  const ok = patient.prn && sel.length > 0;
+
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink, position: 'relative' }}>
+      <AppHeader title={t('directEnroll')} sub={t('directEnrollDesc')} onBack={onBack} />
+      <div style={{ flex: 1, overflow: 'auto', padding: '6px 16px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* minimal patient ID */}
+        <Card style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.2 }}>{t('patientL')}</div>
+          <Field label={t('prn')}><TextField mono value={patient.prn || ''} onChange={(v) => set({ prn: v })} placeholder="2025-00123" /></Field>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ flex: 1 }}><Field label={t('ageL')} hint={t('optional')}><TextField mono unit={t('years')} value={patient.age || ''} onChange={(v) => set({ age: v.replace(/[^0-9]/g, '') })} placeholder="—" /></Field></div>
+            <div style={{ width: 132 }}><Field label={t('strokeType')}><Segmented options={[{ v: 'isch', l: 'Isch' }, { v: 'hemo', l: 'Hem' }]} value={patient.strokeType} onChange={(v) => set({ strokeType: v })} /></Field></div>
+          </div>
+        </Card>
+
+        {/* trial multi-select with search */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 4px 10px' }}>
+            <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: -0.2 }}>{t('selectTrials')}</span>
+            {sel.length > 0 && <span style={{ fontSize: 12.5, fontWeight: 700, color: ENS.okFg, background: ENS.okBg, padding: '2px 9px', borderRadius: 999, fontFamily: ENS.mono }}>{sel.length}</span>}
+          </div>
+          {/* search */}
+          <div style={{ position: 'relative', marginBottom: 12 }}>
+            <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)' }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke={ENS.ink3} strokeWidth="1.8" /><path d="M16 16l4 4" stroke={ENS.ink3} strokeWidth="1.8" strokeLinecap="round" /></svg>
+            </span>
+            <input className="ens-input" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('selectTrial')}
+              style={{ width: '100%', boxSizing: 'border-box', border: `1px solid ${ENS.line}`, borderRadius: 12, padding: '12px 14px 12px 38px', fontSize: 15, fontFamily: ENS.sans, color: ENS.ink, background: ENS.surface, outline: 'none' }} />
+          </div>
+          {/* grouped cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {groups.map((g) => {
+              const items = TRIALS.filter((tr) => tr.cat === g.cat && match(tr));
+              if (!items.length) return null;
+              const [cfg, cbg] = cc[g.cat];
+              return (
+                <div key={g.cat}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8, paddingLeft: 2 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: 999, background: cfg }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.4, color: ENS.ink2 }}>{g.label}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                    {items.map((tr) => {
+                      const on = sel.includes(tr.id);
+                      return (
+                        <button key={tr.id} className="ens-press" onClick={() => onToggle(tr.id)}
+                          style={{ textAlign: 'left', cursor: 'pointer', border: on ? `1.5px solid ${ENS.okFg}` : `1px solid ${ENS.line}`, background: on ? ENS.okBg : ENS.surface, borderRadius: 15, padding: '13px 14px', display: 'flex', alignItems: 'center', gap: 12, boxShadow: softShadow, transition: 'all .15s' }}>
+                          <span style={{ width: 24, height: 24, borderRadius: 8, border: on ? 'none' : `2px solid ${ENS.line}`, background: on ? ENS.okFg : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxSizing: 'border-box', transition: 'all .15s' }}>
+                            {on && <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                          </span>
+                          <span style={{ flex: 1, minWidth: 0 }}>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span style={{ fontSize: 15.5, fontWeight: 700 }}>{tr.id}</span>
+                              <span style={{ fontSize: 10.5, fontWeight: 600, color: cfg, background: cbg, padding: '2px 8px', borderRadius: 999 }}>{tr.cat}</span>
+                            </span>
+                            <span style={{ display: 'flex', gap: 12, marginTop: 4, fontFamily: ENS.mono, fontSize: 11, color: ENS.ink3 }}><span>{tr.label}</span></span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+            {TRIALS.filter(match).length === 0 && <div style={{ fontSize: 13, color: ENS.ink3, fontStyle: 'italic', padding: '8px 4px' }}>—</div>}
+          </div>
+        </div>
+      </div>
+      <BottomBar onBack={onBack} onNext={ok ? onReview : undefined} nextDisabled={!ok}
+        nextLabel={sel.length ? `${t('continueSummary')} · ${sel.length}` : t('enroll')} />
+    </div>
+  );
+}
+
+// ── Enroll confirmation (one or more trials) ───────────────────
+function EnrollConfirm({ patient, trials, onHome }) {
+  const { t } = useT();
+  const list = Array.isArray(trials) ? trials : (trials ? [trials] : []);
+  return (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: ENS.bg, fontFamily: ENS.sans, color: ENS.ink }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 32px', textAlign: 'center' }}>
+        <div className="ens-pop" style={{ width: 84, height: 84, borderRadius: 999, background: ENS.okBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke={ENS.okFg} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </div>
+        <div className="ens-rise" style={{ fontSize: 24, fontWeight: 600, letterSpacing: -0.5 }}>{t('sent')}</div>
+        <div className="ens-rise" style={{ animationDelay: '70ms', fontSize: 14, color: ENS.ink3, marginTop: 8 }}>{t('sentSub')}{patient.prn ? ` · ${patient.prn}` : ''}</div>
+        <div className="ens-rise" style={{ animationDelay: '120ms', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 18 }}>
+          {list.map((id) => (
+            <span key={id} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: ENS.surface, boxShadow: softShadow, padding: '11px 16px', borderRadius: 14 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke={ENS.okFg} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <span style={{ fontSize: 17, fontWeight: 700 }}>{id}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+      <div style={{ flexShrink: 0, padding: '12px 16px 30px' }}>
+        <button className="ens-press" onClick={onHome} style={{ width: '100%', border: 'none', borderRadius: 14, padding: '16px', cursor: 'pointer', background: ENS.ink, color: '#fff', fontFamily: ENS.sans, fontSize: 15, fontWeight: 600 }}>{t('goHome')}</button>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { HomeFinal, ChoiceContent, StepPreImaging, PreImagingResult, StepPostImaging, ResultsScreen, EnrollSummary, QuickPatient, EnrollConfirm, TRIALS });
+
+
+/* ===== ensapp-proto.jsx ===== */
+// ensapp-proto.jsx — prototype router, transitions, transition picker
+const { useState, useRef, useEffect, useCallback } = React;
+
+const TRANSITIONS = [
+  { key: 'sheet',  label: 'Sheet',  cls: 'ens-tr-sheet'  },
+  { key: 'reveal', label: 'Reveal', cls: 'ens-tr-reveal' },
+  { key: 'split',  label: 'Split',  cls: 'ens-tr-split'  },
+  { key: 'zoom',   label: 'Zoom',   cls: 'ens-tr-zoom'   },
+];
+
+// Choice overlay — entrance animation chosen by `variant`
+function ChoiceOverlay({ variant, origin, onPick, onClose, animKey }) {
+  const cls = (TRANSITIONS.find((x) => x.key === variant) || TRANSITIONS[0]).cls;
+  const style = origin ? { '--ox': origin.x + 'px', '--oy': origin.y + 'px' } : {};
+  return (
+    <div key={animKey} className={`ens-choice ${cls}`} style={{ position: 'absolute', inset: 0, zIndex: 5, background: ENS.bg, overflow: 'hidden', ...style }}>
+      <div style={{ paddingTop: 54, paddingLeft: 16, paddingRight: 16, paddingBottom: 4, display: 'flex', justifyContent: 'flex-end' }}>
+        <button className="ens-press" onClick={onClose} style={{ width: 38, height: 38, borderRadius: 999, border: 'none', background: ENS.surface, boxShadow: softShadow, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke={ENS.ink2} strokeWidth="2" strokeLinecap="round" /></svg>
+        </button>
+      </div>
+      <ChoiceContent onPick={onPick} stagger />
+    </div>
+  );
+}
+
+function App() {
+  const [lang, setLang] = useState('en');
+  const [screen, setScreen] = useState('home');
+  const [patient, setPatient] = useState({});
+  const [trial, setTrial] = useState(null);
+  const [picked, setPicked] = useState([]);
+  const [flow, setFlow] = useState('check');
+  const [trialId, setTrialId] = useState(null);
+  const [reviewId, setReviewId] = useState(null);
+  const navTab = (k) => { if (k === 'home') goHome(); else if (k === 'new') openChoice(); else if (k === 'trials') setScreen('catalog'); };
+  const [variant, setVariant] = useState('zoom');
+  const [origin, setOrigin] = useState(null);
+  const [animKey, setAnimKey] = useState(0);
+  const [scale, setScale] = useState(1);
+  const scalerRef = useRef(null);
+
+  const set = (patch) => setPatient((p) => ({ ...p, ...patch }));
+
+  useEffect(() => {
+    const fit = () => {
+      const vh = window.innerHeight, vw = window.innerWidth;
+      setScale(Math.min(1.05, (vh - 150) / 844, (vw - 40) / 390));
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, []);
+
+  const openChoice = useCallback(() => {
+    // compute hero center in phone-logical coords for reveal/zoom origins
+    const hero = document.getElementById('ens-hero');
+    const sc = scalerRef.current;
+    if (hero && sc) {
+      const hr = hero.getBoundingClientRect();
+      const sr = sc.getBoundingClientRect();
+      const k = sr.width / 390;
+      setOrigin({ x: (hr.left + hr.width / 2 - sr.left) / k, y: (hr.top + hr.height / 2 - sr.top) / k });
+    } else setOrigin({ x: 195, y: 320 });
+    setAnimKey((n) => n + 1);
+    setScreen('choice');
+  }, []);
+
+  const replay = () => { if (screen === 'home') openChoice(); else { setScreen('home'); setTimeout(openChoice, 60); } };
+
+  const goHome = () => { setScreen('home'); setPatient({}); setTrial(null); setPicked([]); setFlow('check'); };
+  const enroll = (id) => { setTrial([id]); setScreen('confirm'); };   // quick flow: single
+  const togglePick = (id) => setPicked((p) => p.includes(id) ? p.filter((x) => x !== id) : [...p, id]);
+  const confirmMulti = () => { setTrial(picked); setScreen('send'); };
+
+  const base = screen === 'choice' ? 'home' : screen;
+  let view = null;
+  if (base === 'home') view = <HomeFinal onNew={openChoice} onCatalog={() => setScreen('catalog')} onPast={() => setScreen('past')} onNav={navTab} />;
+  else if (base === 'catalog') view = <TrialCatalog onOpen={(id) => { setTrialId(id); setScreen('trialDetail'); }} onNav={navTab} />;
+  else if (base === 'trialDetail') view = <TrialDetail trial={trialId} onBack={() => setScreen('catalog')} onNav={navTab} />;
+  else if (base === 'past') view = <PastPatients onOpen={(id) => { setReviewId(id); setScreen('patientReview'); }} onNav={navTab} />;
+  else if (base === 'patientReview') view = <PatientReview id={reviewId} onBack={() => setScreen('past')} onNav={navTab} />;
+  else if (base === 'pre') view = <StepPreImaging patient={patient} set={set} onBack={() => setScreen('home')} onNext={() => setScreen('preResult')} />;
+  else if (base === 'preResult') view = <PreImagingResult patient={patient} onBack={() => setScreen('pre')} onNext={() => setScreen('post')} />;
+  else if (base === 'post') view = <StepPostImaging patient={patient} set={set} onBack={() => setScreen('preResult')} onNext={() => setScreen('results')} />;
+  else if (base === 'results') view = <ResultsScreen patient={patient} selected={picked} onToggle={togglePick} onBack={() => setScreen('post')} onHome={goHome} onReview={() => setScreen('summary')} />;
+  else if (base === 'summary') view = <EnrollSummary patient={patient} selected={picked} onBack={() => setScreen(flow === 'direct' ? 'quick' : 'results')} onConfirm={confirmMulti} />;
+  else if (base === 'send') view = <SendRecord patient={patient} trials={trial} onBack={() => setScreen('summary')} onSent={() => setScreen('confirm')} />;
+  else if (base === 'quick') view = <QuickPatient patient={patient} set={set} selected={picked} onToggle={togglePick} onBack={() => setScreen('home')} onReview={() => setScreen('summary')} />;
+  else if (base === 'confirm') view = <EnrollConfirm patient={patient} trials={trial} onHome={goHome} />;
+
+  const pickFromChoice = (k) => { setFlow(k === 'check' ? 'check' : 'direct'); setScreen(k === 'check' ? 'pre' : 'quick'); };
+
+  return (
+    <LangCtx.Provider value={{ lang, setLang }}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: '20px 0 24px', background: 'radial-gradient(120% 120% at 50% 0%, #fbfbfc 0%, #eceef2 100%)' }}>
+        {/* phone */}
+        <div style={{ width: 390 * scale, height: 844 * scale, flexShrink: 0 }}>
+          <div ref={scalerRef} style={{ width: 390, height: 844, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+            <IOSDevice width={390} height={844}>
+              <div style={{ position: 'relative', height: '100%' }}>
+                <div key={base} className={base === 'home' || base === 'confirm' ? '' : 'ens-screen-in'} style={{ height: '100%' }}>{view}</div>
+                {screen === 'choice' && <ChoiceOverlay variant={variant} origin={origin} animKey={animKey} onPick={pickFromChoice} onClose={() => setScreen('home')} />}
+              </div>
+            </IOSDevice>
+          </div>
+        </div>
+
+        {/* transition picker (outside the phone) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fff', borderRadius: 16, padding: '10px 12px', boxShadow: '0 2px 10px rgba(16,24,40,.08), 0 0 0 1px rgba(16,24,40,.04)', fontFamily: ENS.sans }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: ENS.ink3, textTransform: 'uppercase', letterSpacing: 0.5, paddingLeft: 4 }}>Transition</span>
+          <div style={{ display: 'flex', gap: 4, background: ENS.bgSunken, borderRadius: 10, padding: 3 }}>
+            {TRANSITIONS.map((tr) => {
+              const on = variant === tr.key;
+              return <button key={tr.key} onClick={() => setVariant(tr.key)} style={{ border: 'none', cursor: 'pointer', borderRadius: 8, padding: '7px 12px', fontSize: 13, fontWeight: 600, fontFamily: ENS.sans, color: on ? '#fff' : ENS.ink2, background: on ? ENS.ink : 'transparent', transition: 'all .15s' }}>{tr.label}</button>;
+            })}
+          </div>
+          <button className="ens-press" onClick={replay} style={{ border: 'none', cursor: 'pointer', borderRadius: 10, padding: '8px 14px', fontSize: 13, fontWeight: 700, fontFamily: ENS.sans, color: '#fff', background: ENS.primary, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M6 4l14 8-14 8z" /></svg> Play
+          </button>
+          <button onClick={() => setLang(lang === 'en' ? 'es' : 'en')} style={{ border: `1px solid ${ENS.line}`, background: '#fff', cursor: 'pointer', borderRadius: 10, padding: '8px 10px', fontSize: 12, fontWeight: 600, fontFamily: ENS.mono, color: ENS.ink2 }}>{lang.toUpperCase()}</button>
+        </div>
+      </div>
+    </LangCtx.Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,662 @@
+{
+  "generatedAt": "2026-05-28T18:52:55.716Z",
+  "source": "legacy/js/domain/{acute-rules,hemorrhagic-rules}.js",
+  "acute": [
+    {
+      "id": "ischemic-classic-lvo-m1-eligible",
+      "description": "LVO M1, NIHSS 14, 3h, mRS 1, ASPECTS 8 - candidato classico",
+      "input": {
+        "age": 68,
+        "nihss": 14,
+        "premrs": 1,
+        "ltsw": 3,
+        "angiograph": "yes",
+        "lvo": "yes",
+        "tandem": "no",
+        "tortuosity": "no",
+        "targetVessels": [
+          "m1"
+        ],
+        "aspects": 8,
+        "lesionConfirmed": "yes",
+        "candidate": "eligible",
+        "ivtCandidate": "eligible",
+        "doac": "no",
+        "acei": "no",
+        "contraTpa": "no"
+      },
+      "expected": {
+        "weTrust": true,
+        "athena": true,
+        "vanish": true,
+        "pivotal": true,
+        "promise": true,
+        "nivo": false,
+        "moste": false,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "doneSymple": false,
+        "shionogi": true,
+        "sovateltide": false,
+        "orion": false,
+        "doit": false,
+        "remedy": false
+      },
+      "vesselFlags": {
+        "vanish": true,
+        "pivotal": true,
+        "moste": true,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "promise": true,
+        "nivo": false
+      }
+    },
+    {
+      "id": "ischemic-wakeup-12h",
+      "description": "Wake-up stroke, 11h, NIHSS 12, sintomi <6h",
+      "input": {
+        "age": 72,
+        "nihss": 12,
+        "premrs": 1,
+        "ltsw": 11,
+        "wakeupStroke": true,
+        "wakeupSymptomsWithin6h": true,
+        "angiograph": "yes",
+        "lvo": "yes",
+        "tandem": "no",
+        "tortuosity": "no",
+        "targetVessels": [
+          "ica-terminal"
+        ],
+        "aspects": 7,
+        "lesionConfirmed": "yes",
+        "candidate": "eligible",
+        "ivtCandidate": "not eligible",
+        "doac": "no",
+        "acei": "no",
+        "contraTpa": "no"
+      },
+      "expected": {
+        "weTrust": true,
+        "athena": true,
+        "vanish": true,
+        "pivotal": false,
+        "promise": true,
+        "nivo": false,
+        "moste": false,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "doneSymple": false,
+        "shionogi": true,
+        "sovateltide": false,
+        "orion": true,
+        "doit": false,
+        "remedy": false
+      },
+      "vesselFlags": {
+        "vanish": true,
+        "pivotal": true,
+        "moste": true,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "promise": true,
+        "nivo": false
+      }
+    },
+    {
+      "id": "ischemic-late-window-24h",
+      "description": "Tardivo 22h, ASPECTS 6, mRS 1, NIHSS 8",
+      "input": {
+        "age": 60,
+        "nihss": 8,
+        "premrs": 1,
+        "ltsw": 22,
+        "angiograph": "yes",
+        "lvo": "yes",
+        "tandem": "no",
+        "tortuosity": "no",
+        "targetVessels": [
+          "m1"
+        ],
+        "aspects": 6,
+        "lesionConfirmed": "yes",
+        "candidate": "eligible",
+        "ivtCandidate": "not eligible",
+        "doac": "no",
+        "acei": "no",
+        "contraTpa": "no"
+      },
+      "expected": {
+        "weTrust": false,
+        "athena": true,
+        "vanish": true,
+        "pivotal": false,
+        "promise": true,
+        "nivo": false,
+        "moste": false,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "doneSymple": false,
+        "shionogi": true,
+        "sovateltide": false,
+        "orion": true,
+        "doit": false,
+        "remedy": false
+      },
+      "vesselFlags": {
+        "vanish": true,
+        "pivotal": true,
+        "moste": true,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "promise": true,
+        "nivo": false
+      }
+    },
+    {
+      "id": "ischemic-distal-m2-nivo",
+      "description": "Distal M2, mRS 1, NIHSS 7, ASPECTS 9 (NiVO target)",
+      "input": {
+        "age": 55,
+        "nihss": 7,
+        "premrs": 1,
+        "ltsw": 6,
+        "angiograph": "yes",
+        "lvo": "yes",
+        "tandem": "no",
+        "tortuosity": "no",
+        "targetVessels": [
+          "gt-m2"
+        ],
+        "aspects": 9,
+        "lesionConfirmed": "yes",
+        "candidate": "eligible",
+        "ivtCandidate": "eligible",
+        "doac": "no",
+        "acei": "no",
+        "contraTpa": "no"
+      },
+      "expected": {
+        "weTrust": false,
+        "athena": false,
+        "vanish": false,
+        "pivotal": false,
+        "promise": false,
+        "nivo": true,
+        "moste": false,
+        "twin2win2": false,
+        "artemis": false,
+        "hybernia": false,
+        "doneSymple": false,
+        "shionogi": true,
+        "sovateltide": false,
+        "orion": true,
+        "doit": false,
+        "remedy": false
+      },
+      "vesselFlags": {
+        "vanish": false,
+        "pivotal": false,
+        "moste": false,
+        "twin2win2": false,
+        "artemis": false,
+        "hybernia": false,
+        "promise": false,
+        "nivo": true
+      }
+    },
+    {
+      "id": "ischemic-low-nihss-moste",
+      "description": "Low NIHSS (4), M1, mRS 0 (MOSTE target)",
+      "input": {
+        "age": 64,
+        "nihss": 4,
+        "premrs": 0,
+        "ltsw": 10,
+        "angiograph": "yes",
+        "lvo": "yes",
+        "tandem": "no",
+        "tortuosity": "no",
+        "targetVessels": [
+          "m1"
+        ],
+        "aspects": 9,
+        "lesionConfirmed": "yes",
+        "candidate": "eligible",
+        "ivtCandidate": "eligible",
+        "doac": "no",
+        "acei": "no",
+        "contraTpa": "no"
+      },
+      "expected": {
+        "weTrust": false,
+        "athena": false,
+        "vanish": false,
+        "pivotal": false,
+        "promise": true,
+        "nivo": false,
+        "moste": true,
+        "twin2win2": false,
+        "artemis": false,
+        "hybernia": false,
+        "doneSymple": false,
+        "shionogi": false,
+        "sovateltide": false,
+        "orion": false,
+        "doit": false,
+        "remedy": false
+      },
+      "vesselFlags": {
+        "vanish": true,
+        "pivotal": true,
+        "moste": true,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "promise": true,
+        "nivo": false
+      }
+    },
+    {
+      "id": "ischemic-no-lvo-not-eligible",
+      "description": "No LVO, NIHSS 10 - candidato sovateltide/remedy",
+      "input": {
+        "age": 70,
+        "nihss": 10,
+        "premrs": 1,
+        "ltsw": 8,
+        "angiograph": "yes",
+        "lvo": "no",
+        "tandem": "no",
+        "tortuosity": "no",
+        "targetVessels": [],
+        "aspects": 8,
+        "lesionConfirmed": "yes",
+        "candidate": "not eligible",
+        "ivtCandidate": "not eligible",
+        "doac": "no",
+        "acei": "no",
+        "contraTpa": "no"
+      },
+      "expected": {
+        "weTrust": false,
+        "athena": false,
+        "vanish": false,
+        "pivotal": false,
+        "promise": false,
+        "nivo": false,
+        "moste": false,
+        "twin2win2": false,
+        "artemis": false,
+        "hybernia": false,
+        "doneSymple": false,
+        "shionogi": true,
+        "sovateltide": true,
+        "orion": false,
+        "doit": false,
+        "remedy": true
+      },
+      "vesselFlags": {
+        "vanish": false,
+        "pivotal": false,
+        "moste": false,
+        "twin2win2": false,
+        "artemis": false,
+        "hybernia": false,
+        "promise": false,
+        "nivo": false
+      }
+    },
+    {
+      "id": "ischemic-doit-doac-positive",
+      "description": "DOAC positive, LTSW 3h, IVT candidate (DOiT)",
+      "input": {
+        "age": 75,
+        "nihss": 9,
+        "premrs": 1,
+        "ltsw": 3,
+        "angiograph": "yes",
+        "lvo": "yes",
+        "tandem": "no",
+        "tortuosity": "no",
+        "targetVessels": [
+          "m1"
+        ],
+        "aspects": 8,
+        "lesionConfirmed": "yes",
+        "candidate": "eligible",
+        "ivtCandidate": "eligible",
+        "doac": "yes",
+        "acei": "no",
+        "contraTpa": "no"
+      },
+      "expected": {
+        "weTrust": false,
+        "athena": true,
+        "vanish": true,
+        "pivotal": true,
+        "promise": true,
+        "nivo": false,
+        "moste": false,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "doneSymple": false,
+        "shionogi": true,
+        "sovateltide": false,
+        "orion": false,
+        "doit": true,
+        "remedy": false
+      },
+      "vesselFlags": {
+        "vanish": true,
+        "pivotal": true,
+        "moste": true,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "promise": true,
+        "nivo": false
+      }
+    },
+    {
+      "id": "ischemic-done-simple-late",
+      "description": "DONE-Simple: 48h, NIHSS 10, LVO M1",
+      "input": {
+        "age": 65,
+        "nihss": 10,
+        "premrs": 1,
+        "ltsw": 48,
+        "angiograph": "yes",
+        "lvo": "yes",
+        "tandem": "no",
+        "tortuosity": "no",
+        "targetVessels": [
+          "m1"
+        ],
+        "aspects": 7,
+        "lesionConfirmed": "yes",
+        "candidate": "eligible",
+        "ivtCandidate": "not eligible",
+        "doac": "no",
+        "acei": "no",
+        "contraTpa": "no"
+      },
+      "expected": {
+        "weTrust": false,
+        "athena": false,
+        "vanish": true,
+        "pivotal": false,
+        "promise": false,
+        "nivo": false,
+        "moste": false,
+        "twin2win2": false,
+        "artemis": false,
+        "hybernia": false,
+        "doneSymple": true,
+        "shionogi": false,
+        "sovateltide": false,
+        "orion": false,
+        "doit": false,
+        "remedy": false
+      },
+      "vesselFlags": {
+        "vanish": true,
+        "pivotal": true,
+        "moste": true,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "promise": true,
+        "nivo": false
+      }
+    },
+    {
+      "id": "ischemic-elderly-90-orion",
+      "description": "Elderly 88y, late 6h, mRS 1, NIHSS 6 (ORION)",
+      "input": {
+        "age": 88,
+        "nihss": 6,
+        "premrs": 1,
+        "ltsw": 6,
+        "angiograph": "yes",
+        "lvo": "yes",
+        "tandem": "no",
+        "tortuosity": "no",
+        "targetVessels": [
+          "m1"
+        ],
+        "aspects": 7,
+        "lesionConfirmed": "yes",
+        "candidate": "eligible",
+        "ivtCandidate": "not eligible",
+        "doac": "no",
+        "acei": "no",
+        "contraTpa": "no"
+      },
+      "expected": {
+        "weTrust": false,
+        "athena": false,
+        "vanish": true,
+        "pivotal": false,
+        "promise": true,
+        "nivo": false,
+        "moste": false,
+        "twin2win2": true,
+        "artemis": false,
+        "hybernia": true,
+        "doneSymple": false,
+        "shionogi": true,
+        "sovateltide": false,
+        "orion": true,
+        "doit": false,
+        "remedy": false
+      },
+      "vesselFlags": {
+        "vanish": true,
+        "pivotal": true,
+        "moste": true,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "promise": true,
+        "nivo": false
+      }
+    },
+    {
+      "id": "ischemic-tortuosity-missing",
+      "description": "Tortuosity non specificata: athena deve fallire",
+      "input": {
+        "age": 50,
+        "nihss": 12,
+        "premrs": 1,
+        "ltsw": 3,
+        "angiograph": "yes",
+        "lvo": "yes",
+        "tandem": "no",
+        "tortuosity": "",
+        "targetVessels": [
+          "m1"
+        ],
+        "aspects": 8,
+        "lesionConfirmed": "yes",
+        "candidate": "eligible",
+        "ivtCandidate": "eligible",
+        "doac": "no",
+        "acei": "no",
+        "contraTpa": "no"
+      },
+      "expected": {
+        "weTrust": true,
+        "athena": false,
+        "vanish": true,
+        "pivotal": true,
+        "promise": true,
+        "nivo": false,
+        "moste": false,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "doneSymple": false,
+        "shionogi": true,
+        "sovateltide": false,
+        "orion": false,
+        "doit": false,
+        "remedy": false
+      },
+      "vesselFlags": {
+        "vanish": true,
+        "pivotal": true,
+        "moste": true,
+        "twin2win2": true,
+        "artemis": true,
+        "hybernia": true,
+        "promise": true,
+        "nivo": false
+      }
+    }
+  ],
+  "hemorrhagic": [
+    {
+      "id": "hem-fastest-eligible",
+      "description": "FASTEST eligible: 1.5h, 20mL, GCS 12, no exclusioni",
+      "input": {
+        "age": 65,
+        "premrs": 1,
+        "ltsw": 1.5,
+        "hemVolume": 20,
+        "gcs": 12,
+        "brainstem": "no",
+        "procoagulant": "no",
+        "ecg": "no",
+        "thrombosis": "no",
+        "pregnancy": "no",
+        "angioplasty": "no",
+        "ivhScore": "yes",
+        "anticoag": "none",
+        "ivh": "no",
+        "seizure": "no",
+        "secondaryCause": "None"
+      },
+      "expected": {
+        "fastest": {
+          "baseCriteriaMet": true,
+          "extraMissing": false,
+          "eligible": true
+        },
+        "tich3": true
+      }
+    },
+    {
+      "id": "hem-fastest-missing-info",
+      "description": "FASTEST con info mancanti (brainstem vuoto)",
+      "input": {
+        "age": 65,
+        "premrs": 1,
+        "ltsw": 1.5,
+        "hemVolume": 20,
+        "gcs": 12,
+        "brainstem": "",
+        "procoagulant": "no",
+        "ecg": "no",
+        "thrombosis": "no",
+        "pregnancy": "no",
+        "angioplasty": "no",
+        "ivhScore": "yes",
+        "anticoag": "none",
+        "ivh": "no",
+        "seizure": "no",
+        "secondaryCause": "None"
+      },
+      "expected": {
+        "fastest": {
+          "baseCriteriaMet": true,
+          "extraMissing": true,
+          "eligible": false
+        },
+        "tich3": true
+      }
+    },
+    {
+      "id": "hem-fastest-too-late",
+      "description": "FASTEST LTSW 3h (oltre finestra 2h)",
+      "input": {
+        "age": 65,
+        "premrs": 1,
+        "ltsw": 3,
+        "hemVolume": 20,
+        "gcs": 12,
+        "brainstem": "no",
+        "procoagulant": "no",
+        "ecg": "no",
+        "thrombosis": "no",
+        "pregnancy": "no",
+        "angioplasty": "no",
+        "ivhScore": "yes",
+        "anticoag": "none",
+        "ivh": "no",
+        "seizure": "no",
+        "secondaryCause": "None"
+      },
+      "expected": {
+        "fastest": {
+          "baseCriteriaMet": false,
+          "extraMissing": false,
+          "eligible": false
+        },
+        "tich3": true
+      }
+    },
+    {
+      "id": "hem-tich3-eligible",
+      "description": "TICH-3 eligible: 2h, 30mL, no IVH, GCS 10",
+      "input": {
+        "age": 65,
+        "premrs": 1,
+        "ltsw": 2,
+        "hemVolume": 30,
+        "gcs": 10,
+        "ivh": "no",
+        "seizure": "no",
+        "secondaryCause": "None"
+      },
+      "expected": {
+        "fastest": {
+          "baseCriteriaMet": true,
+          "extraMissing": true,
+          "eligible": false
+        },
+        "tich3": true
+      }
+    },
+    {
+      "id": "hem-tich3-large-volume",
+      "description": "TICH-3 con volume >= 60mL (escluso)",
+      "input": {
+        "age": 65,
+        "premrs": 1,
+        "ltsw": 2,
+        "hemVolume": 65,
+        "gcs": 10,
+        "ivh": "no",
+        "seizure": "no",
+        "secondaryCause": "None"
+      },
+      "expected": {
+        "fastest": {
+          "baseCriteriaMet": true,
+          "extraMissing": true,
+          "eligible": false
+        },
+        "tich3": false
+      }
+    }
+  ]
+}
