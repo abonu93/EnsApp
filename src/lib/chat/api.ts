@@ -6,7 +6,7 @@
 
 import type { Locale } from "$lib/i18n";
 
-const DEFAULT_PROXY_URL = "https://ensapp-assistant.workers.dev";
+const DEFAULT_PROXY_URL = "https://eligo-assistant.adriano-bonura.workers.dev";
 
 function proxyUrl(): string {
   return import.meta.env.VITE_PROXY_URL || DEFAULT_PROXY_URL;
