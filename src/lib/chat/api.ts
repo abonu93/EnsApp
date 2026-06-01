@@ -6,10 +6,10 @@
 
 import type { Locale } from "$lib/i18n";
 
-// Proxy AI servito come Cloudflare Pages Function sullo stesso dominio dell'app
-// (vedi functions/api/chat.js). Stesso dominio = niente problemi di CORS/SSL.
-// Override possibile via VITE_PROXY_URL.
-const DEFAULT_PROXY_URL = "https://ensapp.pages.dev/api/chat";
+// Proxy AI = Worker dedicato (eligo-assistant). La chiave vive solo lato Worker.
+// Esiste anche una Pages Function equivalente in functions/api/chat.js come
+// alternativa same-origin. Override possibile via VITE_PROXY_URL.
+const DEFAULT_PROXY_URL = "https://eligo-assistant.adriano-bonura.workers.dev";
 
 function proxyUrl(): string {
   return import.meta.env.VITE_PROXY_URL || DEFAULT_PROXY_URL;
