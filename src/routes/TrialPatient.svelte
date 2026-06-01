@@ -59,7 +59,7 @@
   ]);
 
   const canSubmit = $derived(
-    patientId !== "" && age !== null && trial !== "" && (!showArm || arm !== "")
+    patientId !== "" && age !== null && (trial === "" || !showArm || arm !== "")
   );
 
   const message = $derived.by(() => {
@@ -103,7 +103,8 @@
     saving = true;
 
     const outcomes: Record<string, "intervention" | "control"> =
-      arm && hasKnownStudyArm(trial) ? { [trial]: arm } : {};
+      trial && arm && hasKnownStudyArm(trial) ? { [trial]: arm } : {};
+    const selected = trial ? [trial] : [];
 
     const payload = {
       patientId,
@@ -111,9 +112,8 @@
       nihss,
       premrs,
       strokeType,
-      ...buildTrialsForSheet([trial], outcomes),
+      ...buildTrialsForSheet(selected, outcomes),
       Notes: notes,
-      // Per il quick patient non c'e' calcolo di eligibility, quindi:
       missed: "",
       eligible: "",
       source: "quick-patient",
@@ -126,7 +126,7 @@
       strokeType,
       age: age ?? undefined,
       nihss: nihss ?? undefined,
-      trials: [trial],
+      trials: selected,
       snapshot: {
         pre: {
           patientId,
@@ -136,7 +136,7 @@
         },
         post: { strokeType: strokeType || undefined },
         hem: {},
-        studies: [trial],
+        studies: selected,
         outcomes,
         chronic: [],
         notes,

@@ -304,6 +304,23 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     ],
     visits: null,
   },
+  "NORA HOME": {
+    status: "active",
+    category: "Home discharge (minor stroke / high-risk TIA)",
+    key: { window: "-", age: ">= 18 y", mrs: "-", nihss: "< 5", aspects: "-" },
+    consent: "Per local practice.",
+    imaging: "Brain imaging per standard of care.",
+    thrombolytic: "Per local practice.",
+    thrombectomy: "Per local practice.",
+    preEvtLabs: "No.",
+    intervention: "Early home discharge with structured follow-up vs in-hospital pathway.",
+    notes: [
+      "Inclusion: age > 18 AND (high-risk TIA OR NIHSS < 5).",
+      "Default pathway: virtually any patient who is clinically stable and safe to discharge home.",
+      "High-risk TIA is a clinical judgement (no dedicated field in the app).",
+    ],
+    visits: null,
+  },
 };
 
 export type TrialName = keyof typeof TRIALS_INFO;

@@ -207,6 +207,13 @@ export function reasonDoit(input: AcuteInput): ReasonReport {
   ]);
 }
 
+export function reasonNoraHome(input: AcuteInput): ReasonReport {
+  return reduce([
+    { ok: input.age > 18, label: "age > 18" },
+    { ok: input.nihss < 5, label: "NIHSS < 5 (oppure TIA ad alto rischio)" },
+  ]);
+}
+
 export function reasonRemedy(input: AcuteInput): ReasonReport {
   const excluded =
     hv(input, "ica-intracranial") || hv(input, "ica-terminal") || hv(input, "m1") ||
@@ -241,4 +248,5 @@ export const REASON_BY_TRIAL: Record<string, (i: AcuteInput) => ReasonReport> = 
   ORION: reasonOrion,
   "DO-IT": reasonDoit,
   REMEDY: reasonRemedy,
+  "NORA HOME": reasonNoraHome,
 };

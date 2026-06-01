@@ -303,6 +303,16 @@ export function doit(input: AcuteInput): boolean {
   );
 }
 
+/**
+ * NORA HOME: home-discharge trial per ictus minore / TIA ad alto rischio.
+ * Criteri: eta' > 18 anni AND NIHSS < 5.
+ * (Il check "AIT ad alto rischio" e' lasciato al giudizio clinico:
+ * non c'e' un campo dedicato; si entra anche solo con NIHSS basso.)
+ */
+export function noraHome(input: AcuteInput): boolean {
+  return input.age > 18 && input.nihss < 5;
+}
+
 export function remedy(input: AcuteInput): boolean {
   const hasExcludedVessel =
     hasVessel(input.targetVessels, "ica-intracranial") ||

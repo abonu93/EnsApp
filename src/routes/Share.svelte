@@ -29,6 +29,7 @@
       ["HYBERNIA", e.hybernia], ["DONE SYMPLE", e.doneSymple], ["SHIONOGI", e.shionogi],
       ["SOVATELTIDE", e.sovateltide], ["ORION", e.orion], ["NiVO", e.nivo],
       ["DO-IT", e.doit], ["REMEDY", e.remedy],
+      ["NORA HOME", e.noraHome],
       ["FASTEST", h.fastest.eligible], ["TICH-3", h.tich3],
     ];
     return map.filter(([, ok]) => ok).map(([n]) => n);

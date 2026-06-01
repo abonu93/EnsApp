@@ -75,7 +75,13 @@ describe("sheet payload - parity with legacy", () => {
     test(`buildTrialsForSheet: ${s.name}`, () => {
       const ours = buildTrialsForSheet(s.selected, s.outcomes);
       const theirs = legacyAPI.buildTrialsForSheet(s.selected, s.outcomes);
-      expect(ours).toEqual(theirs);
+      // Le nostre estensioni (es. NORAHOME) sono colonne che il legacy
+      // non aveva: il test parity verifica solo le colonne in comune.
+      const oursLegacyOnly: Record<string, string> = {};
+      for (const k of Object.keys(theirs)) {
+        oursLegacyOnly[k] = (ours as Record<string, string>)[k];
+      }
+      expect(oursLegacyOnly).toEqual(theirs);
     });
   }
 });

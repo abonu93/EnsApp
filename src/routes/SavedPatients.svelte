@@ -39,6 +39,9 @@
     "NiVO": "NiVO",
     "NIVO": "NiVO",
     "REMEDY": "REMEDY",
+    "NORAHOME": "NORA HOME",
+    "NORA_HOME": "NORA HOME",
+    "NORA HOME": "NORA HOME",
   };
 
   function readTrialsFromRow(r: SheetPatientRow): string[] {

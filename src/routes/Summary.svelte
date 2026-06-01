@@ -31,6 +31,7 @@
     { display: "NiVO", eligible: $acuteEligibility.nivo, tone: "ischemic" },
     { display: "DO-IT", eligible: $acuteEligibility.doit, tone: "ischemic" },
     { display: "REMEDY", eligible: $acuteEligibility.remedy, tone: "ischemic" },
+    { display: "NORA HOME", eligible: $acuteEligibility.noraHome, tone: "post-acute" },
   ]);
 
   const hemEligibleList = $derived<EligibleEntry[]>([

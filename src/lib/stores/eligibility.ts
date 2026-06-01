@@ -25,6 +25,7 @@ export interface AcuteEligibility {
   orion: boolean;
   doit: boolean;
   remedy: boolean;
+  noraHome: boolean;
 }
 
 export interface HemorrhagicEligibility {
@@ -57,6 +58,7 @@ export const acuteEligibility = derived(
       orion: safeBoolean(() => acute.orion(input)),
       doit: safeBoolean(() => acute.doit(input)),
       remedy: safeBoolean(() => acute.remedy(input)),
+      noraHome: safeBoolean(() => acute.noraHome(input)),
     };
   }
 );
