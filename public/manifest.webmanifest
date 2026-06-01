@@ -1,14 +1,14 @@
 {
-  "name": "EnsApp - Clinical Trial Assignment",
-  "short_name": "EnsApp",
-  "description": "Assign patients to clinical trials - acute, hemorrhagic, post-acute.",
+  "name": "Eligo - Trial eligibility, in seconds",
+  "short_name": "Eligo",
+  "description": "Stroke clinical-trial eligibility matching.",
   "lang": "es",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f5f6f8",
-  "theme_color": "#2d5bd7",
+  "background_color": "#EFF5F8",
+  "theme_color": "#4F8FBC",
   "icons": [
     {
       "src": "icon-192.png",

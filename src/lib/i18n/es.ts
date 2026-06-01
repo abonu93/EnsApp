@@ -2,7 +2,7 @@ import type { Dictionary } from "./it";
 
 export const es: Dictionary = {
   common: {
-    appName: "EnsApp",
+    appName: "Eligo",
     next: "Siguiente",
     back: "Atras",
     cancel: "Cancelar",

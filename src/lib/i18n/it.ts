@@ -3,7 +3,7 @@
 
 export const it = {
   common: {
-    appName: "EnsApp",
+    appName: "Eligo",
     next: "Avanti",
     back: "Indietro",
     cancel: "Annulla",

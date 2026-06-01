@@ -2,6 +2,7 @@
   import Router, { location, link } from "svelte-spa-router";
   import { routes, setupRouterA11y } from "$lib/router";
   import BottomNav from "$lib/components/BottomNav.svelte";
+  import Logo from "$lib/components/Logo.svelte";
   import { t, locale, cycleLocale } from "$lib/i18n";
 
   setupRouterA11y();
@@ -23,14 +24,9 @@
 <header class="hdr">
   <a href="/" use:link class="brand">
     <span class="brand-dot" aria-hidden="true">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2v6" />
-        <path d="M12 22v-6" />
-        <path d="M5.6 5.6l4.2 4.2" />
-        <path d="M14.2 14.2l4.2 4.2" />
-      </svg>
+      <Logo size={17} variant="white" />
     </span>
-    <span class="brand-name">EnsApp</span>
+    <span class="brand-name">Eligo</span>
   </a>
   <button class="lang-btn" type="button" onclick={cycleLocale} aria-label="{$t.common.language}: {$locale.toUpperCase()}">
     {$locale.toUpperCase()}
@@ -85,9 +81,10 @@
     justify-content: center;
   }
   .brand-name {
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.05em;
   }
 
   .lang-btn {
