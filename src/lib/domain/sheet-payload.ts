@@ -57,7 +57,7 @@ const NAME_TO_KEY: Record<string, SheetTrialKey> = {
   "NORA HOME": "NORAHOME",
 };
 
-const STUDIES_WITHOUT_ARM = new Set(["SAFER-DOAC", "FASTEST", "TICH-3", "NiVO", "REMEDY"]);
+const STUDIES_WITHOUT_ARM = new Set(["SAFER-DOAC", "FASTEST", "TICH-3", "NiVO", "REMEDY", "NORA HOME"]);
 
 export function normalizeStudyName(name: string): string {
   if (name === "SaferDoac") return "SAFER-DOAC";
