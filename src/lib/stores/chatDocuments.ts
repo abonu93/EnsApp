@@ -121,7 +121,7 @@ async function indexFor(docId: string): Promise<TfIdfIndex | null> {
  * Recupera i top-k chunk rilevanti su tutti i documenti pronti.
  * E' la fase di "retrieval" del RAG: il risultato va inviato al modello.
  */
-export async function retrieveContext(query: string, k = 6): Promise<RetrievedChunk[]> {
+export async function retrieveContext(query: string, k = 14): Promise<RetrievedChunk[]> {
   const ready = get(persistedDocs).filter((d) => d.status === "ready");
   const indexes: TfIdfIndex[] = [];
   for (const doc of ready) {

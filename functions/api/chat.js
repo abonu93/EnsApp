@@ -1,25 +1,24 @@
 // Cloudflare Pages Function: proxy AI servito dallo STESSO dominio dell'app
-// (es. https://ensapp.pages.dev/api/chat). Evita il sotto-dominio workers.dev
-// (problemi di certificato) e, essendo same-origin, evita anche il CORS.
+// (es. https://ensapp.pages.dev/api/chat). Same-origin: niente CORS/SSL.
+// Si aggiorna automaticamente ad ogni push (collegato a GitHub).
 //
-// Cloudflare Pages monta automaticamente la cartella functions/ : questo file
-// risponde su /api/chat. Le variabili (chiave inclusa) si impostano nel
-// progetto Pages: Settings > Variables and Secrets.
-//   - Secret  GEMINI_API_KEY  = chiave Google Gemini
-//   - Text    PROVIDER        = gemini
-//   - Text    GEMINI_MODEL    = gemini-2.0-flash
-//   - Text    ALLOWED_ORIGINS = https://abonu93.github.io,https://ensapp.pages.dev
+// Variabili (progetto Pages > Settings > Variables and Secrets):
+//   - Text    PROVIDER        = groq            (oppure "gemini")
+//   - Secret  GROQ_API_KEY     = chiave Groq     (se PROVIDER=groq)
+//   - Secret  GEMINI_API_KEY   = chiave Gemini   (se PROVIDER=gemini)
+//   - Text    GROQ_MODEL       = llama-3.3-70b-versatile   (opzionale)
+//   - Text    GEMINI_MODEL     = gemini-2.0-flash           (opzionale)
+//   - Text    ALLOWED_ORIGINS  = https://abonu93.github.io,https://ensapp.pages.dev
 
-const LANG = { it: "italiano", es: "español", ca: "català", en: "English" };
-
-function buildSystemPrompt(locale) {
-  const lang = LANG[locale] || "español";
+function buildSystemPrompt() {
   return [
-    "Sei un assistente che risponde a domande sui protocolli di studi clinici.",
-    "Rispondi ESCLUSIVAMENTE in base agli estratti (SOURCES) forniti qui sotto.",
-    "Se l'informazione non è presente negli estratti, dillo chiaramente e non inventare.",
-    "Quando affermi qualcosa, indica il documento e la pagina da cui proviene.",
-    `Rispondi in ${lang}.`,
+    "Sei un assistente esperto che aiuta un medico/ricercatore a capire i protocolli di studi clinici.",
+    "Usa gli ESTRATTI (SOURCES) forniti come fonte principale e prioritaria di verità sul protocollo caricato.",
+    "Rispondi in modo completo, chiaro e ragionato, sintetizzando le informazioni tra i vari estratti; non limitarti a citare, spiega.",
+    "Puoi usare la tua conoscenza medica generale per spiegare termini, sigle, contesto e implicazioni, ma distingui ciò che proviene dal protocollo da ciò che è conoscenza generale.",
+    "Se un dettaglio specifico non è presente negli estratti, dillo con onestà, ma cerca comunque di essere il più utile possibile.",
+    "Quando riporti un dato preciso del protocollo, indica documento e pagina.",
+    "MOLTO IMPORTANTE: rispondi SEMPRE nella stessa lingua usata dall'utente nella sua ultima domanda.",
   ].join(" ");
 }
 
@@ -30,17 +29,14 @@ function formatSources(context) {
     .join("\n\n");
 }
 
-async function callGemini(messages, context, locale, env) {
+async function callGemini(messages, context, env) {
   const model = env.GEMINI_MODEL || "gemini-2.0-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`;
-  const system = buildSystemPrompt(locale);
   const sources = formatSources(context);
 
   const contents = messages.map((m, i) => {
     const isLastUser = i === messages.length - 1 && m.role === "user";
-    const text = isLastUser
-      ? `SOURCES:\n${sources}\n\nDOMANDA:\n${m.content}`
-      : m.content;
+    const text = isLastUser ? `SOURCES:\n${sources}\n\nDOMANDA:\n${m.content}` : m.content;
     return { role: m.role === "assistant" ? "model" : "user", parts: [{ text }] };
   });
 
@@ -48,19 +44,52 @@ async function callGemini(messages, context, locale, env) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
+      systemInstruction: { parts: [{ text: buildSystemPrompt() }] },
       contents,
-      generationConfig: { temperature: 0.2 },
+      generationConfig: { temperature: 0.3, maxOutputTokens: 2048 },
     }),
   });
 
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Gemini ${res.status}: ${detail.slice(0, 300)}`);
-  }
+  if (!res.ok) throw new Error(`Gemini ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const data = await res.json();
   const parts = data?.candidates?.[0]?.content?.parts || [];
   return parts.map((p) => p.text || "").join("");
+}
+
+async function callGroq(messages, context, env) {
+  const model = env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  const sources = formatSources(context);
+
+  const chat = [
+    { role: "system", content: buildSystemPrompt() },
+    ...messages.map((m, i) => {
+      const isLastUser = i === messages.length - 1 && m.role === "user";
+      return {
+        role: m.role,
+        content: isLastUser ? `SOURCES:\n${sources}\n\nDOMANDA:\n${m.content}` : m.content,
+      };
+    }),
+  ];
+
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({ model, messages: chat, temperature: 0.3, max_tokens: 2048 }),
+  });
+
+  if (!res.ok) throw new Error(`Groq ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  const data = await res.json();
+  return data?.choices?.[0]?.message?.content || "";
+}
+
+function callProvider(messages, context, env) {
+  if ((env.PROVIDER || "gemini").toLowerCase() === "groq") {
+    return callGroq(messages, context, env);
+  }
+  return callGemini(messages, context, env);
 }
 
 function corsHeaders(origin, env) {
@@ -108,20 +137,28 @@ export async function onRequestPost(context) {
   }
 
   const messages = Array.isArray(body.messages) ? body.messages : [];
-  const context_ = Array.isArray(body.context) ? body.context : [];
-  const locale = typeof body.locale === "string" ? body.locale : "es";
-
+  const ctx = Array.isArray(body.context) ? body.context : [];
   if (!messages.length) return json({ error: "Missing messages" }, 400, cors);
-  if (!env.GEMINI_API_KEY) return json({ error: "Server missing GEMINI_API_KEY" }, 500, cors);
+
+  const provider = (env.PROVIDER || "gemini").toLowerCase();
+  if (provider === "gemini" && !env.GEMINI_API_KEY)
+    return json({ error: "Server missing GEMINI_API_KEY" }, 500, cors);
+  if (provider === "groq" && !env.GROQ_API_KEY)
+    return json({ error: "Server missing GROQ_API_KEY" }, 500, cors);
 
   try {
-    const answer = await callGemini(messages, context_, locale, env);
-    const citations = context_.map((c) => ({
-      docName: c.docName,
-      page: c.page,
-      chunkId: c.chunkId,
-    }));
-    return json({ answer, citations, grounded: context_.length > 0 }, 200, cors);
+    const answer = await callProvider(messages, ctx, env);
+    // Citazioni: fonti uniche per documento+pagina, al massimo 8.
+    const seen = new Set();
+    const citations = [];
+    for (const c of ctx) {
+      const key = `${c.docName}|${c.page}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      citations.push({ docName: c.docName, page: c.page, chunkId: c.chunkId });
+      if (citations.length >= 8) break;
+    }
+    return json({ answer, citations, grounded: ctx.length > 0 }, 200, cors);
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "Upstream error" }, 502, cors);
   }

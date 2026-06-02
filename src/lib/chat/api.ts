@@ -6,10 +6,9 @@
 
 import type { Locale } from "$lib/i18n";
 
-// Proxy AI = Worker dedicato (eligo-assistant). La chiave vive solo lato Worker.
-// Esiste anche una Pages Function equivalente in functions/api/chat.js come
-// alternativa same-origin. Override possibile via VITE_PROXY_URL.
-const DEFAULT_PROXY_URL = "https://eligo-assistant.adriano-bonura.workers.dev";
+// Proxy AI = Cloudflare Pages Function sullo stesso dominio (functions/api/chat.js).
+// Si aggiorna in automatico ad ogni push. Override via VITE_PROXY_URL.
+const DEFAULT_PROXY_URL = "https://ensapp.pages.dev/api/chat";
 
 function proxyUrl(): string {
   return import.meta.env.VITE_PROXY_URL || DEFAULT_PROXY_URL;
