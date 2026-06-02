@@ -326,7 +326,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding-bottom: 96px;
+    padding-bottom: 8px;
   }
   .empty {
     text-align: center;
@@ -383,17 +383,17 @@
     font-weight: var(--fw-medium);
   }
 
+  /* sticky (non fixed): il contenitore di route ha un transform di animazione
+     che romperebbe position:fixed facendolo sovrapporre ai messaggi. */
   .composer {
-    position: fixed;
-    left: 0;
-    right: 0;
+    position: sticky;
     bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0) + 8px);
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
+    margin: 8px auto 0;
     max-width: var(--container-max);
-    margin: 0 auto;
     z-index: var(--z-bottom-nav);
   }
   .ask {
