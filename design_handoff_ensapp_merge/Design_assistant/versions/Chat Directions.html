@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Eligo — Chat directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Hanken+Grotesk:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  html, body { margin: 0; background: #eceef2; }
+  * { box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#1C4E6C"/><g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M38 33h24M38 33v34M38 50h18M38 67h24"/></g></svg>
+</template>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ens-shared.jsx"></script>
+<script type="text/babel" src="ens-v1v2.jsx"></script>
+<script type="text/babel" src="ens-v3v4.jsx"></script>
+<script type="text/babel" src="ens-v5.jsx"></script>
+
+<script type="text/babel">
+const VERSIONS = [
+  { id: 'v1', title: 'V1 · Aurora Glass', subtitle: 'Dark frosted glass · aurora glow · glacier accents', Home: window.V1Home, Chat: window.V1Chat },
+  { id: 'v2', title: 'V2 · Mono Console', subtitle: 'Terminal / developer feel · IBM Plex Mono · command input', Home: window.V2Home, Chat: window.V2Chat },
+  { id: 'v3', title: 'V3 · Bento Spatial', subtitle: 'Light bento grid · assistant as hero tile · soft depth', Home: window.V3Home, Chat: window.V3Chat },
+  { id: 'v4', title: 'V4 · Neon Pulse', subtitle: 'Dark · living orb avatar · voice + waveform input', Home: window.V4Home, Chat: window.V4Chat },
+  { id: 'v5', title: 'V5 · Gradient AI', subtitle: 'Light · soft glacier→teal gradient · shimmering AI pill', Home: window.V5Home, Chat: window.V5Chat },
+];
+
+function App() {
+  return (
+    <DesignCanvas>
+      {VERSIONS.map((v) => (
+        <DCSection key={v.id} id={v.id} title={v.title} subtitle={v.subtitle}>
+          <DCArtboard id={v.id + '-home'} label="Home" width={360} height={760}><v.Home /></DCArtboard>
+          <DCArtboard id={v.id + '-chat'} label="Chat" width={360} height={760}><v.Chat /></DCArtboard>
+        </DCSection>
+      ))}
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
