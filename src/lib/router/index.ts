@@ -15,7 +15,6 @@ import TrialPatient from "../../routes/TrialPatient.svelte";
 import SavedPatients from "../../routes/SavedPatients.svelte";
 import SavedPatientDetail from "../../routes/SavedPatientDetail.svelte";
 import Assistant from "../../routes/Assistant.svelte";
-import KbAdmin from "../../routes/KbAdmin.svelte";
 import Components from "../../routes/Components.svelte";
 import FormDemo from "../../routes/FormDemo.svelte";
 import NotFound from "../../routes/NotFound.svelte";
@@ -35,7 +34,6 @@ export const routes = {
   "/saved": SavedPatients,
   "/saved/:id": SavedPatientDetail,
   "/assistant": Assistant,
-  "/kb-admin": KbAdmin,
   "/components": Components,
   "/form-demo": FormDemo,
   "*": NotFound,

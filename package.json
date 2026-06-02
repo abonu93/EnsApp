@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build:index": "tsx tools/build-protocols-index.ts",
+    "build": "npm run build:index && vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
@@ -27,11 +28,10 @@
     "svelte-check": "^4.1.1",
     "svelte-spa-router": "^4.0.1",
     "tslib": "^2.8.1",
+    "tsx": "^4.22.4",
     "typescript": "^5.7.2",
+    "unpdf": "^1.6.2",
     "vite": "^6.0.5",
     "vitest": "^2.1.8"
-  },
-  "dependencies": {
-    "pdfjs-dist": "^4.10.38"
   }
 }
