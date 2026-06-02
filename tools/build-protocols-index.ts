@@ -1,32 +1,47 @@
-// Build-time: legge i PDF nella cartella protocols/ ed esce un indice TF-IDF
-// in public/protocols-index.json (la "base di conoscenza" del chatbot).
-// Lanciato dallo script "build" (vedi package.json), quindi gira ad ogni
-// deploy su Cloudflare Pages / GitHub Pages. L'estrazione PDF avviene QUI,
-// una sola volta, non nel browser degli utenti.
+// Build-time: legge ricorsivamente i documenti in protocols/ (PDF e DOCX),
+// ne estrae il testo e produce l'indice TF-IDF in public/protocols-index.json
+// (la "base di conoscenza" del chatbot). Gira ad ogni build/deploy.
 //
-// Per aggiornare i protocolli: aggiungi/rimuovi PDF in protocols/ e fai commit.
+// Convenzione cartelle: protocols/<STUDIO>/<file>. Il nome dello STUDIO
+// (la sottocartella) diventa il nome mostrato nelle citazioni.
 
 import { readdir, readFile, writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { dirname, join, basename } from "node:path";
+import { dirname, join, basename, extname, relative, sep } from "node:path";
 import { getDocumentProxy, extractText } from "unpdf";
+import mammoth from "mammoth";
 import { chunkPages, buildIndex, mergeIndexes, type PageText, type TfIdfIndex } from "../src/lib/chat/chunk";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PROTOCOLS_DIR = join(root, "protocols");
 const OUTPUT = join(root, "public", "protocols-index.json");
 
-function slug(name: string): string {
-  return name.replace(/\.pdf$/i, "").replace(/[^\w-]+/g, "-").toLowerCase();
+function slug(s: string): string {
+  return s.replace(/[^\w-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").toLowerCase();
 }
 
-async function listPdfs(): Promise<string[]> {
+// Nome documento = sottocartella di studio (es. "WETRUST"); se il file e' in
+// protocols/ direttamente, usa il nome del file.
+function docNameFor(absPath: string): string {
+  const rel = relative(PROTOCOLS_DIR, absPath);
+  const parts = rel.split(sep);
+  return parts.length > 1 ? parts[0] : basename(rel, extname(rel));
+}
+
+async function walk(dir: string): Promise<string[]> {
+  const out: string[] = [];
+  let entries;
   try {
-    const entries = await readdir(PROTOCOLS_DIR);
-    return entries.filter((f) => f.toLowerCase().endsWith(".pdf")).sort();
+    entries = await readdir(dir, { withFileTypes: true });
   } catch {
-    return []; // cartella assente: indice vuoto
+    return out;
   }
+  for (const e of entries) {
+    const p = join(dir, e.name);
+    if (e.isDirectory()) out.push(...(await walk(p)));
+    else out.push(p);
+  }
+  return out;
 }
 
 async function pdfToPages(filePath: string): Promise<PageText[]> {
@@ -39,34 +54,46 @@ async function pdfToPages(filePath: string): Promise<PageText[]> {
     .filter((p) => p.text.length > 0);
 }
 
-async function main() {
-  const files = await listPdfs();
-  const indexes: TfIdfIndex[] = [];
-  const docNames: string[] = [];
+async function docxToPages(filePath: string): Promise<PageText[]> {
+  const buffer = await readFile(filePath);
+  const { value } = await mammoth.extractRawText({ buffer });
+  const text = (value || "").replace(/\s+/g, " ").trim();
+  return text ? [{ page: 1, text }] : [];
+}
 
-  for (const file of files) {
-    const name = basename(file, ".pdf");
+async function main() {
+  const all = (await walk(PROTOCOLS_DIR)).sort();
+  const indexes: TfIdfIndex[] = [];
+  const docNames = new Set<string>();
+  let filesOk = 0;
+
+  for (const file of all) {
+    const ext = extname(file).toLowerCase();
+    if (ext !== ".pdf" && ext !== ".docx") continue;
+    const rel = relative(PROTOCOLS_DIR, file);
+    const docName = docNameFor(file);
     try {
-      const pages = await pdfToPages(join(PROTOCOLS_DIR, file));
+      const pages = ext === ".pdf" ? await pdfToPages(file) : await docxToPages(file);
       if (pages.length === 0) {
-        console.warn(`[protocols] "${file}": nessun testo estratto (PDF scansionato?). Saltato.`);
+        console.warn(`[protocols] "${rel}": nessun testo estratto (scansione/immagini?). Saltato.`);
         continue;
       }
-      const chunks = chunkPages(slug(file), name, pages);
+      const chunks = chunkPages(slug(rel), docName, pages);
       indexes.push(buildIndex(chunks));
-      docNames.push(name);
-      console.log(`[protocols] "${file}": ${pages.length} pagine, ${chunks.length} frammenti.`);
+      docNames.add(docName);
+      filesOk++;
+      console.log(`[protocols] "${rel}" -> [${docName}] ${pages.length} pag, ${chunks.length} frammenti.`);
     } catch (e) {
-      console.warn(`[protocols] "${file}": errore di lettura, saltato.`, e instanceof Error ? e.message : e);
+      console.warn(`[protocols] "${rel}": errore di lettura, saltato.`, e instanceof Error ? e.message : e);
     }
   }
 
   const index = indexes.length > 0 ? mergeIndexes(indexes) : { chunks: [], tf: [], df: {}, n: 0 };
-  const payload = { version: 1, builtAt: Date.now(), docNames, index };
+  const payload = { version: 1, builtAt: Date.now(), docNames: [...docNames], index };
 
   await mkdir(dirname(OUTPUT), { recursive: true });
   await writeFile(OUTPUT, JSON.stringify(payload));
-  console.log(`[protocols] Scritto ${OUTPUT}: ${docNames.length} protocolli, ${index.n} frammenti.`);
+  console.log(`[protocols] OK: ${filesOk} file, ${docNames.size} studi, ${index.n} frammenti -> ${relative(root, OUTPUT)}`);
 }
 
 main().catch((e) => {
