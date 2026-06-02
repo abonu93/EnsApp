@@ -129,7 +129,13 @@ export async function retrieveContext(query: string, k = 6): Promise<RetrievedCh
     if (idx) indexes.push(idx);
   }
   if (indexes.length === 0) return [];
-  return retrieve(query, mergeIndexes(indexes), k);
+  const merged = mergeIndexes(indexes);
+  const results = retrieve(query, merged, k);
+  if (results.length > 0) return results;
+  // Fallback: nessun match lessicale (domanda generica, di sintesi, o in una
+  // lingua diversa dal PDF). Invia l'inizio dei documenti (titolo/abstract/
+  // introduzione) cosi' il modello ha comunque contesto su cui rispondere.
+  return merged.chunks.slice(0, k).map((c) => ({ ...c, score: 0 }));
 }
 
 /** Riallinea la lista persistita con IndexedDB (pulizia metadati orfani). */
