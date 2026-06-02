@@ -3,9 +3,7 @@ name: Deploy preview to GitHub Pages
 on:
   push:
     branches:
-      - develop
       - main
-      - claude/github-branching-strategy-q1ChX
   workflow_dispatch:
 
 permissions:
