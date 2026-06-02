@@ -73,6 +73,47 @@ async function callGemini(messages, context, locale, env) {
   return parts.map((p) => p.text || "").join("");
 }
 
+// Groq (API compatibile OpenAI). Free tier con limiti generosi.
+async function callGroq(messages, context, locale, env) {
+  const model = env.GROQ_MODEL || "llama-3.3-70b-versatile";
+  const system = buildSystemPrompt(locale);
+  const sources = formatSources(context);
+
+  const chat = [
+    { role: "system", content: system },
+    ...messages.map((m, i) => {
+      const isLastUser = i === messages.length - 1 && m.role === "user";
+      return {
+        role: m.role,
+        content: isLastUser ? `SOURCES:\n${sources}\n\nDOMANDA:\n${m.content}` : m.content,
+      };
+    }),
+  ];
+
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({ model, messages: chat, temperature: 0.2 }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text();
+    throw new Error(`Groq ${res.status}: ${detail.slice(0, 300)}`);
+  }
+  const data = await res.json();
+  return data?.choices?.[0]?.message?.content || "";
+}
+
+function callProvider(messages, context, locale, env) {
+  if ((env.PROVIDER || "gemini").toLowerCase() === "groq") {
+    return callGroq(messages, context, locale, env);
+  }
+  return callGemini(messages, context, locale, env);
+}
+
 function corsHeaders(origin, env) {
   const allowed = (env.ALLOWED_ORIGINS || "")
     .split(",")
@@ -124,11 +165,15 @@ export default {
     const locale = typeof body.locale === "string" ? body.locale : "es";
 
     if (!messages.length) return json({ error: "Missing messages" }, 400, cors);
-    if (!env.GEMINI_API_KEY)
+
+    const provider = (env.PROVIDER || "gemini").toLowerCase();
+    if (provider === "gemini" && !env.GEMINI_API_KEY)
       return json({ error: "Server missing GEMINI_API_KEY" }, 500, cors);
+    if (provider === "groq" && !env.GROQ_API_KEY)
+      return json({ error: "Server missing GROQ_API_KEY" }, 500, cors);
 
     try {
-      const answer = await callGemini(messages, context, locale, env);
+      const answer = await callProvider(messages, context, locale, env);
       const citations = context.map((c) => ({
         docName: c.docName,
         page: c.page,
