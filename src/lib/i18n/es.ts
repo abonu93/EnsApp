@@ -54,6 +54,7 @@ export const es: Dictionary = {
     clearChat: "Borrar conversación",
     loadedProtocols: "Protocolos",
     kbEmpty: "Aún no hay protocolos disponibles.",
+    knowsProtocols: "Conoce los protocolos cargados",
   },
   kbAdmin: {
     title: "Gestión de protocolos",
@@ -67,6 +68,10 @@ export const es: Dictionary = {
     tagline: "Asignacion de paciente a ensayos clinicos - agudo, hemorragico y post-agudo.",
     heroTitle: "Asigna un paciente\na un ensayo.",
     newPatient: "Nuevo paciente",
+    newPatientDesc: "Comprueba la elegibilidad en todos los ensayos",
+    assistantHeroTitle: "Tu conocimiento de\nlos ensayos, al instante.",
+    askCta: "Pregunta sobre los protocolos...",
+    suggestions: ["Ensayos activos", "Criterios de inclusion", "Ventanas temporales"],
     inProgressTitle: "Paciente en curso",
     pastPatients: "Pacientes enviados",
     inProgressSubtitle: "Recuperado de localStorage",

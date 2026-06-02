@@ -55,6 +55,7 @@ export const it = {
     clearChat: "Cancella conversazione",
     loadedProtocols: "Protocolli",
     kbEmpty: "Nessun protocollo ancora disponibile.",
+    knowsProtocols: "Conosce i protocolli caricati",
   },
   kbAdmin: {
     title: "Gestione protocolli",
@@ -68,6 +69,10 @@ export const it = {
     tagline: "Assegnazione paziente a trial clinici - acuto, emorragico e post-acuto.",
     heroTitle: "Assegna un paziente\na un trial.",
     newPatient: "Nuovo paziente",
+    newPatientDesc: "Verifica l'eleggibilita' su tutti i trial",
+    assistantHeroTitle: "Il tuo sapere sui\ntrial, all'istante.",
+    askCta: "Chiedi sui protocolli...",
+    suggestions: ["Trial attivi", "Criteri di inclusione", "Finestre temporali"],
     inProgressTitle: "Paziente in lavorazione",
     pastPatients: "Pazienti inviati",
     inProgressSubtitle: "Ripreso da localStorage",

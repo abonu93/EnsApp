@@ -44,17 +44,19 @@
 
 <a href="#main" class="skip-link">{$t.common.skipToContent}</a>
 
-<header class="hdr">
-  <a href="/" use:link class="brand">
-    <span class="brand-dot" aria-hidden="true">
-      <Logo size={17} variant="white" />
-    </span>
-    <span class="brand-name">Eligo</span>
-  </a>
-  <button class="lang-btn" type="button" onclick={cycleLocale} aria-label="{$t.common.language}: {$locale.toUpperCase()}">
-    {$locale.toUpperCase()}
-  </button>
-</header>
+{#if $location !== "/"}
+  <header class="hdr">
+    <a href="/" use:link class="brand">
+      <span class="brand-dot" aria-hidden="true">
+        <Logo size={17} variant="white" />
+      </span>
+      <span class="brand-name">Eligo</span>
+    </a>
+    <button class="lang-btn" type="button" onclick={cycleLocale} aria-label="{$t.common.language}: {$locale.toUpperCase()}">
+      {$locale.toUpperCase()}
+    </button>
+  </header>
+{/if}
 
 <main id="main" tabindex="-1">
   {#key animKey}

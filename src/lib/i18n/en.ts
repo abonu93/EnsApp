@@ -54,6 +54,7 @@ export const en: Dictionary = {
     clearChat: "Clear conversation",
     loadedProtocols: "Protocols",
     kbEmpty: "No protocols available yet.",
+    knowsProtocols: "Knows the loaded protocols",
   },
   kbAdmin: {
     title: "Manage protocols",
@@ -67,6 +68,10 @@ export const en: Dictionary = {
     tagline: "Patient assignment to clinical trials - acute, hemorrhagic and post-acute.",
     heroTitle: "Assign a patient\nto a trial.",
     newPatient: "New patient",
+    newPatientDesc: "Check eligibility across all trials",
+    assistantHeroTitle: "Your trial knowledge,\ninstantly.",
+    askCta: "Ask about the protocols...",
+    suggestions: ["Active trials", "Inclusion criteria", "Time windows"],
     inProgressTitle: "Patient in progress",
     pastPatients: "Past patients",
     inProgressSubtitle: "Resumed from localStorage",

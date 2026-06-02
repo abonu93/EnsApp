@@ -54,6 +54,7 @@ export const ca: Dictionary = {
     clearChat: "Esborra la conversa",
     loadedProtocols: "Protocols",
     kbEmpty: "Encara no hi ha protocols disponibles.",
+    knowsProtocols: "Coneix els protocols carregats",
   },
   kbAdmin: {
     title: "Gestió de protocols",
@@ -67,6 +68,10 @@ export const ca: Dictionary = {
     tagline: "Assignacio de pacient a assaigs clinics - agut, hemorragic i post-agut.",
     heroTitle: "Assigna un pacient\na un assaig.",
     newPatient: "Nou pacient",
+    newPatientDesc: "Comprova l'elegibilitat en tots els assaigs",
+    assistantHeroTitle: "El teu coneixement\ndels assaigs, a l'instant.",
+    askCta: "Pregunta sobre els protocols...",
+    suggestions: ["Assaigs actius", "Criteris d'inclusio", "Finestres temporals"],
     inProgressTitle: "Pacient en curs",
     pastPatients: "Pacients enviats",
     inProgressSubtitle: "Recuperat de localStorage",
