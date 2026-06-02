@@ -52,6 +52,16 @@ export const ca: Dictionary = {
     statusError: "Error",
     removeDoc: "Elimina document",
     clearChat: "Esborra la conversa",
+    loadedProtocols: "Protocols",
+    kbEmpty: "Encara no hi ha protocols disponibles.",
+  },
+  kbAdmin: {
+    title: "Gestió de protocols",
+    subtitle: "Puja els PDF, genera la base de coneixement i publica-la.",
+    export: "Exporta la base de coneixement",
+    step1: "Puja els PDF dels protocols a dalt i espera l'estat 'Llest'.",
+    step2: "Prem 'Exporta la base de coneixement': es baixa el fitxer protocols-index.json.",
+    step3: "A GitHub, puja aquest fitxer a la carpeta public/ (sobreescrivint) i fes commit: el lloc s'actualitza sol.",
   },
   landing: {
     tagline: "Assignacio de pacient a assaigs clinics - agut, hemorragic i post-agut.",

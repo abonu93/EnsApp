@@ -53,6 +53,16 @@ export const it = {
     statusError: "Errore",
     removeDoc: "Rimuovi documento",
     clearChat: "Cancella conversazione",
+    loadedProtocols: "Protocolli",
+    kbEmpty: "Nessun protocollo ancora disponibile.",
+  },
+  kbAdmin: {
+    title: "Gestione protocolli",
+    subtitle: "Carica i PDF, genera la base di conoscenza e pubblicala.",
+    export: "Esporta base di conoscenza",
+    step1: "Carica i PDF dei protocolli qui sopra e attendi lo stato 'Pronto'.",
+    step2: "Premi 'Esporta base di conoscenza': scarichi il file protocols-index.json.",
+    step3: "Su GitHub, carica quel file nella cartella public/ (sovrascrivendo) e fai commit: il sito si aggiorna da solo.",
   },
   landing: {
     tagline: "Assegnazione paziente a trial clinici - acuto, emorragico e post-acuto.",

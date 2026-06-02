@@ -138,6 +138,21 @@ export async function retrieveContext(query: string, k = 14): Promise<RetrievedC
   return merged.chunks.slice(0, k).map((c) => ({ ...c, score: 0 }));
 }
 
+/**
+ * Indice unito di tutti i documenti pronti, con i nomi. Usato dalla pagina
+ * admin per esportare la base di conoscenza (public/protocols-index.json).
+ */
+export async function exportMergedIndex(): Promise<{ index: TfIdfIndex; docNames: string[] } | null> {
+  const ready = get(persistedDocs).filter((d) => d.status === "ready");
+  const indexes: TfIdfIndex[] = [];
+  for (const doc of ready) {
+    const idx = await indexFor(doc.docId);
+    if (idx) indexes.push(idx);
+  }
+  if (indexes.length === 0) return null;
+  return { index: mergeIndexes(indexes), docNames: ready.map((d) => d.name) };
+}
+
 /** Riallinea la lista persistita con IndexedDB (pulizia metadati orfani). */
 export async function reconcileDocuments(): Promise<void> {
   try {

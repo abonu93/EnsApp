@@ -52,6 +52,16 @@ export const es: Dictionary = {
     statusError: "Error",
     removeDoc: "Eliminar documento",
     clearChat: "Borrar conversación",
+    loadedProtocols: "Protocolos",
+    kbEmpty: "Aún no hay protocolos disponibles.",
+  },
+  kbAdmin: {
+    title: "Gestión de protocolos",
+    subtitle: "Sube los PDF, genera la base de conocimiento y publícala.",
+    export: "Exportar base de conocimiento",
+    step1: "Sube los PDF de los protocolos arriba y espera el estado 'Listo'.",
+    step2: "Pulsa 'Exportar base de conocimiento': se descarga el archivo protocols-index.json.",
+    step3: "En GitHub, sube ese archivo a la carpeta public/ (sobrescribiendo) y haz commit: el sitio se actualiza solo.",
   },
   landing: {
     tagline: "Asignacion de paciente a ensayos clinicos - agudo, hemorragico y post-agudo.",

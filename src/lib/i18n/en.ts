@@ -52,6 +52,16 @@ export const en: Dictionary = {
     statusError: "Error",
     removeDoc: "Remove document",
     clearChat: "Clear conversation",
+    loadedProtocols: "Protocols",
+    kbEmpty: "No protocols available yet.",
+  },
+  kbAdmin: {
+    title: "Manage protocols",
+    subtitle: "Upload the PDFs, build the knowledge base and publish it.",
+    export: "Export knowledge base",
+    step1: "Upload the protocol PDFs above and wait for the 'Ready' status.",
+    step2: "Click 'Export knowledge base': it downloads the protocols-index.json file.",
+    step3: "On GitHub, upload that file into the public/ folder (overwriting) and commit: the site updates on its own.",
   },
   landing: {
     tagline: "Patient assignment to clinical trials - acute, hemorrhagic and post-acute.",
