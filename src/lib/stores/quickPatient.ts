@@ -12,9 +12,17 @@ export interface QuickPatientData {
   age?: number;
   nihss?: number;
   premrs?: number;
+  /** ISO datetime "Last seen well". Le ore vengono derivate. */
+  ltswDate?: string;
+  /** LTSW in ore (derivato da ltswDate al momento della compilazione). */
+  ltsw?: number;
   strokeType?: QuickStrokeType;
   trial?: string;
   arm?: "intervention" | "control" | "";
+  /** Trattamenti in acuto: trombectomia (TEV) + relativo mTICI + trombolisi (TIV). */
+  tev?: "Yes" | "No" | "";
+  mtici?: string;
+  tiv?: "Yes" | "No" | "";
   notes?: string;
 }
 

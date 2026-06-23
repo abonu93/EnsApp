@@ -8,28 +8,42 @@
   import Card from "$lib/components/Card.svelte";
   import NihssScale from "$lib/components/NihssScale.svelte";
   import Segmented from "$lib/components/Segmented.svelte";
+  import DateTimeField from "$lib/components/DateTimeField.svelte";
+  import RadioGroup from "$lib/components/RadioGroup.svelte";
   import { TRIALS_INFO } from "$lib/domain/trials-info";
   import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm } from "$lib/domain/sheet-payload";
   import { addSavedPatient } from "$lib/stores/savedPatients";
   import { quickPatient, clearQuickPatient } from "$lib/stores/quickPatient";
+  import { hoursSince } from "$lib/stores/patient";
+  import { fmtHoursAsClock } from "$lib/utils/time";
   import { announce } from "$lib/a11y/liveRegion";
   import { t } from "$lib/i18n";
 
   type Arm = "intervention" | "control" | "";
+  type YesNo = "Yes" | "No" | "";
+  type MticiVal = "" | "0" | "1" | "2a" | "2b50" | "2b67" | "2c" | "3";
 
   let patientId = $state($quickPatient.patientId ?? "");
   let age = $state<number | null>($quickPatient.age ?? null);
   let nihss = $state<number | null>($quickPatient.nihss ?? null);
   let premrs = $state<number | null>($quickPatient.premrs ?? null);
+  let ltswDate = $state<string>($quickPatient.ltswDate ?? "");
   let strokeType = $state<"ischemic" | "hemorrhagic" | "">(
     ($quickPatient.strokeType as "ischemic" | "hemorrhagic" | "") ?? ""
   );
   let trial = $state<string>($quickPatient.trial ?? "");
   let arm = $state<Arm>(($quickPatient.arm as Arm) ?? "");
+  // Trattamenti in acuto (TEV + mTICI + TIV), come nel flusso guided (Share).
+  let tev = $state<YesNo>(($quickPatient.tev as YesNo) ?? "");
+  let mtici = $state<MticiVal>(($quickPatient.mtici as MticiVal) ?? "");
+  let tiv = $state<YesNo>(($quickPatient.tiv as YesNo) ?? "");
   let notes = $state($quickPatient.notes ?? "");
 
   let saving = $state(false);
   let saved = $state(false);
+
+  const ltswHrs = $derived(hoursSince(ltswDate));
+  const showMtici = $derived(tev === "Yes");
 
   // Persist su store dedicato (NON preData!)
   $effect(() => {
@@ -38,9 +52,14 @@
       age: age ?? undefined,
       nihss: nihss ?? undefined,
       premrs: premrs ?? undefined,
+      ltswDate: ltswDate || undefined,
+      ltsw: ltswHrs,
       strokeType,
       trial: trial || undefined,
       arm: arm || undefined,
+      tev: tev || undefined,
+      mtici: showMtici ? mtici || undefined : undefined,
+      tiv: tiv || undefined,
       notes,
     });
   });
@@ -57,6 +76,30 @@
     { value: "intervention" as const, label: $t.extras.quickIntervention },
     { value: "control" as const, label: $t.extras.quickControl },
   ]);
+  const ynOpts = $derived<{ value: "Yes" | "No"; label: string }[]>([
+    { value: "No", label: $t.common.no },
+    { value: "Yes", label: $t.common.yes },
+  ]);
+  const mticiOpts: { value: MticiVal; label: string }[] = [
+    { value: "0", label: "0" },
+    { value: "1", label: "1" },
+    { value: "2a", label: "2a" },
+    { value: "2b50", label: "2b50" },
+    { value: "2b67", label: "2b67" },
+    { value: "2c", label: "2c" },
+    { value: "3", label: "3" },
+  ];
+
+  // Classificazione finestra terapeutica per LTSW (come PreImaging).
+  function windowInfo(hours: number | undefined): { tone: "success" | "warn" | "danger"; label: string } | null {
+    if (hours === undefined) return null;
+    const min = hours * 60;
+    if (min <= 270) return { tone: "success", label: $t.extras.windowIv };
+    if (min <= 360) return { tone: "success", label: $t.extras.windowEvt };
+    if (min <= 1440) return { tone: "warn", label: $t.extras.windowEvtSelected };
+    return { tone: "danger", label: $t.extras.windowClosed };
+  }
+  const win = $derived(windowInfo(ltswHrs));
 
   const canSubmit = $derived(
     patientId !== "" && age !== null && (trial === "" || !showArm || arm !== "")
@@ -68,6 +111,7 @@
     if (age != null) lines.push(`Age: ${age}`);
     if (nihss != null) lines.push(`NIHSS: ${nihss}`);
     if (premrs != null) lines.push(`pre-mRS: ${premrs}`);
+    if (ltswHrs != null) lines.push(`LTSW: ${fmtHoursAsClock(ltswHrs)}`);
     if (strokeType) lines.push(`Stroke type: ${strokeType}`);
     if (trial) {
       lines.push("");
@@ -77,6 +121,18 @@
         lines.push(`Trial: ${trial}`);
       }
     }
+
+    // Acute treatments
+    const extras: string[] = [];
+    if (tev) extras.push(`TEV: ${tev}`);
+    if (showMtici && mtici) extras.push(`mTICI: ${mtici}`);
+    if (tiv) extras.push(`TIV: ${tiv}`);
+    if (extras.length > 0) {
+      lines.push("");
+      lines.push("Acute treatments:");
+      for (const e of extras) lines.push(`- ${e}`);
+    }
+
     if (notes.trim()) {
       lines.push("");
       lines.push(`Notes: ${notes.trim()}`);
@@ -111,8 +167,12 @@
       age,
       nihss,
       premrs,
+      ltsw: ltswHrs,
       strokeType,
       ...buildTrialsForSheet(selected, outcomes),
+      TEV: tev,
+      mTICI: showMtici ? mtici : "",
+      TIV: tiv,
       Notes: notes,
       missed: "",
       eligible: "",
@@ -133,6 +193,8 @@
           age: age ?? undefined,
           nihss: nihss ?? undefined,
           premrs: premrs ?? undefined,
+          ltswDate: ltswDate || undefined,
+          ltsw: ltswHrs,
         },
         post: { strokeType: strokeType || undefined },
         hem: {},
@@ -140,7 +202,11 @@
         outcomes,
         chronic: [],
         notes,
-        extras: {},
+        extras: {
+          tev: tev || undefined,
+          mtici: showMtici ? mtici || undefined : undefined,
+          tiv: tiv || undefined,
+        },
       },
     });
 
@@ -206,6 +272,29 @@
     {/snippet}
   </Card>
 
+  <Card title={$t.preImaging.ltswLabel}>
+    {#snippet children()}
+      <div class="stack">
+        <DateTimeField id="quick-ltsw" bind:value={ltswDate} label={$t.preImaging.ltswLabel} />
+
+        {#if ltswHrs !== undefined}
+          <div class="elapsed">
+            <span class="elapsed-val">{fmtHoursAsClock(ltswHrs)}</span>
+            <span class="elapsed-lbl">{$t.extras.sinceLtsw}</span>
+          </div>
+          {#if win}
+            <div class="window tone-{win.tone}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span>{win.label}</span>
+            </div>
+          {/if}
+        {/if}
+      </div>
+    {/snippet}
+  </Card>
+
   <Card title={$t.extras.quickTrialLabel}>
     {#snippet children()}
       <label class="field">
@@ -223,6 +312,26 @@
           <Segmented options={armOpts} bind:value={arm} cols={2} />
         </div>
       {/if}
+    {/snippet}
+  </Card>
+
+  <Card title={$t.extras.acuteTreatments}>
+    {#snippet children()}
+      <div class="stack">
+        <RadioGroup id="quick-tev" label={$t.trialPatient.tevLabel} name="tev" columns={2} bind:value={tev} options={ynOpts} />
+        {#if showMtici}
+          <label class="field">
+            <span class="lbl">{$t.trialPatient.mticiLabel}</span>
+            <select class="input" bind:value={mtici} aria-label={$t.trialPatient.mticiLabel}>
+              <option value="">--</option>
+              {#each mticiOpts as opt (opt.value)}
+                <option value={opt.value}>{opt.label}</option>
+              {/each}
+            </select>
+          </label>
+        {/if}
+        <RadioGroup id="quick-tiv" label={$t.trialPatient.tivLabel} name="tiv" columns={2} bind:value={tiv} options={ynOpts} />
+      </div>
     {/snippet}
   </Card>
 
@@ -310,6 +419,32 @@
   }
   .input.mono { font-family: var(--font-mono); }
   .input:focus { border-color: var(--primary); box-shadow: var(--focus-ring); }
+  .elapsed {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .elapsed-val {
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: -0.4px;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .elapsed-lbl { font-size: 12.5px; color: var(--text-muted); }
+  .window {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .window.tone-success { background: var(--success-soft); color: var(--success); }
+  .window.tone-warn { background: var(--warn-soft); color: var(--warn); }
+  .window.tone-danger { background: var(--danger-soft); color: var(--danger); }
   .unit {
     position: absolute;
     right: 14px;
