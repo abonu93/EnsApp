@@ -15,6 +15,7 @@
   import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm } from "$lib/domain/sheet-payload";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
   import { fmtHoursAsClock } from "$lib/utils/time";
+  import { maskPatientId } from "$lib/utils/mask";
   import { announce } from "$lib/a11y/liveRegion";
   import { t } from "$lib/i18n";
 
@@ -50,7 +51,7 @@
 
   const message = $derived.by(() => {
     const lines: string[] = [];
-    if ($preData.patientId) lines.push(`Patient ID: ${$preData.patientId}`);
+    if ($preData.patientId) lines.push(`Patient ID: ${maskPatientId($preData.patientId)}`);
     if ($preData.age != null) lines.push(`Age: ${$preData.age}`);
     if ($preData.nihss != null) lines.push(`NIHSS: ${$preData.nihss}`);
     if ($preData.premrs != null) lines.push(`pre-mRS: ${$preData.premrs}`);
