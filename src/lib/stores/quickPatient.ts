@@ -19,6 +19,8 @@ export interface QuickPatientData {
   strokeType?: QuickStrokeType;
   trial?: string;
   arm?: "intervention" | "control" | "";
+  /** Vasi target / occlusi (codici VesselCode). Opzionale. */
+  targetVessels?: string[];
   /** Trattamenti in acuto: trombectomia (TEV) + relativo mTICI + trombolisi (TIV). */
   tev?: "Yes" | "No" | "";
   mtici?: string;

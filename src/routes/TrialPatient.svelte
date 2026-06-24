@@ -10,6 +10,9 @@
   import Segmented from "$lib/components/Segmented.svelte";
   import DateTimeField from "$lib/components/DateTimeField.svelte";
   import RadioGroup from "$lib/components/RadioGroup.svelte";
+  import VesselPicker from "$lib/components/VesselPicker.svelte";
+  import type { VesselCode } from "$lib/domain/acute-rules";
+  import { VESSEL_OPTIONS } from "$lib/domain/vessels";
   import { TRIALS_INFO } from "$lib/domain/trials-info";
   import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm } from "$lib/domain/sheet-payload";
   import { addSavedPatient } from "$lib/stores/savedPatients";
@@ -34,6 +37,7 @@
   );
   let trial = $state<string>($quickPatient.trial ?? "");
   let arm = $state<Arm>(($quickPatient.arm as Arm) ?? "");
+  let targetVessels = $state<VesselCode[]>(($quickPatient.targetVessels as VesselCode[]) ?? []);
   // Trattamenti in acuto (TEV + mTICI + TIV), come nel flusso guided (Share).
   let tev = $state<YesNo>(($quickPatient.tev as YesNo) ?? "");
   let mtici = $state<MticiVal>(($quickPatient.mtici as MticiVal) ?? "");
@@ -58,6 +62,7 @@
       strokeType,
       trial: trial || undefined,
       arm: arm || undefined,
+      targetVessels: targetVessels.length ? targetVessels : undefined,
       tev: tev || undefined,
       mtici: showMtici ? mtici || undefined : undefined,
       tiv: tiv || undefined,
@@ -102,6 +107,12 @@
   }
   const win = $derived(windowInfo(ltswHrs));
 
+  // Mappa codice vaso -> etichetta UI, per il messaggio condiviso e il foglio.
+  const VESSEL_LABEL = Object.fromEntries(
+    VESSEL_OPTIONS.map((o) => [o.value, o.label])
+  ) as Record<VesselCode, string>;
+  const vesselText = $derived(targetVessels.map((c) => VESSEL_LABEL[c]).join(", "));
+
   const canSubmit = $derived(
     patientId !== "" && age !== null && (trial === "" || !showArm || arm !== "")
   );
@@ -114,6 +125,7 @@
     if (premrs != null) lines.push(`pre-mRS: ${premrs}`);
     if (ltswHrs != null) lines.push(`LTSW: ${fmtHoursAsClock(ltswHrs)}`);
     if (strokeType) lines.push(`Stroke type: ${strokeType}`);
+    if (vesselText) lines.push(`Target vessel: ${vesselText}`);
     if (trial) {
       lines.push("");
       if (hasKnownStudyArm(trial) && arm) {
@@ -170,6 +182,7 @@
       premrs,
       ltsw: ltswHrs,
       strokeType,
+      targetVessels: vesselText,
       ...buildTrialsForSheet(selected, outcomes),
       TEV: tev,
       mTICI: showMtici ? mtici : "",
@@ -197,7 +210,10 @@
           ltswDate: ltswDate || undefined,
           ltsw: ltswHrs,
         },
-        post: { strokeType: strokeType || undefined },
+        post: {
+          strokeType: strokeType || undefined,
+          targetVessels: targetVessels.length ? [...targetVessels] : undefined,
+        },
         hem: {},
         studies: selected,
         outcomes,
@@ -293,6 +309,12 @@
           {/if}
         {/if}
       </div>
+    {/snippet}
+  </Card>
+
+  <Card title={$t.postImaging.vesselsLabel}>
+    {#snippet children()}
+      <VesselPicker bind:value={targetVessels} />
     {/snippet}
   </Card>
 
