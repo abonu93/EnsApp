@@ -13,6 +13,7 @@
   } from "$lib/stores/trialSelection";
   import { addSavedPatient } from "$lib/stores/savedPatients";
   import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm } from "$lib/domain/sheet-payload";
+  import { isTrialOpen } from "$lib/domain/trials-info";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
   import { fmtHoursAsClock } from "$lib/utils/time";
   import { maskPatientId } from "$lib/utils/mask";
@@ -33,7 +34,8 @@
       ["NORA HOME", e.noraHome],
       ["FASTEST", h.fastest.eligible], ["TICH-3", h.tich3],
     ];
-    return map.filter(([, ok]) => ok).map(([n]) => n);
+    // Esclude i trial con reclutamento chiuso: non sono "missed opportunity".
+    return map.filter(([name, ok]) => ok && isTrialOpen(name)).map(([n]) => n);
   }
 
   let saving = $state(false);

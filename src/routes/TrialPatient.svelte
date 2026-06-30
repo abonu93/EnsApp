@@ -13,7 +13,7 @@
   import VesselPicker from "$lib/components/VesselPicker.svelte";
   import type { VesselCode } from "$lib/domain/acute-rules";
   import { VESSEL_OPTIONS } from "$lib/domain/vessels";
-  import { TRIALS_INFO } from "$lib/domain/trials-info";
+  import { TRIALS_INFO, isTrialOpen } from "$lib/domain/trials-info";
   import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm } from "$lib/domain/sheet-payload";
   import { addSavedPatient } from "$lib/stores/savedPatients";
   import { quickPatient, clearQuickPatient } from "$lib/stores/quickPatient";
@@ -70,7 +70,10 @@
     });
   });
 
-  const trialOptions = Object.keys(TRIALS_INFO).map((name) => ({ value: name, label: name }));
+  // Esclude i trial con reclutamento chiuso (es. SHIONOGI): non selezionabili.
+  const trialOptions = Object.keys(TRIALS_INFO)
+    .filter((name) => isTrialOpen(name))
+    .map((name) => ({ value: name, label: name }));
   const showArm = $derived(trial !== "" && hasKnownStudyArm(trial));
 
   const mrsOpts: { value: number; label: string }[] = [0, 1, 2, 3, 4, 5].map((v) => ({ value: v, label: String(v) }));
