@@ -8,6 +8,7 @@
   import { selectedStudies } from "$lib/stores/trialSelection";
   import { acuteInput } from "$lib/stores/patient";
   import { REASON_BY_TRIAL } from "$lib/domain/acute-reasons";
+  import { isTrialOpen } from "$lib/domain/trials-info";
   import { t } from "$lib/i18n";
 
   let showIneligible = $state(false);
@@ -39,8 +40,14 @@
     { display: "TICH-3", eligible: $hemEligibility.tich3, tone: "hemorrhagic" },
   ]);
 
-  const eligibleItems = $derived([...acuteEligible, ...hemEligibleList].filter((e) => e.eligible));
-  const ineligibleItems = $derived(acuteEligible.filter((e) => !e.eligible));
+  // I trial con reclutamento chiuso (es. SHIONOGI) restano nel catalogo ma
+  // non sono selezionabili: vengono esclusi dai risultati di arruolamento.
+  const eligibleItems = $derived(
+    [...acuteEligible, ...hemEligibleList].filter((e) => e.eligible && isTrialOpen(e.display))
+  );
+  const ineligibleItems = $derived(
+    acuteEligible.filter((e) => !e.eligible && isTrialOpen(e.display))
+  );
 
   function toggle(name: string) {
     selectedStudies.update((arr) => arr.includes(name) ? arr.filter((n) => n !== name) : [...arr, name]);

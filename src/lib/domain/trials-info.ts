@@ -2,7 +2,7 @@
 // I criteri chiave (window/age/mrs/nihss/aspects) sono PROSA, non logica.
 // La logica di eligibility vive in src/lib/domain/{acute,hemorrhagic}-rules.ts.
 
-export type TrialStatus = "active" | "paused" | "post-acute";
+export type TrialStatus = "active" | "paused" | "post-acute" | "closed";
 export type TrialCategory = string;
 
 export interface TrialKeyCriteria {
@@ -172,7 +172,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: null,
   },
   Shionogi: {
-    status: "active",
+    // Reclutamento chiuso: le info restano consultabili nel catalogo,
+    // ma il trial non e' selezionabile per l'arruolamento.
+    status: "closed",
     category: "Thrombolytic / Adjunct",
     key: { window: "< 25 h", age: "> 18 y", mrs: "0-1", nihss: "6-22", aspects: "-" },
     consent: "Written.",
@@ -360,4 +362,25 @@ export function filterTrials(
       );
     })
     .map(([name, info]) => ({ name, info }));
+}
+
+/**
+ * Trova le info di un trial dato un nome che puo' essere la chiave di
+ * TRIALS_INFO oppure il display name usato altrove (case-insensitive).
+ * Es. "SHIONOGI" -> Shionogi.
+ */
+export function findTrialInfo(name: string): TrialInfo | undefined {
+  if (TRIALS_INFO[name]) return TRIALS_INFO[name];
+  const lower = (name || "").toLowerCase();
+  const key = Object.keys(TRIALS_INFO).find((k) => k.toLowerCase() === lower);
+  return key ? TRIALS_INFO[key] : undefined;
+}
+
+/**
+ * True se il trial e' arruolabile (reclutamento non chiuso).
+ * I trial sconosciuti sono considerati aperti (default sicuro).
+ */
+export function isTrialOpen(name: string): boolean {
+  const info = findTrialInfo(name);
+  return info ? info.status !== "closed" : true;
 }

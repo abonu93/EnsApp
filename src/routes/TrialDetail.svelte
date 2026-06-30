@@ -17,6 +17,7 @@
   function statusTone(status: string) {
     if (status === "active") return "success" as const;
     if (status === "paused") return "warn" as const;
+    if (status === "closed") return "danger" as const;
     return "info" as const;
   }
 </script>
