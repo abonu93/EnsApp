@@ -180,34 +180,26 @@
 
     const sheetTrials = buildTrialsForSheet(selected, outcomes);
     const payload = {
-      // Forma legacy attesa dal backend Apps Script (GAS_URL): il foglio
-      // legge N_patient e i campi annidati in `pre`/`trials`. Senza queste
-      // chiavi, ID paziente/NIHSS/mRS/LTSW/trial arrivavano vuoti nel DB.
+      // Le chiavi DEVONO combaciare ESATTAMENTE (case-sensitive) con le
+      // intestazioni di colonna del foglio EnsApp_Data: il backend Apps
+      // Script scrive ogni colonna leggendo payload[nomeColonna]. Nomi come
+      // patientId/age/nihss/premrs/ltsw/timestamp non combaciavano e finivano
+      // vuoti nel DB (ID paziente, NIHSS, mRS, LTSW, data mancanti).
+      Timestamp: new Date().toISOString(),
       N_patient: patientId,
-      pre: {
-        age,
-        nihss,
-        ltsw: ltswHrs,
-        premrs,
-      },
-      trials: sheetTrials,
-      // Forma flat/camelCase mantenuta per compatibilita' con schemi alternativi.
-      patientId,
-      age,
-      nihss,
-      premrs,
-      ltsw: ltswHrs,
-      strokeType,
-      targetVessels: vesselText,
+      Age: age,
+      NIHSS: nihss,
+      LTSW_h: ltswHrs,
+      pre_mRS: premrs,
       ...sheetTrials,
+      // Colonne trial con intestazioni non normalizzate nel foglio:
+      "DO  IT": sheetTrials.DOIT,
+      NiVO: sheetTrials.NIVO,
       TEV: tev,
       mTICI: showMtici ? mtici : "",
       TIV: tiv,
       Notes: notes,
-      missed: "",
-      eligible: "",
       source: "quick-patient",
-      timestamp: new Date().toISOString(),
     };
     await sendToSheet(payload);
 
