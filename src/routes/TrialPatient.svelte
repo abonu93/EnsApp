@@ -178,7 +178,20 @@
       trial && arm && hasKnownStudyArm(trial) ? { [trial]: arm } : {};
     const selected = trial ? [trial] : [];
 
+    const sheetTrials = buildTrialsForSheet(selected, outcomes);
     const payload = {
+      // Forma legacy attesa dal backend Apps Script (GAS_URL): il foglio
+      // legge N_patient e i campi annidati in `pre`/`trials`. Senza queste
+      // chiavi, ID paziente/NIHSS/mRS/LTSW/trial arrivavano vuoti nel DB.
+      N_patient: patientId,
+      pre: {
+        age,
+        nihss,
+        ltsw: ltswHrs,
+        premrs,
+      },
+      trials: sheetTrials,
+      // Forma flat/camelCase mantenuta per compatibilita' con schemi alternativi.
       patientId,
       age,
       nihss,
@@ -186,7 +199,7 @@
       ltsw: ltswHrs,
       strokeType,
       targetVessels: vesselText,
-      ...buildTrialsForSheet(selected, outcomes),
+      ...sheetTrials,
       TEV: tev,
       mTICI: showMtici ? mtici : "",
       TIV: tiv,

@@ -113,6 +113,18 @@
     const missed = eligibleNow.filter((name) => !enrolledSet.has(name));
 
     const payload = {
+      // Forma legacy attesa dal backend Apps Script (GAS_URL): il foglio
+      // legge N_patient e i campi annidati in `pre`/`trials`. Senza queste
+      // chiavi, ID paziente/NIHSS/mRS/LTSW/trial arrivavano vuoti nel DB.
+      N_patient: $preData.patientId,
+      pre: {
+        age: $preData.age,
+        nihss: $preData.nihss,
+        ltsw: $preData.ltsw,
+        premrs: $preData.premrs,
+      },
+      trials: sheetTrials,
+      // Forma flat/camelCase mantenuta per compatibilita' con schemi alternativi.
       patientId: $preData.patientId,
       age: $preData.age,
       nihss: $preData.nihss,
