@@ -93,9 +93,10 @@ test.describe("ischemic flow - golden patient", () => {
     expect(capturedBody).toContain("payload=");
     const params = new URLSearchParams(capturedBody);
     const payload = JSON.parse(decodeURIComponent(params.get("payload") ?? "{}"));
-    expect(payload.patientId).toBe("E2E-2025-001");
-    expect(payload.age).toBe(70);
-    expect(payload.nihss).toBe(14);
+    // Le chiavi combaciano con le intestazioni di colonna del foglio EnsApp_Data.
+    expect(payload.N_patient).toBe("E2E-2025-001");
+    expect(payload.Age).toBe(70);
+    expect(payload.NIHSS).toBe(14);
     expect(payload.WeTrust).toBe("intervention");
 
     // Feedback successo

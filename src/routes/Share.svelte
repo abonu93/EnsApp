@@ -4,7 +4,7 @@
   import Card from "$lib/components/Card.svelte";
   import Button from "$lib/components/Button.svelte";
   import RadioGroup from "$lib/components/RadioGroup.svelte";
-  import { preData, postData, hemData, clearPatient } from "$lib/stores/patient";
+  import { preData, postData, hemData, clearPatient, ltswHours } from "$lib/stores/patient";
   import {
     selectedStudies,
     studyOutcomes,
@@ -113,26 +113,28 @@
     const missed = eligibleNow.filter((name) => !enrolledSet.has(name));
 
     const payload = {
-      patientId: $preData.patientId,
-      age: $preData.age,
-      nihss: $preData.nihss,
-      premrs: $preData.premrs,
-      ltsw: $preData.ltsw,
-      strokeType: $postData.strokeType,
+      // Le chiavi DEVONO combaciare ESATTAMENTE (case-sensitive) con le
+      // intestazioni di colonna del foglio EnsApp_Data: il backend Apps
+      // Script scrive ogni colonna leggendo payload[nomeColonna]. Nomi come
+      // patientId/age/nihss/premrs/ltsw/timestamp non combaciavano e finivano
+      // vuoti nel DB (ID paziente, NIHSS, mRS, LTSW, data mancanti).
+      Timestamp: new Date().toISOString(),
+      N_patient: $preData.patientId,
+      Age: $preData.age,
+      NIHSS: $preData.nihss,
+      LTSW_h: $ltswHours,
+      pre_mRS: $preData.premrs,
       ...sheetTrials,
+      // Colonne trial con intestazioni non normalizzate nel foglio:
+      "DO  IT": sheetTrials.DOIT,
+      NiVO: sheetTrials.NIVO,
       TEV: tev,
       mTICI: showMtici ? mtici : "",
       TIV: tiv,
       Notes: $notesText,
-      // Missed opportunities per analisi statistica backend
-      // Tre nomi diversi per coprire schemi diversi del foglio:
-      missed: missed.join(","),
-      eligible: eligibleNow.join(","),
+      missed_trials: missed.join(","),
+      eligible_at_submit: eligibleNow.join(","),
       source: "guided",
-      // Compat retroattiva (camelCase) per fogli con quei nomi:
-      missedTrials: missed,
-      eligibleAtSubmit: eligibleNow,
-      timestamp: new Date().toISOString(),
     };
     await sendToSheet(payload);
 

@@ -178,23 +178,28 @@
       trial && arm && hasKnownStudyArm(trial) ? { [trial]: arm } : {};
     const selected = trial ? [trial] : [];
 
+    const sheetTrials = buildTrialsForSheet(selected, outcomes);
     const payload = {
-      patientId,
-      age,
-      nihss,
-      premrs,
-      ltsw: ltswHrs,
-      strokeType,
-      targetVessels: vesselText,
-      ...buildTrialsForSheet(selected, outcomes),
+      // Le chiavi DEVONO combaciare ESATTAMENTE (case-sensitive) con le
+      // intestazioni di colonna del foglio EnsApp_Data: il backend Apps
+      // Script scrive ogni colonna leggendo payload[nomeColonna]. Nomi come
+      // patientId/age/nihss/premrs/ltsw/timestamp non combaciavano e finivano
+      // vuoti nel DB (ID paziente, NIHSS, mRS, LTSW, data mancanti).
+      Timestamp: new Date().toISOString(),
+      N_patient: patientId,
+      Age: age,
+      NIHSS: nihss,
+      LTSW_h: ltswHrs,
+      pre_mRS: premrs,
+      ...sheetTrials,
+      // Colonne trial con intestazioni non normalizzate nel foglio:
+      "DO  IT": sheetTrials.DOIT,
+      NiVO: sheetTrials.NIVO,
       TEV: tev,
       mTICI: showMtici ? mtici : "",
       TIV: tiv,
       Notes: notes,
-      missed: "",
-      eligible: "",
       source: "quick-patient",
-      timestamp: new Date().toISOString(),
     };
     await sendToSheet(payload);
 
