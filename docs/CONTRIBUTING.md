@@ -91,12 +91,23 @@ Ordine dei file da toccare (esempio: TENACITY):
 9. Test in `tests/domain/acute-rules.test.ts` (almeno un caso positivo e uno
    negativo per ogni criterio nuovo).
 
-**Passo manuale sul backend (obbligatorio):** il foglio `EnsApp_Data` su Google
-Drive va aggiornato a mano, perche' l'Apps Script scrive ogni colonna leggendo
-`payload[intestazione]`: se la colonna non esiste, il dato dell'arruolamento
-viene silenziosamente scartato. Aggiungere nel tab `DB` una colonna con
-intestazione **identica** alla chiave di `SHEET_TRIAL_KEYS` (case-sensitive,
-es. `TENACITY`), e replicarla nel tab di export e nel tab statistiche.
+**Backend Apps Script** (`tools/apps-script/Code.gs`, copia versionata dello
+script legato a `EnsApp_Data`): l'Apps Script costruisce ogni riga leggendo
+`payload[intestazione]`, quindi una colonna mancante fa scartare il dato in
+silenzio. Per evitare il passo manuale, `ensureTrialColumns_()` crea in coda le
+colonne dei trial presenti in `TRIAL_KEYS` ma assenti nel foglio.
+
+Quindi, quando si aggiunge un trial:
+
+1. aggiungere la chiave a `TRIAL_KEYS` in `tools/apps-script/Code.gs` (stessa
+   stringa di `SHEET_TRIAL_KEYS` lato client, case-sensitive);
+2. incollare lo script aggiornato nell'editor Apps Script del foglio e fare un
+   nuovo deploy della web app;
+3. il primo invio dall'app crea la colonna. Gli alias in `TRIAL_ALIASES`
+   evitano duplicati quando l'intestazione umana differisce (`DO  IT` -> `DOIT`,
+   `NiVO` -> `NIVO`, `NORA HOME` -> `NORAHOME`).
+
+Restano manuali le colonne del tab statistiche (coppia Intervention/Control).
 
 ## Checklist PR
 
