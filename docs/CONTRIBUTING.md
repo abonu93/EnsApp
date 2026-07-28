@@ -72,6 +72,43 @@ Su ogni PR verso `develop` o `main` GitHub Actions esegue:
 Su push a `develop` o `main`, deploy preview automatico su GitHub Pages
 (workflow `pages.yml`). URL: `https://abonu93.github.io/EnsApp/`.
 
+## Aggiungere un nuovo trial
+
+Ordine dei file da toccare (esempio: TENACITY):
+
+1. `src/lib/domain/acute-rules.ts` - funzione pura con i criteri (+ eventuali
+   nuovi campi in `AcuteInput`).
+2. `src/lib/domain/acute-reasons.ts` - wrapper diagnostico + voce in
+   `REASON_BY_TRIAL` (chiave = display name).
+3. `src/lib/domain/trials-info.ts` - scheda del catalogo (criteri in prosa).
+4. `src/lib/domain/sheet-payload.ts` - `SHEET_TRIAL_KEYS` + `NAME_TO_KEY`.
+5. `src/lib/stores/eligibility.ts` - campo in `AcuteEligibility`.
+6. `src/lib/stores/patient.ts` - nuovi campi del paziente (se servono).
+7. UI: `PostImaging.svelte` (domande dedicate), `Summary.svelte`,
+   `Share.svelte` (`eligibleNamesNow`), `SavedPatients.svelte`
+   (`SHEET_TO_DISPLAY`).
+8. i18n: `it.ts` (master) + `en.ts` / `es.ts` / `ca.ts` con le stesse chiavi.
+9. Test in `tests/domain/acute-rules.test.ts` (almeno un caso positivo e uno
+   negativo per ogni criterio nuovo).
+
+**Backend Apps Script** (`tools/apps-script/Code.gs`, copia versionata dello
+script legato a `EnsApp_Data`): l'Apps Script costruisce ogni riga leggendo
+`payload[intestazione]`, quindi una colonna mancante fa scartare il dato in
+silenzio. Per evitare il passo manuale, `ensureTrialColumns_()` crea in coda le
+colonne dei trial presenti in `TRIAL_KEYS` ma assenti nel foglio.
+
+Quindi, quando si aggiunge un trial:
+
+1. aggiungere la chiave a `TRIAL_KEYS` in `tools/apps-script/Code.gs` (stessa
+   stringa di `SHEET_TRIAL_KEYS` lato client, case-sensitive);
+2. incollare lo script aggiornato nell'editor Apps Script del foglio e fare un
+   nuovo deploy della web app;
+3. il primo invio dall'app crea la colonna. Gli alias in `TRIAL_ALIASES`
+   evitano duplicati quando l'intestazione umana differisce (`DO  IT` -> `DOIT`,
+   `NiVO` -> `NIVO`, `NORA HOME` -> `NORAHOME`).
+
+Restano manuali le colonne del tab statistiche (coppia Intervention/Control).
+
 ## Checklist PR
 
 - [ ] Nessuna regressione nei flussi principali

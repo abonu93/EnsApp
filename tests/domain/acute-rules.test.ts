@@ -4,6 +4,7 @@ import {
   athena,
   vanish,
   computeVesselFlags,
+  tenacity,
 } from "$lib/domain/acute-rules";
 
 describe("acute-rules - smoke (ported from legacy node:test)", () => {
@@ -56,5 +57,80 @@ describe("acute-rules - smoke (ported from legacy node:test)", () => {
   test("vanish: requires vessel ica-terminal or m1", () => {
     expect(vanish({ age: 50, nihss: 8, premrs: 1, ltsw: 5, lvo: "yes", targetVessels: ["m1"] })).toBe(true);
     expect(vanish({ age: 50, nihss: 8, premrs: 1, ltsw: 5, lvo: "yes", targetVessels: ["basilar"] })).toBe(false);
+  });
+});
+
+describe("acute-rules - TENACITY (TNK > 4.5h - 72h)", () => {
+  const base = {
+    age: 70,
+    nihss: 12,
+    premrs: 1,
+    ltsw: 20,
+    candidate: "not eligible" as const,
+    ivtCandidate: "not eligible" as const,
+    perfusionMismatch: "yes" as const,
+  };
+
+  test("eligible via CT perfusion mismatch (option 1)", () => {
+    expect(tenacity(base)).toBe(true);
+  });
+
+  test("eligible via CTA M1 + ASPECTS >= 7 without perfusion (option 2)", () => {
+    expect(
+      tenacity({ ...base, perfusionMismatch: "no", targetVessels: ["m1"], aspects: 7 })
+    ).toBe(true);
+    expect(
+      tenacity({ ...base, perfusionMismatch: "no", targetVessels: ["m1"], aspects: 6 })
+    ).toBe(false);
+  });
+
+  test("M2 occlusion requires ASPECTS 9-10", () => {
+    expect(
+      tenacity({ ...base, perfusionMismatch: "no", targetVessels: ["m2-any"], aspects: 8 })
+    ).toBe(false);
+    expect(
+      tenacity({ ...base, perfusionMismatch: "no", targetVessels: ["m2-any"], aspects: 9 })
+    ).toBe(true);
+  });
+
+  test("no imaging criterion met -> not eligible", () => {
+    expect(tenacity({ ...base, perfusionMismatch: "no" })).toBe(false);
+  });
+
+  test("window: LTSW must be > 4.5h and <= 72h", () => {
+    expect(tenacity({ ...base, ltsw: 4.5 })).toBe(false);
+    expect(tenacity({ ...base, ltsw: 4.6 })).toBe(true);
+    expect(tenacity({ ...base, ltsw: 72 })).toBe(true);
+    expect(tenacity({ ...base, ltsw: 72.5 })).toBe(false);
+  });
+
+  test("NIHSS must be 6-25", () => {
+    expect(tenacity({ ...base, nihss: 5 })).toBe(false);
+    expect(tenacity({ ...base, nihss: 6 })).toBe(true);
+    expect(tenacity({ ...base, nihss: 25 })).toBe(true);
+    expect(tenacity({ ...base, nihss: 26 })).toBe(false);
+  });
+
+  test("pre-mRS must be 0-1 and age >= 18", () => {
+    expect(tenacity({ ...base, premrs: 2 })).toBe(false);
+    expect(tenacity({ ...base, age: 17 })).toBe(false);
+  });
+
+  test("exclusions: EVT candidate, IVT candidate, ICA occlusion", () => {
+    expect(tenacity({ ...base, candidate: "eligible" })).toBe(false);
+    expect(tenacity({ ...base, ivtCandidate: "eligible" })).toBe(false);
+    expect(tenacity({ ...base, targetVessels: ["ica-terminal"] })).toBe(false);
+    expect(tenacity({ ...base, targetVessels: ["ica-intracranial"] })).toBe(false);
+  });
+
+  test("exclusions: high-risk imaging (large core / ASPECTS 0-6)", () => {
+    expect(tenacity({ ...base, largeCore: "yes" })).toBe(false);
+    expect(tenacity({ ...base, aspects: 6 })).toBe(false);
+    expect(tenacity({ ...base, aspects: 7 })).toBe(true);
+  });
+
+  test("exclusions: diabetes and contraindications to tenecteplase", () => {
+    expect(tenacity({ ...base, diabetes: "yes" })).toBe(false);
+    expect(tenacity({ ...base, contraTpa: "yes" })).toBe(false);
   });
 });

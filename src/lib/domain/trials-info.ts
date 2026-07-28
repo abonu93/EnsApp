@@ -306,6 +306,25 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     ],
     visits: null,
   },
+  TENACITY: {
+    status: "active",
+    category: "Thrombolytic (late window)",
+    key: { window: "> 4.5 h and <= 72 h", age: ">= 18 y", mrs: "0-1", nihss: "6-25", aspects: ">= 7 (M1) / 9-10 (M2)" },
+    consent: "Written & oral/phone consent.",
+    imaging:
+      "Acute ischemic stroke (wake-up included) of the supratentorial circulation (ACA, MCA or PCA). Option 1 - CT perfusion: perfusion/core mismatch >= 20% (ratio >= 1.2) AND mismatch volume > 10 mL. Option 2 - no MRI/CTP: M1 or M2 MCA occlusion on CTA with small core on NCCT (ASPECTS >= 7 for M1; ASPECTS 9-10 for M2, max one region distal to the occlusion).",
+    thrombolytic: "Yes - tenecteplase (TNK) vs standard care in the > 4.5 h window.",
+    thrombectomy: "No - patients treated with mechanical thrombectomy are excluded.",
+    preEvtLabs: "No.",
+    intervention: "Tenecteplase (TNK) beyond 4.5 h and up to 72 h from LSW.",
+    notes: [
+      "Exclusion - imaging: internal carotid artery occlusion; high hemorrhagic risk (DWI >= 70 mL, CTP ischemic core >= 70 mL, ASPECTS 0-6, intense hypo-attenuation on NCCT vs contralateral white matter).",
+      "Exclusion - clinical: NIHSS <= 5 or rapidly improving; NIHSS > 25; imaging not suggestive of acute ischemic stroke or suggestive of stroke > 72 h; patient receiving thrombolysis as routine clinical practice.",
+      "Exclusion: contraindications to tenecteplase; diabetes.",
+      "App logic: 'treated with thrombectomy' = EVT candidate; 'thrombolysis as routine practice' = IVT candidate.",
+    ],
+    visits: null,
+  },
   "NORA HOME": {
     status: "active",
     category: "Home discharge (minor stroke / high-risk TIA)",

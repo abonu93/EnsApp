@@ -177,6 +177,12 @@ export const ca: Dictionary = {
     pregnancyLabel: "Embaras?",
     angioplastyLabel: "Angioplastia recent?",
     ivhScoreLabel: "IVH score conegut?",
+    tenacityTitle: "TENACITY - Preguntes addicionals",
+    tenacityHint: "Nomes per ictus isquemic no-EVT amb LTSW > 4,5h i <= 72h.",
+    perfusionMismatchLabel: "TC de perfusio: mismatch >= 20% (relacio >= 1,2) i volum > 10 mL?",
+    tenacityOcclusionLabel: "Oclusio en angio-TC (M1 / M2 per a TENACITY)",
+    largeCoreLabel: "Nucli isquemic gran (>= 70 mL) o hipoatenuacio intensa en TC?",
+    diabetesLabel: "Diabetis?",
   },
   summary: {
     title: "Assaigs elegibles",

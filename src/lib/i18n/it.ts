@@ -178,6 +178,12 @@ export const it = {
     pregnancyLabel: "Gravidanza?",
     angioplastyLabel: "Angioplastica recente?",
     ivhScoreLabel: "IVH score noto?",
+    tenacityTitle: "TENACITY - Domande aggiuntive",
+    tenacityHint: "Mostrato solo per ischemico non-EVT con LTSW > 4.5h e <= 72h.",
+    perfusionMismatchLabel: "TC perfusione: mismatch >= 20% (ratio >= 1.2) e volume > 10 mL?",
+    tenacityOcclusionLabel: "Occlusione su angio-TC (M1 / M2 per TENACITY)",
+    largeCoreLabel: "Core esteso (>= 70 mL) o ipodensita' intensa in TC?",
+    diabetesLabel: "Diabete?",
   },
   summary: {
     title: "Trial eligibili",

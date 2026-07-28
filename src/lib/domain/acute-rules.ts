@@ -37,6 +37,12 @@ export interface AcuteInput {
   doac?: YesNoEmpty;
   acei?: YesNoEmpty;
   contraTpa?: YesNoEmpty;
+  /** TENACITY - opzione imaging 1: mismatch CTP >= 20% (ratio >= 1.2) E volume > 10 mL. */
+  perfusionMismatch?: YesNoEmpty;
+  /** TENACITY - imaging ad alto rischio: core/DWI >= 70 mL o ipodensita' intensa in TC. */
+  largeCore?: YesNoEmpty;
+  /** TENACITY - diabete (criterio di esclusione). */
+  diabetes?: YesNoEmpty;
 }
 
 export interface VesselFlags {
@@ -333,5 +339,62 @@ export function remedy(input: AcuteInput): boolean {
     isValidNumber(input.aspects) &&
     input.aspects >= 6 &&
     input.acei !== "yes"
+  );
+}
+
+/**
+ * TENACITY: tenecteplase nella finestra tardiva (> 4.5 h e <= 72 h).
+ *
+ * Inclusione: eta' >= 18, ictus ischemico acuto (anche al risveglio) del
+ * circolo sopratentoriale (ACA/MCA/PCA), LTSW > 4.5 h e <= 72 h, pre-mRS 0-1.
+ *
+ * Imaging - basta UNA delle due opzioni:
+ *  1) TC di perfusione: mismatch >= 20% (ratio >= 1.2) E volume mismatch > 10 mL;
+ *  2) Senza RM/perfusione: occlusione M1 o M2 su angio-TC con infarto piccolo
+ *     in TC basale (ASPECTS >= 7 per M1, ASPECTS 9-10 per M2).
+ *
+ * Esclusione: trattamento con trombectomia meccanica, occlusione carotide
+ * interna, imaging ad alto rischio (core/DWI >= 70 mL, ASPECTS 0-6, ipodensita'
+ * intensa), NIHSS <= 5 o > 25, trombolisi come pratica clinica abituale,
+ * controindicazioni alla tenecteplasi, diabete.
+ *
+ * Note sulla mappatura app -> protocollo:
+ *  - "trattato con trombectomia" -> candidate === "eligible" (candidato EVT);
+ *  - "trombolisi come pratica abituale" -> ivtCandidate === "eligible";
+ *  - "controindicazioni a tenecteplasi" -> contraTpa (stesso set di
+ *    controindicazioni della trombolisi endovenosa);
+ *  - il miglioramento rapido del NIHSS resta giudizio clinico.
+ */
+export function tenacity(input: AcuteInput): boolean {
+  const hasIca =
+    hasVessel(input.targetVessels, "ica-intracranial") ||
+    hasVessel(input.targetVessels, "ica-terminal");
+  const hasM1 = hasVessel(input.targetVessels, "m1");
+  const hasM2 =
+    hasVessel(input.targetVessels, "m2-any") || hasVessel(input.targetVessels, "m2-proxdom");
+  const aspects = input.aspects;
+
+  // Opzione 1 (perfusione) OPPURE opzione 2 (angio-TC + ASPECTS).
+  const imagingPerfusion = input.perfusionMismatch === "yes";
+  const imagingNoPerfusion =
+    isValidNumber(aspects) && ((hasM1 && aspects >= 7) || (hasM2 && aspects >= 9));
+
+  // Alto rischio emorragico: core esteso o ASPECTS 0-6 (se ASPECTS e' noto).
+  const highRiskImaging = input.largeCore === "yes" || (isValidNumber(aspects) && aspects <= 6);
+
+  return (
+    input.age >= 18 &&
+    input.ltsw > 4.5 &&
+    input.ltsw <= 72 &&
+    input.premrs <= 1 &&
+    input.nihss > 5 &&
+    input.nihss <= 25 &&
+    (imagingPerfusion || imagingNoPerfusion) &&
+    !highRiskImaging &&
+    !hasIca &&
+    input.candidate !== "eligible" &&
+    input.ivtCandidate !== "eligible" &&
+    input.contraTpa !== "yes" &&
+    input.diabetes !== "yes"
   );
 }

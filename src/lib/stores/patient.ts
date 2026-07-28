@@ -38,6 +38,12 @@ export type PostData = Partial<{
   aspects: number;
   lesionConfirmed: "yes" | "no" | "";
   contraTpa: "yes" | "no" | "";
+  /** TENACITY: mismatch CTP >= 20% (ratio >= 1.2) E volume mismatch > 10 mL. */
+  perfusionMismatch: "yes" | "no" | "";
+  /** TENACITY: core/DWI >= 70 mL o ipodensita' intensa in TC basale. */
+  largeCore: "yes" | "no" | "";
+  /** TENACITY: diabete (criterio di esclusione). */
+  diabetes: "yes" | "no" | "";
 }>;
 
 export type HemData = Partial<HemorrhagicInput>;

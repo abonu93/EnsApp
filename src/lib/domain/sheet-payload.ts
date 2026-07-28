@@ -27,6 +27,7 @@ export const SHEET_TRIAL_KEYS = [
   "PROMISE",
   "NIVO",
   "NORAHOME",
+  "TENACITY",
 ] as const;
 
 export type SheetTrialKey = (typeof SHEET_TRIAL_KEYS)[number];
@@ -55,6 +56,7 @@ const NAME_TO_KEY: Record<string, SheetTrialKey> = {
   PROMISE: "PROMISE",
   NiVO: "NIVO",
   "NORA HOME": "NORAHOME",
+  TENACITY: "TENACITY",
 };
 
 const STUDIES_WITHOUT_ARM = new Set(["SAFER-DOAC", "FASTEST", "TICH-3", "NiVO", "REMEDY"]);

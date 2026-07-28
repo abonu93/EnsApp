@@ -177,6 +177,12 @@ export const en: Dictionary = {
     pregnancyLabel: "Pregnancy?",
     angioplastyLabel: "Recent angioplasty?",
     ivhScoreLabel: "Known IVH score?",
+    tenacityTitle: "TENACITY - Additional questions",
+    tenacityHint: "Shown only for non-EVT ischemic stroke with LTSW > 4.5h and <= 72h.",
+    perfusionMismatchLabel: "CT perfusion: mismatch >= 20% (ratio >= 1.2) and volume > 10 mL?",
+    tenacityOcclusionLabel: "Occlusion on CTA (M1 / M2 for TENACITY)",
+    largeCoreLabel: "Large core (>= 70 mL) or intense hypo-attenuation on CT?",
+    diabetesLabel: "Diabetes?",
   },
   summary: {
     title: "Eligible trials",

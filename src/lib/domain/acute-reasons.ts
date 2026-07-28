@@ -230,6 +230,33 @@ export function reasonRemedy(input: AcuteInput): ReasonReport {
   ]);
 }
 
+export function reasonTenacity(input: AcuteInput): ReasonReport {
+  const hasIca = hv(input, "ica-intracranial") || hv(input, "ica-terminal");
+  const hasM1 = hv(input, "m1");
+  const hasM2 = hv(input, "m2-any") || hv(input, "m2-proxdom");
+  const a = input.aspects;
+  const imagingPerfusion = input.perfusionMismatch === "yes";
+  const imagingNoPerfusion = isNumber(a) && ((hasM1 && a >= 7) || (hasM2 && a >= 9));
+  const highRiskImaging = input.largeCore === "yes" || (isNumber(a) && a <= 6);
+
+  return reduce([
+    { ok: input.age >= 18, label: "age >= 18" },
+    { ok: input.ltsw > 4.5 && input.ltsw <= 72, label: "LTSW > 4.5h e <= 72h" },
+    { ok: input.premrs <= 1, label: "pre-mRS <= 1" },
+    { ok: input.nihss > 5 && input.nihss <= 25, label: "NIHSS 6-25" },
+    {
+      ok: imagingPerfusion || imagingNoPerfusion,
+      label: "imaging: mismatch CTP (>=1.2 e >10 mL) oppure M1 con ASPECTS >=7 / M2 con ASPECTS >=9",
+    },
+    { ok: !highRiskImaging, label: "no imaging ad alto rischio (core >=70 mL o ASPECTS <=6)" },
+    { ok: !hasIca, label: "no occlusione carotide interna" },
+    { ok: input.candidate !== "eligible", label: "non trattato con trombectomia" },
+    { ok: input.ivtCandidate !== "eligible", label: "no trombolisi come pratica abituale" },
+    { ok: input.contraTpa !== "yes", label: "no controindicazioni a tenecteplasi" },
+    { ok: input.diabetes !== "yes", label: "no diabete" },
+  ]);
+}
+
 /** Mappa nome di display -> funzione reasons. */
 export const REASON_BY_TRIAL: Record<string, (i: AcuteInput) => ReasonReport> = {
   WeTrust: reasonWeTrust,
@@ -249,4 +276,5 @@ export const REASON_BY_TRIAL: Record<string, (i: AcuteInput) => ReasonReport> = 
   "DO-IT": reasonDoit,
   REMEDY: reasonRemedy,
   "NORA HOME": reasonNoraHome,
+  TENACITY: reasonTenacity,
 };
