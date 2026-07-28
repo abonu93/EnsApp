@@ -26,6 +26,7 @@ export interface AcuteEligibility {
   doit: boolean;
   remedy: boolean;
   noraHome: boolean;
+  tenacity: boolean;
 }
 
 export interface HemorrhagicEligibility {
@@ -59,6 +60,7 @@ export const acuteEligibility = derived(
       doit: safeBoolean(() => acute.doit(input)),
       remedy: safeBoolean(() => acute.remedy(input)),
       noraHome: safeBoolean(() => acute.noraHome(input)),
+      tenacity: safeBoolean(() => acute.tenacity(input)),
     };
   }
 );

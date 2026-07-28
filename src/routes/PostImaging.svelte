@@ -21,8 +21,6 @@
   let strokeType = $state<StrokeType>(($postData.strokeType as StrokeType) ?? "");
   let candidate = $state<CandidateStatus>(($postData.candidate as CandidateStatus) ?? "");
   let ivtCandidate = $state<CandidateStatus>(($postData.ivtCandidate as CandidateStatus) ?? "");
-  // contraTpa rimane scollegato dalla UI (default "no" per non bloccare ORION)
-  const contraTpa: YN = "no";
 
   // LVO derivato da candidate: se candidato a trombectomia eleggibile,
   // l'occlusione di grosso vaso e' implicitamente confermata.
@@ -35,6 +33,14 @@
   let targetVessels = $state<VesselCode[]>(($postData.targetVessels as VesselCode[]) ?? []);
   let aspects = $state<number | null>($postData.aspects ?? null);
   let lesionConfirmed = $state<YN>(($postData.lesionConfirmed as YN) ?? "");
+
+  // TENACITY (TNK > 4.5h - 72h): campi specifici del trial.
+  let perfusionMismatch = $state<YN>(($postData.perfusionMismatch as YN) ?? "");
+  let largeCore = $state<YN>(($postData.largeCore as YN) ?? "");
+  let diabetes = $state<YN>(($postData.diabetes as YN) ?? "");
+  // contraTpa passa da costante a campo: mostrato solo nella card TENACITY,
+  // resta "no" (default invariato per ORION) se la card non e' visibile.
+  let contraTpaAnswer = $state<YN>(($postData.contraTpa as YN) || "no");
 
   // Hemorrhagic
   let hemVolume = $state<number | null>($hemData.hemVolume ?? null);
@@ -61,9 +67,12 @@
       tandem: tandem ? "yes" : "no",
       tortuosity: tortuosity ? "yes" : "no",
       targetVessels,
-      contraTpa: contraTpa || undefined,
+      contraTpa: contraTpaAnswer || undefined,
       aspects: aspects ?? undefined,
       lesionConfirmed: lesionConfirmed || undefined,
+      perfusionMismatch: perfusionMismatch || undefined,
+      largeCore: largeCore || undefined,
+      diabetes: diabetes || undefined,
     });
   });
 
@@ -90,6 +99,10 @@
   const showEvt = $derived(isIschemic && candidate === "eligible");
   const showNonEvt = $derived(isIschemic && candidate === "not eligible");
   const showFastest = $derived(isHem && ($preData.ltsw ?? 999) < 2 && ($preData.premrs ?? 99) <= 2);
+  // TENACITY: solo ischemico NON candidato a trombectomia, finestra > 4.5h e <= 72h.
+  const showTenacity = $derived(
+    showNonEvt && ($preData.ltsw ?? -1) > 4.5 && ($preData.ltsw ?? -1) <= 72
+  );
 
   const strokeOpts = $derived([
     { value: "ischemic" as const, label: $t.postImaging.ischemic },
@@ -167,6 +180,41 @@
       <Card title={$t.postImaging.nonEvtTitle}>
         {#snippet children()}
           <Segmented options={ynOpts} bind:value={lesionConfirmed} cols={2} label={$t.postImaging.lesionConfirmedLabel} />
+        {/snippet}
+      </Card>
+    {/if}
+
+    {#if showTenacity}
+      <Card title={$t.postImaging.tenacityTitle} subtitle={$t.postImaging.tenacityHint}>
+        {#snippet children()}
+          <div class="stack">
+            <div class="field">
+              <span class="lbl">{$t.postImaging.perfusionMismatchLabel}</span>
+              <Segmented options={ynOpts} bind:value={perfusionMismatch} cols={2} />
+            </div>
+            <div class="divider"></div>
+            <div class="field">
+              <span class="lbl">{$t.postImaging.tenacityOcclusionLabel}</span>
+              <VesselPicker bind:value={targetVessels} />
+            </div>
+            <div class="field">
+              <span class="lbl">{$t.postImaging.aspectsLabel}</span>
+              <AspectsCells bind:value={aspects} />
+            </div>
+            <div class="divider"></div>
+            <div class="field">
+              <span class="lbl">{$t.postImaging.largeCoreLabel}</span>
+              <Segmented options={ynOpts} bind:value={largeCore} cols={2} />
+            </div>
+            <div class="field">
+              <span class="lbl">{$t.postImaging.contraTpaLabel}</span>
+              <Segmented options={ynOpts} bind:value={contraTpaAnswer} cols={2} />
+            </div>
+            <div class="field">
+              <span class="lbl">{$t.postImaging.diabetesLabel}</span>
+              <Segmented options={ynOpts} bind:value={diabetes} cols={2} />
+            </div>
+          </div>
         {/snippet}
       </Card>
     {/if}

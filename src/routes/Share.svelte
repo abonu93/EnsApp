@@ -30,7 +30,7 @@
       ["PROMISE", e.promise], ["MOSTE", e.moste], ["TWIN-2-WIN 2", e.twin2win2], ["ARTEMIS", e.artemis],
       ["HYBERNIA", e.hybernia], ["DONE SYMPLE", e.doneSymple], ["SHIONOGI", e.shionogi],
       ["SOVATELTIDE", e.sovateltide], ["ORION", e.orion], ["NiVO", e.nivo],
-      ["DO-IT", e.doit], ["REMEDY", e.remedy],
+      ["DO-IT", e.doit], ["REMEDY", e.remedy], ["TENACITY", e.tenacity],
       ["NORA HOME", e.noraHome],
       ["FASTEST", h.fastest.eligible], ["TICH-3", h.tich3],
     ];

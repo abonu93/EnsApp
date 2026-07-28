@@ -72,6 +72,32 @@ Su ogni PR verso `develop` o `main` GitHub Actions esegue:
 Su push a `develop` o `main`, deploy preview automatico su GitHub Pages
 (workflow `pages.yml`). URL: `https://abonu93.github.io/EnsApp/`.
 
+## Aggiungere un nuovo trial
+
+Ordine dei file da toccare (esempio: TENACITY):
+
+1. `src/lib/domain/acute-rules.ts` - funzione pura con i criteri (+ eventuali
+   nuovi campi in `AcuteInput`).
+2. `src/lib/domain/acute-reasons.ts` - wrapper diagnostico + voce in
+   `REASON_BY_TRIAL` (chiave = display name).
+3. `src/lib/domain/trials-info.ts` - scheda del catalogo (criteri in prosa).
+4. `src/lib/domain/sheet-payload.ts` - `SHEET_TRIAL_KEYS` + `NAME_TO_KEY`.
+5. `src/lib/stores/eligibility.ts` - campo in `AcuteEligibility`.
+6. `src/lib/stores/patient.ts` - nuovi campi del paziente (se servono).
+7. UI: `PostImaging.svelte` (domande dedicate), `Summary.svelte`,
+   `Share.svelte` (`eligibleNamesNow`), `SavedPatients.svelte`
+   (`SHEET_TO_DISPLAY`).
+8. i18n: `it.ts` (master) + `en.ts` / `es.ts` / `ca.ts` con le stesse chiavi.
+9. Test in `tests/domain/acute-rules.test.ts` (almeno un caso positivo e uno
+   negativo per ogni criterio nuovo).
+
+**Passo manuale sul backend (obbligatorio):** il foglio `EnsApp_Data` su Google
+Drive va aggiornato a mano, perche' l'Apps Script scrive ogni colonna leggendo
+`payload[intestazione]`: se la colonna non esiste, il dato dell'arruolamento
+viene silenziosamente scartato. Aggiungere nel tab `DB` una colonna con
+intestazione **identica** alla chiave di `SHEET_TRIAL_KEYS` (case-sensitive,
+es. `TENACITY`), e replicarla nel tab di export e nel tab statistiche.
+
 ## Checklist PR
 
 - [ ] Nessuna regressione nei flussi principali
