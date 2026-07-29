@@ -46,9 +46,12 @@
   let hemVolume = $state<number | null>($hemData.hemVolume ?? null);
   let volUnknown = $state<boolean>(false);
   let gcs = $state<number | null>($hemData.gcs ?? null);
-  let ivh = $state<YN>(($hemData.ivh as YN) ?? "");
+  // ivh/seizure sono ToggleRow: spento = "no". Devono partire da "no" e non da
+  // "" altrimenti il toggle appare spento ma il valore resta vuoto e TICH-3
+  // risulta non eleggibile finche' l'utente non lo accende e rispegne.
+  let ivh = $state<YN>(($hemData.ivh as YN) || "no");
   let secondaryCause = $state<string>(($hemData.secondaryCause as string) ?? "");
-  let seizure = $state<YN>(($hemData.seizure as YN) ?? "");
+  let seizure = $state<YN>(($hemData.seizure as YN) || "no");
   let anticoag = $state<string>(($hemData.anticoag as string) ?? "");
   let brainstem = $state<YN>(($hemData.brainstem as YN) ?? "");
   let procoagulant = $state<YN>(($hemData.procoagulant as YN) ?? "");

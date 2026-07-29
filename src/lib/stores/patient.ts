@@ -90,6 +90,15 @@ export const acuteInput = derived([preData, postData, ltswHours], ([$pre, $post,
   return { ...$pre, ...$post, ltsw: $h } as Partial<AcuteInput>;
 });
 
+/**
+ * Snapshot per le regole emorragiche. Rispecchia ESATTAMENTE il merge usato da
+ * `hemEligibility` ({...pre, ...hem}), cosi' i reason report mostrati in
+ * Summary non possono divergere dal calcolo di eleggibilita'.
+ */
+export const hemInput = derived([preData, hemData], ([$pre, $hem]) => {
+  return { ...$pre, ...$hem } as Partial<HemorrhagicInput>;
+});
+
 export function clearPatient(): void {
   preData.clear();
   postData.clear();

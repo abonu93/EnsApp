@@ -6,14 +6,9 @@
 
 import type { AcuteInput, VesselCode } from "./acute-rules";
 import { computeVesselFlags } from "./acute-rules";
+import { reduce, type ReasonReport } from "./reason-report";
 
-export interface ReasonReport {
-  /** Criteri soddisfatti (per audit). */
-  meet: string[];
-  /** Criteri NON soddisfatti. Lista vuota se il trial e' eligible. */
-  fail: string[];
-  eligible: boolean;
-}
+export type { ReasonReport };
 
 function hv(input: AcuteInput, code: VesselCode): boolean {
   return Array.isArray(input.targetVessels) && input.targetVessels.includes(code);
@@ -23,13 +18,6 @@ function vcount(input: AcuteInput): number {
 }
 function isNumber(v: unknown): v is number {
   return typeof v === "number" && !Number.isNaN(v);
-}
-
-type Check = { ok: boolean; label: string };
-function reduce(checks: Check[]): ReasonReport {
-  const meet = checks.filter((c) => c.ok).map((c) => c.label);
-  const fail = checks.filter((c) => !c.ok).map((c) => c.label);
-  return { meet, fail, eligible: fail.length === 0 };
 }
 
 export function reasonWeTrust(input: AcuteInput): ReasonReport {
