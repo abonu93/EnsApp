@@ -6,8 +6,9 @@
   import Pill from "$lib/components/Pill.svelte";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
   import { selectedStudies } from "$lib/stores/trialSelection";
-  import { acuteInput } from "$lib/stores/patient";
+  import { acuteInput, hemInput } from "$lib/stores/patient";
   import { REASON_BY_TRIAL } from "$lib/domain/acute-reasons";
+  import { REASON_BY_HEM_TRIAL } from "$lib/domain/hem-reasons";
   import { isTrialOpen } from "$lib/domain/trials-info";
   import { t } from "$lib/i18n";
 
@@ -46,17 +47,21 @@
   const eligibleItems = $derived(
     [...acuteEligible, ...hemEligibleList].filter((e) => e.eligible && isTrialOpen(e.display))
   );
+  // Include anche i trial emorragici: prima comparivano solo gli acuti, quindi
+  // FASTEST e TICH-3 sparivano senza spiegazione quando non eleggibili.
   const ineligibleItems = $derived(
-    acuteEligible.filter((e) => !e.eligible && isTrialOpen(e.display))
+    [...acuteEligible, ...hemEligibleList].filter((e) => !e.eligible && isTrialOpen(e.display))
   );
 
   function toggle(name: string) {
     selectedStudies.update((arr) => arr.includes(name) ? arr.filter((n) => n !== name) : [...arr, name]);
   }
   function reasonsFor(name: string): string[] {
-    const fn = REASON_BY_TRIAL[name];
-    if (!fn) return [];
-    return fn($acuteInput as Parameters<typeof fn>[0]).fail;
+    const acuteFn = REASON_BY_TRIAL[name];
+    if (acuteFn) return acuteFn($acuteInput as Parameters<typeof acuteFn>[0]).fail;
+    const hemFn = REASON_BY_HEM_TRIAL[name];
+    if (hemFn) return hemFn($hemInput as Parameters<typeof hemFn>[0]).fail;
+    return [];
   }
 
   const selectedCount = $derived($selectedStudies.length);
@@ -106,7 +111,10 @@
               {@const fails = reasonsFor(item.display)}
               <li class="inel">
                 <div class="inel-head">
-                  <strong>{item.display}</strong>
+                  <span class="inel-name">
+                    <strong>{item.display}</strong>
+                    <Pill tone={item.tone}>{#snippet children()}{item.tone}{/snippet}</Pill>
+                  </span>
                   <Pill tone="danger">{#snippet children()}{$t.common.notEligible}{/snippet}</Pill>
                 </div>
                 {#if fails.length > 0}
@@ -215,6 +223,12 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+  }
+  .inel-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
   }
   .reasons {
     margin-top: 8px;
