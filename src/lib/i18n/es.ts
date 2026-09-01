@@ -89,6 +89,9 @@ export const es: Dictionary = {
     notFoundTitle: "Ensayo no encontrado",
     notFoundDesc: "no esta en el catalogo.",
     backCatalog: "Volver al catalogo",
+    notRecruitingTitle: "Ensayo no activo",
+    notRecruitingDesc:
+      "Este ensayo no recluta: la informacion sigue disponible, pero no se puede seleccionar para el reclutamiento.",
   },
   preImaging: {
     title: "Pre-Imagen",

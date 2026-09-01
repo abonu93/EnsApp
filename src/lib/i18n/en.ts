@@ -89,6 +89,9 @@ export const en: Dictionary = {
     notFoundTitle: "Trial not found",
     notFoundDesc: "is not in the catalog.",
     backCatalog: "Back to catalog",
+    notRecruitingTitle: "Trial not active",
+    notRecruitingDesc:
+      "This trial is not recruiting: the information stays available, but it cannot be selected for enrollment.",
   },
   preImaging: {
     title: "Pre-Imaging",

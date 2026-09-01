@@ -90,6 +90,9 @@ export const it = {
     notFoundTitle: "Trial non trovato",
     notFoundDesc: "non e' presente nel catalogo.",
     backCatalog: "Torna al catalogo",
+    notRecruitingTitle: "Trial non attivo",
+    notRecruitingDesc:
+      "Questo trial non arruola: le informazioni restano consultabili, ma non e' selezionabile per l'arruolamento.",
   },
   preImaging: {
     title: "Pre-Imaging",

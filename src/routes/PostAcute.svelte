@@ -3,6 +3,8 @@
   // descritte in TRIALS_INFO; qui usiamo un calcolo derived per mostrare
   // eligibility on-the-fly al medico (no porting da legacy: librexia
   // non aveva regola pura in domain/, era inline in app-post-acute.js).
+  // Se Librexia non arruola piu' (status "inactive"/"closed") la schermata
+  // mostra solo l'avviso: nessun form, nessuna selezione possibile.
   import { push } from "svelte-spa-router";
   import AppHeader from "$lib/components/AppHeader.svelte";
   import BottomBar from "$lib/components/BottomBar.svelte";
@@ -12,6 +14,7 @@
   import NumberField from "$lib/components/NumberField.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import { preData } from "$lib/stores/patient";
+  import { isTrialOpen } from "$lib/domain/trials-info";
   import { t } from "$lib/i18n";
 
   type YN = "yes" | "no" | "";
@@ -53,7 +56,12 @@
     { value: "yes", label: $t.common.yes },
   ]);
 
+  // Unico trial del percorso post-acuto: se non arruola, la valutazione
+  // non deve nemmeno essere compilabile.
+  const librexiaOpen = isTrialOpen("Librexia");
+
   function proceed() {
+    if (!librexiaOpen) return;
     push("/share");
   }
 </script>
@@ -61,6 +69,11 @@
 <AppHeader title={$t.postAcute.title} sub={$t.postAcute.subtitle} onBack={() => push("/summary")} />
 
 <div class="body"><div class="stack">
+  {#if !librexiaOpen}
+    <Card title={$t.trials.notRecruitingTitle}>
+      {#snippet children()}<p class="notice">{$t.trials.notRecruitingDesc}</p>{/snippet}
+    </Card>
+  {:else}
   <Card>
     {#snippet children()}
       <div class="status">
@@ -104,10 +117,16 @@
       </div>
     {/snippet}
   </Card>
+  {/if}
 </div>
 </div>
 
-<BottomBar onBack={() => push("/summary")} onNext={proceed} nextDisabled={!eligible} nextLabel={$t.summary.proceed} />
+<BottomBar
+  onBack={() => push("/summary")}
+  onNext={proceed}
+  nextDisabled={!librexiaOpen || !eligible}
+  nextLabel={$t.summary.proceed}
+/>
 
 <style>
   .body { padding: 6px 16px 16px; }
@@ -115,6 +134,7 @@
   .stack { display: flex; flex-direction: column; gap: var(--sp-4); }
   .form-stack { display: flex; flex-direction: column; gap: var(--sp-4); }
   .status { display: flex; justify-content: center; padding: var(--sp-2); }
+  .notice { margin: 0; color: var(--text-muted); font-size: var(--fs-sm); }
   .actions {
     position: sticky;
     bottom: var(--bottom-nav-h);

@@ -4,7 +4,7 @@
   import Card from "$lib/components/Card.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import Button from "$lib/components/Button.svelte";
-  import { TRIALS_INFO, getTrialCategory, randomizationLinks } from "$lib/domain/trials-info";
+  import { TRIALS_INFO, getTrialCategory, randomizationLinks, isNonRecruitingStatus } from "$lib/domain/trials-info";
   import { t } from "$lib/i18n";
 
   interface Props {
@@ -17,9 +17,13 @@
   function statusTone(status: string) {
     if (status === "active") return "success" as const;
     if (status === "paused") return "warn" as const;
-    if (status === "closed") return "danger" as const;
+    if (status === "closed" || status === "inactive") return "danger" as const;
     return "info" as const;
   }
+
+  // Trial chiusi/inattivi: scheda consultabile ma nessuna via di arruolamento
+  // (il randomizzatore e' l'azione di arruolamento e resta nascosto).
+  const notRecruiting = $derived(!!info && isNonRecruitingStatus(info.status));
 </script>
 
 {#if !info}
@@ -34,6 +38,12 @@
   </div>
 
   <div class="stack">
+    {#if notRecruiting}
+      <Card title={$t.trials.notRecruitingTitle}>
+        {#snippet children()}<p class="notice">{$t.trials.notRecruitingDesc}</p>{/snippet}
+      </Card>
+    {/if}
+
     <Card title={$t.trials.keyCriteria}>
       {#snippet children()}
         <dl class="criteria">
@@ -89,7 +99,7 @@
       </Card>
     {/if}
 
-    {#if randomizationLinks[name]}
+    {#if randomizationLinks[name] && !notRecruiting}
       <a href={randomizationLinks[name]} target="_blank" rel="noopener noreferrer" class="rand-link">
         <Button variant="primary" fullWidth>
           {#snippet children()}{$t.trials.openRandomizer}{/snippet}
@@ -112,6 +122,11 @@
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
+  }
+  .notice {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
   }
   .criteria, .kv {
     display: flex;

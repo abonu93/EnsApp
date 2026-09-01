@@ -2,7 +2,7 @@
 // I criteri chiave (window/age/mrs/nihss/aspects) sono PROSA, non logica.
 // La logica di eligibility vive in src/lib/domain/{acute,hemorrhagic}-rules.ts.
 
-export type TrialStatus = "active" | "paused" | "post-acute" | "closed";
+export type TrialStatus = "active" | "paused" | "post-acute" | "inactive" | "closed";
 export type TrialCategory = string;
 
 export interface TrialKeyCriteria {
@@ -42,7 +42,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: null,
   },
   MOSTE: {
-    status: "active",
+    // Trial inattivo: le info restano consultabili nel catalogo,
+    // ma il trial non e' selezionabile per l'arruolamento.
+    status: "inactive",
     category: "EVT strategy",
     key: { window: "< 23 h", age: "No upper limit", mrs: "0-1", nihss: "0-5", aspects: "6-10" },
     consent: "Written & oral/phone consent.",
@@ -190,7 +192,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     ],
   },
   Librexia: {
-    status: "post-acute",
+    // Trial inattivo: le info restano consultabili nel catalogo,
+    // ma il trial non e' selezionabile per l'arruolamento.
+    status: "inactive",
     category: "Antithrombotic (post-acute)",
     key: { window: "<= 48 h", age: ">= 40 y", mrs: "<= 2", nihss: "<= 7", aspects: "-" },
     consent: "Written.",
@@ -396,10 +400,27 @@ export function findTrialInfo(name: string): TrialInfo | undefined {
 }
 
 /**
- * True se il trial e' arruolabile (reclutamento non chiuso).
+ * Stati che escludono un trial dall'arruolamento:
+ * - "closed"   -> reclutamento definitivamente chiuso (es. SHIONOGI)
+ * - "inactive" -> trial momentaneamente non attivo (es. MOSTE, Librexia)
+ * In entrambi i casi le info restano consultabili nel catalogo, ma il trial
+ * non deve essere selezionabile in nessun flusso di arruolamento.
+ */
+const NON_RECRUITING_STATUSES: ReadonlySet<TrialStatus> = new Set<TrialStatus>([
+  "closed",
+  "inactive",
+]);
+
+/**
+ * True se il trial e' arruolabile (reclutamento aperto).
  * I trial sconosciuti sono considerati aperti (default sicuro).
  */
 export function isTrialOpen(name: string): boolean {
   const info = findTrialInfo(name);
-  return info ? info.status !== "closed" : true;
+  return info ? !NON_RECRUITING_STATUSES.has(info.status) : true;
+}
+
+/** True se lo stato indica un trial non arruolabile (per badge/avvisi UI). */
+export function isNonRecruitingStatus(status: TrialStatus): boolean {
+  return NON_RECRUITING_STATUSES.has(status);
 }

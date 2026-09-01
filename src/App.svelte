@@ -6,6 +6,12 @@
   import Splash from "$lib/components/Splash.svelte";
   import InstallPrompt from "$lib/components/InstallPrompt.svelte";
   import { t, locale, cycleLocale } from "$lib/i18n";
+  import { pruneUnselectableStudies } from "$lib/stores/trialSelection";
+
+  // La selezione trial vive 24h in localStorage: all'avvio scartiamo i trial
+  // nel frattempo disattivati (es. MOSTE, Librexia), altrimenti resterebbero
+  // nel payload inviato al Sheet pur non essendo piu' visibili nella UI.
+  pruneUnselectableStudies();
 
   // Splash visibile al primo load di sessione. Lo skip persiste in
   // sessionStorage (cosi' tornando indietro non si rivede di continuo,

@@ -5,7 +5,7 @@
   import Card from "$lib/components/Card.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
-  import { selectedStudies } from "$lib/stores/trialSelection";
+  import { selectedStudies, toggleStudy } from "$lib/stores/trialSelection";
   import { acuteInput, hemInput } from "$lib/stores/patient";
   import { REASON_BY_TRIAL } from "$lib/domain/acute-reasons";
   import { REASON_BY_HEM_TRIAL } from "$lib/domain/hem-reasons";
@@ -42,8 +42,9 @@
     { display: "TICH-3", eligible: $hemEligibility.tich3, tone: "hemorrhagic" },
   ]);
 
-  // I trial con reclutamento chiuso (es. SHIONOGI) restano nel catalogo ma
-  // non sono selezionabili: vengono esclusi dai risultati di arruolamento.
+  // I trial non arruolabili - reclutamento chiuso (SHIONOGI) o inattivi
+  // (MOSTE) - restano nel catalogo ma non sono selezionabili: vengono
+  // esclusi sia dagli eleggibili sia dai non eleggibili.
   const eligibleItems = $derived(
     [...acuteEligible, ...hemEligibleList].filter((e) => e.eligible && isTrialOpen(e.display))
   );
@@ -53,9 +54,6 @@
     [...acuteEligible, ...hemEligibleList].filter((e) => !e.eligible && isTrialOpen(e.display))
   );
 
-  function toggle(name: string) {
-    selectedStudies.update((arr) => arr.includes(name) ? arr.filter((n) => n !== name) : [...arr, name]);
-  }
   function reasonsFor(name: string): string[] {
     const acuteFn = REASON_BY_TRIAL[name];
     if (acuteFn) return acuteFn($acuteInput as Parameters<typeof acuteFn>[0]).fail;
@@ -65,6 +63,10 @@
   }
 
   const selectedCount = $derived($selectedStudies.length);
+
+  // Il percorso post-acuto valuta solo Librexia: se il trial non arruola piu',
+  // il link non ha senso e viene nascosto.
+  const postAcuteOpen = isTrialOpen("Librexia");
 </script>
 
 <AppHeader title={$t.extras.results} sub={`${eligibleItems.length} ${$t.extras.eligibleTrialsCount}`} step={2} steps={3} onBack={() => push("/post-imaging")} />
@@ -78,7 +80,7 @@
     <div class="list">
       {#each eligibleItems as item (item.display)}
         {@const checked = $selectedStudies.includes(item.display)}
-        <button class="card-pick" class:on={checked} type="button" onclick={() => toggle(item.display)}>
+        <button class="card-pick" class:on={checked} type="button" onclick={() => toggleStudy(item.display)}>
           <span class="check" class:on={checked} aria-hidden="true">
             {#if checked}
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -131,7 +133,9 @@
     {/if}
   {/if}
 
-  <a href="/post-acute" use:link class="post-link">{$t.summary.goToPostAcute} →</a>
+  {#if postAcuteOpen}
+    <a href="/post-acute" use:link class="post-link">{$t.summary.goToPostAcute} →</a>
+  {/if}
 </div>
 
 <BottomBar

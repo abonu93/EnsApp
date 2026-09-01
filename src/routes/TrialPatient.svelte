@@ -35,7 +35,11 @@
   let strokeType = $state<"ischemic" | "hemorrhagic" | "">(
     ($quickPatient.strokeType as "ischemic" | "hemorrhagic" | "") ?? ""
   );
-  let trial = $state<string>($quickPatient.trial ?? "");
+  // Una bozza salvata puo' contenere un trial disattivato nel frattempo:
+  // non comparirebbe piu' tra le opzioni ma resterebbe selezionato e finirebbe
+  // nel payload, quindi lo scartiamo all'init.
+  const draftTrial = $quickPatient.trial ?? "";
+  let trial = $state<string>(isTrialOpen(draftTrial) ? draftTrial : "");
   let arm = $state<Arm>(($quickPatient.arm as Arm) ?? "");
   let targetVessels = $state<VesselCode[]>(($quickPatient.targetVessels as VesselCode[]) ?? []);
   // Trattamenti in acuto (TEV + mTICI + TIV), come nel flusso guided (Share).
@@ -70,7 +74,8 @@
     });
   });
 
-  // Esclude i trial con reclutamento chiuso (es. SHIONOGI): non selezionabili.
+  // Esclude i trial non arruolabili - reclutamento chiuso (SHIONOGI) o
+  // inattivi (MOSTE, Librexia): non sono selezionabili.
   const trialOptions = Object.keys(TRIALS_INFO)
     .filter((name) => isTrialOpen(name))
     .map((name) => ({ value: name, label: name }));

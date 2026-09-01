@@ -89,6 +89,9 @@ export const ca: Dictionary = {
     notFoundTitle: "Assaig no trobat",
     notFoundDesc: "no es al cataleg.",
     backCatalog: "Tornar al cataleg",
+    notRecruitingTitle: "Assaig no actiu",
+    notRecruitingDesc:
+      "Aquest assaig no recluta: la informacio segueix disponible, pero no es pot seleccionar per a l'inclusio.",
   },
   preImaging: {
     title: "Pre-Imatge",
