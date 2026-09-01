@@ -18,11 +18,15 @@
   <div class="pill">
     {#each items as item (item.href)}
       {@const active = $location === item.href || $location.startsWith(item.href + "/")}
+      <!-- L'etichetta testuale compare solo sulla voce attiva: senza
+           aria-label le altre voci resterebbero link di sole icone, quindi
+           prive di nome accessibile (axe: link-name). -->
       <a
         href={item.href}
         use:link
         class="item"
         class:active
+        aria-label={item.label}
         aria-current={active ? "page" : undefined}
       >
         <span class="icon" aria-hidden="true">

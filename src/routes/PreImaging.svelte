@@ -101,6 +101,7 @@
             options={mrsOpts}
             value={premrs ?? ""}
             onChange={(v) => (premrs = v)}
+            name="pre-mRS"
           />
         </div>
       </div>
@@ -150,16 +151,13 @@
     {#snippet children()}
       <div class="stack">
         <div class="field">
-          <span class="lbl">{$t.preImaging.angioLabel}</span>
-          <Segmented options={ynOpts} bind:value={angiograph} cols={2} />
+          <Segmented options={ynOpts} bind:value={angiograph} cols={2} label={$t.preImaging.angioLabel} />
         </div>
         <div class="field">
-          <span class="lbl">{$t.preImaging.doacLabel}</span>
-          <Segmented options={ynOpts} bind:value={doac} cols={2} />
+          <Segmented options={ynOpts} bind:value={doac} cols={2} label={$t.preImaging.doacLabel} />
         </div>
         <div class="field">
-          <span class="lbl">{$t.preImaging.aceiLabel}</span>
-          <Segmented options={ynOpts} bind:value={acei} cols={2} />
+          <Segmented options={ynOpts} bind:value={acei} cols={2} label={$t.preImaging.aceiLabel} />
         </div>
       </div>
     {/snippet}

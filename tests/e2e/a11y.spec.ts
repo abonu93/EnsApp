@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { freshSession, assertAppShell } from "./helpers";
+import { freshSession, assertAppShell, waitForAnimations } from "./helpers";
 
 const ROUTES = [
   { name: "landing", path: "/" },
@@ -22,6 +22,7 @@ test.describe("a11y - WCAG 2.1 AA scan", () => {
       await freshSession(page);
       await page.goto(`/#${route.path}`);
       await page.waitForSelector("main h1", { timeout: 5_000 });
+      await waitForAnimations(page);
 
       const results = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

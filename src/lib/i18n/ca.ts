@@ -24,6 +24,7 @@ export const ca: Dictionary = {
     theme: "Tema",
     language: "Idioma",
     of: "de",
+    progress: "Progres",
   },
   nav: {
     home: "Inici",

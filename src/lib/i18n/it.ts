@@ -25,6 +25,7 @@ export const it = {
     theme: "Tema",
     language: "Lingua",
     of: "di",
+    progress: "Avanzamento",
   },
   nav: {
     home: "Home",

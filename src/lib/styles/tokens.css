@@ -16,17 +16,22 @@
   --border: #DBEBF1;
   --border-strong: #C9DDE6;
 
-  /* Brand "Glacier" */
-  --primary: #4F8FBC;
+  /* Brand "Glacier"
+   * I toni sono scuriti rispetto alla palette originale per rispettare il
+   * contrasto WCAG 2.1 AA (4.5:1) sia come sfondo con testo bianco sia come
+   * testo sulle varianti -soft. I valori chiari precedenti (primary #4F8FBC,
+   * success #2E9E7B, danger #C8524C, warn #B5832C) si fermavano a ~2.9-3.7:1.
+   * Coperto da tests/e2e/a11y.spec.ts (axe-core, regola color-contrast). */
+  --primary: #2C6488;        /* 6.39:1 su bianco */
   --primary-hover: #1C4E6C;
-  --primary-soft: #E5F1F8;
+  --primary-soft: #E5F1F8;   /* primary su primary-soft: 5.56:1 */
 
   /* Semantic */
-  --success: #2E9E7B;
+  --success: #1B6B52;        /* su success-soft: 5.65:1 */
   --success-soft: #E4F4EE;
-  --danger: #C8524C;
+  --danger: #A83C36;         /* su danger-soft: 5.29:1 */
   --danger-soft: #F8E9E8;
-  --warn: #B5832C;
+  --warn: #7F5A14;           /* su warn-soft: 5.44:1 */
   --warn-soft: #F7EFDE;
   --info: #1C4E6C;
   --info-soft: #E5F1F8;
@@ -106,7 +111,7 @@
   --transition-base: 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
   --transition-slow: 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  --focus-ring: 0 0 0 3px rgba(79, 143, 188, 0.32);
+  --focus-ring: 0 0 0 3px rgba(44, 100, 136, 0.32);
 
   --z-header: 100;
   --z-bottom-nav: 100;

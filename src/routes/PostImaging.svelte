@@ -192,8 +192,7 @@
         {#snippet children()}
           <div class="stack">
             <div class="field">
-              <span class="lbl">{$t.postImaging.perfusionMismatchLabel}</span>
-              <Segmented options={ynOpts} bind:value={perfusionMismatch} cols={2} />
+              <Segmented options={ynOpts} bind:value={perfusionMismatch} cols={2} label={$t.postImaging.perfusionMismatchLabel} />
             </div>
             <div class="divider"></div>
             <div class="field">
@@ -206,16 +205,13 @@
             </div>
             <div class="divider"></div>
             <div class="field">
-              <span class="lbl">{$t.postImaging.largeCoreLabel}</span>
-              <Segmented options={ynOpts} bind:value={largeCore} cols={2} />
+              <Segmented options={ynOpts} bind:value={largeCore} cols={2} label={$t.postImaging.largeCoreLabel} />
             </div>
             <div class="field">
-              <span class="lbl">{$t.postImaging.contraTpaLabel}</span>
-              <Segmented options={ynOpts} bind:value={contraTpaAnswer} cols={2} />
+              <Segmented options={ynOpts} bind:value={contraTpaAnswer} cols={2} label={$t.postImaging.contraTpaLabel} />
             </div>
             <div class="field">
-              <span class="lbl">{$t.postImaging.diabetesLabel}</span>
-              <Segmented options={ynOpts} bind:value={diabetes} cols={2} />
+              <Segmented options={ynOpts} bind:value={diabetes} cols={2} label={$t.postImaging.diabetesLabel} />
             </div>
           </div>
         {/snippet}
@@ -245,8 +241,7 @@
           <ToggleRow title={$t.extras.isolatedIvh} sub={$t.extras.isolatedIvhSub} checked={ivh === "yes"} onChange={(v) => ivh = v ? "yes" : "no"} />
           <div class="divider"></div>
           <div class="field">
-            <span class="lbl">{$t.postImaging.secondaryCauseLabel}</span>
-            <Segmented options={secondaryOpts} bind:value={secondaryCause} cols={3} />
+            <Segmented options={secondaryOpts} bind:value={secondaryCause} cols={3} label={$t.postImaging.secondaryCauseLabel} />
           </div>
         </div>
       {/snippet}
@@ -258,8 +253,7 @@
           <ToggleRow title={$t.extras.txaExcl} sub={$t.extras.txaExclSub} checked={seizure === "yes"} onChange={(v) => seizure = v ? "yes" : "no"} />
           <div class="divider"></div>
           <div class="field">
-            <span class="lbl">{$t.postImaging.anticoagLabel}</span>
-            <Segmented options={anticoagOpts} bind:value={anticoag} cols={2} />
+            <Segmented options={anticoagOpts} bind:value={anticoag} cols={2} label={$t.postImaging.anticoagLabel} />
           </div>
         </div>
       {/snippet}
@@ -269,13 +263,13 @@
       <Card title={$t.postImaging.fastestTitle} subtitle={$t.postImaging.fastestHint}>
         {#snippet children()}
           <div class="stack">
-            <div class="field"><span class="lbl">{$t.postImaging.brainstemLabel}</span><Segmented options={ynOpts} bind:value={brainstem} cols={2} /></div>
-            <div class="field"><span class="lbl">{$t.postImaging.procoagulantLabel}</span><Segmented options={ynOpts} bind:value={procoagulant} cols={2} /></div>
-            <div class="field"><span class="lbl">{$t.postImaging.ecgLabel}</span><Segmented options={ynOpts} bind:value={ecg} cols={2} /></div>
-            <div class="field"><span class="lbl">{$t.postImaging.thrombosisLabel}</span><Segmented options={ynOpts} bind:value={thrombosis} cols={2} /></div>
-            <div class="field"><span class="lbl">{$t.postImaging.pregnancyLabel}</span><Segmented options={ynOpts} bind:value={pregnancy} cols={2} /></div>
-            <div class="field"><span class="lbl">{$t.postImaging.angioplastyLabel}</span><Segmented options={ynOpts} bind:value={angioplasty} cols={2} /></div>
-            <div class="field"><span class="lbl">{$t.postImaging.ivhScoreLabel}</span><Segmented options={ynOpts} bind:value={ivhScore} cols={2} /></div>
+            <div class="field"><Segmented options={ynOpts} bind:value={brainstem} cols={2} label={$t.postImaging.brainstemLabel} /></div>
+            <div class="field"><Segmented options={ynOpts} bind:value={procoagulant} cols={2} label={$t.postImaging.procoagulantLabel} /></div>
+            <div class="field"><Segmented options={ynOpts} bind:value={ecg} cols={2} label={$t.postImaging.ecgLabel} /></div>
+            <div class="field"><Segmented options={ynOpts} bind:value={thrombosis} cols={2} label={$t.postImaging.thrombosisLabel} /></div>
+            <div class="field"><Segmented options={ynOpts} bind:value={pregnancy} cols={2} label={$t.postImaging.pregnancyLabel} /></div>
+            <div class="field"><Segmented options={ynOpts} bind:value={angioplasty} cols={2} label={$t.postImaging.angioplastyLabel} /></div>
+            <div class="field"><Segmented options={ynOpts} bind:value={ivhScore} cols={2} label={$t.postImaging.ivhScoreLabel} /></div>
           </div>
         {/snippet}
       </Card>

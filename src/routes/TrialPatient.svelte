@@ -291,12 +291,11 @@
 
         <div class="field">
           <span class="row-lbl"><span class="lbl">pre-mRS</span><span class="hint">0 - 5</span></span>
-          <Segmented options={mrsOpts} value={premrs ?? ""} onChange={(v) => (premrs = v)} />
+          <Segmented options={mrsOpts} value={premrs ?? ""} onChange={(v) => (premrs = v)} name="pre-mRS" />
         </div>
 
         <div class="field">
-          <span class="lbl">{$t.postImaging.strokeTypeLabel}</span>
-          <Segmented options={strokeOpts} bind:value={strokeType} cols={2} />
+          <Segmented options={strokeOpts} bind:value={strokeType} cols={2} label={$t.postImaging.strokeTypeLabel} />
         </div>
       </div>
     {/snippet}
@@ -344,8 +343,7 @@
       </label>
       {#if showArm}
         <div class="field" style="margin-top: 16px">
-          <span class="lbl">{$t.extras.quickArmLabel}</span>
-          <Segmented options={armOpts} bind:value={arm} cols={2} />
+          <Segmented options={armOpts} bind:value={arm} cols={2} label={$t.extras.quickArmLabel} />
         </div>
       {/if}
     {/snippet}

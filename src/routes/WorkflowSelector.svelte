@@ -19,7 +19,9 @@
       title: $t.extras.directEnroll,
       desc: $t.extras.directEnrollDesc,
       tag: $t.extras.fastTag,
-      accent: "var(--post-acute)",
+      // -text e non il tono pieno: l'accent colora anche il testo del tag
+      // sullo sfondo -soft, dove --post-acute si ferma a 2.9:1 (serve 4.5:1).
+      accent: "var(--post-acute-text)",
       bg: "var(--post-acute-soft)",
       route: "/trial-patient",
       icon: "bolt" as const,
@@ -33,7 +35,9 @@
 
 <div class="page">
   <div class="intro">
-    <h2>{$t.landing.newPatient}</h2>
+    <!-- h1: e' il titolo principale della schermata (AppHeader qui non ne
+         rende uno, non avendo title), serve alla struttura dei landmark. -->
+    <h1>{$t.landing.newPatient}</h1>
     <p>{$t.extras.proceedHow}</p>
   </div>
 
@@ -77,7 +81,7 @@
   .intro {
     margin-bottom: 22px;
   }
-  h2 {
+  h1 {
     font-size: 24px;
     font-weight: 600;
     letter-spacing: -0.6px;

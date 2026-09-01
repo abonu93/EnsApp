@@ -24,6 +24,7 @@ export const en: Dictionary = {
     theme: "Theme",
     language: "Language",
     of: "of",
+    progress: "Progress",
   },
   nav: {
     home: "Home",

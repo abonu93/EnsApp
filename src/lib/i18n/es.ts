@@ -24,6 +24,7 @@ export const es: Dictionary = {
     theme: "Tema",
     language: "Idioma",
     of: "de",
+    progress: "Progreso",
   },
   nav: {
     home: "Inicio",

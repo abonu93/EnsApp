@@ -2,6 +2,7 @@
   // Page header con back + opzionale step indicator + title + sub.
   // Sostituisce il layout precedente per le route che sono "pagine di flusso".
   import { pop } from "svelte-spa-router";
+  import { t } from "$lib/i18n";
 
   interface Props {
     title?: string;
@@ -22,21 +23,29 @@
 
 <div class="hdr">
   <div class="row">
-    <button class="iconbtn" type="button" onclick={handleBack} aria-label="Indietro">
+    <button class="iconbtn" type="button" onclick={handleBack} aria-label={$t.common.back}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
         <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </button>
     <div class="spacer"></div>
     {#if step != null && steps}
-      <div class="dots" role="progressbar" aria-valuemin={1} aria-valuemax={steps} aria-valuenow={step + 1}>
+      <!-- role="progressbar" richiede un nome accessibile (axe: aria-progressbar-name). -->
+      <div
+        class="dots"
+        role="progressbar"
+        aria-label={`${$t.common.progress}: ${step + 1} ${$t.common.of} ${steps}`}
+        aria-valuemin={1}
+        aria-valuemax={steps}
+        aria-valuenow={step + 1}
+      >
         {#each Array(steps) as _, i (i)}
           <span class="dot" class:done={i <= step} class:current={i === step}></span>
         {/each}
       </div>
     {/if}
     {#if onClose}
-      <button class="iconbtn" type="button" onclick={onClose} aria-label="Chiudi">
+      <button class="iconbtn" type="button" onclick={onClose} aria-label={$t.common.close}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
