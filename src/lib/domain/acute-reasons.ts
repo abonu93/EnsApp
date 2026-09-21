@@ -126,6 +126,7 @@ export function reasonArtemis(input: AcuteInput): ReasonReport {
     { ok: input.premrs <= 2, label: "pre-mRS <= 2" },
     { ok: input.nihss >= 6 && input.nihss <= 25, label: "NIHSS 6-25" },
     { ok: input.lvo === "yes", label: "LVO confermato" },
+    { ok: input.tandem !== "yes", label: "no occlusione tandem (esclusione)" },
     { ok: v.artemis, label: "vessel ICA intracr., ICA-T, M1, M2 prox/dom" },
     { ok: isNumber(input.aspects) && input.aspects > 5, label: "ASPECTS > 5" },
   ]);

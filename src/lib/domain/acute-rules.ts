@@ -222,6 +222,8 @@ export function twin2win2(input: AcuteInput): boolean {
 
 export function artemis(input: AcuteInput): boolean {
   const vessels = computeVesselFlags(input.targetVessels);
+  // Occlusione tandem = criterio di esclusione: basta la conferma ("yes")
+  // per escludere, il dato mancante non esclude.
   return (
     input.ltsw < 24 &&
     input.age >= 18 &&
@@ -230,6 +232,7 @@ export function artemis(input: AcuteInput): boolean {
     input.nihss >= 6 &&
     input.nihss <= 25 &&
     isLvo(input.lvo) &&
+    input.tandem !== "yes" &&
     vessels.artemis &&
     isValidNumber(input.aspects) &&
     input.aspects > 5

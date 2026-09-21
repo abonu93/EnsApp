@@ -3,9 +3,11 @@ import {
   weTrust,
   athena,
   vanish,
+  artemis,
   computeVesselFlags,
   tenacity,
 } from "$lib/domain/acute-rules";
+import { reasonArtemis } from "$lib/domain/acute-reasons";
 
 describe("acute-rules - smoke (ported from legacy node:test)", () => {
   test("weTrust: eligible when all criteria are met", () => {
@@ -132,5 +134,37 @@ describe("acute-rules - TENACITY (TNK > 4.5h - 72h)", () => {
   test("exclusions: diabetes and contraindications to tenecteplase", () => {
     expect(tenacity({ ...base, diabetes: "yes" })).toBe(false);
     expect(tenacity({ ...base, contraTpa: "yes" })).toBe(false);
+  });
+});
+
+describe("acute-rules - ARTEMIS (tandem occlusion excluded)", () => {
+  const base = {
+    age: 68,
+    nihss: 14,
+    premrs: 1,
+    ltsw: 3,
+    lvo: "yes" as const,
+    targetVessels: ["m1" as const],
+    aspects: 8,
+  };
+
+  test("eligible without tandem occlusion", () => {
+    expect(artemis({ ...base, tandem: "no" })).toBe(true);
+  });
+
+  test("not eligible with tandem occlusion", () => {
+    expect(artemis({ ...base, tandem: "yes" })).toBe(false);
+  });
+
+  test("missing tandem answer does not exclude", () => {
+    expect(artemis({ ...base, tandem: "" })).toBe(true);
+    expect(artemis(base)).toBe(true);
+  });
+
+  test("reasonArtemis reports tandem as the failed criterion", () => {
+    const report = reasonArtemis({ ...base, tandem: "yes" });
+    expect(report.eligible).toBe(false);
+    expect(report.fail).toEqual(["no occlusione tandem (esclusione)"]);
+    expect(reasonArtemis({ ...base, tandem: "no" }).eligible).toBe(true);
   });
 });
