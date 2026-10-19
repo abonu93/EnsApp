@@ -104,13 +104,20 @@ export function fastest(input: HemorrhagicInput): FastestResult {
   };
 }
 
+// TICH-3: protocollo Final v3.1, p. 25-26. Esclusione iii: anticoagulazione
+// terapeutica con warfarin (AVK) o EBPM; i DOAC sono esplicitamente ammessi.
+// La EBPM profilattica non e' un'esclusione.
+const TICH3_EXCLUDED_ANTICOAG: AnticoagStatus[] = ["warfarin", "heparin"];
+
 export function tich3(input: HemorrhagicInput): boolean {
   return (
+    input.age >= 18 &&
     input.ltsw < 4.5 &&
     input.hemVolume < 60 &&
     input.ivh === "no" &&
     input.gcs >= 5 &&
     input.seizure === "no" &&
-    input.secondaryCause === "None"
+    input.secondaryCause === "None" &&
+    !TICH3_EXCLUDED_ANTICOAG.includes(input.anticoag ?? "")
   );
 }

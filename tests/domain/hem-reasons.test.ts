@@ -28,6 +28,10 @@ describe("hem-reasons - parita' con le regole", () => {
       { ...tich3Ok, ivh: "" },
       { ...tich3Ok, seizure: "" },
       { ...tich3Ok, secondaryCause: "Traumatic" },
+      { ...tich3Ok, anticoag: "warfarin" },
+      { ...tich3Ok, anticoag: "heparin" },
+      { ...tich3Ok, anticoag: "doac" },
+      { ...tich3Ok, age: 17 },
       {} as HemorrhagicInput,
     ];
     for (const c of cases) {

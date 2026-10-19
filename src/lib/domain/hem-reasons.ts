@@ -39,12 +39,17 @@ export function reasonFastest(input: HemorrhagicInput): ReasonReport {
 
 export function reasonTich3(input: HemorrhagicInput): ReasonReport {
   return reduce([
+    { ok: input.age >= 18, label: "age >= 18" },
     { ok: input.ltsw < 4.5, label: "LTSW < 4.5h" },
     { ok: input.hemVolume < 60, label: "volume ematoma < 60 mL" },
     { ok: input.ivh === "no", label: "emorragia non isolata a IVH" },
     { ok: input.gcs >= 5, label: "GCS >= 5" },
     { ok: input.seizure === "no", label: "no convulsioni / trombosi / ipersensibilita' a TXA" },
     { ok: input.secondaryCause === "None", label: "nessuna causa secondaria" },
+    {
+      ok: input.anticoag !== "warfarin" && input.anticoag !== "heparin",
+      label: "no AVK ne' eparina/EBPM terapeutica (DOAC ammessi)",
+    },
   ]);
 }
 

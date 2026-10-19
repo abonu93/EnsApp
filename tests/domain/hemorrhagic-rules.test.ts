@@ -108,3 +108,27 @@ describe("FASTEST - criteri del protocollo V10.5 (Parte 2)", () => {
     expect(fastest({ ...ok, anticoag: "antiplatelet" }).eligible).toBe(true);
   });
 });
+
+describe("TICH-3 - criteri del protocollo Final v3.1", () => {
+  const ok = {
+    age: 65, premrs: 3, ltsw: 3, hemVolume: 30, gcs: 10,
+    ivh: "no", seizure: "no", secondaryCause: "None", anticoag: "none",
+  } as const;
+
+  test("warfarin/AVK ed eparina o EBPM terapeutica escludono", () => {
+    expect(tich3({ ...ok, anticoag: "warfarin" })).toBe(false);
+    expect(tich3({ ...ok, anticoag: "heparin" })).toBe(false);
+  });
+
+  test("DOAC, EBPM profilattica e antiaggreganti sono ammessi", () => {
+    for (const a of ["doac", "lmwh", "antiplatelet", "none"] as const) {
+      expect(tich3({ ...ok, anticoag: a })).toBe(true);
+    }
+  });
+
+  test("eta' >= 18", () => {
+    expect(tich3({ ...ok, age: 17 })).toBe(false);
+    expect(tich3({ ...ok, age: 18 })).toBe(true);
+    expect(tich3({ ...ok, age: 99 })).toBe(true);
+  });
+});
