@@ -17,6 +17,8 @@ actualizado: 2026-10-19
 > Questo foglio, mantenuto dal team in "ENSAYOS ABIERTOS", è il riferimento
 > per sapere **quali studi sono aperti**. Rileggerlo a ogni sessione
 > (vedi [[CLAUDE]]). Ultima modifica letta: 2026-10-09.
+> Riletto il 2026-10-19: Drive segnala una modifica alle 08:19:19, che coincide al secondo
+> con l'ultima apertura; il contenuto esportato è **identico** a quello qui sotto.
 
 > [!info] Lettura
 > Completa. Il file è un `.xlsx`: il testo esportato perde la griglia, quindi

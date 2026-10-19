@@ -18,6 +18,8 @@ Punteggio da 0 a 10 che quantifica i segni precoci di ischemia nel territorio de
 | [[ARTEMIS]] | Inclusione: ASPECTS 6–10 su TC o DWI-RM basale; con valutazione automatica, anche core ≤50 cc su TC-perfusione o DWI-RM. L'app controlla solo ASPECTS >5 (`acute-rules.ts:234-235`), non il core | ([[ARTEMIS — Protocolo — V03]], p. 25) |
 | [[REMEDY]] | Esclusione: "large core of established infarction defined as (…) ASPECTS 0-5", quindi serve ≥6. L'app richiede ASPECTS ≥6 (`acute-rules.ts:339-340`), ma per i non candidati a EVT il campo compare solo nella card TENACITY (>4,5 h): entro 4,5 h REMEDY non risulta mai eleggibile. Il foglio del team scrive "5-10" | ([[REMEDY — Protocolo — V6.2]], p. 38) |
 | [[PIVOTAL]] | Esclusione: ASPECTS <6, oppure **PC-ASPECTS <7** (immagini sorgente dell'angio-TC o DWI) nella circolazione posteriore; con software automatico, anche core >50 cc in TC-perfusione o >70 cc in DWI. L'app non controlla l'ASPECTS (`acute-rules.ts:160-171`) e non chiede il PC-ASPECTS | ([[PIVOTAL — Protocolo — Rev 03]], p. 12, p. 42) |
+| [[TWIN2WIN-2]] | Esclusione: ASPECTS **<6 in TC o <5 in DWI** (soglie diverse per modalità); nessuna indicazione per la basilare. Il foglio del team e l'app scrivono "no" / "-" (`trials-info.ts:103`) e la regola non lo controlla (`acute-rules.ts:211-221`) | ([[TWIN2WIN-2 — Protocolo — V2]], p. 5) |
+| [[HYBERNIA]] | Inclusione: ASPECTS 5–10 su TC senza contrasto o RM; nessun criterio di core, perfusione facoltativa. L'app controlla ASPECTS >4 (`acute-rules.ts:249-250`) | ([[HYBERNIA — Protocolo — V1.1]], p. 20, p. 24) |
 
 ## Note
 - Nato per il territorio della MCA: non è applicabile così com'è alla circolazione posteriore.
