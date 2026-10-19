@@ -50,7 +50,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | EAST-STROKE | ABIERTOS / OTROS | assente | ⬜ | |
 | ELAPSE | ABIERTOS / OTROS | assente | ⬜ | |
 | ORBIT-XI | PENDIENTES ABRIR | assente | ⬜ (sinossi a 0 byte) | |
-| SAIL-MeVO | PENDIENTES ABRIR | aperto ⚠ (non in app) | ⬜ | |
+| SAIL-MeVO | PENDIENTES ABRIR | aperto ⚠ (non in app) | ✅ | [[SAIL-MeVO]] |
 | TargED (TG1-CL-201) | PENDIENTES ABRIR | assente | ⬜ | |
 
 ## 3 — Studi nel foglio senza documenti nella copia né in app
@@ -96,6 +96,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[Tenecteplasa]]
 - [[TICI]]
 - [[TOAST]]
+- [[Trombólisis intraarterial]]
 - [[Ventana extendida]]
 - [[Volumen de hematoma]]
 - [[Volumen del core]]
