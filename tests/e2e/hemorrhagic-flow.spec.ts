@@ -50,7 +50,7 @@ test.describe("hemorrhagic flow - FASTEST eligible", () => {
     await selectRadio(page, "post-thrombosis", "no");
     await selectRadio(page, "post-pregn", "no");
     await selectRadio(page, "post-angio", "no");
-    await selectRadio(page, "post-ivhscore", "yes");
+    await selectRadio(page, "post-ivhlarge", "no");
 
     await page.getByRole("button", { name: /^avanti$/i }).click();
     await expect(page).toHaveURL(/\/summary$/);
