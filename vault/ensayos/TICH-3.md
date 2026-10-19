@@ -102,7 +102,7 @@ Confronto con:
 - `src/lib/domain/trials-info.ts:255-267` (voce `TICH3`) e `:399-413` (`findTrialInfo`, `isTrialOpen`);
 - `src/lib/domain/hemorrhagic-rules.ts:82-91` (`tich3()`) e `src/lib/domain/hem-reasons.ts:33-42` (`reasonTich3()`);
 - `src/lib/stores/eligibility.ts:68-74`;
-- interfaccia: `src/routes/PreImaging.svelte:19-37`, `src/routes/PostImaging.svelte:46-62`, `:122-140`, `:226-264`, `src/routes/Summary.svelte:40-55`, etichette `src/lib/i18n/es.ts:254-257`, `:306-312`;
+- interfaccia: `src/routes/PreImaging.svelte:20-37`, `src/routes/PostImaging.svelte:46-62`, `:122-140`, `:226-264`, `src/routes/Summary.svelte:40-55`, etichette `src/lib/i18n/es.ts:254-257`, `:306-312`;
 - storia: commit `691c0a2` (i toggle "IVH isolata" ed "Esclusione TXA" partivano da `""` e TICH-3 non risultava mai eleggibile; ora partono da `"no"`, `PostImaging.svelte:49-54`).
 
 Verificato il 2026-10-19.
@@ -131,12 +131,12 @@ Verificato il 2026-10-19.
 - [ ] **3. [FN] Esordio ignoto o ictus al risveglio: l'app conta dall'ultima volta visto bene, il protocollo dalla scoperta.**
 > [!warning] Contraddizione
 > Protocollo: "When onset of symptoms is unknown patient must be within 4.5 hours of symptom discovery" (p. 25); "presenting within 4.5 hours of wake-up or discovery" (p. 26) ([[TICH-3 — Protocolo — v3.1]]).
-> App: `ltsw` sono le ore dall'LTSW (`PreImaging.svelte:19`, `:25`, `:36`; etichetta "LTSW", `es.ts:105`). Il flag `wakeupStroke` esiste (`PreImaging.svelte:20`, `:37`), ma `tich3()` non lo usa e non esiste un campo "ora della scoperta". Un'ICH scoperta al risveglio 1 h prima, con LTSW la sera prima, risulta non eleggibile anche se il protocollo la ammette. Vedi [[Ictus del despertar]].
+> App: `ltsw` sono le ore dall'LTSW (`PreImaging.svelte:20`, `:26`, `:36`; etichetta "LTSW", `es.ts:105`). Il flag `wakeupStroke` esiste (`PreImaging.svelte:21`, `:37`), ma `tich3()` non lo usa e non esiste un campo "ora della scoperta". Un'ICH scoperta al risveglio 1 h prima, con LTSW la sera prima, risulta non eleggibile anche se il protocollo la ammette. Vedi [[Ictus del despertar]].
 
 - [ ] **4. [FP] La finestra si calcola quando si inserisce l'ora, non quando si valuta né quando si somministra.**
 > [!warning] Contraddizione
 > Protocollo: il farmaco va **iniziato** entro 4,5 h; "randomisation after 4.5 hours after ICH" è una violazione di protocollo (p. 25–26, p. 34).
-> App: `hemEligibility` usa `$pre.ltsw` (`eligibility.ts:68-69`), salvato da `PreImaging.svelte:36` quando si compila la scheda pre-imaging. Le regole acute usano invece `ltswHours`, ricalcolato (`stores/patient.ts:82-91`). Un paziente inserito a 4 h resta "eleggibile" anche se il riepilogo si apre a 5 h. Stesso problema descritto in [[FASTEST]] (divergenza 6).
+> App: `hemEligibility` usa `$pre.ltsw` (`eligibility.ts:68-69`), salvato da `PreImaging.svelte:36` quando si compila la scheda pre-imaging. Le regole acute usano invece `ltswHours`, ricalcolato (`stores/patient.ts:82-86`). Un paziente inserito a 4 h resta "eleggibile" anche se il riepilogo si apre a 5 h. Stesso problema descritto in [[FASTEST]] (divergenza 6).
 
 - [ ] **5. [NC] FASTEST e TICH-3 proposti insieme, senza avviso.**
 > [!warning] Contraddizione
