@@ -15,6 +15,7 @@
   import type { VesselCode } from "$lib/domain/acute-rules";
 
   type YN = "yes" | "no" | "";
+  type YNNa = YN | "na";
   type StrokeType = "ischemic" | "hemorrhagic" | "";
   type CandidateStatus = "eligible" | "not eligible" | "";
 
@@ -41,6 +42,13 @@
   // contraTpa passa da costante a campo: mostrato solo nella card TENACITY,
   // resta "no" (default invariato per ORION) se la card non e' visibile.
   let contraTpaAnswer = $state<YN>(($postData.contraTpa as YN) || "no");
+
+  // SAIL-MeVO (EVT in MeVO): campi specifici del trial.
+  let aiCoreLt10 = $state<YNNa>(($postData.aiCoreLt10 as YNNa) ?? "");
+  let tmaxGt30 = $state<YNNa>(($postData.tmaxGt30 as YNNa) ?? "");
+  let pregnant = $state<YN>(($postData.pregnant as YN) ?? "");
+  let lifeExpectancyLt3m = $state<YN>(($postData.lifeExpectancyLt3m as YN) ?? "");
+  let contrastAllergy = $state<YN>(($postData.contrastAllergy as YN) ?? "");
 
   // Hemorrhagic
   let hemVolume = $state<number | null>($hemData.hemVolume ?? null);
@@ -76,6 +84,11 @@
       perfusionMismatch: perfusionMismatch || undefined,
       largeCore: largeCore || undefined,
       diabetes: diabetes || undefined,
+      aiCoreLt10: aiCoreLt10 || undefined,
+      tmaxGt30: tmaxGt30 || undefined,
+      pregnant: pregnant || undefined,
+      lifeExpectancyLt3m: lifeExpectancyLt3m || undefined,
+      contrastAllergy: contrastAllergy || undefined,
     });
   });
 
@@ -106,6 +119,19 @@
   const showTenacity = $derived(
     showNonEvt && ($preData.ltsw ?? -1) > 4.5 && ($preData.ltsw ?? -1) <= 72
   );
+  // SAIL-MeVO: ischemico (EVT randomizzato, quindi entrambi i percorsi) con
+  // eta' 18-80, pre-mRS 0-1, NIHSS 9-17 e LTSW < 12h.
+  const showSailMevo = $derived(
+    isIschemic &&
+    candidate !== "" &&
+    ($preData.ltsw ?? 999) < 12 &&
+    ($preData.age ?? -1) >= 18 && ($preData.age ?? 999) <= 80 &&
+    ($preData.premrs ?? 99) <= 1 &&
+    ($preData.nihss ?? -1) >= 9 && ($preData.nihss ?? 99) <= 17
+  );
+  // Vasi / ASPECTS / tandem sono gia' nella card EVT (e vasi/ASPECTS nella
+  // card TENACITY): li ripetiamo solo se non sono gia' a schermo.
+  const sailNeedsVessels = $derived(!showEvt && !showTenacity);
 
   const strokeOpts = $derived([
     { value: "ischemic" as const, label: $t.postImaging.ischemic },
@@ -118,6 +144,11 @@
   const ynOpts = $derived<{ value: "yes" | "no"; label: string }[]>([
     { value: "no", label: $t.common.no },
     { value: "yes", label: $t.common.yes },
+  ]);
+  const ynNaOpts = $derived<{ value: "yes" | "no" | "na"; label: string }[]>([
+    { value: "no", label: $t.common.no },
+    { value: "yes", label: $t.common.yes },
+    { value: "na", label: $t.postImaging.notAvailable },
   ]);
   const secondaryOpts = $derived([
     { value: "None", label: $t.extras.causeNone },
@@ -216,6 +247,48 @@
             <div class="field">
               <span class="lbl">{$t.postImaging.diabetesLabel}</span>
               <Segmented options={ynOpts} bind:value={diabetes} cols={2} />
+            </div>
+          </div>
+        {/snippet}
+      </Card>
+    {/if}
+
+    {#if showSailMevo}
+      <Card title={$t.postImaging.sailMevoTitle} subtitle={$t.postImaging.sailMevoHint}>
+        {#snippet children()}
+          <div class="stack">
+            {#if sailNeedsVessels}
+              <div class="field">
+                <span class="lbl">{$t.postImaging.sailMevoOcclusionLabel}</span>
+                <VesselPicker bind:value={targetVessels} />
+              </div>
+              <ToggleRow title={$t.postImaging.sailMevoTandemLabel} bind:checked={tandem} />
+              <div class="field">
+                <span class="lbl">{$t.postImaging.aspectsLabel}</span>
+                <AspectsCells bind:value={aspects} />
+              </div>
+              <div class="divider"></div>
+            {/if}
+            <div class="field">
+              <span class="lbl">{$t.postImaging.aiCoreLt10Label}</span>
+              <Segmented options={ynNaOpts} bind:value={aiCoreLt10} cols={3} />
+            </div>
+            <div class="field">
+              <span class="lbl">{$t.postImaging.tmaxGt30Label}</span>
+              <Segmented options={ynNaOpts} bind:value={tmaxGt30} cols={3} />
+            </div>
+            <div class="divider"></div>
+            <div class="field">
+              <span class="lbl">{$t.postImaging.pregnancyLabel}</span>
+              <Segmented options={ynOpts} bind:value={pregnant} cols={2} />
+            </div>
+            <div class="field">
+              <span class="lbl">{$t.postImaging.lifeExpectancyLabel}</span>
+              <Segmented options={ynOpts} bind:value={lifeExpectancyLt3m} cols={2} />
+            </div>
+            <div class="field">
+              <span class="lbl">{$t.postImaging.contrastAllergyLabel}</span>
+              <Segmented options={ynOpts} bind:value={contrastAllergy} cols={2} />
             </div>
           </div>
         {/snippet}

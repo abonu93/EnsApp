@@ -27,6 +27,7 @@ export interface AcuteEligibility {
   remedy: boolean;
   noraHome: boolean;
   tenacity: boolean;
+  sailMevo: boolean;
 }
 
 export interface HemorrhagicEligibility {
@@ -61,6 +62,7 @@ export const acuteEligibility = derived(
       remedy: safeBoolean(() => acute.remedy(input)),
       noraHome: safeBoolean(() => acute.noraHome(input)),
       tenacity: safeBoolean(() => acute.tenacity(input)),
+      sailMevo: safeBoolean(() => acute.sailMevo(input)),
     };
   }
 );

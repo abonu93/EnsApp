@@ -325,6 +325,25 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     ],
     visits: null,
   },
+  "SAIL-MeVO": {
+    status: "active",
+    category: "EVT in medium vessel occlusion (randomized EVT + BMT vs BMT)",
+    key: { window: "< 12 h (onset / LKW to randomization)", age: "18-80 y", mrs: "0-1", nihss: "9-17", aspects: ">= 6" },
+    consent: "Written consent from the patient or legal representative; emergency consent where approved by the ethics committee, with deferred written consent.",
+    imaging:
+      "Isolated MeVO on CTA/MRA: non-dominant M2-M3 (MCA), A2-A3 (ACA) or P2-P3 (PCA). NCCT ASPECTS >= 6. AI-estimated core on NCCT < 10 mL (if available). CT perfusion Tmax > 6 s volume > 30 mL (if available). If several studies were done, the most recent one counts.",
+    thrombolytic: "Allowed when indicated (part of best medical treatment). After IVT the NIHSS must still be 9-17 at 30 min from IVT start.",
+    thrombectomy: "Randomized 1:1 - EVT arm: ADAPT first line (max 2 passes), then SAIL (stent-retriever-assisted intra-arterial lysis) as rescue or first line with unfavorable anatomy.",
+    preEvtLabs: "Pregnancy test if applicable.",
+    intervention: "EVT (ADAPT / SAIL) + best medical treatment vs best medical treatment alone. Sponsor: VHIR - FlowCat Lab (PI: Marc Ribo).",
+    notes: [
+      "Exclusion: proximal LVO (ICA, M1) or tandem cervical ICA stenosis > 70%; intracranial hemorrhage on baseline imaging; pregnancy; life expectancy < 3 months; severe allergy to iodinated contrast.",
+      "Wake-up stroke: < 12 h from the sleep midpoint. Unwitnessed onset: < 12 h from last known well.",
+      "NIHSS: the last one before randomization counts (before sedation/intubation if sedated).",
+      "App logic: the EVT candidacy answer is not used (EVT is randomized); 'non-dominant M2' = 'Any M2' (not 'M2 proximal/dominant'), M3 = '>M2'; isolated = only one vessel selected; tandem > 70% = tandem flag. AI core / Tmax 'not available' do not exclude.",
+    ],
+    visits: ["Baseline", "24 h (12-48 h)", "Day 5 +/- 1 / discharge", "Day 30 +/- 7", "Day 90 (mRS, EQ-5D-5L, blinded)"],
+  },
   "NORA HOME": {
     status: "active",
     category: "Home discharge (minor stroke / high-risk TIA)",
