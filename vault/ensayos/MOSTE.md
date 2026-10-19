@@ -137,90 +137,91 @@ Ci sono anche soglie di laboratorio: glicemia <50 o >400 mg/dL, creatinina >4,0 
 
 ## Divergenze con EnsApp
 Confronto con:
-- `src/lib/domain/trials-info.ts:44-56` e `:352`;
+- `src/lib/domain/trials-info.ts:44-58` e `:360`;
 - `src/lib/domain/acute-rules.ts:86-90` (`computeVesselFlags`) e `:200-209` (`moste()`);
 - `src/lib/domain/acute-reasons.ts:98-107`;
 - per l'interfaccia, `src/routes/PostImaging.svelte` e `src/lib/domain/vessels.ts`.
 
-Verificato il 2026-10-19.
+Verificato il 2026-10-19 sul commit `6617a91`.
 
 > [!success] Coincide
 > - mRS pre ≤1 (`acute-rules.ts:204`);
-> - NIHSS 0–5 (`nihss < 6`, `:205`; testo `trials-info.ts:47`);
-> - nessun limite superiore di età (`trials-info.ts:47`);
-> - finestra di 23 h (vedi però il punto 6);
+> - NIHSS 0–5 (`nihss < 6`, `:205`; testo `trials-info.ts:49`);
+> - nessun limite superiore di età (`trials-info.ts:49`);
+> - finestra di 23 h (vedi però il punto 8);
 > - LVO obbligatoria (`:206`);
 > - ICA-T e M1 fra i vasi ammessi (`:87-88`);
 > - tandem non escluso (`tandem` non usato dalla regola, come da protocollo);
-> - trombolisi "Optional." e randomizzazione "EVT yes/no" (`trials-info.ts:50-51`);
-> - drip and ship con nuovo imaging se >1 h (`trials-info.ts:54`);
-> - testo ASPECTS "6-10" (`trials-info.ts:47`);
-> - link di randomizzazione all'eCRF Ennov dell'Università di Lille (`trials-info.ts:352`; [[MOSTE — Protocolo — V5]], p. 42).
+> - trombolisi "Optional." e randomizzazione "EVT yes/no" (`trials-info.ts:52-53`);
+> - drip and ship con nuovo imaging se >1 h (`trials-info.ts:56`);
+> - testo ASPECTS "6-10" (`trials-info.ts:49`);
+> - link di randomizzazione all'eCRF Ennov dell'Università di Lille (`trials-info.ts:360`; [[MOSTE — Protocolo — V5]], p. 42);
+> - stato `closed` come il foglio (`trials-info.ts:47`, vedi il punto 13).
 
-- [ ] **1. Stato: l'app lo propone ancora, il foglio dice reclutamento chiuso.**
-> [!warning] Contraddizione
-> Foglio [[Esquema ensayos — septiembre 2026]]: MOSTE "reclutamiento cerrado". Protocollo: reclutamento previsto fino al 30-04-2027 ([[MOSTE — Protocolo — V5]], p. 20).
-> App: `trials-info.ts:45` `status: "active"`. `isTrialOpen()` (`:402-405`) filtra solo `closed`, quindi `Summary.svelte:48` elenca MOSTE fra gli studi eleggibili.
-
-- [ ] **2. L'ASPECTS non viene controllato.**
+- [ ] **1. [FP] L'ASPECTS non viene controllato.**
 > [!warning] Contraddizione
 > Protocollo, inclusione 4: "ASPECT score ≥ 6 on non-contrast CT or DWI-MRI" ([[MOSTE — Protocolo — V5]], p. 24).
-> App: `moste()` (`acute-rules.ts:200-209`) e `reasonMoste()` (`acute-reasons.ts:98-107`) non leggono `aspects`, anche se il campo si compila nella stessa scheda EVT (`PostImaging.svelte:175-177`). Il testo `trials-info.ts:47` dice "6-10", ma la logica no. Un paziente con ASPECTS 0–5 risulta eleggibile: falsi positivi.
+> App: `moste()` (`acute-rules.ts:200-209`) e `reasonMoste()` (`acute-reasons.ts:98-107`) non leggono `aspects`, anche se il campo si compila nella stessa scheda EVT (`PostImaging.svelte:175-177`). Il testo `trials-info.ts:49` dice "6-10", ma la logica no. Un paziente con ASPECTS 0–5 risulta eleggibile: falsi positivi.
 
-- [ ] **3. L'età ≥18 non viene controllata.**
-> [!warning] Contraddizione
-> Protocollo, inclusione 1: "Subject is ≥ 18 years old at inclusion (no upper age limit)" ([[MOSTE — Protocolo — V5]], p. 23).
-> App: `moste()` non ha alcuna condizione su `input.age` (`acute-rules.ts:202-208`). Il "No upper limit" di `trials-info.ts:47` è corretto, ma manca il limite inferiore.
-
-- [ ] **4. La M2 isolata è accettata.**
+- [ ] **2. [FP] La M2 isolata è accettata.**
 > [!warning] Contraddizione
 > Protocollo: si ammette "M1-M2", cioè l'occlusione totale di M2 **con sospetto coinvolgimento di M1** ([[MOSTE — Protocolo — V5]], p. 24). "isolated M2 occlusions … are excluded from the study" ([[MOSTE — Protocolo — V5]], p. 29). L'App. B considera eleggibile come M1 distale la mancata visualizzazione dell'origine di uno dei due rami M2 ([[MOSTE — Protocolo — V5]], p. 72).
-> App: `computeVesselFlags` accetta `m2-any` e `m2-proxdom` da soli (`acute-rules.ts:89-90`); l'etichetta è "vessel ICA-T / M1 / M2" (`acute-reasons.ts:105`). Una M2 isolata, anche non dominante ("Any M2", `vessels.ts:16`), risulta eleggibile: falsi positivi. Il foglio scrive "M1-M2" come l'app (`trials-info.ts:49`), ma la regola non lo applica.
+> App: `computeVesselFlags` accetta `m2-any` e `m2-proxdom` da soli (`acute-rules.ts:89-90`); l'etichetta è "vessel ICA-T / M1 / M2" (`acute-reasons.ts:105`). Una M2 isolata, anche non dominante ("Any M2", `vessels.ts:16`), risulta eleggibile: falsi positivi. Il foglio scrive "M1-M2" come l'app (`trials-info.ts:51`), ma la regola non lo applica.
 
-- [ ] **5. La ICA intracranica non terminale è esclusa; il protocollo è ambiguo.**
-> [!warning] Contraddizione
-> Protocollo: "(ICA, M1, M1-M2 …)" (inclusione 6, p. 24); "Intracranial ICA and/or MCA-M1 or M1-M2" (p. 28); stratificazione "ICA vs MCA" (p. 21); ma il flow chart dice "ICA-T" (p. 33) ([[MOSTE — Protocolo — V5]]).
-> App: `computeVesselFlags` include solo `ica-terminal`, non `ica-intracranial` ("Intracranial ICA (no T)", `vessels.ts:12`) (`acute-rules.ts:87`). Se la ICA intracranica non-T è ammessa, ci sono falsi negativi. Da chiarire con il promotore.
-
-- [ ] **6. Finestra: `< 23` invece di `≤ 23`, misurata quando si usa l'app e non alla randomizzazione.**
-> [!warning] Contraddizione
-> Protocollo: "TLKW ≤ 23h at randomization" ([[MOSTE — Protocolo — V5]], p. 23); trattamento entro 24 h dal TLKW ([[MOSTE — Protocolo — V5]], p. 6).
-> App: `input.ltsw < 23` (`acute-rules.ts:203`; `acute-reasons.ts:101` "LTSW < 23h"; `trials-info.ts:47` "< 23 h"). `ltsw` sono le ore trascorse al momento della valutazione (`stores/patient.ts:82-90`). La differenza è di bordo (esattamente 23 h), ma l'app non avvisa che il limite vale alla randomizzazione, che avviene dopo.
-
-- [ ] **7. Non si controllano le occlusioni in più territori né la tortuosità.**
+- [ ] **3. [FP] Non si controllano le occlusioni in più territori né la tortuosità.**
 > [!warning] Contraddizione
 > Protocollo, esclusioni imaging 3 e 8: "Excessive tortuosity of cervical vessels…" e "Occlusions in multiple vascular territories…" ([[MOSTE — Protocolo — V5]], p. 25–26, p. 29).
 > App: `vessels.moste` è un OR (`acute-rules.ts:86-90`), quindi per esempio M1 + basilare risulta eleggibile. Il campo `tortuosity` esiste (`PostImaging.svelte:174`), ma `moste()` non lo usa.
 
-- [ ] **8. Il deficit "potentially disabling" non viene chiesto.**
+- [ ] **4. [FP] Il deficit "potentially disabling" non viene chiesto.**
 > [!warning] Contraddizione
 > Protocollo, inclusione 3: NIHSS 0–5 "with potentially disabling deficit…" ([[MOSTE — Protocolo — V5]], p. 23); la sinossi dice "disabling deficit" (p. 6).
 > App: basta `nihss < 6` (`acute-rules.ts:205`). Un NIHSS 0–1 con deficit non disabilitante risulta eleggibile. È accettabile come scelta di progetto, ma va reso esplicito.
 
-- [ ] **9. MOSTE compare solo se il paziente è marcato "candidato a trombectomia".**
+- [ ] **5. [FP] L'età ≥18 non viene controllata.**
+> [!warning] Contraddizione
+> Protocollo, inclusione 1: "Subject is ≥ 18 years old at inclusion (no upper age limit)" ([[MOSTE — Protocolo — V5]], p. 23).
+> App: `moste()` non ha alcuna condizione su `input.age` (`acute-rules.ts:202-208`). Il "No upper limit" di `trials-info.ts:49` è corretto, ma manca il limite inferiore.
+
+- [ ] **6. [FN] MOSTE compare solo se il paziente è marcato "candidato a trombectomia".**
 > [!warning] Contraddizione
 > Protocollo: in MOSTE la trombectomia è proprio il trattamento randomizzato, in pazienti con NIHSS 0–5 per i quali non è lo standard ([[MOSTE — Protocolo — V5]], p. 15–16, p. 19).
 > App: `lvo` deriva da "Candidato a trombectomia (EVT)? → Eleggibile" (`PostImaging.svelte:25-27`), e la scheda dei vasi appare solo in quel caso (`:102`, `:163-169`). Se il medico risponde "Non eleggibile" a un ictus minor con LVO, cosa plausibile fuori dallo studio, MOSTE non viene mai valutato: falsi negativi di flusso.
 
-- [ ] **10. Consenso orale o telefonico non previsto dai documenti.**
+- [ ] **7. [FN] La ICA intracranica non terminale è esclusa; il protocollo è ambiguo.**
+> [!warning] Contraddizione
+> Protocollo: "(ICA, M1, M1-M2 …)" (inclusione 6, p. 24); "Intracranial ICA and/or MCA-M1 or M1-M2" (p. 28); stratificazione "ICA vs MCA" (p. 21); ma il flow chart dice "ICA-T" (p. 33) ([[MOSTE — Protocolo — V5]]).
+> App: `computeVesselFlags` include solo `ica-terminal`, non `ica-intracranial` ("Intracranial ICA (no T)", `vessels.ts:12`) (`acute-rules.ts:87`). Se la ICA intracranica non-T è ammessa, ci sono falsi negativi. Da chiarire con il promotore.
+
+- [ ] **8. [FN]/[FP] Finestra: `< 23` invece di `≤ 23`, misurata quando si usa l'app e non alla randomizzazione.**
+> [!warning] Contraddizione
+> Protocollo: "TLKW ≤ 23h at randomization" ([[MOSTE — Protocolo — V5]], p. 23); trattamento entro 24 h dal TLKW ([[MOSTE — Protocolo — V5]], p. 6).
+> App: `input.ltsw < 23` (`acute-rules.ts:203`; `acute-reasons.ts:101` "LTSW < 23h"; `trials-info.ts:49` "< 23 h"). `ltsw` sono le ore trascorse al momento della valutazione (`stores/patient.ts:82-90`). La differenza è di bordo (esattamente 23 h), ma l'app non avvisa che il limite vale alla randomizzazione, che avviene dopo.
+
+- [ ] **9. [TXT] Consenso orale o telefonico non previsto dai documenti.**
 > [!warning] Contraddizione
 > Protocollo: consenso scritto del paziente o del rappresentante; persona di fiducia; inclusione senza firma se il CEIm lo permette ([[MOSTE — Protocolo — V5]], p. 34–35, p. 61). CI: solo firme scritte, del paziente o del rappresentante, poi conferma del paziente ([[MOSTE — CI — v2.0]], p. 9–10).
-> App: `trials-info.ts:48` "Written & oral/phone consent." (come il foglio). Né l'orale né il telefonico compaiono nei documenti in Drive: da verificare con il CEIm o il promotore.
+> App: `trials-info.ts:50` "Written & oral/phone consent." (come il foglio). Né l'orale né il telefonico compaiono nei documenti in Drive: da verificare con il CEIm o il promotore.
 
-- [ ] **11. Testo dell'imaging impreciso.**
+- [ ] **10. [TXT] Testo dell'imaging impreciso.**
 > [!warning] Contraddizione
 > Protocollo: occlusione su angio-TC **o angio-RM**, RM preferita (p. 24, p. 36, p. 58). A 24 h "MRI/MRA or CT/CTA", idealmente con la stessa modalità del basale e la RM raccomandata (p. 36). È esclusa la ICA cervicale prossimale **isolata**, non la ICA in generale (p. 7, p. 29) ([[MOSTE — Protocolo — V5]]).
-> App: `trials-info.ts:49` "CTA showing occlusion: TICA, M1-M2 or tandem. CT + CTA at 24 h."; `:54` "Isolated ICA exclusion.", "24 h CT and CTA always.". La M1 da sola non è citata, la RM manca, e "Isolated ICA" va precisato come "isolated proximal cervical ICA".
+> App: `trials-info.ts:51` "CTA showing occlusion: TICA, M1-M2 or tandem. CT + CTA at 24 h."; `:56` "Isolated ICA exclusion.", "24 h CT and CTA always.". La M1 da sola non è citata, la RM manca, e "Isolated ICA" va precisato come "isolated proximal cervical ICA".
 
-- [ ] **12. "preEvtLabs: No." contro criteri di esclusione di laboratorio.**
+- [ ] **11. [TXT] "preEvtLabs: No." contro criteri di esclusione di laboratorio.**
 > [!warning] Contraddizione
 > Protocollo, esclusioni 13–16: glicemia, creatinina, piastrine, INR/PTT; "Labs" allo screening nella Tabella 1 ([[MOSTE — Protocolo — V5]], p. 25, p. 34).
-> App: `trials-info.ts:52` "No." Il protocollo non dice esplicitamente che i risultati debbano essere disponibili prima della randomizzazione, ma i criteri li presuppongono.
+> App: `trials-info.ts:54` "No." Il protocollo non dice esplicitamente che i risultati debbano essere disponibili prima della randomizzazione, ma i criteri li presuppongono.
 
-- [ ] **13. Visite: G90 non è telefonica di default.**
+- [ ] **12. [TXT] Visite: G90 non è telefonica di default.**
 > [!warning] Contraddizione
 > Protocollo: G5–7 o dimissione, se precedente; G90 (±14) "within an inperson visit (by a blinded assessor)"; il telefono solo se il paziente non può venire ([[MOSTE — Protocolo — V5]], p. 37; [[MOSTE — CI — v2.0]], p. 4).
-> App: `trials-info.ts:55` "Day 5 / discharge (in-person)", "Day 90 (phone)".
+> App: `trials-info.ts:57` "Day 5 / discharge (in-person)", "Day 90 (phone)".
+
+- [x] **13. [FP] Stato: l'app lo proponeva ancora, il foglio dice reclutamento chiuso. ✅ risolto il 2026-10-19 (status closed).**
+> [!success] Risolto
+> Foglio [[Esquema ensayos — septiembre 2026]]: MOSTE "reclutamiento cerrado". Protocollo: reclutamento previsto fino al 30-04-2027 ([[MOSTE — Protocolo — V5]], p. 20).
+> Prima: `status: "active"`, e `Summary.svelte:48` elencava MOSTE fra gli studi eleggibili. Ora (commit `7818276`): `trials-info.ts:47` `status: "closed"`, con il commento sul foglio (`:45-46`). `isTrialOpen()` esclude `closed` e `paused` (`trials-info.ts:410-413`), quindi il Riepilogo (`Summary.svelte:48`) non lo propone più. Resta da allineare il frontmatter `estado_app: activo`.
 
 > [!note] Non modellati (scelta di progetto, non divergenza)
 > La regola non controlla le altre esclusioni cliniche e di imaging: emorragia, ricanalizzazione già avvenuta, accesso entro 60 min, sospetta stenosi intracranica o embolo calcifico, stent intracranico, effetto massa, gravidanza, adulti sotto tutela, altri studi con farmaco ([[MOSTE — Protocolo — V5]], p. 24–26). L'emorragia è comunque filtrata dal tipo di ictus nell'interfaccia.

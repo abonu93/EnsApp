@@ -162,57 +162,57 @@ Le visite remote si possono sostituire con visite in presenza se lo chiede il pa
 - Compatibilità con studi specifici: non riportata nel documento.
 
 ## Divergenze con EnsApp
-Confronto con `src/lib/domain/trials-info.ts:309-327`, `src/lib/domain/acute-rules.ts:345-400`, `src/lib/domain/acute-reasons.ts:221-246` e, per i campi dell'interfaccia, `src/routes/PostImaging.svelte` e `src/lib/i18n/it.ts`. Verificato il 2026-10-19.
+Confronto con `src/lib/domain/trials-info.ts:317-335`, `src/lib/domain/acute-rules.ts:345-400`, `src/lib/domain/acute-reasons.ts:221-246` e, per i campi dell'interfaccia, `src/routes/PostImaging.svelte` e `src/lib/i18n/it.ts`. Verificato il 2026-10-19 sul commit `6617a91`.
 
 > [!success] Coincide
 > Età ≥18; LKW >4,5 h; limite di 72 h (vedi nota sotto); mRS pre ≤1; NIHSS 6–25; soglie di perfusione (rapporto ≥1,2 e mismatch >10 mL); via c con M1 e ASPECTS ≥7 o M2 e ASPECTS ≥9; esclusione di core o DWI ≥70 mL, ipodensità intensa e ASPECTS 0–6; esclusione di ICA intracranica e terminale; esclusione della trombolisi standard (`ivtCandidate`); esclusione del candidato a EVT, equivalente alla MT nello stesso ospedale in un centro con trombectomia.
 
-- [ ] **1. Il diabete da solo esclude: nel protocollo no.** L'audit del team non lo segnala.
+- [ ] **1. [FN] Il diabete da solo esclude: nel protocollo no.** L'audit del team non lo segnala.
 > [!warning] Contraddizione
 > Protocollo, esclusione 21: "Any history of prior stroke and concomitant diabetes" ([[TENACITY — Protocolo — V1.0]], p. 32). Esclude cioè solo chi ha diabete **e** un ictus pregresso.
-> App: `acute-rules.ts:398` `input.diabetes !== "yes"`; `acute-reasons.ts:244` "no diabete"; `trials-info.ts:323` "Exclusion: contraindications to tenecteplase; diabetes."; domanda "Diabete?" (`i18n/it.ts:186`); commento in `stores/patient.ts:45`. L'app esclude **ogni** paziente diabetico: falsi negativi.
+> App: `acute-rules.ts:398` `input.diabetes !== "yes"`; `acute-reasons.ts:244` "no diabete"; `trials-info.ts:331` "Exclusion: contraindications to tenecteplase; diabetes."; domanda "Diabete?" (`i18n/it.ts:186`); commento in `stores/patient.ts:45`. L'app esclude **ogni** paziente diabetico: falsi negativi.
 
-- [ ] **2. La sede sopratentoriale non viene controllata** (lacuna già nota dall'audit, confermata).
+- [ ] **2. [FP] La sede sopratentoriale non viene controllata** (lacuna già nota dall'audit, confermata).
 > [!warning] Contraddizione
 > Protocollo, inclusione 3: "affecting the supratentorial circulation (anterior [ACA], middle [MCA], and posterior cerebral arteries [PCA])" ([[TENACITY — Protocolo — V1.0]], p. 30).
-> App: con `perfusionMismatch === "yes"` (`acute-rules.ts:378`, `:392`) la regola non guarda i vasi. Un'occlusione basilare o vertebrale (`basilar`, `va`), o un infarto cerebellare o del tronco con mismatch, risulta eleggibile. Lo stesso vale in `acute-reasons.ts:226`, `:236`. Il testo di `trials-info.ts:315` cita la circolazione sopratentoriale ma la logica non la verifica.
+> App: con `perfusionMismatch === "yes"` (`acute-rules.ts:378`, `:392`) la regola non guarda i vasi. Un'occlusione basilare o vertebrale (`basilar`, `va`), o un infarto cerebellare o del tronco con mismatch, risulta eleggibile. Lo stesso vale in `acute-reasons.ts:226`, `:236`. Il testo di `trials-info.ts:323` cita la circolazione sopratentoriale ma la logica non la verifica.
 
-- [ ] **3. La via c (angio-TC + ASPECTS) è accettata senza condizioni.**
+- [ ] **3. [FP] La via c (angio-TC + ASPECTS) è accettata senza condizioni.**
 > [!warning] Contraddizione
 > Protocollo: "c) If neither MRI or CT perfusion are available at the site" ([[TENACITY — Protocolo — V1.0]], p. 30); "Only sites without capabilities for neither MRI perfusion nor CT perfusion will be allowed to enroll participants by the NCCT / CTA criterion" ([[TENACITY — Protocolo — V1.0]], p. 46).
 > App: `acute-rules.ts:379-380`, `:392` accetta M1 con ASPECTS ≥7 o M2 con ASPECTS ≥9 anche se la perfusione è negativa o non è stata fatta. Se il nostro centro è registrato come centro con perfusione (da verificare con il promotore o il manuale di imaging), la via c non è ammessa: falsi positivi.
 
-- [ ] **4. La via a (RM perfusione-DWI) manca e la via b è incompleta.**
-> [!warning] Contraddizione
-> Protocollo: tre vie a/b/c. La via b richiede anche "lesion on NCCT is not larger than the estimated ischemic core lesion" ([[TENACITY — Protocolo — V1.0]], p. 30).
-> App: `trials-info.ts:315` dice "Option 1 - CT perfusion … Option 2 - no MRI/CTP" e non cita la RM. La domanda è "TC perfusione: mismatch >= 20% (ratio >= 1.2) e volume > 10 mL?" (`i18n/it.ts:183`; commento `acute-rules.ts:40`). Un paziente selezionato con RM rischia di avere risposta "No". La condizione NCCT ≤ core non viene chiesta.
-
-- [ ] **5. L'occlusione della ICA cervicale o tandem non viene rilevata.**
+- [ ] **4. [FP] L'occlusione della ICA cervicale o tandem non viene rilevata.**
 > [!warning] Contraddizione
 > Protocollo, esclusione 2: "Occlusion of the internal carotid artery (ICA)", senza limiti di sede ([[TENACITY — Protocolo — V1.0]], p. 31).
 > App: `acute-rules.ts:369-371` esclude solo `ica-intracranial` e `ica-terminal`. Non esiste un codice per la ICA extracranica. Il campo `tandem` si chiede solo nella scheda EVT (`PostImaging.svelte:163`, `:172`), che non compare mai per i candidati TENACITY (non-EVT), e la regola non lo usa. Un tandem con M1 e ASPECTS ≥7 risulta eleggibile.
 
-- [ ] **6. Il consenso telefonico non è previsto dal protocollo.**
+- [ ] **5. [FN]/[FP] La via a (RM perfusione-DWI) manca e la via b è incompleta.**
 > [!warning] Contraddizione
-> Protocollo: consenso scritto, completo o abbreviato; differito se la legge locale lo permette; rappresentante o caregiver; testimone imparziale per il consenso verbale ([[TENACITY — Protocolo — V1.0]], p. 6–7, p. 66–67).
-> App: `trials-info.ts:313` "Written & oral/phone consent." Il consenso telefonico non compare nel protocollo. Il CI locale non è in Drive: da verificare.
+> Protocollo: tre vie a/b/c. La via b richiede anche "lesion on NCCT is not larger than the estimated ischemic core lesion" ([[TENACITY — Protocolo — V1.0]], p. 30).
+> App: `trials-info.ts:323` dice "Option 1 - CT perfusion … Option 2 - no MRI/CTP" e non cita la RM. La domanda è "TC perfusione: mismatch >= 20% (ratio >= 1.2) e volume > 10 mL?" (`i18n/it.ts:183`; commento `acute-rules.ts:40`). Un paziente selezionato con RM rischia di avere risposta "No". La condizione NCCT ≤ core non viene chiesta.
 
-- [ ] **7. Testo sulla trombectomia impreciso** (divergenza solo testuale, la logica è corretta).
-> [!warning] Contraddizione
-> Protocollo: è esclusa solo l'intenzione di fare la MT **nello stesso ospedale**; i trasferiti per MT sono eleggibili ([[TENACITY — Protocolo — V1.0]], p. 29, p. 31).
-> App: `trials-info.ts:317` "No - patients treated with mechanical thrombectomy are excluded." In un centro con trombectomia l'effetto pratico è lo stesso (`acute-rules.ts:395`), ma il testo è sbagliato per i pazienti trasferiti.
-
-- [ ] **8. "preEvtLabs: No." è incompleto.**
-> [!warning] Contraddizione
-> Protocollo: prima del farmaco sono obbligatori la glicemia capillare e, nelle donne in età fertile, il test di gravidanza negativo. Coagulazione e piastrine servono se il paziente assume anticoagulanti o si sospetta una coagulopatia ([[TENACITY — Protocolo — V1.0]], p. 7).
-> App: `trials-info.ts:318` "No."
-
-- [ ] **9. Le controindicazioni alla TNK sono ridotte a un'unica domanda generica.**
+- [ ] **6. [NC] Le controindicazioni alla TNK sono ridotte a un'unica domanda generica.**
 > [!warning] Contraddizione
 > Protocollo: 19 criteri specifici (11–29), tra cui DOAC nelle ultime 48 h (13b), ictus ischemico o TIA negli ultimi 3 mesi (27) e glicemia <50 o >400 mg/dL (17) ([[TENACITY — Protocolo — V1.0]], p. 31–32).
 > App: il solo campo `contraTpa`, "Controindicazioni alla trombolisi?" (`i18n/it.ts:156`), con valore predefinito "no" (`PostImaging.svelte:43`) e controllato in `acute-rules.ts:397`. Il campo `doac`, che esiste, non viene usato. Anche i criteri 5, 10 e 30–36 (tra cui la partecipazione ad altri studi, 34) non sono modellati. È accettabile come scelta di progetto, ma un "no" predefinito non è una verifica.
 
-- [ ] **10. Visite non compilate**: `trials-info.ts:326` `visits: null`. Il protocollo prevede 7 visite, di cui G30 e G90 remote ([[TENACITY — Protocolo — V1.0]], p. 6).
+- [ ] **7. [TXT] Il consenso telefonico non è previsto dal protocollo.**
+> [!warning] Contraddizione
+> Protocollo: consenso scritto, completo o abbreviato; differito se la legge locale lo permette; rappresentante o caregiver; testimone imparziale per il consenso verbale ([[TENACITY — Protocolo — V1.0]], p. 6–7, p. 66–67).
+> App: `trials-info.ts:321` "Written & oral/phone consent." Il consenso telefonico non compare nel protocollo. Il CI locale non è in Drive: da verificare.
+
+- [ ] **8. [TXT] Testo sulla trombectomia impreciso** (la logica è corretta).
+> [!warning] Contraddizione
+> Protocollo: è esclusa solo l'intenzione di fare la MT **nello stesso ospedale**; i trasferiti per MT sono eleggibili ([[TENACITY — Protocolo — V1.0]], p. 29, p. 31).
+> App: `trials-info.ts:325` "No - patients treated with mechanical thrombectomy are excluded." In un centro con trombectomia l'effetto pratico è lo stesso (`acute-rules.ts:395`), ma il testo è sbagliato per i pazienti trasferiti.
+
+- [ ] **9. [TXT] "preEvtLabs: No." è incompleto.**
+> [!warning] Contraddizione
+> Protocollo: prima del farmaco sono obbligatori la glicemia capillare e, nelle donne in età fertile, il test di gravidanza negativo. Coagulazione e piastrine servono se il paziente assume anticoagulanti o si sospetta una coagulopatia ([[TENACITY — Protocolo — V1.0]], p. 7).
+> App: `trials-info.ts:326` "No."
+
+- [ ] **10. [TXT] Visite non compilate**: `trials-info.ts:334` `visits: null`. Il protocollo prevede 7 visite, di cui G30 e G90 remote ([[TENACITY — Protocolo — V1.0]], p. 6).
 
 > [!note] Nota interpretativa (non è una divergenza)
 > Il limite di 72 h nel protocollo è un criterio clinico-radiologico ("findings … suggesting stroke older than 72 h", esclusione 8, [[TENACITY — Protocolo — V1.0]], p. 31). Non è un tetto esplicito sul LKW. L'app lo traduce in `ltsw <= 72` (`acute-rules.ts:388`; `PostImaging.svelte:107`): è un'approssimazione ragionevole, ma non identica. Inoltre il DMC può restringere la finestra a 4,5–24 h ([[TENACITY — Protocolo — V1.0]], p. 72): se succede, l'app andrà aggiornata.

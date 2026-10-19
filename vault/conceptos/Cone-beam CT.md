@@ -12,6 +12,7 @@ Tomografia ottenuta in sala angiografica facendo ruotare il braccio a C attorno 
 | Studio | Uso / soglia | Fonte |
 |---|---|---|
 | [[WETRUST]] | Imaging di triage del braccio [[Direct to angio]]: CBCT senza contrasto per escludere l'emorragia, poi CBCT-A (facoltativa) o angiografia per l'occlusione. Ricostruzione con Butterfly Reconstructor (in studio) o SmartCT R3 (commercializzato) su angiografo Philips | ([[WETRUST — Protocolo — Rev 09]], p. 23, p. 34–35, p. 61) |
+| [[CEREFUZE]] | Inclusione 13: "Cone-beam CT performed immediately after EVT does not show intracranial haemorrhage", ultimo controllo in sala prima della riperfusione controllata | ([[CEREFUZE — Protocolo — Rev 01]], p. 5–6) |
 
 ## Note
 - La qualità dipende dagli artefatti da movimento: senza correzione il 24% delle CBCT ha artefatti moderati o gravi, con la correzione il 7%. Per questo WE-TRUST esclude i pazienti "extremadamente agitados" ([[WETRUST — Protocolo — Rev 09]], p. 48–49, p. 60).

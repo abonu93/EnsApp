@@ -28,3 +28,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-19 — Ingerito LIBREXIA (protocollo Am. 2 118/118, sinossi, CI): chiuso in app; la logica post-acuta richiede ABCD2 ≥6 a tutti ed esclude sempre gli AIT. Nuovi concetti: ABCD2, TOAST.
 - 2026-10-19 — Ingeriti i chiusi SHIONOGI (redasemtide; la voce dell'app mescola ABBVIE e LIBREXIA), MARRS (MARSS nell'app: solo colonna del foglio dati, nessuna voce né regola), PROMISE20 (la voce PROMISE dell'app descrive RELOADED).
 - 2026-10-19 — Ingerito SAIL-MeVO (protocollo V2.1 45/45, sinossi, CI paziente e rappresentante): sezione 'Proposta per EnsApp' con bozza di regola; mRS 0-1 nel protocollo vs 0-2 nel foglio. Nuovo concetto: Trombólisis intraarterial.
+- 2026-10-19 — Ingeriti DOAC-CVT (registro TVC; NON corrisponde a SAFER-DOAC dell'app), EAST-STROKE (97/97), ELAPSE (53/53); schede minime per AZURE (documenti cifrati) e ORBIT-XI (nessun documento). Nuovo concetto: Fibrilación auricular.

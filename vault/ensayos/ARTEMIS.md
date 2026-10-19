@@ -146,55 +146,54 @@ Nessuna visita a 30 giorni. Il CI riporta le stesse 5 visite ([[ARTEMIS — CI �
 - Compatibilità con studi specifici: non riportata nel documento.
 
 ## Divergenze con EnsApp
-Confronto con `src/lib/domain/trials-info.ts:109-121`, `src/lib/domain/acute-rules.ts:95-99` (vasi) e `:223-237` (regola), `src/lib/domain/acute-reasons.ts:121-132` e, per i campi dell'interfaccia, `src/routes/PostImaging.svelte`. Verificato il 2026-10-19 sul commit `5b39216`. Nel working tree `trials-info.ts` ha modifiche non committate di altri: le righe del blocco ARTEMIS sono slittate di +4, cioè 113–125. `acute-rules.ts` e `acute-reasons.ts` non sono cambiati.
+Confronto con `src/lib/domain/trials-info.ts:113-127`, `src/lib/domain/acute-rules.ts:95-99` (vasi) e `:223-237` (regola), `src/lib/domain/acute-reasons.ts:121-132` e, per i campi dell'interfaccia, `src/routes/PostImaging.svelte`. Verificato il 2026-10-19 sul commit `6617a91`. Lo stato `closed` è stato committato in `7818276` (prima era una modifica non committata nel working tree).
 
 > [!success] Coincide
-> Età 18–85 (`acute-rules.ts:227-228`); mRS pre ≤2 (`:229`); NIHSS 6–25 (`:230-231`); ASPECTS >5, cioè 6–10 (`:234-235`); vasi ammessi ICA intracranica, ICA terminale, M1 e M2 prossimale o dominante, con l'M2 generico escluso (`acute-rules.ts:95-99`; coincide con p. 25 e p. 29); finestra <24 h (`:226`, vedi però la nota 6); LVO candidato a EVT (`:232`); trombolisi "Optional." e trombectomia "Yes." (`trials-info.ts:115-116`); intervento "Stent retriever CONDA." (`:118`); parametri in `trials-info.ts:112` (`< 24 h`, `18-85 y`, `0-2`, `6-25`, `6-10`). Le etichette dei motivi (`acute-reasons.ts:124-130`) rispecchiano la regola. Tortuosità e tandem non entrano nella regola ARTEMIS: per due criteri che il protocollo valuta in sala, è coerente.
+> Età 18–85 (`acute-rules.ts:227-228`); mRS pre ≤2 (`:229`); NIHSS 6–25 (`:230-231`); ASPECTS >5, cioè 6–10 (`:234-235`); vasi ammessi ICA intracranica, ICA terminale, M1 e M2 prossimale o dominante, con l'M2 generico escluso (`acute-rules.ts:95-99`; coincide con p. 25 e p. 29); finestra <24 h (`:226`, vedi però il punto 3); LVO candidato a EVT (`:232`); trombolisi "Optional." e trombectomia "Yes." (`trials-info.ts:121-122`); intervento "Stent retriever CONDA." (`:124`); parametri in `trials-info.ts:118` (`< 24 h`, `18-85 y`, `0-2`, `6-25`, `6-10`); stato `closed` come il foglio (`trials-info.ts:116`, vedi il punto 10). Le etichette dei motivi (`acute-reasons.ts:124-130`) rispecchiano la regola. Tortuosità e tandem non entrano nella regola ARTEMIS: per due criteri che il protocollo valuta in sala, è coerente.
 
-- [ ] **1. Stato: l'app dice "active", il foglio "reclutamiento cerrado".**
-> [!warning] Contraddizione
-> Foglio del team: ARTEMIS "reclutamiento cerrado" ([[Esquema ensayos — septiembre 2026]]). Cartella originale in Drive in ENSAYOS INACTIVOS.
-> App (commit `5b39216`): `trials-info.ts:110` `status: "active"`. La regola `artemis()` non guarda lo stato (`stores/eligibility.ts:54`). Il Riepilogo filtra con `isTrialOpen()`, che esclude solo `"closed"` (`trials-info.ts:402-405`; `routes/Summary.svelte:48`). Quindi ARTEMIS viene ancora proposto come eleggibile.
-> **Modifica in corso, non committata, fatta da altri** e vista il 2026-10-19 nel working tree: `trials-info.ts:114-116` imposta `status: "closed"` con il commento "Reclutamento chiuso (foglio 'Esquema ensayos', set. 2026)". Se viene committata, questa divergenza si chiude. Il frontmatter `estado_app: activo` riflette il commit.
-
-- [ ] **2. Tandem: l'audit del team non trova conferma nel codice.** L'audit diceva che l'app "le esclude tutte". In realtà la regola ARTEMIS **non usa affatto** il campo `tandem` (`acute-rules.ts:223-237`; `acute-reasons.ts:121-132`). Il campo viene letto solo da ATHENA (`acute-rules.ts:144`, `acute-reasons.ts:44`). Neanche il codice legacy lo usa per ARTEMIS (`legacy/js/app-eligibility.js:220-229`).
-> [!note] Verdetto tandem
-> Protocollo: esclusione 26, valutata **in sala**, solo per le lesioni in tandem "requiring treatment or preventing access to thrombus" ([[ARTEMIS — Protocolo — V03]], p. 26; sinossi p. 7). È coerente con il divieto di doppio stent e di accesso carotideo (p. 32).
-> App: non esclude nessun tandem. Non è più restrittiva, anzi è più permissiva: un paziente con tandem risulta eleggibile senza alcun avviso. Per un criterio intra-operatorio non escludere allo screening è accettabile, ma servirebbe una nota in `trials-info.ts:119` (`notes: []`), per esempio "Tandem lesion requiring treatment or preventing access excluded intra-op". L'ambiguità extracranica/intracranica (sinossi vs corpo) resta una domanda per il promotore.
-
-- [ ] **3. L'occlusione singola e i territori multipli non vengono controllati.**
+- [ ] **1. [FP] L'occlusione singola e i territori multipli non vengono controllati.**
 > [!warning] Contraddizione
 > Protocollo: "a single occlusion" (p. 29); esclusione 28, "Occlusions in multiple vascular territories" (p. 26); esclusione 3, quadro clinico bilaterale o multiterritoriale (p. 25) ([[ARTEMIS — Protocolo — V03]]).
 > App: `vessels.artemis` (`acute-rules.ts:95-99`) è vero se **almeno uno** dei vasi ammessi è selezionato. Il numero di vasi non viene contato, a differenza di NiVO (`acute-rules.ts:194`). Con M1 + basilare il paziente risulta eleggibile.
 
-- [ ] **4. Il core ≤50 cc in valutazione automatica non viene chiesto.**
+- [ ] **2. [FP] Il core ≤50 cc in valutazione automatica non viene chiesto.**
 > [!warning] Contraddizione
 > Protocollo, inclusione 9: "If automated assessment, core volume of ≤50 cc on CTP/ DWI-MRI." ([[ARTEMIS — Protocolo — V03]], p. 25).
 > App: solo l'ASPECTS (`acute-rules.ts:234-235`). Il campo `largeCore` esiste, ma è di TENACITY con soglia 70 mL (`acute-rules.ts:42-43`). Con ASPECTS ≥6 e core automatico fra 51 e 69 cc il paziente risulta eleggibile.
 
-- [ ] **5. L'eTICI 0–1 è approssimato con "candidato EVT".** Il protocollo chiede eTICI 0–1 confermato all'angiografia o all'angio-TC/angio-RM (inclusione 8, p. 25) e lo ricontrolla all'inizio della DSA (esclusione 23, p. 26) ([[ARTEMIS — Protocolo — V03]]). L'app usa `lvo`, derivato da "candidato a trombectomia: eleggibile" (`PostImaging.svelte:25-27`). È un'approssimazione ragionevole, non una divergenza clinica forte.
-
-- [ ] **6. La finestra si misura fino alla puntura, non fino al momento del calcolo.**
+- [ ] **3. [FP] La finestra si misura fino alla puntura, non fino al momento del calcolo.**
 > [!warning] Contraddizione
 > Protocollo: "Treatable within 24 hours … Treatment start is defined by access puncture time" (p. 25); "within a timeframe of 24 hours from symptom onset (last time seen well) to potential access puncture" (p. 29) ([[ARTEMIS — Protocolo — V03]]).
-> App: `input.ltsw < 24` (`acute-rules.ts:226`), con il LTSW al momento dell'inserimento dati. Un paziente a 23,5 h può risultare eleggibile ma essere punto oltre le 24 h. Il testo di `trials-info.ts:112` (`< 24 h`) non lo specifica.
+> App: `input.ltsw < 24` (`acute-rules.ts:226`), con il LTSW al momento dell'inserimento dati. Un paziente a 23,5 h può risultare eleggibile ma essere punto oltre le 24 h. Il testo di `trials-info.ts:118` (`< 24 h`) non lo specifica.
 
-- [ ] **7. Il consenso è indicato come solo scritto.**
+- [ ] **4. [NC] Tandem: l'audit del team non trova conferma nel codice.** L'audit diceva che l'app "le esclude tutte". In realtà la regola ARTEMIS **non usa affatto** il campo `tandem` (`acute-rules.ts:223-237`; `acute-reasons.ts:121-132`). Il campo viene letto solo da ATHENA (`acute-rules.ts:144`, `acute-reasons.ts:44`). Neanche il codice legacy lo usa per ARTEMIS (`legacy/js/app-eligibility.js:220-229`).
+> [!note] Verdetto tandem
+> Protocollo: esclusione 26, valutata **in sala**, solo per le lesioni in tandem "requiring treatment or preventing access to thrombus" ([[ARTEMIS — Protocolo — V03]], p. 26; sinossi p. 7). È coerente con il divieto di doppio stent e di accesso carotideo (p. 32).
+> App: non esclude nessun tandem. Non è più restrittiva, anzi è più permissiva: un paziente con tandem risulta eleggibile senza alcun avviso. Per un criterio intra-operatorio non escludere allo screening è accettabile, ma servirebbe una nota in `trials-info.ts:125` (`notes: []`), per esempio "Tandem lesion requiring treatment or preventing access excluded intra-op". L'ambiguità extracranica/intracranica (sinossi vs corpo) resta una domanda per il promotore.
+
+- [ ] **5. [NC] L'eTICI 0–1 è approssimato con "candidato EVT".** Il protocollo chiede eTICI 0–1 confermato all'angiografia o all'angio-TC/angio-RM (inclusione 8, p. 25) e lo ricontrolla all'inizio della DSA (esclusione 23, p. 26) ([[ARTEMIS — Protocolo — V03]]). L'app usa `lvo`, derivato da "candidato a trombectomia: eleggibile" (`PostImaging.svelte:25-27`). È un'approssimazione ragionevole, non una divergenza clinica forte.
+
+- [ ] **6. [NC] Le esclusioni cliniche e radiologiche non sono modellate** (scelta di progetto, da rendere esplicita). Mancano i criteri 1–22 (tra cui ictus negli ultimi 6 mesi, AVK con INR >3, glicemia, PA refrattaria, creatinina ≥3 o GFR <30 o dialisi, allergia al nichel-titanio, gravidanza, emorragia, tumore, vasculite, stent preesistente) e quelli intra-operatori 23–29 ([[ARTEMIS — Protocolo — V03]], p. 25–26). `trials-info.ts:125` `notes: []` non ne cita nessuno.
+
+- [ ] **7. [TXT] Il consenso è indicato come solo scritto.**
 > [!warning] Contraddizione
 > Protocollo: surrogato, consenso remoto elettronico, differito, orale con il consenso del CEIm, testimone ([[ARTEMIS — Protocolo — V03]], p. 28, p. 61–62). CI V03: consenso verbale telefonico del rappresentante, poi firma ([[ARTEMIS — CI — V03]], p. 1, p. 13). Il foglio del team dice "scritto e orale/telefonico".
-> App: `trials-info.ts:113` `consent: "Written."`.
+> App: `trials-info.ts:119` `consent: "Written."`.
 
-- [ ] **8. Visite sbagliate.**
+- [ ] **8. [TXT] Visite sbagliate.**
 > [!warning] Contraddizione
 > Protocollo: screening, G0, 24 h (−8/+12), **G5 ±24 h o dimissione** (la prima delle due), **G90 ±14 d preferibilmente in presenza**. Nessuna visita a 30 giorni ([[ARTEMIS — Protocolo — V03]], p. 9, p. 27, p. 32–33).
-> App: `trials-info.ts:120` `["Baseline (in-person)", "24 h (in-person)", "Discharge (in-person)", "Day 30 (phone)", "Day 90 (phone)"]`. La visita a 30 giorni non esiste, il G90 è indicato solo per telefono e il G5 manca.
+> App: `trials-info.ts:126` `["Baseline (in-person)", "24 h (in-person)", "Discharge (in-person)", "Day 30 (phone)", "Day 90 (phone)"]`. La visita a 30 giorni non esiste, il G90 è indicato solo per telefono e il G5 manca.
 
-- [ ] **9. Testo dell'imaging incompleto** (divergenza solo testuale). `trials-info.ts:114` elenca i vasi, ma non cita l'eTICI 0–1, l'occlusione singola, la ICA terminale (ammessa a p. 29 e codificata in `acute-rules.ts:97`) né il core ≤50 cc.
+- [ ] **9. [TXT] Testo dell'imaging incompleto.** `trials-info.ts:120` elenca i vasi, ma non cita l'eTICI 0–1, l'occlusione singola, la ICA terminale (ammessa a p. 29 e codificata in `acute-rules.ts:97`) né il core ≤50 cc.
 
-- [ ] **10. Le esclusioni cliniche e radiologiche non sono modellate** (scelta di progetto, da rendere esplicita). Mancano i criteri 1–22 (tra cui ictus negli ultimi 6 mesi, AVK con INR >3, glicemia, PA refrattaria, creatinina ≥3 o GFR <30 o dialisi, allergia al nichel-titanio, gravidanza, emorragia, tumore, vasculite, stent preesistente) e quelli intra-operatori 23–29 ([[ARTEMIS — Protocolo — V03]], p. 25–26). `trials-info.ts:119` `notes: []` non ne cita nessuno.
+- [x] **10. [FP] Stato: l'app diceva "active", il foglio "reclutamiento cerrado". ✅ risolto il 2026-10-19 (status closed).**
+> [!success] Risolto
+> Foglio del team: ARTEMIS "reclutamiento cerrado" ([[Esquema ensayos — septiembre 2026]]). Cartella originale in Drive in ENSAYOS INACTIVOS.
+> Prima (commit `5b39216`): `status: "active"`, quindi ARTEMIS veniva proposto come eleggibile. Ora (commit `7818276`): `trials-info.ts:116` `status: "closed"`, con il commento "Reclutamento chiuso (foglio 'Esquema ensayos', set. 2026)" (`:114-115`). La regola `artemis()` continua a non guardare lo stato (`stores/eligibility.ts:54`), ma il Riepilogo filtra con `isTrialOpen()`, che esclude `"closed"` e `"paused"` (`trials-info.ts:410-413`; `routes/Summary.svelte:48`): ARTEMIS non viene più proposto. Resta da allineare il frontmatter `estado_app: activo`.
 
 > [!note] preEvtLabs
-> `trials-info.ts:117` "No." è sostanzialmente corretto: il protocollo non chiede esami specifici dello studio, solo esami della pratica locale ([[ARTEMIS — Protocolo — V03]], p. 35). Alcune esclusioni (5, 6, 11) usano però valori "known" di INR, glicemia e creatinina.
+> `trials-info.ts:123` "No." è sostanzialmente corretto: il protocollo non chiede esami specifici dello studio, solo esami della pratica locale ([[ARTEMIS — Protocolo — V03]], p. 35). Alcune esclusioni (5, 6, 11) usano però valori "known" di INR, glicemia e creatinina.
 
 ## Problemi documentali
 - **Lettura del protocollo incompleta**: pp. 82–84 non lette (fine dell'Appendix 4 e probabilmente l'Appendix 5, la publication policy). Il PDF da 8,7 MB supera il limite di download del connettore Drive. Vedi [[ARTEMIS — Protocolo — V03]].

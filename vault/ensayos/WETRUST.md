@@ -115,44 +115,44 @@ Testo originale (§7.4.1.2, [[WETRUST — Protocolo — Rev 09]], p. 59–60):
 - Studi specifici compatibili o incompatibili: non riportati nelle pagine lette.
 
 ## Divergenze con EnsApp
-Confronto con `src/lib/domain/trials-info.ts:31-43`, `src/lib/domain/acute-rules.ts:121-133`, `src/lib/domain/acute-reasons.ts:23-35` e, per i campi d'ingresso, `src/routes/PreImaging.svelte`, `src/lib/stores/patient.ts` e `src/lib/i18n/it.ts`. Verificato il 2026-10-19.
+Confronto con `src/lib/domain/trials-info.ts:31-43`, `src/lib/domain/acute-rules.ts:121-133`, `src/lib/domain/acute-reasons.ts:23-35` e, per i campi d'ingresso, `src/routes/PreImaging.svelte`, `src/lib/stores/patient.ts` e `src/lib/i18n/it.ts`. Verificato il 2026-10-19 sul commit `6617a91`.
 
 > [!success] Coincide
 > Stato "active" (`trials-info.ts:32`) come il foglio del team ("aperto"); età ≥18; NIHSS ≥10; mRS pre 0–2 (`acute-rules.ts:126-128`, `trials-info.ts:34`); finestra di 6 h e, per l'ictus al risveglio, 12 h con sintomi entro 6 h nel testo (`trials-info.ts:34`); nessun criterio ASPECTS (`aspects: "-"`); nessun requisito di occlusione prima della randomizzazione (corretto: si randomizza prima dell'imaging); disponibilità dell'angiografo come prerequisito (`acute-rules.ts:131`, inclusione 6); trombolisi "Optional" e trombectomia "Yes" (`trials-info.ts:37-38`); intervento "Cone-beam CT software (vs standard)" e vie d'imaging DTAS o TC multimodale (`trials-info.ts:36`, `:40`); INR >3 fra le esclusioni citate (`trials-info.ts:41`).
 
-- [ ] **1. L'estensione per l'ictus al risveglio non funziona: chi ha LSW fra 6 e 12 h risulta sempre non eleggibile.**
+- [ ] **1. [FN] L'estensione per l'ictus al risveglio non funziona: chi ha LSW fra 6 e 12 h risulta sempre non eleggibile.**
 > [!warning] Contraddizione
 > Protocollo, inclusione 4: "Ictus al despertar con un tiempo desde la última vez que se lo vio bien < 12 horas a la llegada al centro de ictus Y con síntomas identificados dentro de las 6 horas" ([[WETRUST — Protocolo — Rev 09]], p. 59). Il limite delle 6 h riguarda il momento in cui i sintomi sono stati **scoperti**, non il LSW.
 > App: `PreImaging.svelte:27` calcola `symptomsWithin6h = wakeupStroke && ltswHrs <= 6`, cioè usa **il LSW** e non l'ora della scoperta dei sintomi, e lo salva in `wakeupSymptomsWithin6h` (`PreImaging.svelte:38`). La regola richiede questo valore vero (`acute-rules.ts:124`, `:130`; `acute-reasons.ts:26`, `:32`). Risultato: con l'ictus al risveglio la regola equivale a LSW ≤6 h e la soglia di 12 h (`acute-rules.ts:123`) non si raggiunge mai. Il testo promette altro: "ammette LTSW fino a 12h se sintomi identificati entro 6h" (`i18n/it.ts:111`), "Sintomi identificati entro 6h dal risveglio" (`i18n/it.ts:112`), ma non c'è un campo per l'ora del risveglio o della scoperta. Falsi negativi.
 
-- [ ] **2. Il tempo si misura in un momento diverso e il limite è incluso.**
+- [ ] **2. [FN]/[FP] Il tempo si misura in un momento diverso e il limite è incluso.**
 > [!warning] Contraddizione
 > Protocollo: "tiempo estimado hasta la llegada al centro de ictus < 6 horas"; "< 12 horas a la llegada al centro de ictus" ([[WETRUST — Protocolo — Rev 09]], p. 59). Limite stretto e calcolato **all'arrivo**.
 > App: `ltsw` è calcolato rispetto all'ora attuale (`stores/patient.ts:70-75`, `Date.now()`) e confrontato con `<=` (`acute-rules.ts:129`; `acute-reasons.ts:31` "LTSW <= 6h"). Se il paziente viene valutato dopo l'arrivo l'app è più restrittiva; esattamente a 6,0 h (o 12,0 h) è più permissiva. Differenza piccola, ma l'app dovrebbe ragionare sull'ora di arrivo.
 
-- [ ] **3. "low GCS" non è nel protocollo.**
-> [!warning] Contraddizione
-> Protocollo, esclusione 6: "Pacientes en coma (puntuación de consciencia según NIHSS >1)" ([[WETRUST — Protocolo — Rev 09]], p. 60). Il criterio usa il NIHSS 1a, non la GCS; anche le crisi escludono solo se "podrían evitar la obtención de una puntuación NIHSS inicial" (esclusione 9).
-> App: `trials-info.ts:41` "low GCS, INR > 3, seizure at onset". Lo stesso testo è nel foglio del team ("GCS basso") ([[Esquema ensayos — septiembre 2026]]).
-
-- [ ] **4. Le esclusioni non sono modellate nella regola.**
+- [ ] **3. [NC] Le esclusioni non sono modellate nella regola.**
 > [!warning] Contraddizione
 > Protocollo: 21 criteri di esclusione, fra cui INR >3,0 noto, piastrine <30 000, glicemia <50 mg/dL, trasferiti con imaging valido, coma, vomito o agitazione estremi, crisi all'esordio, ictus intraospedaliero, allergia grave al contrasto, gravidanza ([[WETRUST — Protocolo — Rev 09]], p. 59–60).
 > App: `acute-rules.ts:121-133` controlla solo età, NIHSS, mRS, tempo e angiografo; le esclusioni sono solo un testo d'esempio (`trials-info.ts:41`). Il messaggio "Il paziente soddisfa i criteri WeTrust. E' possibile procedere alla randomizzazione." (`i18n/it.ts:124`) è quindi troppo forte: va completato con la verifica manuale delle esclusioni. In particolare l'esclusione 5 (trasferiti con TC/RM che non va ripetuta) non ha un campo nell'app.
 
-- [ ] **5. L'équipe endovascolare non viene chiesta** (lacuna minore).
+- [ ] **4. [NC] L'équipe endovascolare non viene chiesta** (lacuna minore).
 > [!warning] Contraddizione
 > Protocollo, inclusioni 6 e 7: sala angiografica **ed** équipe endovascolare disponibili subito ([[WETRUST — Protocolo — Rev 09]], p. 59).
 > App: una sola domanda, "Angiografo Philips disponibile?" (`i18n/it.ts:114`; `acute-rules.ts:131`; motivo "angiografo Philips disponibile", `acute-reasons.ts:33`). Il riferimento a Philips è coerente con il dispositivo ([[WETRUST — Protocolo — Rev 09]], p. 34).
 
-- [ ] **6. Consenso non compilato.**
+- [ ] **5. [TXT] "low GCS" non è nel protocollo.**
+> [!warning] Contraddizione
+> Protocollo, esclusione 6: "Pacientes en coma (puntuación de consciencia según NIHSS >1)" ([[WETRUST — Protocolo — Rev 09]], p. 60). Il criterio usa il NIHSS 1a, non la GCS; anche le crisi escludono solo se "podrían evitar la obtención de una puntuación NIHSS inicial" (esclusione 9).
+> App: `trials-info.ts:41` "low GCS, INR > 3, seizure at onset". Lo stesso testo è nel foglio del team ("GCS basso") ([[Esquema ensayos — septiembre 2026]]).
+
+- [ ] **6. [TXT] Consenso non compilato.**
 > [!warning] Contraddizione
 > CI locale: consenso **differito**, prima dal rappresentante o familiare e poi dal paziente con ri-consenso ([[WETRUST — CI — Rev 07]], p. 1, p. 9–11). Protocollo, inclusione 5: paziente o rappresentante legale ([[WETRUST — Protocolo — Rev 09]], p. 59).
 > App: `trials-info.ts:35` `consent: "—"`. Il foglio del team dice "scritto e orale/telefonico", che il CI non prevede ([[Esquema ensayos — septiembre 2026]]). Il §14 del protocollo non è stato letto: da verificare prima di scrivere il testo.
 
-- [ ] **7. Visite non compilate**: `trials-info.ts:42` `visits: null`. Il protocollo prevede imaging a 24 (−12/+24) h, una visita alla dimissione o a 5–7 giorni e il mRS a 90 ±14 giorni, in cieco e in presenza (videochiamata ammessa) ([[WETRUST — Protocolo — Rev 09]], p. 26–27, p. 64).
+- [ ] **7. [TXT] Visite non compilate**: `trials-info.ts:42` `visits: null`. Il protocollo prevede imaging a 24 (−12/+24) h, una visita alla dimissione o a 5–7 giorni e il mRS a 90 ±14 giorni, in cieco e in presenza (videochiamata ammessa) ([[WETRUST — Protocolo — Rev 09]], p. 26–27, p. 64).
 
-- [ ] **8. Popolazione target non descritta** (solo testo, non logica). Il protocollo analizza solo le OGV di ACI intracranica, M1 o basilare (escluse M2 e più distali) ([[WETRUST — Protocolo — Rev 09]], p. 67). L'app non lo dice (`trials-info.ts:36`). Non va usato come criterio prima della randomizzazione, ma è utile in sala per sapere chi entra nell'analisi primaria.
+- [ ] **8. [TXT] Popolazione target non descritta** (solo testo, non logica). Il protocollo analizza solo le OGV di ACI intracranica, M1 o basilare (escluse M2 e più distali) ([[WETRUST — Protocolo — Rev 09]], p. 67). L'app non lo dice (`trials-info.ts:36`). Non va usato come criterio prima della randomizzazione, ma è utile in sala per sapere chi entra nell'analisi primaria.
 
 > [!note] Nota (non è una divergenza)
 > `preEvtLabs: "No."` (`trials-info.ts:39`): nelle pagine lette il protocollo non prevede esami specifici dello studio prima della procedura. I criteri 1–3 si basano su valori "conocidos" o "iniciales" ([[WETRUST — Protocolo — Rev 09]], p. 59–60). Da ricontrollare se il §14 o le appendici aggiungono qualcosa.

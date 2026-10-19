@@ -17,7 +17,7 @@ actualizado: 2026-10-19
 # EAST-STROKE
 
 > [!summary] In breve
-> Studio PROBE di fase IV, randomizzato 1:1, promosso dall'UKE di Amburgo. Confronta la terapia abituale con la terapia abituale più il **controllo precoce del ritmo** (antiaritmici, ablazione o cardioversione) in pazienti con ictus ischemico acuto e **fibrillazione atriale** diagnosticata da ≤1 anno. La randomizzazione avviene entro 4 settimane dall'ictus. L'endpoint primario è un composito di ictus ricorrente, morte cardiovascolare e ricovero per scompenso o sindrome coronarica acuta ([[EAST-STROKE — Protocolo — v2.0]], p. 9–11, p. 23).
+> Studio PROBE di fase IV, randomizzato 1:1, promosso dall'UKE di Amburgo. Confronta la terapia abituale con la terapia abituale più il **controllo precoce del ritmo** (antiaritmici, ablazione o cardioversione) in pazienti con ictus ischemico acuto e **[[Fibrilación auricular|fibrillazione atriale]]** diagnosticata da ≤1 anno. La randomizzazione avviene entro 4 settimane dall'ictus. L'endpoint primario è un composito di ictus ricorrente, morte cardiovascolare e ricovero per scompenso o sindrome coronarica acuta ([[EAST-STROKE — Protocolo — v2.0]], p. 9–11, p. 23).
 
 > [!info] Stato
 > Cartella Drive: **ENSAYOS ABIERTOS / OTROS**. Lo studio non compare nel foglio [[Esquema ensayos — septiembre 2026]] né nell'app. Il coordinatore nazionale per la Spagna è di Vall d'Hebron ([[EAST-STROKE — Protocolo — v2.0]], p. 3). Nella cartella non c'è il CI.

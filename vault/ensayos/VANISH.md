@@ -107,68 +107,68 @@ Tutte le valutazioni sono di pratica clinica: nessuna procedura aggiuntiva ([[VA
 Non riportato nel documento: il protocollo non esclude la partecipazione ad altri studi e non cita studi compatibili.
 
 ## Divergenze con EnsApp
-Confronto con `src/lib/domain/trials-info.ts:148-160`, `src/lib/domain/acute-rules.ts:79-81` e `:149-158`, `src/lib/domain/acute-reasons.ts:49-58`; campi dell'interfaccia in `src/routes/PostImaging.svelte` e `src/lib/domain/vessels.ts`. Verificato il 2026-10-19.
+Confronto con `src/lib/domain/trials-info.ts:154-166`, `src/lib/domain/acute-rules.ts:79-81` e `:149-158`, `src/lib/domain/acute-reasons.ts:49-58`; campi dell'interfaccia in `src/routes/PostImaging.svelte` e `src/lib/domain/vessels.ts`. Verificato il 2026-10-19 sul commit `6617a91`.
 
 > [!success] Coincide
-> Stato "active" (`trials-info.ts:149`) = "aperto" nel foglio del team. Età ≥18 (`acute-rules.ts:152`), mRS pre ≤1 (`:153`), NIHSS ≥6 (`:154`), candidato a EVT (`lvo`, `:155`, derivato da `candidate` in `PostImaging.svelte:27`). M1 e ICA terminale accettate (`acute-rules.ts:81`); M2 **non** accettata dalla logica, come nel protocollo. Testo della finestra "< 9 h (wake-up: <= 9 h from mid-sleep)" (`trials-info.ts:151`); trombolisi e.v. "Optional" (`:154`); trombectomia "Yes" (`:155`); link di randomizzazione Study Randomizer (`trials-info.ts:351`), come nel protocollo (p. 22).
+> Stato "active" (`trials-info.ts:155`) = "aperto" nel foglio del team. Età ≥18 (`acute-rules.ts:152`), mRS pre ≤1 (`:153`), NIHSS ≥6 (`:154`), candidato a EVT (`lvo`, `:155`, derivato da `candidate` in `PostImaging.svelte:27`). M1 e ICA terminale accettate (`acute-rules.ts:81`); M2 **non** accettata dalla logica, come nel protocollo. Testo della finestra "< 9 h (wake-up: <= 9 h from mid-sleep)" (`trials-info.ts:157`); trombolisi e.v. "Optional" (`:160`); trombectomia "Yes" (`:161`); link di randomizzazione Study Randomizer (`trials-info.ts:359`), come nel protocollo (p. 22).
 
-- [ ] **1. ASPECTS ≥4 nel testo dell'app: non esiste nel protocollo.**
-> [!warning] Contraddizione
-> Protocollo: nessun criterio ASPECTS in inclusione/esclusione; l'ASPECTS è solo una variabile di stratificazione ("stratifying by center, age, sex, ASPECT score and symptoms onset") ([[VANISH — Protocolo — v1.2]], p. 17–18, p. 22). Neppure sinossi e CI ne parlano.
-> App: `trials-info.ts:151` `aspects: ">= 4"`. La logica (`acute-rules.ts:149-158`) non controlla l'ASPECTS, quindi l'effetto è solo informativo, ma induce a escludere pazienti con ASPECTS 0–3. Vedi verdetto in "Problemi documentali".
-
-- [ ] **2. La finestra di 9 h non viene controllata.**
+- [ ] **1. [FP] La finestra di 9 h non viene controllata.**
 > [!warning] Contraddizione
 > Protocollo, inclusione 6: "within 9 hours of stroke onset … The maximum time window for randomization is then 9 hours from the mid-point" ([[VANISH — Protocolo — v1.2]], p. 17).
 > App: `acute-rules.ts:149-158` e `acute-reasons.ts:49-58` non usano `ltsw`. Un paziente a 20 h risulta eleggibile: falsi positivi. Manca anche il calcolo del punto medio del sonno per l'ictus al risveglio.
 
-- [ ] **3. Core ≤70 mL e mismatch non vengono controllati.**
+- [ ] **2. [FP] Core ≤70 mL e mismatch non vengono controllati.**
 > [!warning] Contraddizione
 > Protocollo, inclusioni 8–9: "ischemic core lesion volume ≤ 70 ml" e "ratio of greater than 1.2 and an absolute difference greater than 10mL (… Tmax > 6 second delay)" ([[VANISH — Protocolo — v1.2]], p. 17). Letteralmente valgono per tutti i pazienti (vedi anche il problema documentale 3).
 > App: nessun controllo in `acute-rules.ts:149-158`. I campi esistenti `perfusionMismatch` e `largeCore` (`acute-rules.ts:40-43`) sono pensati per TENACITY e mostrati solo nella scheda non-EVT; inoltre hanno soglie diverse (TENACITY: rapporto ≥1,2 ed esclusione con core ≥70 mL; VANISH: rapporto >1,2 e inclusione con core ≤70 mL). Non vanno riusati così come sono.
 
-- [ ] **4. Il tandem non esclude** (lacuna già nota dall'audit, confermata).
+- [ ] **3. [FP] Il tandem non esclude** (lacuna già nota dall'audit, confermata).
 > [!warning] Contraddizione
 > Protocollo, esclusione 12: "CTA or MRA evidence of tandem occlusions of any cause" ([[VANISH — Protocolo — v1.2]], p. 18). Anche il foglio del team lo riporta fra le esclusioni.
 > App: il campo `tandem` viene chiesto proprio nella scheda EVT (`PostImaging.svelte:30`, `:70`, `:172`) e usato per ATHENA (`acute-rules.ts:144`), ma non per VANISH (`acute-rules.ts:149-158`). Un tandem ICA cervicale + M1 risulta eleggibile: falsi positivi.
 
-- [ ] **5. La ICA intracranica non terminale è esclusa dall'app.** Non segnalata dall'audit.
+- [ ] **4. [FN] La ICA intracranica non terminale è esclusa dall'app.** Non segnalata dall'audit.
 > [!warning] Contraddizione
 > Protocollo, inclusione 7: "Occlusion (TICI 0-1) of the intracranial internal carotid artery (ICA) and the M1 segments" ([[VANISH — Protocolo — v1.2]], p. 17). Non limita alla ICA terminale.
 > App: `acute-rules.ts:81` accetta solo `ica-terminal` o `m1`; il codice `ica-intracranial` ("Intracranial ICA (no T)", `vessels.ts:12`) non rende eleggibili. Etichetta "vessel ICA-T o M1" in `acute-reasons.ts:56`. Falsi negativi.
 
-- [ ] **6. Il testo cita la M2 e la DSA, il protocollo no.**
-> [!warning] Contraddizione
-> Protocollo: solo ICA intracranica e M1, "confirmed by CT or MR angiography" ([[VANISH — Protocolo — v1.2]], p. 17); la randomizzazione avviene prima dell'angiografia (p. 22).
-> App: `trials-info.ts:153` "Occlusion (TICI 0-1) of ICA, M1, or weight-bearing M2 on CTA/MRA/DSA." Anche il foglio dice "M2 dominante". La logica (`acute-rules.ts:81`) è corretta; il testo no.
-
-- [ ] **7. TICI 0–1 non verificabile.** Il protocollo richiede un'occlusione completa (TICI 0–1) all'angio-TC/RM ([[VANISH — Protocolo — v1.2]], p. 17). L'app usa come approssimazione `lvo === "yes"`, derivato dalla candidatura a EVT (`PostImaging.svelte:27`; `acute-rules.ts:155`). Accettabile, ma non distingue un'occlusione parziale.
-
-- [ ] **8. Controindicazioni alla trombolisi IV/IA non controllate.**
+- [ ] **5. [NC] Controindicazioni alla trombolisi IV/IA non controllate.**
 > [!warning] Contraddizione
 > Protocollo, esclusione 1: "Any absolute contraindication for IV or IA t-PA", con tabella a p. 19 ([[VANISH — Protocolo — v1.2]], p. 17, p. 19).
 > App: il campo `contraTpa` esiste (`acute-rules.ts:39`) ma è mostrato solo nella scheda TENACITY (`PostImaging.svelte:41-43`, `:213-214`) e non è usato da `vanish()`. Nota: il protocollo stesso è incoerente su questo punto (problema documentale 4).
 
-- [ ] **9. Altre esclusioni non modellate**: gravidanza, malattia renale nota, allergia a contrasto/nichel/titanio, effetto massa o tumore, vasculite, aspettativa di vita <90 giorni, follow-up difficile ([[VANISH — Protocolo — v1.2]], p. 17–18). Scelta di progetto accettabile, ma nessun avviso nell'app (`trials-info.ts:158` `notes: []`).
+- [ ] **6. [NC] TICI 0–1 non verificabile.** Il protocollo richiede un'occlusione completa (TICI 0–1) all'angio-TC/RM ([[VANISH — Protocolo — v1.2]], p. 17). L'app usa come approssimazione `lvo === "yes"`, derivato dalla candidatura a EVT (`PostImaging.svelte:27`; `acute-rules.ts:155`). Accettabile, ma non distingue un'occlusione parziale.
 
-- [ ] **10. Consenso non indicato.**
+- [ ] **7. [NC] Altre esclusioni non modellate**: gravidanza, malattia renale nota, allergia a contrasto/nichel/titanio, effetto massa o tumore, vasculite, aspettativa di vita <90 giorni, follow-up difficile ([[VANISH — Protocolo — v1.2]], p. 17–18). Scelta di progetto accettabile, ma nessun avviso nell'app (`trials-info.ts:164` `notes: []`).
+
+- [ ] **8. [TXT] ASPECTS ≥4 nel testo dell'app: non esiste nel protocollo.**
+> [!warning] Contraddizione
+> Protocollo: nessun criterio ASPECTS in inclusione/esclusione; l'ASPECTS è solo una variabile di stratificazione ("stratifying by center, age, sex, ASPECT score and symptoms onset") ([[VANISH — Protocolo — v1.2]], p. 17–18, p. 22). Neppure sinossi e CI ne parlano.
+> App: `trials-info.ts:157` `aspects: ">= 4"`. La logica (`acute-rules.ts:149-158`) non controlla l'ASPECTS, quindi l'effetto è solo informativo, ma induce a escludere pazienti con ASPECTS 0–3. Vedi verdetto in "Problemi documentali".
+
+- [ ] **9. [TXT] Il testo cita la M2 e la DSA, il protocollo no.**
+> [!warning] Contraddizione
+> Protocollo: solo ICA intracranica e M1, "confirmed by CT or MR angiography" ([[VANISH — Protocolo — v1.2]], p. 17); la randomizzazione avviene prima dell'angiografia (p. 22).
+> App: `trials-info.ts:159` "Occlusion (TICI 0-1) of ICA, M1, or weight-bearing M2 on CTA/MRA/DSA." Anche il foglio dice "M2 dominante". La logica (`acute-rules.ts:81`) è corretta; il testo no.
+
+- [ ] **10. [TXT] Consenso non indicato.**
 > [!warning] Contraddizione
 > Protocollo e CI: scritto; orale del paziente con firma successiva; del rappresentante anche per telefono, con ratifica scritta ([[VANISH — Protocolo — v1.2]], p. 22; [[VANISH — CI — V1.2]], p. 10–11).
-> App: `trials-info.ts:152` `consent: "—"`. Il foglio dice solo "scritto".
+> App: `trials-info.ts:158` `consent: "—"`. Il foglio dice solo "scritto".
 
-- [ ] **11. Testo dell'intervento sbagliato.**
+- [ ] **11. [TXT] Testo dell'intervento sbagliato.**
 > [!warning] Contraddizione
 > Protocollo: IAT 0,3 mg/kg (max 30 mg) in 30 min durante la MT; niente eparina né antiaggreganti durante la MT e nelle 24 h dopo Actilyse "except in cases where antiplatelets are needed for intracranial or extracranial artery stenting" ([[VANISH — Protocolo — v1.2]], p. 16, p. 18, p. 20).
-> App: `trials-info.ts:157` "tPA IA possible per protocol; EVT/stenting defer > 24 h after thrombolysis." La MT è la procedura stessa e lo stenting non va rimandato: va solo evitata l'antiaggregazione se non necessaria. La categoria "Thrombolysis with EVT pathway" (`:150`) è accettabile.
+> App: `trials-info.ts:163` "tPA IA possible per protocol; EVT/stenting defer > 24 h after thrombolysis." La MT è la procedura stessa e lo stenting non va rimandato: va solo evitata l'antiaggregazione se non necessaria. La categoria "Thrombolysis with EVT pathway" (`:156`) è accettabile.
 
-- [ ] **12. "preEvtLabs: No." è incompleto.** Nelle donne fertili serve un test di gravidanza negativo prima della randomizzazione ([[VANISH — Protocolo — v1.2]], p. 17). App: `trials-info.ts:156`.
+- [ ] **12. [TXT] "preEvtLabs: No." è incompleto.** Nelle donne fertili serve un test di gravidanza negativo prima della randomizzazione ([[VANISH — Protocolo — v1.2]], p. 17). App: `trials-info.ts:162`.
 
-- [ ] **13. Visite non compilate**: `trials-info.ts:159` `visits: null`. Il protocollo prevede arruolamento, 24 h (TC), dimissione (NIHSS, mRS) e 90 giorni (mRS in presenza o per telefono) ([[VANISH — Protocolo — v1.2]], p. 10).
+- [ ] **13. [TXT] Visite non compilate**: `trials-info.ts:165` `visits: null`. Il protocollo prevede arruolamento, 24 h (TC), dimissione (NIHSS, mRS) e 90 giorni (mRS in presenza o per telefono) ([[VANISH — Protocolo — v1.2]], p. 10).
 
-- [ ] **14. Età nel testo**: `trials-info.ts:151` `age: "> 18 y"`; il protocollo dice "Age ≥18" (p. 17). La logica usa `>= 18` (`acute-rules.ts:152`): divergenza solo testuale.
+- [ ] **14. [TXT] Età nel testo**: `trials-info.ts:157` `age: "> 18 y"`; il protocollo dice "Age ≥18" (p. 17). La logica usa `>= 18` (`acute-rules.ts:152`): divergenza solo testuale.
 
 > [!note] Possibile scambio con DONE SYMPLE (da verificare quando si ingerirà DONE SYMPLE)
-> La voce `DoneSymple` (`trials-info.ts:135-147`) contiene testi che descrivono il disegno di VANISH: categoria "Late-window EVT + IA tPA" (`:137`), "Randomize: IA tPA yes/no alongside EVT strategy." (`:142`), "Intra-arterial tPA (per arm)." (`:144`). Secondo il foglio del team DONE SYMPLE confronta trombectomia sì/no a 24–72 h. Potrebbe trattarsi di testo copiato per errore; non verificato sul protocollo DONE SYMPLE.
+> La voce `DoneSymple` (`trials-info.ts:141-153`) contiene testi che descrivono il disegno di VANISH: categoria "Late-window EVT + IA tPA" (`:143`), "Randomize: IA tPA yes/no alongside EVT strategy." (`:148`), "Intra-arterial tPA (per arm)." (`:150`). Secondo il foglio del team DONE SYMPLE confronta trombectomia sì/no a 24–72 h. Potrebbe trattarsi di testo copiato per errore; non verificato sul protocollo DONE SYMPLE.
 
 ## Problemi documentali
 > [!important] Verdetto: ASPECTS ≥4

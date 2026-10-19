@@ -43,13 +43,13 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 
 | Studio | Dove (Drive originale) | Stato foglio | Lettura | Scheda |
 |---|---|---|---|---|
-| AZURE (AZD0780) | ABIERTOS / OTROS | assente | ⬜ (protocollo e CI cifrati) | |
+| AZURE (AZD0780) | ABIERTOS / OTROS | assente | — cifrati, non letti | [[AZURE]] |
 | CATIS-ICAS | PENDIENTES ABRIR | assente | ⬜ (solo sinossi) | |
 | CEREFUZE | PENDIENTES ABRIR | assente | ⬜ | |
-| DOAC-CVT | INACTIVOS | assente | ⬜ | |
-| EAST-STROKE | ABIERTOS / OTROS | assente | ⬜ | |
-| ELAPSE | ABIERTOS / OTROS | assente | ⬜ | |
-| ORBIT-XI | PENDIENTES ABRIR | assente | ⬜ (sinossi a 0 byte) | |
+| DOAC-CVT | INACTIVOS | assente | ✅ | [[DOAC-CVT]] |
+| EAST-STROKE | ABIERTOS / OTROS | assente | ✅ | [[EAST-STROKE]] |
+| ELAPSE | ABIERTOS / OTROS | assente | ✅ | [[ELAPSE]] |
+| ORBIT-XI | PENDIENTES ABRIR | assente | — nessun documento | [[ORBIT-XI]] |
 | SAIL-MeVO | PENDIENTES ABRIR | aperto ⚠ (non in app) | ✅ | [[SAIL-MeVO]] |
 | TargED (TG1-CL-201) | PENDIENTES ABRIR | assente | ⬜ | |
 
@@ -78,6 +78,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[Direct to angio]]
 - [[DOAC]]
 - [[Drip and ship]]
+- [[Fibrilación auricular]]
 - [[First pass effect]]
 - [[GCS]]
 - [[Hemorragia intracraneal sintomática]]

@@ -15,6 +15,7 @@ Malattia aterosclerotica delle arterie intracraniche. Può causare l'occlusione 
 | [[ARTEMIS]] | Esclusione 27: "Underlying intracranial atherosclerotic disease (ICAD) lesions responsible for the target occlusion"; se emerge solo dopo il rilascio del dispositivo, il soggetto non è uno screen failure | ([[ARTEMIS — Protocolo — V03]], p. 26, p. 30) |
 | [[PIVOTAL]] | Esclusione di imaging 1i: "Known or suspected ICAD" | ([[PIVOTAL — Protocolo — Rev 03]], p. 42) |
 | [[MOSTE]] | Esclusioni di imaging: "High suspicion of underlying intracranial stenosis on CTA/MRA" e "Presumed calcified Embolus or Intracranial Stenosis decompensation" | ([[MOSTE — Protocolo — V5]], p. 25) |
+| [[CATIS-ICAS]] | ICAD come **popolazione**: ictus o TIA ad alto rischio entro 30 giorni attribuibile a stenosi aterosclerotica intracranica 30–99% (criteri WASID) o "flow gap" in angio-RM TOF; esclusi stenosi non aterosclerotiche e stenting intracranico per l'evento. Rivaroxaban 2,5 mg × 2 + ASA contro clopidogrel + ASA (solo sinossi in bozza) | ([[CATIS-ICAS — Sinopsis — Draft 2025-09-10]], p. 1–3) |
 
 ## Note
 - In EnsApp nessuna regola chiede l'ICAD: è un criterio a carico dell'operatore, spesso intra-operatorio.
