@@ -84,5 +84,5 @@ export async function fillPreImaging(
   await setLtswHoursAgo(page, p.ltswHoursAgo);
   await pickSegment(page, "Philips angiograph available?", "Yes");
   await pickSegment(page, "DOAC (NOAC) in the previous 48h?", "No");
-  await pickSegment(page, "ACE inhibitor (IECA) in therapy?", "No");
+  await pickSegment(page, "ACE inhibitor: last dose < 24 h (< 48 h if eGFR < 45) or cannot be stopped until day 29?", "No");
 }

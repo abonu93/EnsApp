@@ -13,7 +13,7 @@
   import { fastestNeedsSpotSign } from "$lib/domain/hemorrhagic-rules";
   import { preData, postData, hemData, ltswHours } from "$lib/stores/patient";
   import { t } from "$lib/i18n";
-  import type { VesselCode } from "$lib/domain/acute-rules";
+  import { VANISH_MAX_HOURS, type VesselCode } from "$lib/domain/acute-rules";
 
   type YN = "yes" | "no" | "";
   type YNNa = YN | "na";
@@ -40,6 +40,8 @@
   let perfusionMismatch = $state<YN>(($postData.perfusionMismatch as YN) ?? "");
   let largeCore = $state<YN>(($postData.largeCore as YN) ?? "");
   let diabetes = $state<YN>(($postData.diabetes as YN) ?? "");
+  // VANISH: core/mismatch alla perfusione (chiesto nella scheda EVT entro 9 h).
+  let vanishCoreMismatch = $state<YN>(($postData.vanishCoreMismatch as YN) ?? "");
   // contraTpa passa da costante a campo: mostrato solo nella card TENACITY,
   // resta "no" (default invariato per ORION) se la card non e' visibile.
   let contraTpaAnswer = $state<YN>(($postData.contraTpa as YN) || "no");
@@ -86,6 +88,7 @@
       perfusionMismatch: perfusionMismatch || undefined,
       largeCore: largeCore || undefined,
       diabetes: diabetes || undefined,
+      vanishCoreMismatch: (showVanishQuestion && vanishCoreMismatch) || undefined,
       aiCoreLt10: aiCoreLt10 || undefined,
       tmaxGt30: tmaxGt30 || undefined,
       pregnant: pregnant || undefined,
@@ -116,6 +119,11 @@
   const isIschemic = $derived(strokeType === "ischemic");
   const isHem = $derived(strokeType === "hemorrhagic");
   const showEvt = $derived(isIschemic && candidate === "eligible");
+  // Vasi occlusi, ASPECTS e tandem servono anche ai trial senza EVT (REMEDY li
+  // usa per escludere, ORION/SAIL-MeVO/TENACITY per includere): una sola
+  // scheda per tutti gli ischemici, indipendente dalla candidatura a EVT.
+  const showImaging = $derived(isIschemic && candidate !== "");
+  const showVanishQuestion = $derived(showEvt && ($ltswHours ?? 999) <= VANISH_MAX_HOURS);
   const showNonEvt = $derived(isIschemic && candidate === "not eligible");
   // Stesso limite della regola fastest() (ltsw <= 2): a 2,0 h la scheda deve comparire.
   const showFastest = $derived(isHem && ($ltswHours ?? 999) <= 2 && ($preData.premrs ?? 99) <= 2);
@@ -134,9 +142,6 @@
     ($preData.premrs ?? 99) <= 1 &&
     ($preData.nihss ?? -1) >= 9 && ($preData.nihss ?? 99) <= 17
   );
-  // Vasi / ASPECTS / tandem sono gia' nella card EVT (e vasi/ASPECTS nella
-  // card TENACITY): li ripetiamo solo se non sono gia' a schermo.
-  const sailNeedsVessels = $derived(!showEvt && !showTenacity);
 
   const strokeOpts = $derived([
     { value: "ischemic" as const, label: $t.postImaging.ischemic },
@@ -199,22 +204,37 @@
       {/snippet}
     </Card>
 
-    {#if showEvt}
-      <Card title={$t.postImaging.evtTitle} subtitle={$t.postImaging.evtDesc}>
+    {#if showImaging}
+      <Card title={$t.postImaging.imagingTitle} subtitle={$t.postImaging.imagingDesc}>
         {#snippet children()}
           <div class="stack">
             <div class="field">
-              <span class="lbl">{$t.postImaging.vesselsLabel}</span>
+              <span class="lbl">{$t.postImaging.imagingVesselsLabel}</span>
               <VesselPicker bind:value={targetVessels} />
             </div>
             <div class="divider"></div>
             <ToggleRow title={$t.postImaging.tandemLabel.replace('?', '')} bind:checked={tandem} />
-            <div class="divider"></div>
-            <ToggleRow title={$t.postImaging.tortuosityLabel.replace('?', '')} sub={$t.postImaging.tortuosityHint} bind:checked={tortuosity} />
             <div class="field">
               <span class="lbl">{$t.postImaging.aspectsLabel}</span>
               <AspectsCells bind:value={aspects} />
             </div>
+          </div>
+        {/snippet}
+      </Card>
+    {/if}
+
+    {#if showEvt}
+      <Card title={$t.postImaging.evtTitle} subtitle={$t.postImaging.evtDesc}>
+        {#snippet children()}
+          <div class="stack">
+            <ToggleRow title={$t.postImaging.tortuosityLabel.replace('?', '')} sub={$t.postImaging.tortuosityHint} bind:checked={tortuosity} />
+            {#if showVanishQuestion}
+              <div class="divider"></div>
+              <div class="field">
+                <span class="lbl">{$t.postImaging.vanishCoreMismatchLabel}</span>
+                <Segmented options={ynOpts} bind:value={vanishCoreMismatch} cols={2} />
+              </div>
+            {/if}
           </div>
         {/snippet}
       </Card>
@@ -233,15 +253,6 @@
             <div class="field">
               <span class="lbl">{$t.postImaging.perfusionMismatchLabel}</span>
               <Segmented options={ynOpts} bind:value={perfusionMismatch} cols={2} />
-            </div>
-            <div class="divider"></div>
-            <div class="field">
-              <span class="lbl">{$t.postImaging.tenacityOcclusionLabel}</span>
-              <VesselPicker bind:value={targetVessels} />
-            </div>
-            <div class="field">
-              <span class="lbl">{$t.postImaging.aspectsLabel}</span>
-              <AspectsCells bind:value={aspects} />
             </div>
             <div class="divider"></div>
             <div class="field">
@@ -265,18 +276,6 @@
       <Card title={$t.postImaging.sailMevoTitle} subtitle={$t.postImaging.sailMevoHint}>
         {#snippet children()}
           <div class="stack">
-            {#if sailNeedsVessels}
-              <div class="field">
-                <span class="lbl">{$t.postImaging.sailMevoOcclusionLabel}</span>
-                <VesselPicker bind:value={targetVessels} />
-              </div>
-              <ToggleRow title={$t.postImaging.sailMevoTandemLabel} bind:checked={tandem} />
-              <div class="field">
-                <span class="lbl">{$t.postImaging.aspectsLabel}</span>
-                <AspectsCells bind:value={aspects} />
-              </div>
-              <div class="divider"></div>
-            {/if}
             <div class="field">
               <span class="lbl">{$t.postImaging.aiCoreLt10Label}</span>
               <Segmented options={ynNaOpts} bind:value={aiCoreLt10} cols={3} />
