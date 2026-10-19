@@ -27,7 +27,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | ORION | activo (pausa reclutamiento) | en pausa | ✅ | [[ORION]] |
 | PIVOTAL | active (dal 2026-10-19) | aperto | ✅ | [[PIVOTAL]] |
 | PROMISE20 | cerrado | — | ⬜ | |
-| PROMISE20 RELOADED | paused (dal 2026-10-19) | en pausa | ⬜ |  |
+| PROMISE20 RELOADED | paused (dal 2026-10-19) | en pausa | ✅ | [[PROMISE20 RELOADED]] |
 | REMEDY | activo | aperto (REMEDY-2) | ✅ | [[REMEDY]] |
 | SHIONOGI | cerrado | — | ⬜ | |
 | SOVATELTIDE | activo | aperto | ✅ | [[SOVATELTIDE]] |
@@ -89,6 +89,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[Neuroprotección]]
 - [[NIHSS]]
 - [[Oclusión en tándem]]
+- [[Potenciales evocados somatosensoriales]]
 - [[Spot sign]]
 - [[Stent retriever]]
 - [[Tenecteplasa]]
