@@ -23,7 +23,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | LIBREXIA | closed (dal 2026-10-19) | cerrado | ⬜ |  |
 | MARRS (MARSS nell'app) | cerrado | — | ⬜ | |
 | MOSTE | closed (dal 2026-10-19) | reclut. cerrado | ✅ | [[MOSTE]] |
-| NiVO | activo | assente ⚠ | ⬜ | |
+| NiVO | activo | assente ⚠ | ✅ (solo sinossi) | [[NiVO]] |
 | ORION | activo (pausa reclutamiento) | en pausa | ✅ | [[ORION]] |
 | PIVOTAL | active (dal 2026-10-19) | aperto | ✅ | [[PIVOTAL]] |
 | PROMISE20 | cerrado | — | ⬜ | |
