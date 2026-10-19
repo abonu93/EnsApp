@@ -12,6 +12,8 @@ Trattamento di riperfusione (trombolisi o trombectomia) oltre le finestre standa
 | Studio | Uso / soglia | Fonte |
 |---|---|---|
 | [[TENACITY]] | LKW >4,5 h prima della randomizzazione; esclusi i casi con reperti di ictus di più di 72 h. Il DMC può restringere la finestra a 4,5–24 h | ([[TENACITY — Protocolo — V1.0]], p. 30–31, p. 72) |
+| [[VANISH]] | Entro 9 h (ictus al risveglio: 9 h dal punto medio del sonno); fra 4,5 e 9 h "if EXTEND criteria are met". Randomizzazione stratificata <4,5 h vs 4,5–9 h | ([[VANISH — Protocolo — v1.2]], p. 17–18, p. 22) |
+| [[MOSTE]] | MT nell'ictus minor con LVO con TLKW ≤23 h alla randomizzazione (trattamento entro 24 h), senza criteri di perfusione. Randomizzazione stratificata 0–4,5 vs 4,5–23 h | ([[MOSTE — Protocolo — V5]], p. 6, p. 21, p. 23, p. 64) |
 
 ## Note
 - Distinguere il tempo dall'**esordio noto** dal **LKW** (esordio ignoto o ictus al risveglio): TENACITY li include entrambi e stratifica per "onset time known" ([[TENACITY — Protocolo — V1.0]], p. 64).

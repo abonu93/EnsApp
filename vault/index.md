@@ -34,7 +34,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | TENACITY | activo | assente ⚠ | ✅ | [[TENACITY]] |
 | TICH-3 | activo | aperto | ⬜ | |
 | TWIN2WIN-2 | activo | aperto | ⬜ | |
-| VANISH | activo | aperto | ⬜ | |
+| VANISH | activo | aperto | ✅ | [[VANISH]] |
 | WETRUST | activo | aperto | ⬜ | |
 | NORA HOME | activo | assente ⚠ | — nessun documento in Drive | |
 | SAFER-DOAC | activo | assente ⚠ | — nessun documento in Drive (forse = DOAC-CVT) | |
@@ -63,11 +63,14 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | ABBVIE | elezanumab vs placebo | aperto |
 
 ## Concetti
+- [[Alteplasa]]
 - [[ASPECTS]]
 - [[Ictus del despertar]]
 - [[Mismatch de perfusión]]
 - [[mRS]]
+- [[Oclusión en tándem]]
 - [[Tenecteplasa]]
+- [[TICI]]
 - [[Ventana extendida]]
 
 ## Comparative

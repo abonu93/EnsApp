@@ -12,6 +12,9 @@ Punteggio da 0 a 10 che quantifica i segni precoci di ischemia nel territorio de
 | Studio | Uso / soglia | Fonte |
 |---|---|---|
 | [[TENACITY]] | Via c (solo nei centri senza perfusione): occlusione M1 con ASPECTS ≥7, occlusione M2 con ASPECTS 9–10 (al massimo 1 regione distale all'occlusione). Esclusione: ASPECTS 0–6. ASPECTS da documentare sempre nelle TC | ([[TENACITY — Protocolo — V1.0]], p. 30–31, p. 46) |
+| [[VANISH]] | **Nessun criterio di eleggibilità**: solo variabile di stratificazione della randomizzazione. Il criterio di tessuto è core ≤70 mL + mismatch. L'"ASPECTS ≥4" del foglio del team, della ficha di sala e dell'app non ha base nel protocollo v1.2 | ([[VANISH — Protocolo — v1.2]], p. 17–18, p. 22) |
+| [[WETRUST]] | **Nessun criterio**: si randomizza prima dell'imaging. Il protocollo motiva che entro 6 h l'85–90% delle occlusioni prossimali ha ASPECTS ≥6 e che la TM è ragionevole anche con ASPECTS <6; atteso circa 5% di core esteso | ([[WETRUST — Protocolo — Rev 09]], p. 37–38) |
+| [[MOSTE]] | Inclusione: ASPECTS ≥6 in TC senza contrasto o RM-DWI. Per la MT secondaria nel braccio di controllo serve ASPECTS **>6** alla TC di ri-screening. Il core lab verifica l'ASPECTS. L'app non controlla l'ASPECTS (`acute-rules.ts:200-209`) | ([[MOSTE — Protocolo — V5]], p. 24, p. 27, p. 58) |
 
 ## Note
 - Nato per il territorio della MCA: non è applicabile così com'è alla circolazione posteriore.
