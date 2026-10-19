@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { TRIALS_INFO, isTrialOpen, findTrialInfo } from "$lib/domain/trials-info";
+import { TRIALS_INFO, isTrialOpen, findTrialInfo, findTrialKey, randomizationLinks } from "$lib/domain/trials-info";
 
 describe("trial recruitment status", () => {
   it("SHIONOGI ha il reclutamento chiuso ma resta nel catalogo", () => {
@@ -42,5 +42,24 @@ describe("trial recruitment status", () => {
   it("findTrialInfo risolve i display name case-insensitive", () => {
     expect(findTrialInfo("shionogi")).toBe(TRIALS_INFO.Shionogi);
     expect(findTrialInfo("zzz")).toBeUndefined();
+  });
+
+  it("i display name con trattini e spazi trovano la chiave", () => {
+    expect(findTrialKey("TWIN-2-WIN 2")).toBe("Twin2Win2");
+    expect(findTrialKey("DONE SYMPLE")).toBe("DoneSymple");
+    expect(findTrialKey("DO-IT")).toBe("DOIT");
+    expect(findTrialKey("TICH-3")).toBe("TICH3");
+    expect(findTrialKey("SAFER-DOAC")).toBe("SaferDoac");
+    expect(findTrialKey("ORION")).toBe("Orion");
+    expect(findTrialKey("")).toBeUndefined();
+  });
+
+  it("lo stato dei display name viene rispettato (es. HYBERNIA in pausa)", () => {
+    expect(findTrialInfo("TWIN-2-WIN 2")).toBe(TRIALS_INFO.Twin2Win2);
+    expect(findTrialInfo("TICH-3")).toBe(TRIALS_INFO.TICH3);
+  });
+
+  it("i link di randomizzazione usano le chiavi di TRIALS_INFO", () => {
+    for (const k of Object.keys(randomizationLinks)) expect(TRIALS_INFO[k]).toBeDefined();
   });
 });

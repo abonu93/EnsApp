@@ -358,8 +358,9 @@ export const randomizationLinks: Record<string, string> = {
   ATHENA: "https://www.randomize.net/Randomize/Set.aspx?id=ba510dbb-ab7d-42ee-ae95-d8a46394d6ec&token=0d0bff39-455b-4f60-a95a-154476064f2e",
   VANISH: "https://app.studyrandomizer.com/dashboard/",
   MOSTE: "https://ecrf.chru-lille.fr/EnnovClinical/login?lang=EN",
-  "TWIN-2-WIN 2": "https://www.studyrandomizer.com/",
-  "DONE SYMPLE": "https://www.studyrandomizer.com/",
+  // Chiavi = chiavi di TRIALS_INFO (TrialDetail cerca per chiave di route).
+  Twin2Win2: "https://www.studyrandomizer.com/",
+  DoneSymple: "https://www.studyrandomizer.com/",
 };
 
 export type TrialFilter = "all" | "ischemic" | "hemorrhagic" | "post-acute";
@@ -392,14 +393,29 @@ export function filterTrials(
 }
 
 /**
- * Trova le info di un trial dato un nome che puo' essere la chiave di
- * TRIALS_INFO oppure il display name usato altrove (case-insensitive).
- * Es. "SHIONOGI" -> Shionogi.
+ * Forma canonica di un nome di trial per i confronti: minuscolo, senza
+ * spazi, trattini o altri separatori. Es. "TWIN-2-WIN 2" e "Twin2Win2"
+ * diventano entrambi "twin2win2".
  */
+export function canonicalTrialName(name: string): string {
+  return (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/**
+ * Trova la chiave di TRIALS_INFO dato un nome che puo' essere la chiave
+ * stessa oppure il display name usato altrove (maiuscole, spazi e trattini
+ * ignorati). Es. "SHIONOGI" -> Shionogi, "TWIN-2-WIN 2" -> Twin2Win2,
+ * "DO-IT" -> DOIT, "TICH-3" -> TICH3.
+ */
+export function findTrialKey(name: string): string | undefined {
+  if (TRIALS_INFO[name]) return name;
+  const canon = canonicalTrialName(name);
+  if (!canon) return undefined;
+  return Object.keys(TRIALS_INFO).find((k) => canonicalTrialName(k) === canon);
+}
+
 export function findTrialInfo(name: string): TrialInfo | undefined {
-  if (TRIALS_INFO[name]) return TRIALS_INFO[name];
-  const lower = (name || "").toLowerCase();
-  const key = Object.keys(TRIALS_INFO).find((k) => k.toLowerCase() === lower);
+  const key = findTrialKey(name);
   return key ? TRIALS_INFO[key] : undefined;
 }
 

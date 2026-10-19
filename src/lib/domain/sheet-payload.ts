@@ -1,6 +1,8 @@
 // Costruzione payload Google Sheets. INVARIANTE per compatibilita' backend
 // (Apps Script GAS_URL). Snapshot test in tests/domain/sheet-payload.test.ts.
 
+import { canonicalTrialName } from "./trials-info";
+
 const GAS_URL =
   "https://script.google.com/macros/s/AKfycbxt9NhlJbn5n6d06_aKFW-a76pYqpe-86xedfNKI6MIkexDOSjLnTSZd56Nau9y12Lf/exec";
 
@@ -72,6 +74,18 @@ export function hasKnownStudyArm(name: string): boolean {
   return !STUDIES_WITHOUT_ARM.has(normalizeStudyName(name));
 }
 
+// Per la colonna del foglio si accetta anche la chiave di TRIALS_INFO
+// (es. "Twin2Win2", "DOIT", "Orion" dalla registrazione rapida), confrontata
+// ignorando maiuscole, spazi e trattini. Prima questi nomi venivano scartati
+// in silenzio e la colonna restava "no".
+const SHEET_KEY_BY_CANON: Record<string, SheetTrialKey> = Object.fromEntries(
+  Object.entries(NAME_TO_KEY).map(([name, key]) => [canonicalTrialName(name), key])
+);
+
+function findSheetKey(name: string): SheetTrialKey | undefined {
+  return NAME_TO_KEY[name] ?? SHEET_KEY_BY_CANON[canonicalTrialName(name)];
+}
+
 export type StudyOutcomes = Record<string, "intervention" | "control" | undefined>;
 
 export function buildTrialsForSheet(
@@ -83,7 +97,7 @@ export function buildTrialsForSheet(
   ) as Record<SheetTrialKey, SheetTrialValue>;
 
   for (const name of selectedStudies) {
-    const key = NAME_TO_KEY[name];
+    const key = findSheetKey(name);
     if (!key) continue;
     if (!hasKnownStudyArm(name)) {
       t[key] = "si";
@@ -92,7 +106,7 @@ export function buildTrialsForSheet(
     }
   }
 
-  if (!selectedStudies.includes("SAFER-DOAC")) t.SAFERDOAC = "no";
+  if (!selectedStudies.some((n) => findSheetKey(n) === "SAFERDOAC")) t.SAFERDOAC = "no";
 
   return t;
 }
