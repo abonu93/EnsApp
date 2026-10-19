@@ -21,15 +21,15 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | FASTEST | activo | aperto | ✅ | [[FASTEST]] |
 | HYBERNIA | pausado | en pausa | ✅ | [[HYBERNIA]] |
 | LIBREXIA | closed (dal 2026-10-19) | cerrado | ✅ | [[LIBREXIA]] |
-| MARRS (MARSS nell'app) | cerrado | — | ⬜ | |
+| MARRS (MARSS nell'app) | cerrado | — | ✅ | [[MARRS]] |
 | MOSTE | closed (dal 2026-10-19) | reclut. cerrado | ✅ | [[MOSTE]] |
 | NiVO | activo | assente ⚠ | ✅ (solo sinossi) | [[NiVO]] |
 | ORION | activo (pausa reclutamiento) | en pausa | ✅ | [[ORION]] |
 | PIVOTAL | active (dal 2026-10-19) | aperto | ✅ | [[PIVOTAL]] |
-| PROMISE20 | cerrado | — | ⬜ | |
+| PROMISE20 | cerrado | — | ✅ | [[PROMISE20]] |
 | PROMISE20 RELOADED | paused (dal 2026-10-19) | en pausa | ✅ | [[PROMISE20 RELOADED]] |
 | REMEDY | activo | aperto (REMEDY-2) | ✅ | [[REMEDY]] |
-| SHIONOGI | cerrado | — | ⬜ | |
+| SHIONOGI | cerrado | — | ✅ | [[SHIONOGI]] |
 | SOVATELTIDE | activo | aperto | ✅ | [[SOVATELTIDE]] |
 | TENACITY | activo | assente ⚠ | ✅ | [[TENACITY]] |
 | TICH-3 | activo | aperto | ✅ | [[TICH-3]] |

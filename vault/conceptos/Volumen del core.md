@@ -17,6 +17,7 @@ Volume (in mL o cc) del tessuto cerebrale considerato già infartuato in modo ir
 | [[TENACITY]] | Esclusione: DWI ≥70 mL o core ≥70 mL in TC-perfusione (oppure ASPECTS 0–6 o ipodensità intensa). È l'unico core chiesto dall'app (`largeCore`, scheda TENACITY) | ([[TENACITY — Protocolo — V1.0]], p. 30–31) |
 | [[ARTEMIS]] | Inclusione: ASPECTS 6–10; se c'è valutazione automatica, anche core ≤50 cc su TC-perfusione o DWI-RM | ([[ARTEMIS — Protocolo — V03]], p. 25) |
 | [[ATHENA]] | Inclusione 9: core ≤50 mL su TC/RM-perfusione **oppure** ASPECTS 6–10 | ([[ATHENA — Protocolo — v2.3]], p. 34) |
+| [[SAIL-MeVO]] | Inclusione: ASPECTS ≥6 **e**, se disponibile il software di IA su TC senza contrasto (Methinks), **AI-ICV <10 mL**; se si fa la TC-perfusione, ipoperfusione Tmax >6 s **>30 mL**. La sinossi CEIm V1.0 chiede il core IA <10 mL senza condizioni. Studio non in app; `largeCore` (≥70 mL) non serve | ([[SAIL-MeVO — Protocolo — V2.1]], p. 21–23, p. 28; [[SAIL-MeVO — Sinopsis — V1.0]], §Población) |
 
 ## Note
 - Attenzione al confine: "≤70", "<70" e "≥70 escluso" non coincidono sul valore di 70 mL esatti (ORION lo lascia non assegnato).

@@ -25,6 +25,7 @@ Punteggio da 0 a 10 che quantifica i segni precoci di ischemia nel territorio de
 | [[DONE SYMPLE]] | **Nessun criterio di eleggibilità**: il tessuto si valuta come core ≤70 cc dal software su TC senza contrasto. Il core lab legge l'ASPECTS basale e a 24 h; scheda ASPECTS nell'App. F (non letta). Coerente con l'app ("-") | ([[DONE SYMPLE — Protocolo — v4]], p. 36, p. 64) |
 | [[NiVO]] | Inclusione: ASPECTS ≥6 (modalità non specificata), anche per le occlusioni di ACA e ACP. L'app lo richiede (`acute-rules.ts:195-196`) | ([[NiVO — Sinopsis — v2.0]], p. 7) |
 | [[PROMISE20 RELOADED]] | **Nessun limite**: inclusione 7 "Any infarct core, without volume restrictions, measured by ASPECT score on non-contrast CT, or DWI-MRI prior to EVT". L'ASPECTS si registra ma "will not preclude EVT"; sottogruppo esplorativo <5 contro ≥5; ASPECTS anche sulla TC a 24–36 h. Coerente con l'app ("-", `trials-info.ts:90`) | ([[PROMISE20 RELOADED — Protocolo — Rev 1]], p. 21–22, p. 26, p. 28) |
+| [[SAIL-MeVO]] | Inclusione: "ASPECTS ≥6 on NCCT", più AI-ICV <10 mL se disponibile e Tmax >6 s >30 mL se c'è perfusione; con più studi di imaging vale il più recente. Studio non in app | ([[SAIL-MeVO — Protocolo — V2.1]], p. 28) |
 
 ## Note
 - Nato per il territorio della MCA: non è applicabile così com'è alla circolazione posteriore.
