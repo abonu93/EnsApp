@@ -14,3 +14,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-19 — Ingerito DO-IT (protocollo 58/58, sinossi, CI-appendice, cambi): è un trial su pazienti in DOAC, non sull'ictus lieve. Nuovi concetti: DOAC, Ictus no discapacitante.
 - 2026-10-19 — Ingerito FASTEST (protocollo 55/55, CI cast. e cat.): l'app applica i criteri della Parte 1 (chiusa) senza spot sign. Nuovi concetti: GCS, Spot sign, Volumen de hematoma.
 - 2026-10-19 — Ingerito REMEDY (protocollo V6.2 102/102, "sinossi" = prime pagine del protocollo V5.0, CI): entro 4,5 h l'app non lo propone mai (ASPECTS richiesto ma non chiesto). Nuovo concetto: Clasificación de Heidelberg.
+- 2026-10-19 — Ingerito PIVOTAL (protocollo Rev 03 69/69, sinossi, CI cast. e cat.): l'app scarta M2 e vertebrale ammesse dal protocollo. Nuovi concetti: First pass effect, Aspiración directa (ADAPT).

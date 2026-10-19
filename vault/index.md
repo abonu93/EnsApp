@@ -25,7 +25,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | MOSTE | closed (dal 2026-10-19) | reclut. cerrado | ✅ | [[MOSTE]] |
 | NiVO | activo | assente ⚠ | ⬜ | |
 | ORION | activo (pausa reclutamiento) | en pausa | ⬜ | |
-| PIVOTAL | active (dal 2026-10-19) | aperto | ⬜ |  |
+| PIVOTAL | active (dal 2026-10-19) | aperto | ✅ | [[PIVOTAL]] |
 | PROMISE20 | cerrado | — | ⬜ | |
 | PROMISE20 RELOADED | paused (dal 2026-10-19) | en pausa | ⬜ |  |
 | REMEDY | activo | aperto (REMEDY-2) | ✅ | [[REMEDY]] |
@@ -68,11 +68,15 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 ## Concetti
 - [[Alteplasa]]
 - [[ASPECTS]]
+- [[Aspiración directa (ADAPT)]]
+- [[Clasificación de Heidelberg]]
 - [[Cone-beam CT]]
 - [[Consentimiento diferido]]
 - [[Direct to angio]]
 - [[DOAC]]
 - [[Drip and ship]]
+- [[First pass effect]]
+- [[GCS]]
 - [[Hemorragia intracraneal sintomática]]
 - [[Ictus del despertar]]
 - [[Ictus minor con LVO]]
@@ -81,10 +85,12 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[mRS]]
 - [[NIHSS]]
 - [[Oclusión en tándem]]
+- [[Spot sign]]
 - [[Stent retriever]]
 - [[Tenecteplasa]]
 - [[TICI]]
 - [[Ventana extendida]]
+- [[Volumen de hematoma]]
 
 ## Comparative
 - [[Estado de los estudios]] — foglio vs app vs Drive
