@@ -57,17 +57,21 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: ["Baseline (in-person)", "24 h (in-person)", "Day 5 / discharge (in-person)", "Day 90 (phone)"],
   },
   ATHENA: {
+    // Testi dal protocollo v2.3 (25-11-2025) e CI v4.0: vedi vault/ensayos/ATHENA.md.
     status: "active",
     category: "EVT device",
-    key: { window: "< 24 h", age: "22-85 y", mrs: "0-2", nihss: ">= 8", aspects: "6-10" },
-    consent: "Written & oral/phone consent.",
-    imaging: "TICA, M1 or M2 occlusion.",
-    thrombolytic: "Optional.",
+    key: { window: "<= 16 h (to arterial puncture)", age: "22-85 y", mrs: "0-2", nihss: "6-25", aspects: "6-10 (or core <= 50 mL on CTP/MRP)" },
+    consent: "Written (patient, representative or witness). Oral/remote only if approved by the Ethics Committee.",
+    imaging: "Single occlusion of terminal ICA, M1, or dominant/proximal M2.",
+    thrombolytic: "Optional, per local practice.",
     thrombectomy: "Yes.",
     preEvtLabs: "No.",
-    intervention: "Stent retriever + ANA vs Stent retriever + DAC.",
-    notes: ["Thrombolysis per local practice (3 h limit removed)."],
-    visits: ["Baseline (in-person)", "24 h (in-person)", "Day 5 / discharge (in-person)", "Day 90 (in-person)"],
+    intervention: "Stent retriever + ANA vs stent retriever +/- intermediate catheter (DAC). Solitaire, Trevo or pRESET only.",
+    notes: [
+      "Assessed in the angio suite: tandem lesion requiring treatment or preventing access to thrombus excludes; tortuosity preventing access excludes.",
+      "Not allowed: balloon guide catheter, double stent, radial or carotid access; another thrombectomy device already used.",
+    ],
+    visits: ["Baseline (in-person)", "24 h (in-person)", "Day 5 / discharge (in-person)", "Day 90 (in-person, phone if not possible)"],
   },
   PIVOTAL: {
     status: "active",

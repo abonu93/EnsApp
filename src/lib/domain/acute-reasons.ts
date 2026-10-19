@@ -5,7 +5,7 @@
 // NON ridefinisce la logica clinica: e' un wrapper diagnostico.
 
 import type { AcuteInput, VesselCode } from "./acute-rules";
-import { computeVesselFlags } from "./acute-rules";
+import { athenaVesselOk, computeVesselFlags } from "./acute-rules";
 import { reduce, type ReasonReport } from "./reason-report";
 
 export type { ReasonReport };
@@ -37,12 +37,19 @@ export function reasonWeTrust(input: AcuteInput): ReasonReport {
 export function reasonAthena(input: AcuteInput): ReasonReport {
   return reduce([
     { ok: input.age >= 22 && input.age <= 85, label: "age 22-85" },
-    { ok: input.nihss >= 8, label: "NIHSS >= 8" },
+    { ok: input.nihss >= 6 && input.nihss <= 25, label: "NIHSS 6-25" },
     { ok: input.premrs <= 2, label: "pre-mRS <= 2" },
-    { ok: input.ltsw <= 24, label: "LTSW <= 24h" },
+    { ok: input.ltsw <= 16, label: "LTSW <= 16h (alla puntura arteriosa)" },
     { ok: input.lvo === "yes", label: "LVO confermato" },
-    { ok: input.tandem === "no", label: "no tandem" },
-    { ok: input.tortuosity === "no", label: "no tortuosita' (richiesto valore esplicito)" },
+    {
+      ok: athenaVesselOk(input.targetVessels),
+      label: "occlusione singola di ICA terminale, M1 o M2 prossimale/dominante",
+    },
+    {
+      ok: !isNumber(input.aspects) || input.aspects >= 6,
+      label: "ASPECTS 6-10 (o core <= 50 mL in CTP/MRP)",
+    },
+    { ok: input.tortuosity === "no", label: "no tortuosita' che impedisce l'accesso alla ICA intracranica" },
   ]);
 }
 

@@ -133,7 +133,7 @@
       },
       "expected": {
         "weTrust": false,
-        "athena": true,
+        "athena": false,
         "vanish": true,
         "pivotal": false,
         "promise": true,
@@ -158,7 +158,8 @@
         "hybernia": true,
         "promise": true,
         "nivo": false
-      }
+      },
+      "note": "2026-10-19: athena true (legacy, v2.11 24 h) -> false. ATHENA protocollo v2.3 inclusione 6: entro 16 h."
     },
     {
       "id": "ischemic-distal-m2-nivo",
@@ -662,5 +663,5 @@
       }
     }
   ],
-  "protocolOverrides": "2026-10-19: FASTEST allineato al protocollo V10.5 Parte 2 (spot sign oltre 90 min, causa secondaria, IVH estesa, anticoagulanti). Gli expected dei casi esistenti non cambiano; i nuovi criteri sono coperti in tests/domain/hemorrhagic-rules.test.ts."
+  "protocolOverrides": "2026-10-19: FASTEST allineato al protocollo V10.5 Parte 2 (spot sign oltre 90 min, causa secondaria, IVH estesa, anticoagulanti). Gli expected dei casi esistenti non cambiano; i nuovi criteri sono coperti in tests/domain/hemorrhagic-rules.test.ts. ATHENA allineato al protocollo v2.3 (16 h, NIHSS 6-25, vasi, ASPECTS, tandem in sala): cambia solo ischemic-late-window-24h."
 }
