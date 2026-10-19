@@ -2,6 +2,7 @@
   // Page header con back + opzionale step indicator + title + sub.
   // Sostituisce il layout precedente per le route che sono "pagine di flusso".
   import { pop } from "svelte-spa-router";
+  import { t } from "$lib/i18n";
 
   interface Props {
     title?: string;
@@ -29,7 +30,7 @@
     </button>
     <div class="spacer"></div>
     {#if step != null && steps}
-      <div class="dots" role="progressbar" aria-valuemin={1} aria-valuemax={steps} aria-valuenow={step + 1}>
+      <div class="dots" role="progressbar" aria-valuemin={1} aria-valuemax={steps} aria-valuenow={step + 1} aria-label={$t.common.stepOf.replace("{n}", String(step + 1)).replace("{total}", String(steps))}>
         {#each Array(steps) as _, i (i)}
           <span class="dot" class:done={i <= step} class:current={i === step}></span>
         {/each}

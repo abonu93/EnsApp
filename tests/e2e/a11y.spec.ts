@@ -19,6 +19,9 @@ const ROUTES = [
 test.describe("a11y - WCAG 2.1 AA scan", () => {
   for (const route of ROUTES) {
     test(`route ${route.name} (${route.path})`, async ({ page }) => {
+      // Animazioni di ingresso (opacity) falserebbero il calcolo del contrasto:
+      // con reduced-motion la UI e' subito nello stato finale.
+      await page.emulateMedia({ reducedMotion: "reduce" });
       await freshSession(page);
       await page.goto(`/#${route.path}`);
       await page.waitForSelector("main h1", { timeout: 5_000 });

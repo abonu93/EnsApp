@@ -21,6 +21,7 @@ export const it = {
     inProgress: "In corso",
     info: "Info",
     skipToContent: "Vai al contenuto",
+    stepOf: "Passo {n} di {total}",
     open: "Apri",
     theme: "Tema",
     language: "Lingua",

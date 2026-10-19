@@ -33,7 +33,7 @@
 
 <div class="page">
   <div class="intro">
-    <h2>{$t.landing.newPatient}</h2>
+    <h1>{$t.landing.newPatient}</h1>
     <p>{$t.extras.proceedHow}</p>
   </div>
 
@@ -77,7 +77,7 @@
   .intro {
     margin-bottom: 22px;
   }
-  h2 {
+  h1 {
     font-size: 24px;
     font-weight: 600;
     letter-spacing: -0.6px;

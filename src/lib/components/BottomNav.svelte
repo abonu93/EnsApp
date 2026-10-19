@@ -23,6 +23,7 @@
         use:link
         class="item"
         class:active
+        aria-label={item.label}
         aria-current={active ? "page" : undefined}
       >
         <span class="icon" aria-hidden="true">
