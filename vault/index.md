@@ -50,7 +50,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | EAST-STROKE | ABIERTOS / OTROS | assente | ✅ | [[EAST-STROKE]] |
 | ELAPSE | ABIERTOS / OTROS | assente | ✅ | [[ELAPSE]] |
 | ORBIT-XI | PENDIENTES ABRIR | assente | — nessun documento | [[ORBIT-XI]] |
-| SAIL-MeVO | PENDIENTES ABRIR | aperto ⚠ (non in app) | ✅ | [[SAIL-MeVO]] |
+| SAIL-MeVO | PENDIENTES ABRIR | aperto — **in app dal 2026-10-19 (PR #12)** | ✅ | [[SAIL-MeVO]] |
 | TargED (TG1-CL-201) | PENDIENTES ABRIR | assente | ✅ | [[TargED]] |
 
 ## 3 — Studi nel foglio senza documenti nella copia né in app

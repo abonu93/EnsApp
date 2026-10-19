@@ -116,6 +116,8 @@ Non riportato nei documenti. Il protocollo vieta "experimental endovascular devi
 Nota per il team: [[NiVO]] (attivo in app) recluta MeVO con un catetere da aspirazione dentro un'indagine clinica, e le popolazioni si sovrappongono (NIHSS ≥5, M2 non dominante, A2–A3, P2–P3). La compatibilità va chiesta ai promotori.
 
 ## Proposta per EnsApp
+> [!note] Dal 2026-10-19 SAIL-MeVO è nell'app (PR #12, `sailMevo()` in `acute-rules.ts`). Questa proposta è stata scritta prima: va riletta come confronto con la regola implementata.
+
 Lo studio non è nell'app. Qui sotto: cosa servirebbe per una regola di eleggibilità, con i campi già presenti e quelli mancanti. Codice verificato il 2026-10-19; **nessun file modificato**.
 
 ### Campi esistenti utilizzabili

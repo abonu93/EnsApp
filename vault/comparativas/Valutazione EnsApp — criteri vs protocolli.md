@@ -22,6 +22,8 @@ Stato nell'app al 2026-10-19 ([[Estado de los estudios]]):
 | `071119a` | [[FASTEST]] alla Parte 2 del protocollo V10.5 | spot sign, causa secondaria, IVH estesa, ECG, anticoagulanti, bordo 2 h, etichette, scheda |
 | `cce926f` | [[TICH-3]] | AVK ed eparina/EBPM terapeutica escluse, età ≥18, scheda |
 | `7b77a2e` | [[ATHENA]] al protocollo v2.3 | 16 h, NIHSS 6–25, vasi, ASPECTS, tandem, tortuosità, scheda |
+| `7ec19c0` | Finestre temporali (T1): orologio dell'app ogni 30 s, LTSW ricalcolato per regole, motivi e schede | Un trial esce dai risultati quando la finestra scade a paziente aperto. Resta a carico del medico che il limite di molti protocolli vale alla puntura, randomizzazione o dose |
+| `fbba0ca` | Merge di `main`: [[SAIL-MeVO]] è ora nell'app (PR #12) | La scheda SAIL-MeVO usa anche lei il tempo aggiornato |
 
 Le sezioni seguenti fotografano lo stato **prima** di queste correzioni; il dettaglio di cosa resta aperto è nel riquadro "Correzioni applicate" di ogni scheda.
 

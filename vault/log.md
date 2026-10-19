@@ -32,3 +32,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-19 — Ingeriti CEREFUZE (15 esclusioni su 18 copiate da HYBERNIA), TargED, CATIS-ICAS (solo sinossi in bozza). Tag [FN]/[FP]/[NC]/[TXT] aggiunti alle schede del lotto 1. Ingestione completata: 31 cartelle.
 - 2026-10-19 — Scritta [[Valutazione EnsApp — criteri vs protocolli]]: 166 divergenze negli studi attivi (30 FN, 41 FP, 42 NC, 57 TXT), 14 problemi trasversali, priorità di correzione. Verificato con test: la registrazione rapida non salva nel foglio dati 7 studi aperti.
 - 2026-10-19 — App corretta: nomi→chiavi (ac10c24), FASTEST (071119a), TICH-3 (cce926f), ATHENA (7b77a2e). Riquadri 'Correzioni applicate' aggiunti alle schede e alla valutazione.
+- 2026-10-19 — Finestre temporali ricalcolate nel tempo (7ec19c0); merge di main con SAIL-MeVO in app (fbba0ca).
