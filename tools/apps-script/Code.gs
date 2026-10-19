@@ -4,12 +4,14 @@
 // EnsApp_Data. Sorgente di verita' operativa = editor Apps Script; questo
 // file serve a versionare le modifiche insieme al client.
 //
-// Trial supportati: 24 chiavi (incluso TENACITY e SAILMEVO).
+// Trial supportati: quelli di TRIAL_KEYS piu' quelli che l'app dichiara nel
+// payload (campo `trialKeys`, CSV di SHEET_TRIAL_KEYS lato client).
 //
 // NOTA: le colonne dei trial mancanti nel foglio vengono create in automatico
 // al primo doPost (ensureTrialColumns_). Senza quella colonna l'arruolamento
 // verrebbe scartato in silenzio, perche' la riga si costruisce leggendo le
-// intestazioni.
+// intestazioni. Dato che l'elenco arriva dall'app, aggiungere un trial nuovo
+// non richiede di modificare ne' rideployare questo script.
 
 const SHEET_NAME = ""; // "" = primo foglio dello spreadsheet
 
@@ -22,7 +24,8 @@ function getSheet_() {
   return ss.getSheets()[0];
 }
 
-// 24 trial keys — include NORAHOME, TENACITY e SAILMEVO
+// Trial keys di base (24). Non serve piu' aggiornarla per i trial nuovi:
+// arrivano da payload.trialKeys e vengono ricordati in knownTrialKeys_().
 const TRIAL_KEYS = ["WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST",
   "TICH3","LIBREXIA","TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE","SAFERDOAC",
   "SHIONOGI","SOVATELTIDE","ORION","DOIT","REMEDY","PROMISE","NIVO","NORAHOME",
@@ -46,6 +49,43 @@ const TRIAL_ALIASES = {
   "SAIL MeVO": "SAILMEVO",
   "SailMevo": "SAILMEVO"
 };
+
+// Chiavi trial dichiarate dall'app: solo lettere, cifre e "_", per non creare
+// intestazioni arbitrarie da un POST qualsiasi (la web app e' pubblica).
+const TRIAL_KEY_RE = /^[A-Za-z0-9_]{1,40}$/;
+const MAX_TRIAL_KEYS = 100;
+const KNOWN_TRIALS_PROP = "KNOWN_TRIAL_KEYS";
+
+/** Chiavi trial in payload.trialKeys (CSV o array), valide e canoniche. */
+function payloadTrialKeys_(payload) {
+  const raw = payload && payload.trialKeys;
+  const list = Array.isArray(raw) ? raw : String(raw || "").split(",");
+  const out = [];
+  list.forEach(k => {
+    const key = canonicalTrialKey_(k);
+    if (TRIAL_KEY_RE.test(key) && out.indexOf(key) < 0 && out.length < MAX_TRIAL_KEYS) out.push(key);
+  });
+  return out;
+}
+
+/**
+ * Tutte le chiavi trial note: TRIAL_KEYS + quelle gia' viste nei POST
+ * (salvate nelle Script Properties, cosi' anche doGet le riconosce).
+ * Con `payload` aggiunge e memorizza quelle nuove dichiarate dall'app.
+ */
+function knownTrialKeys_(payload) {
+  const props = PropertiesService.getScriptProperties();
+  const stored = String(props.getProperty(KNOWN_TRIALS_PROP) || "").split(",").filter(Boolean);
+  const keys = TRIAL_KEYS.slice();
+  stored.concat(payload ? payloadTrialKeys_(payload) : []).forEach(k => {
+    if (keys.indexOf(k) < 0 && keys.length < TRIAL_KEYS.length + MAX_TRIAL_KEYS) keys.push(k);
+  });
+  const extra = keys.filter(k => TRIAL_KEYS.indexOf(k) < 0);
+  if (payload && extra.join(",") !== stored.join(",")) {
+    props.setProperty(KNOWN_TRIALS_PROP, extra.join(","));
+  }
+  return keys;
+}
 
 /** Chiave canonica di una intestazione (o la chiave stessa se non e' un alias). */
 function canonicalTrialKey_(key) {
@@ -76,11 +116,11 @@ function trialValue_(payload, canonical, sheetKey) {
 }
 
 /**
- * Aggiunge in coda le colonne dei trial mancanti (es. TENACITY al primo invio
- * dopo l'aggiornamento dell'app), cosi' non serve un passo manuale sul foglio.
+ * Aggiunge in coda le colonne dei trial mancanti (es. un trial appena aggiunto
+ * all'app, al suo primo invio), cosi' non serve un passo manuale sul foglio.
  * Gli alias contano come presenti: "DO  IT" vale DOIT, "NiVO" vale NIVO.
  */
-function ensureTrialColumns_(sh) {
+function ensureTrialColumns_(sh, trialKeys) {
   const lastCol = sh.getLastColumn();
   if (lastCol === 0) return;
 
@@ -88,7 +128,7 @@ function ensureTrialColumns_(sh) {
   const present = {};
   headers.forEach(h => { if (h) present[canonicalTrialKey_(h)] = true; });
 
-  const missing = TRIAL_KEYS.filter(k => !present[k]);
+  const missing = trialKeys.filter(k => !present[k]);
   if (missing.length === 0) return;
 
   sh.getRange(1, lastCol + 1, 1, missing.length)
@@ -101,12 +141,13 @@ function doPost(e) {
   try {
     const payload = JSON.parse(e.parameter.payload || "{}");
     const sh = getSheet_();
+    const trialKeys = knownTrialKeys_(payload);
     const lastCol = sh.getLastColumn();
     if (lastCol === 0) {
       // Foglio totalmente vuoto: crea header iniziale completo
       const initialHeaders = [
         "Timestamp","N_patient","Age","NIHSS","LTSW_h","pre_mRS",
-        ...TRIAL_KEYS,
+        ...trialKeys,
         "TEV","mTICI","TIV","Notes",
         "missed","eligible","source"
       ];
@@ -114,8 +155,8 @@ function doPost(e) {
       sh.setFrozenRows(1);
     }
 
-    // Colonne trial nuove (es. TENACITY) create al volo prima di scrivere.
-    ensureTrialColumns_(sh);
+    // Colonne trial nuove (dichiarate dall'app) create al volo prima di scrivere.
+    ensureTrialColumns_(sh, trialKeys);
 
     const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(h => String(h || "").trim());
 
@@ -149,7 +190,7 @@ function doPost(e) {
       // Colonne trial: risoluzione uniforme via alias (NORAHOME, DOIT, NIVO,
       // TENACITY, ...). Default "no" se il paziente non e' arruolato.
       const canonical = canonicalTrialKey_(key);
-      if (TRIAL_KEYS.indexOf(canonical) >= 0) {
+      if (trialKeys.indexOf(canonical) >= 0) {
         return trialValue_(payload, canonical, key);
       }
 
@@ -175,6 +216,7 @@ function doGet(e) {
   if (lastRow < 2 || lastCol < 1) return jsonOut([]);
 
   const headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(h => String(h || "").trim());
+  const trialKeys = knownTrialKeys_();
   const data = sh.getRange(2, 1, lastRow - 1, lastCol).getValues();
 
   const rows = data.map((r, idx) => {
@@ -192,7 +234,7 @@ function doGet(e) {
     // Trial arruolati: deriva dalle colonne se non c'e' un campo trials esplicito.
     // Riconosce sia il nome canonico (NORAHOME, TENACITY) sia gli alias.
     if (!obj.trials || obj.trials === "") {
-      obj.trials = TRIAL_KEYS.filter(k => {
+      obj.trials = trialKeys.filter(k => {
         const candidates = trialVariants_(k).map(name => obj[name]);
         return candidates.some(v =>
           v != null && String(v).trim() !== "" &&

@@ -94,18 +94,18 @@ Ordine dei file da toccare (esempio: TENACITY):
 **Backend Apps Script** (`tools/apps-script/Code.gs`, copia versionata dello
 script legato a `EnsApp_Data`): l'Apps Script costruisce ogni riga leggendo
 `payload[intestazione]`, quindi una colonna mancante fa scartare il dato in
-silenzio. Per evitare il passo manuale, `ensureTrialColumns_()` crea in coda le
-colonne dei trial presenti in `TRIAL_KEYS` ma assenti nel foglio.
+silenzio. Per questo ogni invio porta anche `trialKeys` (CSV di
+`SHEET_TRIAL_KEYS`) e `ensureTrialColumns_()` crea in coda le colonne dei trial
+dichiarati ma assenti nel foglio. Le chiavi viste vengono ricordate nelle
+Script Properties (`KNOWN_TRIAL_KEYS`), cosi' anche la lettura (`doGet`) le
+riconosce.
 
-Quindi, quando si aggiunge un trial:
-
-1. aggiungere la chiave a `TRIAL_KEYS` in `tools/apps-script/Code.gs` (stessa
-   stringa di `SHEET_TRIAL_KEYS` lato client, case-sensitive);
-2. incollare lo script aggiornato nell'editor Apps Script del foglio e fare un
-   nuovo deploy della web app;
-3. il primo invio dall'app crea la colonna. Gli alias in `TRIAL_ALIASES`
-   evitano duplicati quando l'intestazione umana differisce (`DO  IT` -> `DOIT`,
-   `NiVO` -> `NIVO`, `NORA HOME` -> `NORAHOME`).
+Quindi, quando si aggiunge un trial, **non serve toccare ne' rideployare lo
+script**: basta la chiave in `SHEET_TRIAL_KEYS` (passo 4) e il primo invio
+dall'app crea la colonna. Le chiavi devono contenere solo lettere, cifre e `_`
+(max 40 caratteri). Gli alias in `TRIAL_ALIASES` evitano duplicati quando
+l'intestazione umana differisce (`DO  IT` -> `DOIT`, `NiVO` -> `NIVO`,
+`NORA HOME` -> `NORAHOME`); un alias nuovo richiede invece un redeploy.
 
 Restano manuali le colonne del tab statistiche (coppia Intervention/Control).
 

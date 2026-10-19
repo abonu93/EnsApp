@@ -14,7 +14,7 @@
   import type { VesselCode } from "$lib/domain/acute-rules";
   import { VESSEL_OPTIONS } from "$lib/domain/vessels";
   import { TRIALS_INFO, isTrialOpen } from "$lib/domain/trials-info";
-  import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm } from "$lib/domain/sheet-payload";
+  import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV } from "$lib/domain/sheet-payload";
   import { addSavedPatient } from "$lib/stores/savedPatients";
   import { quickPatient, clearQuickPatient } from "$lib/stores/quickPatient";
   import { hoursSince } from "$lib/stores/patient";
@@ -195,6 +195,8 @@
       // Colonne trial con intestazioni non normalizzate nel foglio:
       "DO  IT": sheetTrials.DOIT,
       NiVO: sheetTrials.NIVO,
+      // Elenco dei trial: il backend crea da qui le colonne che mancano.
+      trialKeys: SHEET_TRIAL_KEYS_CSV,
       TEV: tev,
       mTICI: showMtici ? mtici : "",
       TIV: tiv,
