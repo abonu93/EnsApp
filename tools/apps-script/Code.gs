@@ -4,7 +4,7 @@
 // EnsApp_Data. Sorgente di verita' operativa = editor Apps Script; questo
 // file serve a versionare le modifiche insieme al client.
 //
-// Trial supportati: 23 chiavi (incluso TENACITY).
+// Trial supportati: 24 chiavi (incluso TENACITY e SAILMEVO).
 //
 // NOTA: le colonne dei trial mancanti nel foglio vengono create in automatico
 // al primo doPost (ensureTrialColumns_). Senza quella colonna l'arruolamento
@@ -22,11 +22,11 @@ function getSheet_() {
   return ss.getSheets()[0];
 }
 
-// 23 trial keys — include NORAHOME e TENACITY
+// 24 trial keys — include NORAHOME, TENACITY e SAILMEVO
 const TRIAL_KEYS = ["WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST",
   "TICH3","LIBREXIA","TWIN2WIN","ARTEMIS","HYBERNIA","DONESYMPLE","SAFERDOAC",
   "SHIONOGI","SOVATELTIDE","ORION","DOIT","REMEDY","PROMISE","NIVO","NORAHOME",
-  "TENACITY"];
+  "TENACITY","SAILMEVO"];
 
 // Alias: l'app o un header umano potrebbe scrivere il nome con spazi.
 // Mappa tutte le varianti -> chiave canonica nella colonna del foglio.
@@ -40,7 +40,11 @@ const TRIAL_ALIASES = {
   "NiVO": "NIVO",
   "Tenacity": "TENACITY",
   "tenacity": "TENACITY",
-  "TNK": "TENACITY"
+  "TNK": "TENACITY",
+  "SAIL-MeVO": "SAILMEVO",
+  "SAIL-MEVO": "SAILMEVO",
+  "SAIL MeVO": "SAILMEVO",
+  "SailMevo": "SAILMEVO"
 };
 
 /** Chiave canonica di una intestazione (o la chiave stessa se non e' un alias). */

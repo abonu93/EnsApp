@@ -16,6 +16,7 @@ export type VesselCode =
 
 export type YesNo = "yes" | "no";
 export type YesNoEmpty = YesNo | "";
+export type YesNoNa = YesNoEmpty | "na";
 export type CandidateStatus = "eligible" | "not eligible" | "";
 
 export interface AcuteInput {
@@ -43,6 +44,14 @@ export interface AcuteInput {
   largeCore?: YesNoEmpty;
   /** TENACITY - diabete (criterio di esclusione). */
   diabetes?: YesNoEmpty;
+  /** SAIL-MeVO - core stimato con IA su TC basale < 10 mL ("na" = software non disponibile). */
+  aiCoreLt10?: YesNoNa;
+  /** SAIL-MeVO - ipoperfusione Tmax > 6 s > 30 mL ("na" = TC perfusione non disponibile). */
+  tmaxGt30?: YesNoNa;
+  /** SAIL-MeVO - esclusioni. */
+  pregnant?: YesNoEmpty;
+  lifeExpectancyLt3m?: YesNoEmpty;
+  contrastAllergy?: YesNoEmpty;
 }
 
 export interface VesselFlags {
@@ -414,5 +423,54 @@ export function tenacity(input: AcuteInput): boolean {
     input.ivtCandidate !== "eligible" &&
     input.contraTpa !== "yes" &&
     input.diabetes !== "yes"
+  );
+}
+
+/** Vasi MeVO ammessi da SAIL-MeVO: M2 non dominante-M3, A2-A3, P2-P3. */
+export const SAIL_MEVO_VESSELS: readonly VesselCode[] = ["m2-any", "gt-m2", "a2", "gt-a2", "p2", "gt-p2"];
+
+/**
+ * SAIL-MeVO: EVT (ADAPT / SAIL) + BMT vs BMT nelle occlusioni di vaso medio-distale.
+ *
+ * Inclusione: eta' 18-80, pre-mRS 0-1, NIHSS 9-17, esordio -> randomizzazione
+ * < 12 h, occlusione ISOLATA di un MeVO (M2 non dominante-M3, A2-A3, P2-P3)
+ * su angio-TC/angio-RM, ASPECTS >= 6, core IA < 10 mL (se disponibile),
+ * volume Tmax > 6 s > 30 mL (se disponibile), consenso del paziente o del
+ * rappresentante legale.
+ *
+ * Esclusione: occlusione prossimale (ICA, M1) o stenosi tandem della ICA
+ * cervicale > 70%, emorragia intracranica basale, gravidanza, aspettativa di
+ * vita < 3 mesi, allergia grave al contrasto iodato.
+ *
+ * Note sulla mappatura app -> protocollo:
+ *  - EVT vs BMT e' randomizzato, quindi la candidatura EVT non conta;
+ *  - "M2 non dominante" -> "m2-any" (escluso "m2-proxdom"); M3 -> ">M2";
+ *  - "isolata" -> un solo vaso selezionato;
+ *  - stenosi tandem > 70% -> flag tandem;
+ *  - emorragia intracranica -> esclusa dal percorso ischemico;
+ *  - core IA e Tmax: "na" (non disponibile) o non compilato non escludono;
+ *  - con trombolisi, il NIHSS deve restare 9-17 a 30 min dall'inizio della
+ *    trombolisi: resta verifica clinica.
+ */
+export function sailMevo(input: AcuteInput): boolean {
+  const vessels = toArray(input.targetVessels);
+  const isolatedMevo = vessels.length === 1 && SAIL_MEVO_VESSELS.includes(vessels[0]);
+
+  return (
+    input.age >= 18 &&
+    input.age <= 80 &&
+    input.premrs <= 1 &&
+    input.nihss >= 9 &&
+    input.nihss <= 17 &&
+    input.ltsw < 12 &&
+    isolatedMevo &&
+    input.tandem !== "yes" &&
+    isValidNumber(input.aspects) &&
+    input.aspects >= 6 &&
+    input.aiCoreLt10 !== "no" &&
+    input.tmaxGt30 !== "no" &&
+    input.pregnant !== "yes" &&
+    input.lifeExpectancyLt3m !== "yes" &&
+    input.contrastAllergy !== "yes"
   );
 }

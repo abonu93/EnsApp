@@ -5,7 +5,9 @@ import {
   vanish,
   computeVesselFlags,
   tenacity,
+  sailMevo,
 } from "$lib/domain/acute-rules";
+import { reasonSailMevo } from "$lib/domain/acute-reasons";
 
 describe("acute-rules - smoke (ported from legacy node:test)", () => {
   test("weTrust: eligible when all criteria are met", () => {
@@ -196,5 +198,72 @@ describe("acute-reasons - ATHENA concorda con la regola", () => {
       const input = { ...base, ...v } as Parameters<typeof athena>[0];
       expect(reasonAthena(input).eligible).toBe(athena(input));
     }
+  });
+});
+
+describe("acute-rules - SAIL-MeVO (EVT in MeVO)", () => {
+  const base = {
+    age: 65,
+    nihss: 12,
+    premrs: 0,
+    ltsw: 6,
+    targetVessels: ["m2-any" as const],
+    aspects: 8,
+  };
+
+  test("eligible with isolated MeVO and optional imaging not available", () => {
+    expect(sailMevo(base)).toBe(true);
+    expect(sailMevo({ ...base, aiCoreLt10: "na", tmaxGt30: "na" })).toBe(true);
+    expect(sailMevo({ ...base, aiCoreLt10: "yes", tmaxGt30: "yes" })).toBe(true);
+    expect(reasonSailMevo(base).eligible).toBe(true);
+  });
+
+  test("EVT candidacy does not matter (EVT is randomized)", () => {
+    expect(sailMevo({ ...base, candidate: "eligible", lvo: "yes" })).toBe(true);
+    expect(sailMevo({ ...base, candidate: "not eligible", lvo: "no" })).toBe(true);
+  });
+
+  test("MeVO vessels: non-dominant M2-M3, A2-A3, P2-P3", () => {
+    for (const v of ["m2-any", "gt-m2", "a2", "gt-a2", "p2", "gt-p2"] as const) {
+      expect(sailMevo({ ...base, targetVessels: [v] })).toBe(true);
+    }
+    for (const v of ["m2-proxdom", "m1", "ica-terminal", "ica-intracranial", "a1", "p1", "basilar", "va"] as const) {
+      expect(sailMevo({ ...base, targetVessels: [v] })).toBe(false);
+    }
+    expect(sailMevo({ ...base, targetVessels: [] })).toBe(false);
+  });
+
+  test("occlusion must be isolated (one vessel)", () => {
+    expect(sailMevo({ ...base, targetVessels: ["m2-any", "a2"] })).toBe(false);
+    expect(sailMevo({ ...base, targetVessels: ["m1", "m2-any"] })).toBe(false);
+  });
+
+  test("age 18-80, pre-mRS 0-1, NIHSS 9-17, LTSW < 12h", () => {
+    expect(sailMevo({ ...base, age: 17 })).toBe(false);
+    expect(sailMevo({ ...base, age: 80 })).toBe(true);
+    expect(sailMevo({ ...base, age: 81 })).toBe(false);
+    expect(sailMevo({ ...base, premrs: 2 })).toBe(false);
+    expect(sailMevo({ ...base, nihss: 8 })).toBe(false);
+    expect(sailMevo({ ...base, nihss: 9 })).toBe(true);
+    expect(sailMevo({ ...base, nihss: 17 })).toBe(true);
+    expect(sailMevo({ ...base, nihss: 18 })).toBe(false);
+    expect(sailMevo({ ...base, ltsw: 11.9 })).toBe(true);
+    expect(sailMevo({ ...base, ltsw: 12 })).toBe(false);
+  });
+
+  test("imaging: ASPECTS >= 6, AI core < 10 mL, Tmax > 6s > 30 mL", () => {
+    expect(sailMevo({ ...base, aspects: 6 })).toBe(true);
+    expect(sailMevo({ ...base, aspects: 5 })).toBe(false);
+    expect(sailMevo({ ...base, aspects: undefined })).toBe(false);
+    expect(sailMevo({ ...base, aiCoreLt10: "no" })).toBe(false);
+    expect(sailMevo({ ...base, tmaxGt30: "no" })).toBe(false);
+  });
+
+  test("exclusions: tandem, pregnancy, life expectancy, contrast allergy", () => {
+    expect(sailMevo({ ...base, tandem: "yes" })).toBe(false);
+    expect(sailMevo({ ...base, pregnant: "yes" })).toBe(false);
+    expect(sailMevo({ ...base, lifeExpectancyLt3m: "yes" })).toBe(false);
+    expect(sailMevo({ ...base, contrastAllergy: "yes" })).toBe(false);
+    expect(reasonSailMevo({ ...base, contrastAllergy: "yes" }).eligible).toBe(false);
   });
 });

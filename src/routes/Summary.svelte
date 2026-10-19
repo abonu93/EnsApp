@@ -34,6 +34,7 @@
     { display: "DO-IT", eligible: $acuteEligibility.doit, tone: "ischemic" },
     { display: "REMEDY", eligible: $acuteEligibility.remedy, tone: "ischemic" },
     { display: "TENACITY", eligible: $acuteEligibility.tenacity, tone: "ischemic" },
+    { display: "SAIL-MeVO", eligible: $acuteEligibility.sailMevo, tone: "ischemic" },
     { display: "NORA HOME", eligible: $acuteEligibility.noraHome, tone: "post-acute" },
   ]);
 
