@@ -37,21 +37,21 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | VANISH | activo | aperto | ✅ | [[VANISH]] |
 | WETRUST | activo | aperto | 🟨 (pp. 1-80/130) | [[WETRUST]] |
 | NORA HOME | activo | assente ⚠ | — nessun documento in Drive | |
-| SAFER-DOAC | activo | assente ⚠ | — nessun documento in Drive (forse = DOAC-CVT) | |
+| SAFER-DOAC | activo | assente ⚠ | — nessun documento in Drive (NON è DOAC-CVT, vedi [[DOAC-CVT]]) |  |
 
 ## 2 — Studi in Drive non presenti nell'app
 
 | Studio | Dove (Drive originale) | Stato foglio | Lettura | Scheda |
 |---|---|---|---|---|
 | AZURE (AZD0780) | ABIERTOS / OTROS | assente | — cifrati, non letti | [[AZURE]] |
-| CATIS-ICAS | PENDIENTES ABRIR | assente | ⬜ (solo sinossi) | |
-| CEREFUZE | PENDIENTES ABRIR | assente | ⬜ | |
+| CATIS-ICAS | PENDIENTES ABRIR | assente | ✅ (solo sinossi) | [[CATIS-ICAS]] |
+| CEREFUZE | PENDIENTES ABRIR | assente | ✅ (pp. 2-14/14) | [[CEREFUZE]] |
 | DOAC-CVT | INACTIVOS | assente | ✅ | [[DOAC-CVT]] |
 | EAST-STROKE | ABIERTOS / OTROS | assente | ✅ | [[EAST-STROKE]] |
 | ELAPSE | ABIERTOS / OTROS | assente | ✅ | [[ELAPSE]] |
 | ORBIT-XI | PENDIENTES ABRIR | assente | — nessun documento | [[ORBIT-XI]] |
 | SAIL-MeVO | PENDIENTES ABRIR | aperto ⚠ (non in app) | ✅ | [[SAIL-MeVO]] |
-| TargED (TG1-CL-201) | PENDIENTES ABRIR | assente | ⬜ | |
+| TargED (TG1-CL-201) | PENDIENTES ABRIR | assente | ✅ | [[TargED]] |
 
 ## 3 — Studi nel foglio senza documenti nella copia né in app
 

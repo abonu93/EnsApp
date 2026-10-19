@@ -2,7 +2,7 @@
 tipo: ensayo
 estudio: LIBREXIA
 alias: [LIBREXIA-STROKE, "70033093STR3001", milvexian, Librexia]
-estado_app: cerrado
+estado_app: cerrado   # aggiornato 2026-10-19
 clave_app: "Librexia"
 categoria: post-agudo
 fase: "3"

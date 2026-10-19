@@ -2,7 +2,7 @@
 tipo: ensayo
 estudio: ATHENA
 alias: [ANA2401, AN10153, "The ATHENA Study", "ANA Funnel Catheter"]
-estado_app: activo
+estado_app: activo   # aggiornato 2026-10-19
 clave_app: "ATHENA"
 categoria: dispositivo
 fase: "non riportata nel documento (indagine clinica con dispositivo medico, MDR 2017/745 e 21 CFR 812)"

@@ -2,7 +2,7 @@
 tipo: ensayo
 estudio: MOSTE
 alias: [IN-EXTREMIS-MOSTE, "MinOr Stroke Therapy Evaluation", "IN EXTREMIS"]
-estado_app: activo
+estado_app: cerrado   # aggiornato 2026-10-19
 clave_app: "MOSTE"
 categoria: isquémico
 fase: "non riportata nel documento (indagine clinica su strategia con dispositivi CE/FDA)"

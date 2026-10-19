@@ -2,7 +2,7 @@
 tipo: ensayo
 estudio: PIVOTAL
 alias: [RapidPulse, "RapidPulse Pivotal Study", CIP-0002, RPAS]
-estado_app: activo
+estado_app: activo   # aggiornato 2026-10-19
 clave_app: "PIVOTAL"
 categoria: dispositivo
 fase: "pivotal (dispositivo sperimentale, braccio singolo contro un obiettivo di performance)"

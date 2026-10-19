@@ -2,7 +2,7 @@
 tipo: ensayo
 estudio: ARTEMIS
 alias: [CON2501, AN11313, "CONDA stent retriever", "The ARTEMIS Study"]
-estado_app: activo
+estado_app: cerrado   # aggiornato 2026-10-19
 clave_app: "ARTEMIS"
 categoria: dispositivo
 fase: "pilota (clinical development stage: Pilot)"

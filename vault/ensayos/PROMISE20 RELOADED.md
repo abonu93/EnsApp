@@ -2,7 +2,7 @@
 tipo: ensayo
 estudio: PROMISE20 RELOADED
 alias: [PROMISE 20 RELOADED, PROMISE20R, "PROMISE (EnsApp)", BraiN20]
-estado_app: pausado
+estado_app: pausado   # aggiornato 2026-10-19
 clave_app: "PROMISE"
 categoria: dispositivo
 fase: "Cohort interventional study; indagine pre-market pivotal con dispositivo medico (MDR)"
