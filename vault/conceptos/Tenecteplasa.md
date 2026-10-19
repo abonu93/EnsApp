@@ -13,6 +13,7 @@ Attivatore tissutale del plasminogeno ricombinante (rt-PA): una variante di alte
 |---|---|---|
 | [[TENACITY]] | Farmaco sperimentale: 0,25 mg/kg (max 25 mg), bolo e.v. di 5–10 s, oltre 4,5 h dal LKW, contro SOC senza trombolisi | ([[TENACITY — Protocolo — V1.0]], p. 35) |
 | [[ARTEMIS]] | Trombolisi e.v. (alteplasa o tenecteplasa) secondo le linee guida AHA/ASA o ESO, da non ritardare; non è un requisito (eleggibili anche i pazienti fuori finestra o con controindicazioni) | ([[ARTEMIS — Protocolo — V03]], p. 25, p. 30) |
+| [[DO-IT]] | Braccio sperimentale (alternativa ad alteplasa, a scelta del centro): 0,25 mg/kg (max 25 mg) in bolo, in pazienti con DOAC nelle 48 h; vietate dosi superiori | ([[DO-IT — Protocolo — v2.0]], p. 29, p. 35) |
 
 ## Note
 - In TENACITY, nel braccio TNK, sono vietati antiaggreganti e anticoagulanti nelle prime 24 h; l'eparina e.v. è ammessa solo dopo un imaging di controllo senza sanguinamento ([[TENACITY — Protocolo — V1.0]], p. 40).

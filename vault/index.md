@@ -16,7 +16,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 |---|---|---|---|---|
 | ARTEMIS | closed (dal 2026-10-19) | reclut. cerrado | 🟨 (pp. 1-81/84) | [[ARTEMIS]] |
 | ATHENA | active (dal 2026-10-19) | aperto | ⬜ |  |
-| DO-IT | activo | aperto | ⬜ | |
+| DO-IT | activo | aperto | ✅ | [[DO-IT]] |
 | DONE SYMPLE | activo | aperto | ⬜ | |
 | FASTEST | activo | aperto | ⬜ | |
 | HYBERNIA | pausado | en pausa | ⬜ | |
@@ -71,10 +71,12 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[Cone-beam CT]]
 - [[Consentimiento diferido]]
 - [[Direct to angio]]
+- [[DOAC]]
 - [[Drip and ship]]
 - [[Hemorragia intracraneal sintomática]]
 - [[Ictus del despertar]]
 - [[Ictus minor con LVO]]
+- [[Ictus no discapacitante]]
 - [[Mismatch de perfusión]]
 - [[mRS]]
 - [[NIHSS]]
