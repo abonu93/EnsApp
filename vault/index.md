@@ -32,7 +32,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | SHIONOGI | cerrado | — | ⬜ | |
 | SOVATELTIDE | activo | aperto | ⬜ | |
 | TENACITY | activo | assente ⚠ | ✅ | [[TENACITY]] |
-| TICH-3 | activo | aperto | ⬜ | |
+| TICH-3 | activo | aperto | ✅ | [[TICH-3]] |
 | TWIN2WIN-2 | activo | aperto | ✅ | [[TWIN2WIN-2]] |
 | VANISH | activo | aperto | ✅ | [[VANISH]] |
 | WETRUST | activo | aperto | 🟨 (pp. 1-80/130) | [[WETRUST]] |
