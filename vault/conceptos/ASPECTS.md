@@ -20,6 +20,7 @@ Punteggio da 0 a 10 che quantifica i segni precoci di ischemia nel territorio de
 | [[PIVOTAL]] | Esclusione: ASPECTS <6, oppure **PC-ASPECTS <7** (immagini sorgente dell'angio-TC o DWI) nella circolazione posteriore; con software automatico, anche core >50 cc in TC-perfusione o >70 cc in DWI. L'app non controlla l'ASPECTS (`acute-rules.ts:160-171`) e non chiede il PC-ASPECTS | ([[PIVOTAL — Protocolo — Rev 03]], p. 12, p. 42) |
 | [[TWIN2WIN-2]] | Esclusione: ASPECTS **<6 in TC o <5 in DWI** (soglie diverse per modalità); nessuna indicazione per la basilare. Il foglio del team e l'app scrivono "no" / "-" (`trials-info.ts:103`) e la regola non lo controlla (`acute-rules.ts:211-221`) | ([[TWIN2WIN-2 — Protocolo — V2]], p. 5) |
 | [[HYBERNIA]] | Inclusione: ASPECTS 5–10 su TC senza contrasto o RM; nessun criterio di core, perfusione facoltativa. L'app controlla ASPECTS >4 (`acute-rules.ts:249-250`) | ([[HYBERNIA — Protocolo — V1.1]], p. 20, p. 24) |
+| [[ATHENA]] | Inclusione 9: **o** core (restrizione della diffusione) ≤50 mL su CTP/MRP **o** ASPECTS 6–10 su TC/DWI-RM; dalla v2.3 ASPECTS 5 ammesso nei centri che lo valutano con RM (la DWI-ASPECTS è circa 1 punto più bassa). Per l'eleggibilità prevale la lettura in tempo reale dell'investigatore. L'app non controlla né ASPECTS né core (`acute-rules.ts:135-147`) | ([[ATHENA — Protocolo — v2.3]], p. 34, p. 60–61; [[ATHENA — Cambios — v2.11 a v2.3]], p. 8–12) |
 
 ## Note
 - Nato per il territorio della MCA: non è applicabile così com'è alla circolazione posteriore.

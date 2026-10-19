@@ -13,6 +13,7 @@ Riperfusione completa o quasi completa (**mTICI 2c–3**) del territorio dell'oc
 |---|---|---|
 | [[PIVOTAL]] | **Endpoint primario di efficacia**: FPE = mTICI ≥2c dopo il primo passaggio, letto dall'Imaging Core Lab, contro un obiettivo di performance di letteratura (H0 ≤0,4054). Secondario chiave 2: FPE contro la media di letteratura 0,4547. Aggiuntivo: mFPE (mTICI ≥2b dopo un passaggio). Un trattamento di salvataggio dopo il primo passaggio conta come fallimento | ([[PIVOTAL — Protocolo — Rev 03]], p. 18–20, p. 32–34, p. 38–39, p. 49) |
 | [[TWIN2WIN-2]] | Secondario di efficacia: ricanalizzazione completa al primo passaggio (mTICI/eTICI 2c–3) con DS-EVT contro SS-EVT; anche 2c–3 nei primi tre tentativi. Nel primo TWIN2WIN era l'endpoint primario (46,6% contro 24%) | ([[TWIN2WIN-2 — Protocolo — V2]], p. 1, p. 3, p. 8) |
+| [[ATHENA]] | **Endpoint primario di efficacia**: FPE = eTICI 2c–3 dopo un solo passaggio (Core Lab), non inferiorità con margine del 10% (atteso 52,5% ANA contro 45% controllo), poi superiorità come primo secondario | ([[ATHENA — Protocolo — v2.3]], p. 8, p. 30–31, p. 79–80) |
 
 ## Note
 - Il "passaggio" va definito protocollo per protocollo: in PIVOTAL è ogni accensione dell'aspirazione RapidPulse con il catetere sul trombo, seguita da angiografia ([[PIVOTAL — Protocolo — Rev 03]], p. 48). Vedi anche [[Stent retriever]].
