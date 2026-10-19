@@ -57,7 +57,7 @@
     if ($preData.age != null) lines.push(`Age: ${$preData.age}`);
     if ($preData.nihss != null) lines.push(`NIHSS: ${$preData.nihss}`);
     if ($preData.premrs != null) lines.push(`pre-mRS: ${$preData.premrs}`);
-    if ($preData.ltsw != null) lines.push(`LTSW: ${fmtHoursAsClock($preData.ltsw)}`);
+    if ($ltswHours != null) lines.push(`LTSW: ${fmtHoursAsClock($ltswHours)}`);
     if ($postData.strokeType) lines.push(`Stroke type: ${$postData.strokeType}`);
 
     if ($selectedStudies.length > 0) {

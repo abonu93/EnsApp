@@ -11,7 +11,7 @@
   import HVolDial from "$lib/components/HVolDial.svelte";
   import HGcs from "$lib/components/HGcs.svelte";
   import { fastestNeedsSpotSign } from "$lib/domain/hemorrhagic-rules";
-  import { preData, postData, hemData } from "$lib/stores/patient";
+  import { preData, postData, hemData, ltswHours } from "$lib/stores/patient";
   import { t } from "$lib/i18n";
   import type { VesselCode } from "$lib/domain/acute-rules";
 
@@ -105,11 +105,11 @@
   const showEvt = $derived(isIschemic && candidate === "eligible");
   const showNonEvt = $derived(isIschemic && candidate === "not eligible");
   // Stesso limite della regola fastest() (ltsw <= 2): a 2,0 h la scheda deve comparire.
-  const showFastest = $derived(isHem && ($preData.ltsw ?? 999) <= 2 && ($preData.premrs ?? 99) <= 2);
-  const showSpotSign = $derived(showFastest && fastestNeedsSpotSign($preData.ltsw ?? 0));
+  const showFastest = $derived(isHem && ($ltswHours ?? 999) <= 2 && ($preData.premrs ?? 99) <= 2);
+  const showSpotSign = $derived(showFastest && fastestNeedsSpotSign($ltswHours ?? 0));
   // TENACITY: solo ischemico NON candidato a trombectomia, finestra > 4.5h e <= 72h.
   const showTenacity = $derived(
-    showNonEvt && ($preData.ltsw ?? -1) > 4.5 && ($preData.ltsw ?? -1) <= 72
+    showNonEvt && ($ltswHours ?? -1) > 4.5 && ($ltswHours ?? -1) <= 72
   );
 
   const strokeOpts = $derived([

@@ -2,7 +2,7 @@
 // IMPORTANTE: nessun PII oltre a patientId (inserito manualmente).
 // Reset esplicito via clearPatient() o startNewPatient().
 
-import { derived } from "svelte/store";
+import { derived, readable } from "svelte/store";
 import { persisted } from "./persistence";
 import type { AcuteInput } from "$lib/domain/acute-rules";
 import type { HemorrhagicInput } from "$lib/domain/hemorrhagic-rules";
@@ -66,21 +66,36 @@ export const hemData = persisted<HemData>({
   ttlMs: TTL_24H,
 });
 
-/** Calcola ore tra LTSW datetime e adesso (positive). */
-export function hoursSince(isoDate: string | undefined): number | undefined {
+/** Calcola ore tra LTSW datetime e `nowMs` (default: adesso). */
+export function hoursSince(isoDate: string | undefined, nowMs: number = Date.now()): number | undefined {
   if (!isoDate) return undefined;
   const t = new Date(isoDate).getTime();
   if (Number.isNaN(t)) return undefined;
-  const diffMs = Date.now() - t;
+  const diffMs = nowMs - t;
   return diffMs / 3_600_000;
 }
 
+/** Ogni quanto si ricalcolano le finestre temporali mentre l'app e' aperta. */
+export const CLOCK_TICK_MS = 30_000;
+
 /**
- * LTSW ore derivato: priorita' a `ltswDate` (se presente),
- * fallback a `ltsw` numerico per retro-compatibilita'.
+ * Orologio dell'app: emette Date.now() ogni CLOCK_TICK_MS finche' qualcuno
+ * e' iscritto. Senza di esso le ore dall'LTSW restavano ferme al momento
+ * dell'inserimento e un paziente restava "in finestra" anche dopo il limite.
  */
-export const ltswHours = derived(preData, ($pre) => {
-  const fromDate = hoursSince($pre.ltswDate);
+export const now = readable(Date.now(), (set) => {
+  set(Date.now());
+  const id = setInterval(() => set(Date.now()), CLOCK_TICK_MS);
+  return () => clearInterval(id);
+});
+
+/**
+ * LTSW ore derivato e aggiornato nel tempo: priorita' a `ltswDate` (se
+ * presente), fallback a `ltsw` numerico (es. pazienti ricaricati dal foglio,
+ * dove esiste solo il valore in ore).
+ */
+export const ltswHours = derived([preData, now], ([$pre, $now]) => {
+  const fromDate = hoursSince($pre.ltswDate, $now);
   if (fromDate !== undefined) return fromDate;
   return $pre.ltsw;
 });
@@ -95,8 +110,8 @@ export const acuteInput = derived([preData, postData, ltswHours], ([$pre, $post,
  * `hemEligibility` ({...pre, ...hem}), cosi' i reason report mostrati in
  * Summary non possono divergere dal calcolo di eleggibilita'.
  */
-export const hemInput = derived([preData, hemData], ([$pre, $hem]) => {
-  return { ...$pre, ...$hem } as Partial<HemorrhagicInput>;
+export const hemInput = derived([preData, hemData, ltswHours], ([$pre, $hem, $h]) => {
+  return { ...$pre, ...$hem, ltsw: $h } as Partial<HemorrhagicInput>;
 });
 
 export function clearPatient(): void {

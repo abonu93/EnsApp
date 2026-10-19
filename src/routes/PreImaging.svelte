@@ -7,7 +7,7 @@
   import Segmented from "$lib/components/Segmented.svelte";
   import Switch from "$lib/components/Switch.svelte";
   import DateTimeField from "$lib/components/DateTimeField.svelte";
-  import { preData, hoursSince } from "$lib/stores/patient";
+  import { preData, hoursSince, now } from "$lib/stores/patient";
   import { fmtHoursAsClock } from "$lib/utils/time";
   import { t } from "$lib/i18n";
 
@@ -23,7 +23,8 @@
   let doac = $state<YN>(($preData.doac as YN) ?? "");
   let acei = $state<YN>(($preData.acei as YN) ?? "");
 
-  const ltswHrs = $derived(hoursSince(ltswDate));
+  // Aggiornato dall'orologio dell'app: il tempo trascorso avanza a schermo aperto.
+  const ltswHrs = $derived(hoursSince(ltswDate, $now));
   const symptomsWithin6h = $derived(wakeupStroke && ltswHrs !== undefined && ltswHrs <= 6);
 
   $effect(() => {

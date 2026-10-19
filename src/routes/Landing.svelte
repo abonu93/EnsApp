@@ -1,6 +1,6 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
-  import { hasPatientInProgress, preData, hoursSince, clearPatient } from "$lib/stores/patient";
+  import { hasPatientInProgress, clearPatient, ltswHours as ltswHoursStore } from "$lib/stores/patient";
   import { clearSelection } from "$lib/stores/trialSelection";
   import { fmtHoursAsClock } from "$lib/utils/time";
   import { t } from "$lib/i18n";
@@ -15,7 +15,7 @@
   function goPast() { push("/saved"); }
 
   // Active session timer (mm:ss da LTSW)
-  const ltswHours = $derived(hoursSince($preData.ltswDate) ?? $preData.ltsw);
+  const ltswHours = $derived($ltswHoursStore);
   const elapsedLabel = $derived(fmtHoursAsClock(ltswHours));
   // Frazione finestra terapeutica (4.5h IV thrombolysis)
   const windowFrac = $derived(
