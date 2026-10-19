@@ -8,6 +8,22 @@ La copia è congelata al 22-09-2026: l'originale nella cartella condivisa
 
 Prima di qualunque lavoro leggi `index.md` e le ultime righe di `log.md`.
 
+## Quali studi sono aperti: fonte di verità
+
+Per lo stato degli studi (aperto, in pausa, reclutamento chiuso, chiuso) fa
+fede **sempre** il foglio del team **"Esquema ensayos"**:
+https://docs.google.com/spreadsheets/d/1-OrcoFQMGQvIjO64umMBMalYGmgmY5T2/edit?gid=737463022#gid=737463022
+(Drive ID `1-OrcoFQMGQvIjO64umMBMalYGmgmY5T2`, cartella ENSAYOS ABIERTOS).
+
+- Rileggilo a ogni sessione di lavoro (`read_file_content`) e confronta la data
+  di modifica con quella in `fuentes/Esquema ensayos — septiembre 2026.md`.
+  Se è cambiato, aggiorna quella nota e `comparativas/Estado de los estudios.md`.
+- Il titolo contiene il mese ("septiembre 2026"): se compare una versione di
+  un mese successivo (`title contains 'Esquema ensayos'`), usa la più recente
+  e segnalalo nel log.
+- Né lo stato dell'app né le cartelle Drive (ABIERTOS/INACTIVOS/CERRADOS)
+  prevalgono sul foglio. Le differenze vanno segnalate, non corrette d'ufficio.
+
 ## Struttura
 
 | Cartella | Contenuto | Una nota per |
@@ -27,6 +43,14 @@ link al file.
 2. Leggi per intero il protocollo vigente (e sinossi, CI, emendamenti se presenti).
    Se il testo restituito è troncato o illeggibile (PDF scansionato, cifrato),
    scrivilo esplicitamente nella nota fonte: mai inventare la parte mancante.
+   **Metodo di lettura dei PDF** (verificato su TENACITY):
+   - `read_file_content` tronca in silenzio i PDF lunghi (circa 200k caratteri:
+     TENACITY si fermava a p. 80 su 84) e rimescola le tabelle a più colonne.
+   - Per i protocolli usa quindi `download_file_content`: decodifica il base64
+     in un file sotto lo scratchpad, poi `pdfinfo` per il numero di pagine e
+     `pdftotext -layout` per il testo. Tabelle e calendari restano leggibili.
+   - Verifica sempre di aver letto fino all'ultima pagina ("Page N of M").
+     Figure e diagrammi in immagine non si leggono: segnalalo.
 3. Crea una nota in `fuentes/` per ogni documento letto (template `_plantillas/fuente.md`).
 4. Crea o aggiorna `ensayos/<STUDIO>.md` (template `_plantillas/ensayo.md`).
 5. Per ogni concetto ricorrente (ASPECTS, mismatch, tandem, TNK…) crea o
