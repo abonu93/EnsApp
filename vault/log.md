@@ -21,3 +21,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-19 — Ingerito HYBERNIA (protocollo 55/55, sinossi, CI): raffreddamento cerebrale selettivo post-trombectomia, first-in-human, max 10 pazienti; soglie dell'app coincidenti. Nuovo concetto: Neuroprotección.
 - 2026-10-19 — Ingerito TICH-3 (protocollo Final v3.1 55/55, modulo CI): l'app non esclude i pazienti in warfarin/EBPM terapeutica. Nuovo concetto: Ácido tranexámico.
 - 2026-10-19 — Ingerito ATHENA (protocollo v2.3 97/97, sinossi, CI, cambi): l'app usa ancora i valori v2.11 (24 h, NIHSS ≥8) invece di 16 h e NIHSS 6-25. Nuovi concetti: Catéter guía con balón, Ateroesclerosis intracraneal (ICAD).
+- 2026-10-19 — Ingerito SOVATELTIDE (protocollo v3.1 130/130, CI): l'app richiede lesione confermata all'imaging, il protocollo accetta diagnosi clinica con TC/RM senza emorragia; testo informativo con parti copiate da VANISH, LIBREXIA e ORION.

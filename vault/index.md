@@ -30,7 +30,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | PROMISE20 RELOADED | paused (dal 2026-10-19) | en pausa | ⬜ |  |
 | REMEDY | activo | aperto (REMEDY-2) | ✅ | [[REMEDY]] |
 | SHIONOGI | cerrado | — | ⬜ | |
-| SOVATELTIDE | activo | aperto | ⬜ | |
+| SOVATELTIDE | activo | aperto | ✅ | [[SOVATELTIDE]] |
 | TENACITY | activo | assente ⚠ | ✅ | [[TENACITY]] |
 | TICH-3 | activo | aperto | ✅ | [[TICH-3]] |
 | TWIN2WIN-2 | activo | aperto | ✅ | [[TWIN2WIN-2]] |
