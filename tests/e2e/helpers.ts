@@ -38,15 +38,14 @@ export async function assertAppShell(page: Page, lang: Locale = "en") {
  * `.lbl` del `.field` che lo contiene.
  */
 export async function pickSegment(page: Page, groupLabel: string, option: string) {
+  // `or()` aspetta che uno dei due compaia (niente count() istantaneo, che
+  // corre contro il render della route appena aperta).
   const named = page.getByRole("radiogroup", { name: groupLabel, exact: true });
-  const group =
-    (await named.count()) > 0
-      ? named
-      : page
-          .locator(".field")
-          .filter({ has: page.locator(".lbl").getByText(groupLabel, { exact: true }) })
-          .getByRole("radiogroup");
-  await group.getByRole("radio", { name: option, exact: true }).click();
+  const inField = page
+    .locator(".field")
+    .filter({ has: page.locator(".lbl").getByText(groupLabel, { exact: true }) })
+    .getByRole("radiogroup");
+  await named.or(inField).first().getByRole("radio", { name: option, exact: true }).click();
 }
 
 /** Imposta un input range (NIHSS, GCS, volume) tramite il suo nome accessibile. */
