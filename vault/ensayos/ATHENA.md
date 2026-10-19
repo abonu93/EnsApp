@@ -105,7 +105,7 @@ Precisazioni per paese: in Spagna test di gravidanza per le donne "between 22 an
 
 **Sintesi**:
 - **Prima della procedura** si escludono: ictus nell'ultimo anno; quadri bilaterali o multiterritoriali; diatesi emorragica, AVK con INR >3, piastrine <50.000; glicemia <50 o >400 mg/dL; PA refrattaria >185/110; aspettativa di vita <1 anno; cancro metastatico; allergia grave al contrasto; creatinina ≥3 mg/dL o GFR <30; cocaina o eroina; gravidanza o allattamento; altri studi che interferiscono con l'endpoint primario; follow-up a 90 giorni improbabile. All'imaging: emorragia (le microemorragie sono ammesse), effetto massa con shift, tumore intracranico (salvo meningioma ≤2 cm asintomatico); poi sospetta dissezione aortica, embolo settico o endocardite, stent preesistente nel sito, tortuosità che impedisce l'accesso alla ICA intracranica.
-- **In sala**, sull'angiografia iniziale: altro dispositivo di trombectomia già usato; miglioramento a eTICI >1; vasculite; tandem che richiede trattamento o impedisce l'accesso; ICAD responsabile; territori multipli; accesso impossibile; anatomia che non permette di posizionare i cateteri o l'ANA.
+- **In sala**, sull'angiografia iniziale: altro dispositivo di trombectomia già usato; miglioramento a eTICI >1; vasculite; tandem che richiede trattamento o impedisce l'accesso; [[Ateroesclerosis intracraneal (ICAD)|ICAD]] responsabile; territori multipli; accesso impossibile; anatomia che non permette di posizionare i cateteri o l'ANA.
 - Gli anticoagulanti diretti (DOAC) non sono citati: si escludono solo gli AVK con INR >3,0.
 
 ## Intervento e procedure

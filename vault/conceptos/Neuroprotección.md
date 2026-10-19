@@ -12,6 +12,7 @@ Strategia che cerca di ridurre il danno del tessuto cerebrale ischemico agendo s
 | Studio | Uso / soglia | Fonte |
 |---|---|---|
 | [[HYBERNIA]] | Neuroprotezione **fisica**: ipotermia cerebrale selettiva con infusione intracarotidea ipsilaterale di salina fredda per circa 30 min, subito dopo una trombectomia con mTICI 2a–3 (calo di temperatura target, per esempio −3 o −4 °C). First-in-human, endpoint di sicurezza e performance, nessun endpoint di efficacia | ([[HYBERNIA — Protocolo — V1.1]], p. 14, p. 21, p. 25–26) |
+| [[SOVATELTIDE]] | Neuroprotezione **farmacologica**: sovateltide, agonista selettivo del recettore ETB (nei modelli animali neuroprotezione, angiogenesi e neurogenesi), 0,3 µg/kg e.v. in 3 boli al giorno nei giorni 1, 3 e 6, aggiunta allo standard of care. Trombolisi ammessa, trombectomia esclusa; prima dose entro 24 h dall'esordio | ([[SOVATELTIDE — Protocolo — v3.1]], p. 28, p. 35–37, p. 55–56, p. 62) |
 
 ## Note
 - Il protocollo HYBERNIA motiva il raffreddamento **selettivo** con i limiti dell'ipotermia sistemica: induzione lenta, sedazione e intubazione, complicanze; cita due grandi trial randomizzati sull'ipotermia sistemica nell'ictus interrotti in anticipo ([[HYBERNIA — Protocolo — V1.1]], p. 13).

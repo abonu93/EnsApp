@@ -15,7 +15,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | Studio | Stato app | Stato foglio | Lettura | Scheda |
 |---|---|---|---|---|
 | ARTEMIS | closed (dal 2026-10-19) | reclut. cerrado | 🟨 (pp. 1-81/84) | [[ARTEMIS]] |
-| ATHENA | active (dal 2026-10-19) | aperto | ⬜ |  |
+| ATHENA | active (dal 2026-10-19) | aperto | ✅ | [[ATHENA]] |
 | DO-IT | activo | aperto | ✅ | [[DO-IT]] |
 | DONE SYMPLE | activo | aperto | ⬜ | |
 | FASTEST | activo | aperto | ✅ | [[FASTEST]] |
@@ -69,6 +69,8 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[Alteplasa]]
 - [[ASPECTS]]
 - [[Aspiración directa (ADAPT)]]
+- [[Ateroesclerosis intracraneal (ICAD)]]
+- [[Catéter guía con balón]]
 - [[Clasificación de Heidelberg]]
 - [[Cone-beam CT]]
 - [[Consentimiento diferido]]
