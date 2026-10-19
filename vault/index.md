@@ -104,4 +104,5 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[Ácido tranexámico]]
 
 ## Comparative
+- [[Valutazione EnsApp — criteri vs protocolli]] — **valutazione completa degli errori dell'app** (FN/FP/NC/TXT, problemi trasversali, priorità)
 - [[Estado de los estudios]] — foglio vs app vs Drive
