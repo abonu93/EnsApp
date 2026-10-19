@@ -43,6 +43,8 @@
     "NORA_HOME": "NORA HOME",
     "NORA HOME": "NORA HOME",
     "TENACITY": "TENACITY",
+    "SAILMEVO": "SAIL-MeVO",
+    "SAIL-MeVO": "SAIL-MeVO",
   };
 
   function readTrialsFromRow(r: SheetPatientRow): string[] {

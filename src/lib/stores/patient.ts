@@ -44,6 +44,14 @@ export type PostData = Partial<{
   largeCore: "yes" | "no" | "";
   /** TENACITY: diabete (criterio di esclusione). */
   diabetes: "yes" | "no" | "";
+  /** SAIL-MeVO: core IA < 10 mL ("na" = non disponibile). */
+  aiCoreLt10: "yes" | "no" | "na" | "";
+  /** SAIL-MeVO: volume Tmax > 6 s > 30 mL ("na" = non disponibile). */
+  tmaxGt30: "yes" | "no" | "na" | "";
+  /** SAIL-MeVO: esclusioni. */
+  pregnant: "yes" | "no" | "";
+  lifeExpectancyLt3m: "yes" | "no" | "";
+  contrastAllergy: "yes" | "no" | "";
 }>;
 
 export type HemData = Partial<HemorrhagicInput>;

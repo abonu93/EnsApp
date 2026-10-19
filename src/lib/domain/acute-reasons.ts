@@ -5,7 +5,7 @@
 // NON ridefinisce la logica clinica: e' un wrapper diagnostico.
 
 import type { AcuteInput, VesselCode } from "./acute-rules";
-import { computeVesselFlags } from "./acute-rules";
+import { computeVesselFlags, SAIL_MEVO_VESSELS } from "./acute-rules";
 import { reduce, type ReasonReport } from "./reason-report";
 
 export type { ReasonReport };
@@ -245,6 +245,30 @@ export function reasonTenacity(input: AcuteInput): ReasonReport {
   ]);
 }
 
+export function reasonSailMevo(input: AcuteInput): ReasonReport {
+  const vessels = Array.isArray(input.targetVessels) ? input.targetVessels : [];
+  const hasProximal = hv(input, "ica-intracranial") || hv(input, "ica-terminal") || hv(input, "m1");
+  return reduce([
+    { ok: input.age >= 18 && input.age <= 80, label: "age 18-80" },
+    { ok: input.premrs <= 1, label: "pre-mRS <= 1" },
+    { ok: input.nihss >= 9 && input.nihss <= 17, label: "NIHSS 9-17" },
+    { ok: input.ltsw < 12, label: "LTSW < 12h" },
+    { ok: !hasProximal, label: "no occlusione prossimale (ICA / M1)" },
+    {
+      ok: vessels.some((v) => SAIL_MEVO_VESSELS.includes(v)),
+      label: "MeVO: M2 non dominante-M3 / A2-A3 / P2-P3",
+    },
+    { ok: vcount(input) === 1, label: "occlusione isolata (un solo vaso)" },
+    { ok: input.tandem !== "yes", label: "no stenosi tandem ICA cervicale > 70%" },
+    { ok: isNumber(input.aspects) && input.aspects >= 6, label: "ASPECTS >= 6" },
+    { ok: input.aiCoreLt10 !== "no", label: "core IA < 10 mL (se disponibile)" },
+    { ok: input.tmaxGt30 !== "no", label: "Tmax > 6s > 30 mL (se disponibile)" },
+    { ok: input.pregnant !== "yes", label: "no gravidanza" },
+    { ok: input.lifeExpectancyLt3m !== "yes", label: "aspettativa di vita >= 3 mesi" },
+    { ok: input.contrastAllergy !== "yes", label: "no allergia grave al contrasto iodato" },
+  ]);
+}
+
 /** Mappa nome di display -> funzione reasons. */
 export const REASON_BY_TRIAL: Record<string, (i: AcuteInput) => ReasonReport> = {
   WeTrust: reasonWeTrust,
@@ -265,4 +289,5 @@ export const REASON_BY_TRIAL: Record<string, (i: AcuteInput) => ReasonReport> = 
   REMEDY: reasonRemedy,
   "NORA HOME": reasonNoraHome,
   TENACITY: reasonTenacity,
+  "SAIL-MeVO": reasonSailMevo,
 };
