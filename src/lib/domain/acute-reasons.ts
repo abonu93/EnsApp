@@ -43,7 +43,7 @@ export function reasonAthena(input: AcuteInput): ReasonReport {
     { ok: input.lvo === "yes", label: "LVO confermato" },
     {
       ok: athenaVesselOk(input.targetVessels),
-      label: "occlusione singola di ICA terminale, M1 o M2 prossimale/dominante",
+      label: "occlusione singola di ICA terminale, M1 o M2 prossimale/dominante (se M1 e M2 sono lo stesso trombo, selezionare solo il segmento prossimale)",
     },
     {
       ok: !isNumber(input.aspects) || input.aspects >= 6,

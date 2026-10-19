@@ -152,9 +152,14 @@ export function weTrust(input: AcuteInput): boolean {
 //   valutato in sala (excl. 23): non e' un criterio di screening.
 const ATHENA_VESSELS: VesselCode[] = ["ica-terminal", "m1", "m2-proxdom"];
 
+// Occlusione singola (p. 32, p. 36): un'occlusione secondaria vista prima della
+// procedura esclude. Quindi un solo segmento; l'unica coppia ammessa e'
+// ICA-T + M1, che descrive la stessa occlusione a T.
 export function athenaVesselOk(targetVessels: VesselCode[] | undefined): boolean {
-  const vessels = toArray(targetVessels);
-  return vessels.length > 0 && vessels.every((v) => ATHENA_VESSELS.includes(v));
+  const vessels = [...new Set(toArray(targetVessels))];
+  if (!vessels.every((v) => ATHENA_VESSELS.includes(v))) return false;
+  if (vessels.length === 1) return true;
+  return vessels.length === 2 && vessels.includes("ica-terminal") && vessels.includes("m1");
 }
 
 export function athena(input: AcuteInput): boolean {

@@ -163,7 +163,9 @@ describe("acute-rules - ATHENA (protocollo v2.3)", () => {
   test("vaso: solo ICA terminale, M1, M2 prossimale/dominante", () => {
     expect(run({ targetVessels: ["ica-terminal"] })).toBe(true);
     expect(run({ targetVessels: ["m2-proxdom"] })).toBe(true);
-    expect(run({ targetVessels: ["ica-terminal", "m1"] })).toBe(true);
+    expect(run({ targetVessels: ["ica-terminal", "m1"] })).toBe(true); // occlusione a T
+    expect(run({ targetVessels: ["m1", "m2-proxdom"] })).toBe(false); // possibile occlusione secondaria
+    expect(run({ targetVessels: ["ica-terminal", "m1", "m2-proxdom"] })).toBe(false);
     expect(run({ targetVessels: ["basilar"] })).toBe(false);
     expect(run({ targetVessels: ["m2-any"] })).toBe(false);
     expect(run({ targetVessels: ["ica-intracranial"] })).toBe(false);
