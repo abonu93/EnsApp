@@ -20,7 +20,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | DONE SYMPLE | activo | aperto | 🟨 (pp. 1-80/98) | [[DONE SYMPLE]] |
 | FASTEST | activo | aperto | ✅ | [[FASTEST]] |
 | HYBERNIA | pausado | en pausa | ✅ | [[HYBERNIA]] |
-| LIBREXIA | closed (dal 2026-10-19) | cerrado | ⬜ |  |
+| LIBREXIA | closed (dal 2026-10-19) | cerrado | ✅ | [[LIBREXIA]] |
 | MARRS (MARSS nell'app) | cerrado | — | ⬜ | |
 | MOSTE | closed (dal 2026-10-19) | reclut. cerrado | ✅ | [[MOSTE]] |
 | NiVO | activo | assente ⚠ | ✅ (solo sinossi) | [[NiVO]] |
@@ -66,6 +66,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | ABBVIE | elezanumab vs placebo | non ancora aperto |
 
 ## Concetti
+- [[ABCD2]]
 - [[Alteplasa]]
 - [[ASPECTS]]
 - [[Aspiración directa (ADAPT)]]
@@ -94,6 +95,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[Stent retriever]]
 - [[Tenecteplasa]]
 - [[TICI]]
+- [[TOAST]]
 - [[Ventana extendida]]
 - [[Volumen de hematoma]]
 - [[Volumen del core]]

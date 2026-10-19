@@ -19,6 +19,7 @@ Classificazione radiologica delle emorragie intracraniche dopo un ictus ischemic
 | [[WETRUST]] | Sicurezza: classificazione di Heidelberg delle emorragie da parte del core lab, accanto alla sICH SITS-MOST modificata | ([[WETRUST — Protocolo — Rev 09]], p. 27) |
 | [[ATHENA]] | Descrittivo di sicurezza: qualunque ICH a 24 h classificata secondo Heidelberg dal Core Lab (Tab. 11); la sICH come SAE usa le classi 1–3 con NIHSS ≥4, o ≥2 in una sottovoce, o intervento, o morte | ([[ATHENA — Protocolo — v2.3]], p. 31, p. 46, p. 52) |
 | [[DONE SYMPLE]] | Emorragia sulla NCCT o RM obbligatoria a 24 h (16–36 h) classificata secondo Heidelberg (App. B, non letta); sicurezza primaria: PH2 e sICH (PH2 + NIHSS ≥4) | ([[DONE SYMPLE — Protocolo — v4]], p. 33, p. 45–46) |
+| [[LIBREXIA]] | **Criterio di eleggibilità**: esclusa l'emorragia intracranica in corso, "except CMB and minor hemorrhagic transformation of infarct manifesting as scattered petechiae (Hemorrhagic Infarction Type 1 [HI1] according to Heidelberg classification)"; per esclusione anche HI2, PH1 e PH2 escludono (deduzione dal testo, non esplicita) | ([[LIBREXIA — Protocolo — Enmienda 2]], p. 41) |
 
 ## Note
 - Nella maggior parte degli studi è una **misura di esito**; in REMEDY è invece un **filtro di eleggibilità** dopo trombolisi.

@@ -25,3 +25,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-19 — Ingerito DONE SYMPLE (protocollo v4 pp. 1-80/98, criteri/procedure/visite coperti; CI): intervento = EVT vs terapia medica; il testo 'IA tPA' dell'app viene da VANISH ed è vietato dal protocollo. Nuovo concetto: Volumen del core.
 - 2026-10-19 — Ingerito NiVO (solo sinossi v2.0 + CI pre/post, nessun protocollo completo): la M2 non dominante, inclusa, non attiva mai NiVO nell'app; tandem non controllato.
 - 2026-10-19 — Ingerito PROMISE20 RELOADED (protocollo Rev 1 44/44 dall'originale: la copia ordinata è protetta da password; sinossi, CI, resumen): l'intervento è il monitoraggio PES N20 (BraiN20), non un dispositivo di trombectomia come dice l'app. Nuovo concetto: Potenciales evocados somatosensoriales.
+- 2026-10-19 — Ingerito LIBREXIA (protocollo Am. 2 118/118, sinossi, CI): chiuso in app; la logica post-acuta richiede ABCD2 ≥6 a tutti ed esclude sempre gli AIT. Nuovi concetti: ABCD2, TOAST.
