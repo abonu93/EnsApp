@@ -131,7 +131,7 @@ Testo originale (§6.2, [[REMEDY — Protocolo — V6.2]], p. 38–40; sinossi p
 | Giorno 2 | | PK, ADA; mRS (o alla dimissione) | ([[REMEDY — Protocolo — V6.2]], p. 20, p. 58) |
 | Giorno 4 (±1) | | s.c., laboratorio; anche a domicilio | ([[REMEDY — Protocolo — V6.2]], p. 19–20; [[REMEDY — CI — v2.1]], p. 6) |
 | Giorni 7, 11, 14, 18 (±1) | | s.c.; in clinica, a domicilio o per telefono/telemedicina | ([[REMEDY — Protocolo — V6.2]], p. 19–20; [[REMEDY — CI — v2.1]], p. 6–7) |
-| Giorno 21 (±1) | | ultima s.c., in presenza; laboratorio, NIHSS, mRS, Barthel | ([[REMEDY — Protocolo — V6.2]], p. 19; [[REMEDY — CI — v2.1]], p. 7) |
+| Giorno 21 (±1) | | ultima s.c., in presenza; esame obiettivo, laboratorio, PK, ADA, mRS | ([[REMEDY — Protocolo — V6.2]], p. 19; [[REMEDY — CI — v2.1]], p. 7) |
 | Giorno 30 (−3/+7) | | anche per telefono o telemedicina | ([[REMEDY — Protocolo — V6.2]], p. 19; [[REMEDY — CI — v2.1]], p. 7) |
 | Giorno 90 (+14) | | mRS (endpoint primario), NIHSS, Barthel, ECG, laboratorio, classificazione eziologica | ([[REMEDY — Protocolo — V6.2]], p. 19, p. 54) |
 

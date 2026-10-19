@@ -16,7 +16,7 @@ actualizado: 2026-10-19
 > [!info] Lettura
 > Completa: pp. 1–102 su 102 ("Page 99 of 102" è l'ultima pagina con piè di pagina; le pp. 100–102 sono il modulo del Barthel Index senza piè di pagina). PDF di 2 MB scaricato con `download_file_content`, testo nativo estratto con `pdftotext -layout`; non cifrato.
 > **Non leggibili come testo** (immagini): Figura 1 (disegno, p. 18) e Figura 4 (flow chart, p. 40), viste come immagine e descritte sotto; Tabella 2 e Figure 2–3 (risultati ReMEDy1, pp. 29–31); Appendice 2 NIHSS (pp. 90–97); prima pagina dell'Appendice 4 Barthel (p. 99).
-> **Tabella 1 (SoA, pp. 19–20)**: la griglia a molte colonne esce rimescolata; l'assegnazione delle X alle colonne è ricostruita e confermata con il testo dei §7.5, §9 e con il calendario del CI ([[REMEDY — CI — v2.1]], p. 6–7, p. 30).
+> **Tabella 1 (SoA, pp. 19–20)**: nel testo estratto la griglia esce rimescolata; la p. 19 è stata quindi letta come immagine e il calendario sotto viene da lì, confrontato con i §7.5, §9 e con il CI ([[REMEDY — CI — v2.1]], p. 6–7, p. 30).
 > File in Drive: "REMEDY — Protocolo — V6.2 — 2025-10-29.pdf". Firmato dal promotore il 31-10-2025.
 
 ## Indice del documento
@@ -76,7 +76,7 @@ actualizado: 2026-10-19
 | Giorno 2 | PK e ADA (≥12 h dopo la 1ª s.c.), mRS (o alla dimissione, se più tardi) |
 | Giorno 4 (±1) | s.c., segni vitali, laboratorio pre-dose; anche visita domiciliare |
 | Giorni 7, 11, 14, 18 (±1) | s.c.; visita in clinica, a domicilio o per telefono/telemedicina |
-| Giorno 21 (±1) | ultima s.c., esame obiettivo, laboratorio, PK, ADA, NIHSS, mRS, Barthel, test di gravidanza su urine |
+| Giorno 21 (±1) | ultima s.c., segni vitali, esame obiettivo, peso, laboratorio, PK, ADA, mRS, test di gravidanza su urine |
 | Giorno 30 (−3/+7) | telefono/telemedicina possibile; mRS, NIHSS, Barthel |
 | Giorno 90 (+14) | mRS (endpoint primario), NIHSS, Barthel, ECG, laboratorio, PK, ADA, classificazione eziologica |
 
