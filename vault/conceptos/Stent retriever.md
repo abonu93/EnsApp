@@ -12,6 +12,7 @@ Dispositivo per la trombectomia meccanica: uno stent autoespandibile montato su 
 | Studio | Uso / soglia | Fonte |
 |---|---|---|
 | [[ARTEMIS]] | Dispositivo sperimentale: C CONDA® (Anaconda Biomed), senza marcatura CE e al primo uso nell'uomo. Stent di 4 × 40 mm, vasi di 2,0–4,0 mm, microcatetere da 0,021". Fino a 3 passaggi, poi salvataggio libero. Vietati doppio stent e accesso carotideo. Esclusi i pazienti trattati prima con un altro dispositivo nella stessa procedura | ([[ARTEMIS — Protocolo — V03]], p. 19, p. 26, p. 32; [[ARTEMIS — CI — V03]], p. 2) |
+| [[PIVOTAL]] | Solo come **salvataggio**: stent retriever o altri sistemi di aspirazione commerciali dopo tre passaggi con il RapidPulse in [[Aspiración directa (ADAPT)|ADAPT]]; usati dopo il primo passaggio, il paziente conta come fallimento dell'endpoint primario | ([[PIVOTAL — Protocolo — Rev 03]], p. 49) |
 
 ## Note
 - Il "passaggio" va definito protocollo per protocollo. In ARTEMIS è ogni tentativo di catturare il coagulo, compresa la successiva valutazione [[TICI|eTICI]] in angiografia ([[ARTEMIS — Protocolo — V03]], p. 32).

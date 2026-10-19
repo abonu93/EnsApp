@@ -28,7 +28,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | PIVOTAL | active (dal 2026-10-19) | aperto | ⬜ |  |
 | PROMISE20 | cerrado | — | ⬜ | |
 | PROMISE20 RELOADED | paused (dal 2026-10-19) | en pausa | ⬜ |  |
-| REMEDY | activo | aperto (REMEDY-2) | ⬜ | |
+| REMEDY | activo | aperto (REMEDY-2) | ✅ | [[REMEDY]] |
 | SHIONOGI | cerrado | — | ⬜ | |
 | SOVATELTIDE | activo | aperto | ⬜ | |
 | TENACITY | activo | assente ⚠ | ✅ | [[TENACITY]] |

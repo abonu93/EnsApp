@@ -38,7 +38,7 @@ actualizado: 2026-10-19
 | Peso | 40–166 kg inclusi | ([[REMEDY — Protocolo — V6.2]], p. 37) |
 | mRS pre | 0–1 | ([[REMEDY — Protocolo — V6.2]], p. 37) |
 | NIHSS | 5–15 "at approximately the time of randomization", misurato subito prima della randomizzazione. Ammessi i pazienti con NIHSS iniziale <5 che peggiorano a 5–15 in modo persistente. Dopo fibrinolisi: NIHSS pre-trombolisi ≤15, e 5–15 persistente ≥6 h dopo con miglioramento <4 punti | ([[REMEDY — Protocolo — V6.2]], p. 20, p. 37) |
-| Imaging / ASPECTS / core | escluso ASPECTS 0–5 (cioè serve ≥6); esclusa emorragia; dopo fibrinolisi o peggioramento, imaging ripetuto: escludono PH1, PH2 (Heidelberg) o emorragia con peggioramento; HI1 e HI2 ammessi. Perfusione non richiesta | ([[REMEDY — Protocolo — V6.2]], p. 20, p. 37–38) |
+| Imaging / ASPECTS / core | escluso ASPECTS 0–5 (cioè serve ≥6); esclusa emorragia; dopo fibrinolisi o peggioramento, imaging ripetuto: escludono PH1, PH2 ([[Clasificación de Heidelberg|Heidelberg]]) o emorragia con peggioramento; HI1 e HI2 ammessi. Perfusione non richiesta | ([[REMEDY — Protocolo — V6.2]], p. 20, p. 37–38) |
 | Occlusione | **esclusa** l'occlusione di grosso vaso **sintomatica** di ICA intracranica (I/T/L), M1, vertebrale o basilare. Esclusi anche ictus del tronco o del cervelletto (imaging e sintomi) e la dissezione extracranica. Ammessi gli ictus della ACP senza coinvolgimento di tronco o cervelletto | ([[REMEDY — Protocolo — V6.2]], p. 38) |
 
 ## Criteri di inclusione
