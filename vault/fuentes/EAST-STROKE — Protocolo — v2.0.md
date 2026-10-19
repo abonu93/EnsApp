@@ -97,6 +97,8 @@ actualizado: 2026-10-19
 - Clinically relevant hepatic dysfunction requiring specific therapy (p. 24)
 - Clinically manifest thyroid dysfunction requiring therapy. After successful treatment of thyroid dysfunction, patients may be enrolled when their thyroid function is controlled (p. 25)
 - Severe renal impairment (stage IV or V; creatinine clearance <30ml/min, or requiring or almost requiring dialysis) (p. 25)
+
+*Exclusion criteria for specific investigational medicinal products:* (p. 25)
 - All contraindications listed in the summary of product characteristics (SmPC) of the specific investigational medicinal products considered for treatment in both treatment arms (intervention and comparator) apply and must be reviewd by the investigators prior to initiating any specific medical treatment (p. 25)
 
 Inoltre (§8.3, p. 31): "If treatment for rhythm control is not considered manageable or safe within this period after stroke in individual patients due to very severe stroke symptoms or complications of stroke, patients are not eligible for enrolment in the trial."
@@ -132,7 +134,6 @@ Se il paziente non può venire, telefonata o video (p. 37).
 - **Rimando inesistente**: §8.5.1 rimanda a "instructions given in 8.3.2" (p. 32); il §8.3 non ha sottosezioni.
 - **Indice**: il §8.5.2 elenca solo amiodarone, flecainide e propafenone (p. 5–6), mentre il testo tratta anche il dronedarone (p. 33–34).
 - **Sinossi e corpo differiscono di poco**: "confirmed with standard of care brain imaging" (p. 9) contro "confirmed by brain imaging" (p. 23); "not suitable for early rhythm control" (p. 10) contro "not suitable for rhythm control" (p. 24).
-- **§6.5 troncato**: la frase sulla randomizzazione si interrompe ("usual care + early rhythm") prima dell'elenco degli strati (p. 21).
 - **Età ">45"**: un paziente di 45 anni esatti è escluso (p. 10, p. 23).
 - **mRS >4**: il criterio "severe stroke" descrive lo stato attuale ("bedridden and fully dependent"), non il mRS pre-ictus (p. 24).
 - **Dati personali omessi**: telefoni, fax ed email dei contatti (p. 2–3) e l'email della farmacovigilanza (p. 55) non sono riportati.

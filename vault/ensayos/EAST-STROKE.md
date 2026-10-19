@@ -78,6 +78,8 @@ Testo originale (§7.1.2, [[EAST-STROKE — Protocolo — v2.0]], p. 24–25):
 14. Clinically relevant hepatic dysfunction requiring specific therapy (p. 24)
 15. Clinically manifest thyroid dysfunction requiring therapy. After successful treatment of thyroid dysfunction, patients may be enrolled when their thyroid function is controlled (p. 25)
 16. Severe renal impairment (stage IV or V; creatinine clearance <30ml/min, or requiring or almost requiring dialysis) (p. 25)
+
+*Exclusion criteria for specific investigational medicinal products:*
 17. All contraindications listed in the summary of product characteristics (SmPC) of the specific investigational medicinal products considered for treatment in both treatment arms (intervention and comparator) apply and must be reviewd by the investigators prior to initiating any specific medical treatment (p. 25)
 
 (La numerazione 1–17 è aggiunta qui per comodità; nel protocollo sono elenchi puntati.)
