@@ -29,7 +29,7 @@
     </button>
     <div class="spacer"></div>
     {#if step != null && steps}
-      <div class="dots" role="progressbar" aria-valuemin={1} aria-valuemax={steps} aria-valuenow={step + 1}>
+      <div class="dots" role="progressbar" aria-valuemin={1} aria-valuemax={steps} aria-valuenow={step + 1} aria-label={`Step ${step + 1} di ${steps}`}>
         {#each Array(steps) as _, i (i)}
           <span class="dot" class:done={i <= step} class:current={i === step}></span>
         {/each}

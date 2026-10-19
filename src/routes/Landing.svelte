@@ -138,7 +138,7 @@
   .hero-sub {
     display: block;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.9);
     margin-top: 3px;
   }
   .hero-arrow {

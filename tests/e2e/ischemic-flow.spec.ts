@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { freshSession, fillNumber, selectRadio, toggleCheckbox } from "./helpers";
+import { FIXED_NOW, freshSession, fillPreImaging, pickSegment, setSlider } from "./helpers";
 
 /**
  * Flusso ischemico golden end-to-end:
@@ -17,63 +17,55 @@ import { freshSession, fillNumber, selectRadio, toggleCheckbox } from "./helpers
 
 test.describe("ischemic flow - golden patient", () => {
   test.beforeEach(async ({ page }) => {
+    await page.clock.setFixedTime(FIXED_NOW);
     await freshSession(page);
   });
 
   test("end-to-end: pre-imaging -> share with intercept", async ({ page }) => {
     // -- Landing --
     await page.goto("/");
-    await page.getByRole("button", { name: /nuovo paziente/i }).click();
+    await page.getByRole("button", { name: /new patient/i }).click();
     await expect(page).toHaveURL(/\/workflow$/);
 
     // -- WorkflowSelector --
-    await page.getByText("Valutazione eligibility").click();
+    await page.getByText("Eligibility evaluation").click();
     await expect(page).toHaveURL(/\/pre-imaging$/);
 
     // -- PreImaging --
-    await page.locator("#pre-pid").fill("E2E-2025-001");
-    await fillNumber(page, "pre-age", 70);
-    await fillNumber(page, "pre-nihss", 14);
-    await fillNumber(page, "pre-mrs", 1);
-    // LTSW datetime: 3 ore fa
-    const ltsw3h = new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 16);
-    await page.locator("#pre-ltsw").fill(ltsw3h);
-    await selectRadio(page, "pre-angio", "yes");
-    await selectRadio(page, "pre-doac", "no");
-    await selectRadio(page, "pre-acei", "no");
-    await page.getByRole("button", { name: /^avanti$/i }).click();
+    await fillPreImaging(page, { patientId: "E2E-2025-001", age: 70, nihss: 14, mrs: 1, ltswHoursAgo: 3 });
+    await page.getByRole("button", { name: /^next$/i }).click();
     await expect(page).toHaveURL(/\/pre-result$/);
 
     // -- PreResult: WeTrust deve essere eligible --
-    await expect(page.locator("main").getByText(/eleggibile/i).first()).toBeVisible();
+    await expect(page.locator(".status-label")).toHaveText("Eligible");
     // Continue al post-imaging
-    await page.getByRole("button", { name: /^continua$/i }).click();
+    await page.getByRole("button", { name: /^continue$/i }).click();
     await expect(page).toHaveURL(/\/post-imaging$/);
 
     // -- PostImaging: ischemic + EVT --
-    await selectRadio(page, "post-stroke", "ischemic");
-    await selectRadio(page, "post-candidate", "eligible");
-    await selectRadio(page, "post-tandem", "no");
-    await selectRadio(page, "post-tort", "no");
-    await toggleCheckbox(page, "post-vessels", "m1");
-    await fillNumber(page, "post-aspects", 8);
-    // IVT unificato: eligible-no-contra
-    await selectRadio(page, "post-ivt", "eligible-no-contra");
-    await page.getByRole("button", { name: /^avanti$/i }).click();
+    await pickSegment(page, "Stroke type", "Ischemic");
+    await pickSegment(page, "Candidate for thrombectomy (EVT)?", "Eligible");
+    await pickSegment(page, "Candidate for thrombolysis (IVT)?", "Eligible");
+    await page.getByRole("tab", { name: "MCA" }).click();
+    await page.getByRole("button", { name: "M1", exact: true }).click();
+    await page.getByRole("button", { name: "ASPECTS 8", exact: true }).click();
+    await page.getByRole("button", { name: /^next$/i }).click();
     await expect(page).toHaveURL(/\/summary$/);
 
     // -- Summary: deve elencare WeTrust e altri trial eligibili --
-    await expect(page.getByText("WeTrust", { exact: true })).toBeVisible();
+    const weTrust = page.locator("button.card-pick").filter({ hasText: "WeTrust" });
+    await expect(weTrust).toBeVisible();
+    await expect(page.locator("button.card-pick")).not.toHaveCount(1);
     // Seleziona WeTrust come trial principale
-    await page.locator("label.row").filter({ hasText: "WeTrust" }).click();
+    await weTrust.click();
 
     // Persistenza: refresh non deve perdere la selezione
     await page.reload();
     await page.waitForSelector("main h1");
-    await expect(page.locator("label.row.checked")).toHaveCount(1);
+    await expect(page.locator("button.card-pick.on")).toHaveCount(1);
 
     // -- Procedi al Share --
-    await page.getByRole("button", { name: /procedi.*\(1\)/i }).click();
+    await page.getByRole("button", { name: /review.*1/i }).click();
     await expect(page).toHaveURL(/\/share$/);
 
     // -- Share: intercetta la POST verso Apps Script --
@@ -85,14 +77,14 @@ test.describe("ischemic flow - golden patient", () => {
       await route.fulfill({ status: 200, contentType: "text/plain", body: "OK" });
     });
 
-    await page.getByRole("button", { name: /invia a sheet/i }).click();
+    await page.getByRole("button", { name: /send to sheet/i }).click();
 
     // Attende che la fetch sia partita e abbia popolato capturedBody.
     await expect.poll(() => capturedBody.length, { timeout: 5_000 }).toBeGreaterThan(0);
 
     expect(capturedBody).toContain("payload=");
     const params = new URLSearchParams(capturedBody);
-    const payload = JSON.parse(decodeURIComponent(params.get("payload") ?? "{}"));
+    const payload = JSON.parse(params.get("payload") ?? "{}");
     // Le chiavi combaciano con le intestazioni di colonna del foglio EnsApp_Data.
     expect(payload.N_patient).toBe("E2E-2025-001");
     expect(payload.Age).toBe(70);
@@ -100,24 +92,24 @@ test.describe("ischemic flow - golden patient", () => {
     expect(payload.WeTrust).toBe("intervention");
 
     // Feedback successo
-    await expect(page.getByText(/salvato con successo/i)).toBeVisible();
+    await expect(page.getByText(/saved successfully/i)).toBeVisible();
   });
 
   test("persistence: refresh keeps wizard state mid-flow", async ({ page }) => {
     await page.goto("/#/pre-imaging");
-    await fillNumber(page, "pre-age", 55);
-    await fillNumber(page, "pre-nihss", 7);
-    await fillNumber(page, "pre-mrs", 0);
+    await page.getByRole("textbox", { name: /^age/i }).fill("55");
+    await setSlider(page, "NIHSS", 7);
+    await pickSegment(page, "pre-mRS", "0");
 
     await page.reload();
     await page.waitForSelector("main h1");
-    await expect(page.locator("#pre-age")).toHaveValue("55");
-    await expect(page.locator("#pre-nihss")).toHaveValue("7");
-    await expect(page.locator("#pre-mrs")).toHaveValue("0");
+    await expect(page.getByRole("textbox", { name: /^age/i })).toHaveValue("55");
+    await expect(page.getByRole("slider", { name: "NIHSS" })).toHaveValue("7");
+    await expect(page.getByRole("radio", { name: "0", exact: true })).toHaveAttribute("aria-checked", "true");
 
     // Banner di resume su landing
     await page.goto("/#/");
-    await expect(page.getByText(/in lavorazione/i)).toBeVisible();
+    await expect(page.getByText(/active session/i)).toBeVisible();
   });
 
   test("saved patients list persists across refresh", async ({ page }) => {
@@ -155,13 +147,14 @@ test.describe("ischemic flow - golden patient", () => {
   });
 
   test("language switch updates UI immediately", async ({ page }) => {
-    await page.goto("/");
-    await expect(page.locator("main h1")).toContainText("EnsApp");
-    await expect(page.getByRole("button", { name: /nuovo paziente/i })).toBeVisible();
+    // Lingua di default del prodotto: spagnolo. Il toggle cicla es -> ca -> en.
+    await freshSession(page, "es");
+    await expect(page.locator("html")).toHaveAttribute("lang", "es");
+    await expect(page.getByRole("button", { name: /nuevo paciente/i })).toBeVisible();
 
-    // Apri menu lingue e seleziona English
-    await page.getByRole("button", { name: /lingua/i }).click();
-    await page.getByRole("menuitem", { name: /english/i }).click();
+    await page.getByRole("button", { name: /^idioma/i }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ca");
+    await page.getByRole("button", { name: /^idioma/i }).click();
 
     await expect(page.getByRole("button", { name: /new patient/i })).toBeVisible();
     await expect(page.locator("html")).toHaveAttribute("lang", "en");

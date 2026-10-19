@@ -17,16 +17,16 @@
   --border-strong: #C9DDE6;
 
   /* Brand "Glacier" */
-  --primary: #4F8FBC;
+  --primary: #3F7296;
   --primary-hover: #1C4E6C;
   --primary-soft: #E5F1F8;
 
   /* Semantic */
-  --success: #2E9E7B;
+  --success: #247B60;
   --success-soft: #E4F4EE;
-  --danger: #C8524C;
+  --danger: #B34944;
   --danger-soft: #F8E9E8;
-  --warn: #B5832C;
+  --warn: #8D6622;
   --warn-soft: #F7EFDE;
   --info: #1C4E6C;
   --info-soft: #E5F1F8;
@@ -40,7 +40,7 @@
   --hemorrhagic: #C0675C;
   --hemorrhagic-text: #8B3A30;
   --hemorrhagic-soft: #F8EAE7;
-  --post-acute: #4A9A86;
+  --post-acute: #3A7869;
   --post-acute-text: #2C6B5C;
   --post-acute-soft: #E6F3EF;
 
