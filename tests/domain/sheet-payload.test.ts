@@ -8,6 +8,8 @@ import {
   buildTrialsForSheet,
   normalizeStudyName,
   hasKnownStudyArm,
+  SHEET_TRIAL_KEYS,
+  SHEET_TRIAL_KEYS_CSV,
   type StudyOutcomes,
 } from "$lib/domain/sheet-payload";
 
@@ -84,4 +86,16 @@ describe("sheet payload - parity with legacy", () => {
       expect(oursLegacyOnly).toEqual(theirs);
     });
   }
+});
+
+describe("sheet payload - trialKeys for the Apps Script backend", () => {
+  test("CSV lists every trial key in order", () => {
+    expect(SHEET_TRIAL_KEYS_CSV.split(",")).toEqual([...SHEET_TRIAL_KEYS]);
+  });
+
+  test("every key passes the backend validation (TRIAL_KEY_RE in Code.gs)", () => {
+    for (const key of SHEET_TRIAL_KEYS) {
+      expect(key).toMatch(/^[A-Za-z0-9_]{1,40}$/);
+    }
+  });
 });

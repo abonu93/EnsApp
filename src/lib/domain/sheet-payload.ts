@@ -32,6 +32,13 @@ export const SHEET_TRIAL_KEYS = [
 ] as const;
 
 export type SheetTrialKey = (typeof SHEET_TRIAL_KEYS)[number];
+
+/**
+ * Elenco CSV delle chiavi trial, inviato nel payload come `trialKeys`.
+ * L'Apps Script crea le colonne mancanti partendo da questo elenco, quindi un
+ * trial nuovo non richiede piu' di aggiornare e rideployare lo script.
+ */
+export const SHEET_TRIAL_KEYS_CSV = SHEET_TRIAL_KEYS.join(",");
 export type SheetTrialValue = "no" | "si" | "intervention" | "control";
 
 const NAME_TO_KEY: Record<string, SheetTrialKey> = {

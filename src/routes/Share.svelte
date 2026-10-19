@@ -12,7 +12,7 @@
     clearSelection,
   } from "$lib/stores/trialSelection";
   import { addSavedPatient } from "$lib/stores/savedPatients";
-  import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm } from "$lib/domain/sheet-payload";
+  import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV } from "$lib/domain/sheet-payload";
   import { isTrialOpen } from "$lib/domain/trials-info";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
   import { fmtHoursAsClock } from "$lib/utils/time";
@@ -129,6 +129,8 @@
       // Colonne trial con intestazioni non normalizzate nel foglio:
       "DO  IT": sheetTrials.DOIT,
       NiVO: sheetTrials.NIVO,
+      // Elenco dei trial: il backend crea da qui le colonne che mancano.
+      trialKeys: SHEET_TRIAL_KEYS_CSV,
       TEV: tev,
       mTICI: showMtici ? mtici : "",
       TIV: tiv,
