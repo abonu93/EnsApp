@@ -22,6 +22,8 @@ Punteggio da 0 a 10 che quantifica i segni precoci di ischemia nel territorio de
 | [[HYBERNIA]] | Inclusione: ASPECTS 5–10 su TC senza contrasto o RM; nessun criterio di core, perfusione facoltativa. L'app controlla ASPECTS >4 (`acute-rules.ts:249-250`) | ([[HYBERNIA — Protocolo — V1.1]], p. 20, p. 24) |
 | [[ATHENA]] | Inclusione 9: **o** core (restrizione della diffusione) ≤50 mL su CTP/MRP **o** ASPECTS 6–10 su TC/DWI-RM; dalla v2.3 ASPECTS 5 ammesso nei centri che lo valutano con RM (la DWI-ASPECTS è circa 1 punto più bassa). Per l'eleggibilità prevale la lettura in tempo reale dell'investigatore. L'app non controlla né ASPECTS né core (`acute-rules.ts:135-147`) | ([[ATHENA — Protocolo — v2.3]], p. 34, p. 60–61; [[ATHENA — Cambios — v2.11 a v2.3]], p. 8–12) |
 | [[SOVATELTIDE]] | **Nessun criterio**: ASPECTS basale solo esplorativo, aggiudicato dal core lab centrale | ([[SOVATELTIDE — Protocolo — v3.1]], p. 51, p. 54, p. 87) |
+| [[DONE SYMPLE]] | **Nessun criterio di eleggibilità**: il tessuto si valuta come core ≤70 cc dal software su TC senza contrasto. Il core lab legge l'ASPECTS basale e a 24 h; scheda ASPECTS nell'App. F (non letta). Coerente con l'app ("-") | ([[DONE SYMPLE — Protocolo — v4]], p. 36, p. 64) |
+| [[NiVO]] | Inclusione: ASPECTS ≥6 (modalità non specificata), anche per le occlusioni di ACA e ACP. L'app lo richiede (`acute-rules.ts:195-196`) | ([[NiVO — Sinopsis — v2.0]], p. 7) |
 
 ## Note
 - Nato per il territorio della MCA: non è applicabile così com'è alla circolazione posteriore.

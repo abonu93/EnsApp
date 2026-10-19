@@ -17,7 +17,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | ARTEMIS | closed (dal 2026-10-19) | reclut. cerrado | 🟨 (pp. 1-81/84) | [[ARTEMIS]] |
 | ATHENA | active (dal 2026-10-19) | aperto | ✅ | [[ATHENA]] |
 | DO-IT | activo | aperto | ✅ | [[DO-IT]] |
-| DONE SYMPLE | activo | aperto | ⬜ | |
+| DONE SYMPLE | activo | aperto | 🟨 (pp. 1-80/98) | [[DONE SYMPLE]] |
 | FASTEST | activo | aperto | ✅ | [[FASTEST]] |
 | HYBERNIA | pausado | en pausa | ✅ | [[HYBERNIA]] |
 | LIBREXIA | closed (dal 2026-10-19) | cerrado | ⬜ |  |
@@ -95,6 +95,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[TICI]]
 - [[Ventana extendida]]
 - [[Volumen de hematoma]]
+- [[Volumen del core]]
 - [[Ácido tranexámico]]
 
 ## Comparative

@@ -12,6 +12,7 @@ Tecnica di trombectomia in cui un catetere da aspirazione di grosso calibro si p
 | Studio | Uso / soglia | Fonte |
 |---|---|---|
 | [[PIVOTAL]] | Inclusione 7: "Candidate to receive treatment with ADAPT technique". Prima linea con il RapidPulse™ Aspiration System (aspirazione pulsata, catetere 071), accesso transfemorale; stent retriever o altri sistemi di aspirazione solo dopo tre passaggi con il dispositivo | ([[PIVOTAL — Protocolo — Rev 03]], p. 41, p. 48–49) |
+| [[NiVO]] | Catetere da aspirazione iNstroke 4F di prima linea, da solo (ADAPT) o con stent retriever (tecnica combinata), in MeVO; endpoint primario mTICI ≥2b in ≤3 tentativi; esplorativi cambio di tecnica e catetere alternativo di salvataggio | ([[NiVO — Sinopsis — v2.0]], p. 2–5) |
 
 ## Note
 - Negli studi di dispositivi verificare se l'aspirazione usata **insieme** a uno stent retriever conta come trattamento di salvataggio o no: cambia il calcolo degli endpoint al primo passaggio.

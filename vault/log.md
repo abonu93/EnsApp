@@ -22,3 +22,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-19 — Ingerito TICH-3 (protocollo Final v3.1 55/55, modulo CI): l'app non esclude i pazienti in warfarin/EBPM terapeutica. Nuovo concetto: Ácido tranexámico.
 - 2026-10-19 — Ingerito ATHENA (protocollo v2.3 97/97, sinossi, CI, cambi): l'app usa ancora i valori v2.11 (24 h, NIHSS ≥8) invece di 16 h e NIHSS 6-25. Nuovi concetti: Catéter guía con balón, Ateroesclerosis intracraneal (ICAD).
 - 2026-10-19 — Ingerito SOVATELTIDE (protocollo v3.1 130/130, CI): l'app richiede lesione confermata all'imaging, il protocollo accetta diagnosi clinica con TC/RM senza emorragia; testo informativo con parti copiate da VANISH, LIBREXIA e ORION.
+- 2026-10-19 — Ingerito DONE SYMPLE (protocollo v4 pp. 1-80/98, criteri/procedure/visite coperti; CI): intervento = EVT vs terapia medica; il testo 'IA tPA' dell'app viene da VANISH ed è vietato dal protocollo. Nuovo concetto: Volumen del core.

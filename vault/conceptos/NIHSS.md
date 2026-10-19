@@ -22,6 +22,7 @@ Scala neurologica standardizzata della gravità del deficit da ictus. Somma le v
 | [[HYBERNIA]] | Inclusione: NIHSS ≥6. Esclusione: coma o coscienza ridotta prima della MT definita come **NIHSS 1a >1** (non verificata dall'app). NIHSS 1–2 h dopo la fine dell'ERT, a 24 h, 48 h e G3–10. sICH definita come "NIHSS reduction of ≥4 points or death" (probabile refuso per aumento) | ([[HYBERNIA — Protocolo — V1.1]], p. 10, p. 17, p. 20, p. 22, p. 27) |
 | [[ATHENA]] | Inclusione: NIHSS basale ≥6 e ≤25 prima della procedura (≥8 fino alla v2.11). L'app usa ancora ≥8 e nessun massimo (`acute-rules.ts:140`). Sicurezza: peggioramento ≥4 punti a 24 h | ([[ATHENA — Protocolo — v2.3]], p. 31, p. 33; [[ATHENA — Cambios — v2.11 a v2.3]], p. 8) |
 | [[SOVATELTIDE]] | Inclusione: NIHSS ≥8 e <20 allo screening, **con voce 1a <2**; esclusi i comatosi (1a ≥2). Il NIHSS si misura prima della prima dose. Secondario chiave: NIHSS <6 a 90 giorni (a 30 giorni come esplorativo) | ([[SOVATELTIDE — Protocolo — v3.1]], p. 50–51, p. 62, p. 67) |
+| [[DONE SYMPLE]] | Inclusione: NIHSS basale ≥8 ("≥6" solo nel disegno a p. 33); conta l'ultimo prima della randomizzazione, nei sedati o intubati quello prima della sedazione. Strati 0–15 / >15–42. Deterioramento: peggioramento ≥4 punti (imaging obbligatorio); sICH = PH2 con peggioramento ≥4 | ([[DONE SYMPLE — Protocolo — v4]], p. 33, p. 36, p. 39–40, p. 46) |
 
 ## Note
 - Diversi protocolli (TENACITY p. 42, MOSTE p. 72) scrivono "composed of 11 items", ma le voci sono 15 (1a–1c, 2–11): refuso ricorrente, senza effetto clinico.
