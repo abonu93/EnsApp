@@ -42,7 +42,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: null,
   },
   MOSTE: {
-    status: "active",
+    // Reclutamento chiuso (foglio "Esquema ensayos", set. 2026): info consultabili,
+    // ma il trial non e' selezionabile per l'arruolamento.
+    status: "closed",
     category: "EVT strategy",
     key: { window: "< 23 h", age: "No upper limit", mrs: "0-1", nihss: "0-5", aspects: "6-10" },
     consent: "Written & oral/phone consent.",
@@ -55,7 +57,7 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: ["Baseline (in-person)", "24 h (in-person)", "Day 5 / discharge (in-person)", "Day 90 (phone)"],
   },
   ATHENA: {
-    status: "paused",
+    status: "active",
     category: "EVT device",
     key: { window: "< 24 h", age: "22-85 y", mrs: "0-2", nihss: ">= 8", aspects: "6-10" },
     consent: "Written & oral/phone consent.",
@@ -68,7 +70,7 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: ["Baseline (in-person)", "24 h (in-person)", "Day 5 / discharge (in-person)", "Day 90 (in-person)"],
   },
   PIVOTAL: {
-    status: "paused",
+    status: "active",
     category: "EVT aspiration system",
     key: { window: "< 8 h", age: "18-80 y", mrs: "0-1", nihss: ">= 6", aspects: "6-10" },
     consent: "Written & oral/phone consent.",
@@ -81,7 +83,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: ["Baseline (in-person)", "24 h (in-person)", "Day 5 / discharge (in-person)", "Day 90 (phone)"],
   },
   PROMISE: {
-    status: "active",
+    // In pausa (foglio "Esquema ensayos", set. 2026): come i chiusi,
+    // non viene proposto per l'arruolamento finche' non riapre.
+    status: "paused",
     category: "EVT device",
     key: { window: "< 24 h", age: ">= 18 y", mrs: "0-2", nihss: ">= 1", aspects: "-" },
     consent: "Written.",
@@ -107,7 +111,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: ["Baseline (in-person)", "24 h (in-person)", "48 h (in-person)", "Day 3-10 / discharge (in-person)", "Day 30 (phone)", "Day 90 (phone)"],
   },
   ARTEMIS: {
-    status: "active",
+    // Reclutamento chiuso (foglio "Esquema ensayos", set. 2026): info consultabili,
+    // ma il trial non e' selezionabile per l'arruolamento.
+    status: "closed",
     category: "EVT device",
     key: { window: "< 24 h", age: "18-85 y", mrs: "0-2", nihss: "6-25", aspects: "6-10" },
     consent: "Written.",
@@ -190,7 +196,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     ],
   },
   Librexia: {
-    status: "post-acute",
+    // Chiuso (foglio "Esquema ensayos", set. 2026): info consultabili,
+    // ma il trial non e' selezionabile per l'arruolamento.
+    status: "closed",
     category: "Antithrombotic (post-acute)",
     key: { window: "<= 48 h", age: ">= 40 y", mrs: "<= 2", nihss: "<= 7", aspects: "-" },
     consent: "Written.",
@@ -396,10 +404,10 @@ export function findTrialInfo(name: string): TrialInfo | undefined {
 }
 
 /**
- * True se il trial e' arruolabile (reclutamento non chiuso).
+ * True se il trial e' arruolabile (reclutamento non chiuso ne' in pausa).
  * I trial sconosciuti sono considerati aperti (default sicuro).
  */
 export function isTrialOpen(name: string): boolean {
   const info = findTrialInfo(name);
-  return info ? info.status !== "closed" : true;
+  return info ? info.status !== "closed" && info.status !== "paused" : true;
 }

@@ -12,6 +12,7 @@
   import NumberField from "$lib/components/NumberField.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import { preData } from "$lib/stores/patient";
+  import { isTrialOpen } from "$lib/domain/trials-info";
   import { t } from "$lib/i18n";
 
   type YN = "yes" | "no" | "";
@@ -32,6 +33,8 @@
     const age = $preData.age ?? -1;
     const ltsw = $preData.ltsw ?? 999;
     const nihss = $preData.nihss ?? 999;
+    // Reclutamento chiuso: mai eleggibile, anche se la pagina e' raggiunta via URL.
+    if (!isTrialOpen("Librexia")) return false;
     return (
       age >= 40 &&
       ltsw <= 48 &&

@@ -43,7 +43,17 @@ del team, modificato il 2026-10-09). Lo stato in EnsApp viene da
 | MARRS | assente | (chiuso secondo l'indice Drive) | sì | ✅ chiuso |
 | PROMISE20 | assente | (chiuso secondo l'indice Drive) | sì | ✅ chiuso |
 
-## Domande per il team
+## Decisioni del team (2026-10-19) e modifiche applicate all'app
+- MOSTE, ARTEMIS, LIBREXIA → `closed`; ATHENA, PIVOTAL → `active`; PROMISE20 RELOADED (chiave `PROMISE`) → `paused`.
+- Gli studi `paused` ora **non vengono proposti** come i `closed` (`isTrialOpen` in `trials-info.ts`): non compaiono tra gli eleggibili né nella selezione manuale; la scheda resta nel catalogo. Vale anche per HYBERNIA.
+- LIBREXIA chiuso: nascosto il link alla valutazione post-acuta (`Summary.svelte`), mai eleggibile in `PostAcute.svelte`.
+- TENACITY, NiVO, NORA HOME, SAFER-DOAC, ORION: lasciati come sono.
+- ACTISAVE, TNKCAT, ICARUS, ABBVIE: **non ancora aperti**, non vanno in app per ora.
+- SAIL-MeVO: aperto nel foglio, non in app — decisione aperta.
+
+> [!note] La tabella sopra fotografa lo stato **prima** delle modifiche del 2026-10-19.
+
+## Domande per il team (storico)
 1. MOSTE e ARTEMIS: chiudere in app (reclutamento chiuso)?
 2. ATHENA e PIVOTAL: riattivare in app (aperti nel foglio)?
 3. PROMISE 20 RELOADED e ORION: mettere in pausa in app?

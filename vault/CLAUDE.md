@@ -51,6 +51,11 @@ link al file.
      `pdftotext -layout` per il testo. Tabelle e calendari restano leggibili.
    - Verifica sempre di aver letto fino all'ultima pagina ("Page N of M").
      Figure e diagrammi in immagine non si leggono: segnalalo.
+   - **PDF sopra ~3 MB** (es. WETRUST 4 MB, ARTEMIS 8,7 MB): il download fa
+     chiudere la connessione al connettore Drive. Tentalo **una sola volta**;
+     se fallisce usa `read_file_content`, controlla che criteri di
+     eleggibilità, procedure e calendario visite rientrino nelle pagine lette,
+     e dichiara in `lectura: parcial` quali pagine/sezioni mancano.
 3. Crea una nota in `fuentes/` per ogni documento letto (template `_plantillas/fuente.md`).
 4. Crea o aggiorna `ensayos/<STUDIO>.md` (template `_plantillas/ensayo.md`).
 5. Per ogni concetto ricorrente (ASPECTS, mismatch, tandem, TNK…) crea o

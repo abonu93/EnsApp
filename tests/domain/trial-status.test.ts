@@ -14,7 +14,25 @@ describe("trial recruitment status", () => {
 
   it("isTrialOpen e' true per i trial attivi", () => {
     expect(isTrialOpen("WeTrust")).toBe(true);
-    expect(isTrialOpen("PROMISE")).toBe(true);
+    expect(isTrialOpen("ATHENA")).toBe(true);
+    expect(isTrialOpen("PIVOTAL")).toBe(true);
+  });
+
+  it("stati allineati al foglio 'Esquema ensayos' (set. 2026)", () => {
+    expect(TRIALS_INFO.MOSTE.status).toBe("closed");
+    expect(TRIALS_INFO.ARTEMIS.status).toBe("closed");
+    expect(TRIALS_INFO.Librexia.status).toBe("closed");
+    expect(TRIALS_INFO.ATHENA.status).toBe("active");
+    expect(TRIALS_INFO.PIVOTAL.status).toBe("active");
+    expect(TRIALS_INFO.PROMISE.status).toBe("paused");
+  });
+
+  it("isTrialOpen e' false per i trial chiusi e in pausa", () => {
+    expect(isTrialOpen("MOSTE")).toBe(false);
+    expect(isTrialOpen("ARTEMIS")).toBe(false);
+    expect(isTrialOpen("LIBREXIA")).toBe(false);
+    expect(isTrialOpen("PROMISE")).toBe(false);
+    expect(isTrialOpen("HYBERNIA")).toBe(false);
   });
 
   it("isTrialOpen ritorna true (default sicuro) per nomi sconosciuti", () => {

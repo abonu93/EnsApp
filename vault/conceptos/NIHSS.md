@@ -1,0 +1,22 @@
+---
+tipo: concepto
+alias: [National Institutes of Health Stroke Scale, NIH Stroke Scale]
+actualizado: 2026-10-19
+---
+# NIHSS
+
+## Definizione
+Scala neurologica standardizzata della gravità del deficit da ictus. Somma le voci 1a–11 (coscienza, sguardo, campo visivo, paresi facciale, motricità degli arti, atassia, sensibilità, linguaggio, disartria, inattenzione), da 0 (normale) a 42 ([[MOSTE — Protocolo — V5]], p. 72). Serve come criterio di eleggibilità (soglie minime o massime), per definire il deterioramento neurologico e come esito precoce (per esempio NIHSS a 24 h).
+
+## Come lo usano gli studi
+| Studio | Uso / soglia | Fonte |
+|---|---|---|
+| [[MOSTE]] | Inclusione: NIHSS 0–5 alla randomizzazione con deficit potenzialmente disabilitante, misurato entro 1 h prima della randomizzazione da un valutatore certificato esterno all'équipe interventistica. Deterioramento: aumento ≥4 punti o NIHSS ≥6, che apre alla MT secondaria. Esiti: ΔNIHSS a 24 h; peggioramento ≥10 punti come esito di sicurezza | ([[MOSTE — Protocolo — V5]], p. 22–23, p. 27, p. 35–36, p. 72) |
+| [[TENACITY]] | Inclusione 6–25: esclusi NIHSS >25 e NIHSS ≤5 non disabilitante o in rapido miglioramento. Miglioramento precoce: riduzione ≥8 o NIHSS 0–1 a 24 h | ([[TENACITY — Protocolo — V1.0]], p. 25, p. 31) |
+| [[WETRUST]] | Inclusione: NIHSS ≥10 prima della randomizzazione (soglia usata come surrogato di OGV). Esclusione del coma definito come "puntuación de consciencia según NIHSS >1"; intubati per il trasferimento solo con NIHSS fatto da un neurologo prima. Strato ≤15/>15. Esiti: NIHSS a 24 h, 5–7 giorni, 90 giorni; risposta precoce = NIHSS 0–2 o miglioramento ≥8 a 24 h | ([[WETRUST — Protocolo — Rev 09]], p. 26, p. 39, p. 58–60) |
+| [[ARTEMIS]] | Inclusione: NIHSS basale 6–25 prima della procedura (filtro iniziale insieme al mRS pre). Esclusione: miglioramento neurologico rapido. Sicurezza: peggioramento ≥4 punti a 24 h (secondario e AESI). NIHSS anche a G5 o alla dimissione; scala con 15 voci (Appendix 2) | ([[ARTEMIS — Protocolo — V03]], p. 24–25, p. 29, p. 37, p. 45, p. 74) |
+
+## Note
+- Diversi protocolli (TENACITY p. 42, MOSTE p. 72) scrivono "composed of 11 items", ma le voci sono 15 (1a–1c, 2–11): refuso ricorrente, senza effetto clinico.
+- Verificare **quando** si misura il NIHSS di eleggibilità (all'arrivo, alla randomizzazione, entro 1 h) e se conta il NIHSS del centro inviante (drip and ship).
+- Un NIHSS basso non esclude un'occlusione di grosso vaso: vedi [[Ictus minor con LVO]].

@@ -15,6 +15,7 @@ Punteggio da 0 a 10 che quantifica i segni precoci di ischemia nel territorio de
 | [[VANISH]] | **Nessun criterio di eleggibilità**: solo variabile di stratificazione della randomizzazione. Il criterio di tessuto è core ≤70 mL + mismatch. L'"ASPECTS ≥4" del foglio del team, della ficha di sala e dell'app non ha base nel protocollo v1.2 | ([[VANISH — Protocolo — v1.2]], p. 17–18, p. 22) |
 | [[WETRUST]] | **Nessun criterio**: si randomizza prima dell'imaging. Il protocollo motiva che entro 6 h l'85–90% delle occlusioni prossimali ha ASPECTS ≥6 e che la TM è ragionevole anche con ASPECTS <6; atteso circa 5% di core esteso | ([[WETRUST — Protocolo — Rev 09]], p. 37–38) |
 | [[MOSTE]] | Inclusione: ASPECTS ≥6 in TC senza contrasto o RM-DWI. Per la MT secondaria nel braccio di controllo serve ASPECTS **>6** alla TC di ri-screening. Il core lab verifica l'ASPECTS. L'app non controlla l'ASPECTS (`acute-rules.ts:200-209`) | ([[MOSTE — Protocolo — V5]], p. 24, p. 27, p. 58) |
+| [[ARTEMIS]] | Inclusione: ASPECTS 6–10 su TC o DWI-RM basale; con valutazione automatica, anche core ≤50 cc su TC-perfusione o DWI-RM. L'app controlla solo ASPECTS >5 (`acute-rules.ts:234-235`), non il core | ([[ARTEMIS — Protocolo — V03]], p. 25) |
 
 ## Note
 - Nato per il territorio della MCA: non è applicabile così com'è alla circolazione posteriore.
