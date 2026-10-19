@@ -24,7 +24,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | MARRS (MARSS nell'app) | cerrado | — | ⬜ | |
 | MOSTE | closed (dal 2026-10-19) | reclut. cerrado | ✅ | [[MOSTE]] |
 | NiVO | activo | assente ⚠ | ⬜ | |
-| ORION | activo (pausa reclutamiento) | en pausa | ⬜ | |
+| ORION | activo (pausa reclutamiento) | en pausa | ✅ | [[ORION]] |
 | PIVOTAL | active (dal 2026-10-19) | aperto | ✅ | [[PIVOTAL]] |
 | PROMISE20 | cerrado | — | ⬜ | |
 | PROMISE20 RELOADED | paused (dal 2026-10-19) | en pausa | ⬜ |  |
@@ -81,6 +81,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[Ictus del despertar]]
 - [[Ictus minor con LVO]]
 - [[Ictus no discapacitante]]
+- [[MeVO]]
 - [[Mismatch de perfusión]]
 - [[mRS]]
 - [[NIHSS]]

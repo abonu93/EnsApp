@@ -15,6 +15,7 @@ Trattamento di riperfusione (trombolisi o trombectomia) oltre le finestre standa
 | [[VANISH]] | Entro 9 h (ictus al risveglio: 9 h dal punto medio del sonno); fra 4,5 e 9 h "if EXTEND criteria are met". Randomizzazione stratificata <4,5 h vs 4,5–9 h | ([[VANISH — Protocolo — v1.2]], p. 17–18, p. 22) |
 | [[MOSTE]] | MT nell'ictus minor con LVO con TLKW ≤23 h alla randomizzazione (trattamento entro 24 h), senza criteri di perfusione. Randomizzazione stratificata 0–4,5 vs 4,5–23 h | ([[MOSTE — Protocolo — V5]], p. 6, p. 21, p. 23, p. 64) |
 | [[ARTEMIS]] | MT entro 24 h dal LKW alla **puntura arteriosa** (inizio del trattamento), senza criteri di perfusione: basta ASPECTS 6–10, o core ≤50 cc se misurato in automatico | ([[ARTEMIS — Protocolo — V03]], p. 25, p. 29–30) |
+| [[ORION]] | Trombolitico sperimentale (JX10) con trattamento a **4,5–6 h** dal LKW senza perfusione o a **4,5–24 h** con mismatch in perfusione; arruolamento a 16–24 h eventualmente limitato. Inizio della finestra adattabile alle linee guida locali. Stratificazione 4,5–6 vs >6–12 vs >12 h | ([[ORION — Protocolo — v2.2]], p. 38, p. 43, p. 47, p. 51) |
 
 ## Note
 - Distinguere il tempo dall'**esordio noto** dal **LKW** (esordio ignoto o ictus al risveglio): TENACITY li include entrambi e stratifica per "onset time known" ([[TENACITY — Protocolo — V1.0]], p. 64).

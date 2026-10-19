@@ -15,3 +15,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-19 — Ingerito FASTEST (protocollo 55/55, CI cast. e cat.): l'app applica i criteri della Parte 1 (chiusa) senza spot sign. Nuovi concetti: GCS, Spot sign, Volumen de hematoma.
 - 2026-10-19 — Ingerito REMEDY (protocollo V6.2 102/102, "sinossi" = prime pagine del protocollo V5.0, CI): entro 4,5 h l'app non lo propone mai (ASPECTS richiesto ma non chiesto). Nuovo concetto: Clasificación de Heidelberg.
 - 2026-10-19 — Ingerito PIVOTAL (protocollo Rev 03 69/69, sinossi, CI cast. e cat.): l'app scarta M2 e vertebrale ammesse dal protocollo. Nuovi concetti: First pass effect, Aspiración directa (ADAPT).
+- 2026-10-19 — Ingerito ORION (protocollo v2.2 97/97, v3.1 107/107, cambi, CI): l'app non controlla l'esclusione 'trombectomia entro 1 h dal farmaco'; la v3.1 conferma la pausa (Parte 2 dopo l'analisi della Parte 1). Nuovo concetto: MeVO.
