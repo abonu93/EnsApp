@@ -19,7 +19,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | DO-IT | activo | aperto | ✅ | [[DO-IT]] |
 | DONE SYMPLE | activo | aperto | ⬜ | |
 | FASTEST | activo | aperto | ✅ | [[FASTEST]] |
-| HYBERNIA | pausado | en pausa | ⬜ | |
+| HYBERNIA | pausado | en pausa | ✅ | [[HYBERNIA]] |
 | LIBREXIA | closed (dal 2026-10-19) | cerrado | ⬜ |  |
 | MARRS (MARSS nell'app) | cerrado | — | ⬜ | |
 | MOSTE | closed (dal 2026-10-19) | reclut. cerrado | ✅ | [[MOSTE]] |
@@ -84,6 +84,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[MeVO]]
 - [[Mismatch de perfusión]]
 - [[mRS]]
+- [[Neuroprotección]]
 - [[NIHSS]]
 - [[Oclusión en tándem]]
 - [[Spot sign]]
@@ -92,6 +93,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 - [[TICI]]
 - [[Ventana extendida]]
 - [[Volumen de hematoma]]
+- [[Ácido tranexámico]]
 
 ## Comparative
 - [[Estado de los estudios]] — foglio vs app vs Drive

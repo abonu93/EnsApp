@@ -18,3 +18,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-19 — Ingerito ORION (protocollo v2.2 97/97, v3.1 107/107, cambi, CI): l'app non controlla l'esclusione 'trombectomia entro 1 h dal farmaco'; la v3.1 conferma la pausa (Parte 2 dopo l'analisi della Parte 1). Nuovo concetto: MeVO.
 - 2026-10-19 — Ingerito TWIN2WIN-2 (protocollo V2 10/10, CI V3): accetta più territori e non controlla ASPECTS; il nome visualizzato "TWIN-2-WIN 2" non trova la voce dell'app (stato e link randomizzazione ignorati).
 - 2026-10-19 — Riletto il foglio "Esquema ensayos": nessun cambio di contenuto.
+- 2026-10-19 — Ingerito HYBERNIA (protocollo 55/55, sinossi, CI): raffreddamento cerebrale selettivo post-trombectomia, first-in-human, max 10 pazienti; soglie dell'app coincidenti. Nuovo concetto: Neuroprotección.

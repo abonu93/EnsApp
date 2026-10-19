@@ -12,6 +12,7 @@ Scala del livello di coscienza da 3 a 15, somma di apertura degli occhi, rispost
 | Studio | Uso / soglia | Fonte |
 |---|---|---|
 | [[FASTEST]] | Esclusione: GCS 3–7, quindi serve GCS ≥8. Misurato solo al basale; un GCS basale <8 esclude dall'analisi per protocollo | ([[FASTEST — Protocolo — V10.5]], p. 24, p. 26, p. 28, p. 31) |
+| [[TICH-3]] | Esclusione v: "Severe coma (Glasgow Coma Scale <5)", quindi GCS ≥5 ammesso (il foglio scrive "GCS >5"). Registrato anche al giorno 1 e al giorno 7; sottogruppo prespecificato | ([[TICH-3 — Protocolo — v3.1]], p. 20, p. 26, p. 37) |
 
 ## Note
 - Nell'app il GCS si inserisce nella scheda emorragica (`src/routes/PostImaging.svelte:235-236`, cursore 3–15) e alimenta il calcolo dell'ICH score (`src/lib/components/HIchCard.svelte:17-19`).
