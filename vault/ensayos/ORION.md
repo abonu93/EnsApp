@@ -150,6 +150,9 @@ Fonti: [[ORION — Protocolo — v3.1]], [[ORION — Cambios — v3.0 a v3.1]]. 
 **Per l'app** (vedi le divergenze): la v3.1 non cambia la logica di eleggibilità. Il cambio dell'eGFR non tocca l'app, che non lo controlla. La stenosi serrata non si può indicare nell'app, che chiede solo vasi occlusi: già con la v2.2 (3a) è un [NC]. La v3.1 rende più netta la divergenza sullo stato (punto 1).
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
+> - ✅ la registrazione rapida ora salva la colonna del foglio dati
+
 Confronto della v2.2 (vigente) con:
 - `src/lib/domain/trials-info.ts:229-241`;
 - `src/lib/domain/acute-rules.ts:290-301` (`orion()`);

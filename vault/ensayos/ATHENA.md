@@ -140,6 +140,16 @@ Precisazioni per paese: in Spagna test di gravidanza per le donne "between 22 an
 - Studi di farmaci (es. neuroprotettori) non sono esclusi in sé: dipende dall'impatto sull'endpoint primario. Non riportato nel documento per studi specifici.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `7b77a2e`)
+> - ✅ 1 finestra 16 h (la misura alla puntura resta a carico del medico)
+> - ✅ 2–3 NIHSS 6–25
+> - ✅ 4 occlusione singola di ICA-T, M1 o M2 prossimale/dominante
+> - ✅ 5 ASPECTS 6–10 se indicato (alternativa core ≤50 mL non modellata)
+> - ✅ 6 il tandem non esclude allo screening
+> - ✅ 7 domanda sulla tortuosità riformulata
+> - ✅ 8–11 testi della scheda
+> - ⬜ 12 esclusioni cliniche (alcune ricordate nelle note)
+
 Confronto con:
 - `src/lib/domain/trials-info.ts:59-71` e `:358`;
 - `src/lib/domain/acute-rules.ts:135-147` (`athena()`);

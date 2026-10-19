@@ -102,6 +102,9 @@ Fuori elenco: "Participants not willing to use a highly effective contraception 
 - Compatibilità con studi specifici: non riportata nel documento.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
+> - ✅ la registrazione rapida ora salva la colonna del foglio dati
+
 Confronto con:
 - `src/lib/domain/trials-info.ts:216-228` (scheda `Sovateltide`);
 - `src/lib/domain/acute-rules.ts:277-288` (`sovateltide()`);

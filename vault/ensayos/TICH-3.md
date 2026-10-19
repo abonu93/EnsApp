@@ -98,6 +98,18 @@ Il foglio del team riporta "7 gg, 180 gg" ([[Esquema ensayos — septiembre 2026
 - In pratica, con ICH entro 2 h ed età 18–80 i due studi sono **alternativi**: bisogna scegliere a quale proporre il paziente.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `cce926f`)
+> - ✅ 1 AVK ed eparina/EBPM terapeutica escludono; DOAC ed EBPM profilattica ammessi
+> - ✅ 2 età ≥18
+> - ✅ 6 nome 'TICH-3' risolto (commit ac10c24)
+> - ✅ 11 scheda informativa compilata
+> - 🟨 12 etichette dei motivi (aggiunte età e anticoagulanti)
+> - ⬜ 3 esordio ignoto dalla scoperta (manca il campo)
+> - ⬜ 4 finestra congelata (T1)
+> - ⬜ 5 avviso di co-arruolamento con FASTEST (solo nota nella scheda)
+> - ⬜ 7 IVH isolata: da confermare con il promotore
+> - ⬜ 8, 9, 10 volume ±10%, TXA, cure palliative
+
 Confronto con:
 - `src/lib/domain/trials-info.ts:255-267` (voce `TICH3`) e `:399-413` (`findTrialInfo`, `isTrialOpen`);
 - `src/lib/domain/hemorrhagic-rules.ts:82-91` (`tich3()`) e `src/lib/domain/hem-reasons.ts:33-42` (`reasonTich3()`);

@@ -117,6 +117,18 @@ Il CI dice: prelievo di 10 mL e TC/RM a 18–30 h; telefonata o videochiamata a 
 - Esclusi i procoagulanti nelle 24 h precedenti, "example, tranexamic acid" (excl. 12), e la partecipazione a uno studio sperimentale con farmaco o dispositivo negli ultimi 30 giorni (excl. 16) ([[FASTEST — Protocolo — V10.5]], p. 26). Un paziente già randomizzato in [[TICH-3]] (acido tranexamico o placebo) **non può entrare** in FASTEST. Il co-arruolamento con studi specifici non è altrimenti trattato.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `071119a`)
+> - ✅ 1 spot sign (obbligatorio tra 91 e 120 min)
+> - ✅ 2 causa secondaria
+> - ✅ 3 ECG: solo sopraslivellamento ST
+> - ✅ 4 IVH estesa al posto di 'IVH score noto'
+> - 🟨 5 anticoagulanti: AVK/DOAC 7 gg, eparina/EBPM terapeutica, EBPM profilattica 24 h; l'eparina non frazionata con PTT normale resta esclusa
+> - ✅ 7 bordo delle 2 h
+> - ✅ 8–9 etichette trombosi 90 gg, gravidanza/puerperio/allattamento, endoarteriectomia/stent
+> - ✅ 11 scheda informativa compilata
+> - ⬜ 6 finestra congelata (problema trasversale T1)
+> - ⬜ 10 esclusioni non modellate (ricordate nelle note della scheda)
+
 Confronto con:
 - `src/lib/domain/trials-info.ts:242-254`;
 - `src/lib/domain/hemorrhagic-rules.ts:46-80` (`fastest()`) e `src/lib/domain/hem-reasons.ts:15-30` (`reasonFastest()`);

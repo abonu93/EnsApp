@@ -122,6 +122,9 @@ Testo originale ([[TWIN2WIN-2 — Protocolo — V2]], p. 5–6):
 - Compatibilità con studi specifici: non riportata nel documento. Gli studi su un dispositivo o una tecnica del primo passaggio (per esempio [[ARTEMIS]], che vieta il doppio stent, o [[PIVOTAL]]) sono di fatto incompatibili nella stessa procedura: è un'inferenza dai due criteri, da confermare con l'équipe.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
+> - ✅ nome 'TWIN-2-WIN 2' risolto: stato, link di randomizzazione e colonna del foglio dati
+
 Confronto con:
 - `src/lib/domain/trials-info.ts:100-112` (scheda), `:361` (link di randomizzazione), `:399-413` (`findTrialInfo`, `isTrialOpen`);
 - `src/lib/domain/acute-rules.ts:91-94` (`computeVesselFlags`) e `:211-221` (`twin2win2()`);

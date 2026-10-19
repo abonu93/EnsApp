@@ -106,6 +106,9 @@ Nella sinossi E3 è "Pregnancy or lactating women" ([[DO-IT — Protocolo — v2
 - Non riportato nel documento: un divieto esplicito di partecipare ad altri studi.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
+> - ✅ nome 'DO-IT' risolto: stato e colonna del foglio dati nella registrazione rapida
+
 Confronto con:
 - `src/lib/domain/trials-info.ts:285-300`;
 - `src/lib/domain/acute-rules.ts:303-310` (`doit()`);

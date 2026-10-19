@@ -14,6 +14,17 @@ Stato nell'app al 2026-10-19 ([[Estado de los estudios]]):
 - **in pausa**, quindi non proposti: PROMISE (= [[PROMISE20 RELOADED]]), [[HYBERNIA]];
 - **attivi**: tutti gli altri.
 
+## 0. Correzioni applicate (2026-10-19)
+
+| Commit | Correzione | Divergenze risolte |
+|---|---|---|
+| `ac10c24` | Nomi → chiavi (T2): confronto ignorando maiuscole, spazi e trattini | Registrazione rapida: 7 studi aperti ora salvati nel foglio dati; stato e link di randomizzazione di TWIN-2-WIN 2 e DONE SYMPLE |
+| `071119a` | [[FASTEST]] alla Parte 2 del protocollo V10.5 | spot sign, causa secondaria, IVH estesa, ECG, anticoagulanti, bordo 2 h, etichette, scheda |
+| `cce926f` | [[TICH-3]] | AVK ed eparina/EBPM terapeutica escluse, età ≥18, scheda |
+| `7b77a2e` | [[ATHENA]] al protocollo v2.3 | 16 h, NIHSS 6–25, vasi, ASPECTS, tandem, tortuosità, scheda |
+
+Le sezioni seguenti fotografano lo stato **prima** di queste correzioni; il dettaglio di cosa resta aperto è nel riquadro "Correzioni applicate" di ogni scheda.
+
 ## 1. Sintesi
 
 - **Studi esaminati: 23.**

@@ -118,6 +118,9 @@ Testo originale (§4.5.2, [[DONE SYMPLE — Protocolo — v4]], p. 36–37):
 - Compatibilità con altri studi specifici: non riportata nel documento.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
+> - ✅ nome 'DONE SYMPLE' risolto: stato, link di randomizzazione e colonna del foglio dati
+
 Confronto con:
 - `src/lib/domain/trials-info.ts:141-153` (voce `DoneSymple`), `:362` (link di randomizzazione), `:399-413` (`findTrialInfo`, `isTrialOpen`);
 - `src/lib/domain/acute-rules.ts:254-264` (`doneSymple()`);
