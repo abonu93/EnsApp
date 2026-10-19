@@ -18,7 +18,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | ATHENA | active (dal 2026-10-19) | aperto | ⬜ |  |
 | DO-IT | activo | aperto | ✅ | [[DO-IT]] |
 | DONE SYMPLE | activo | aperto | ⬜ | |
-| FASTEST | activo | aperto | ⬜ | |
+| FASTEST | activo | aperto | ✅ | [[FASTEST]] |
 | HYBERNIA | pausado | en pausa | ⬜ | |
 | LIBREXIA | closed (dal 2026-10-19) | cerrado | ⬜ |  |
 | MARRS (MARSS nell'app) | cerrado | — | ⬜ | |

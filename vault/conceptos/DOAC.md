@@ -12,6 +12,7 @@ Anticoagulanti orali diretti: dabigatran (inibitore diretto della trombina) e ap
 | Studio | Uso / soglia | Fonte |
 |---|---|---|
 | [[DO-IT]] | Criterio di **inclusione**: DOAC nelle 48 h prima dell'arruolamento, o terapia in corso con ora dell'ultima dose ignota. Esclusa l'antagonizzazione prevista o iniziata (l'acido tranexamico non conta). Livelli plasmatici non richiesti; con attività non misurabile, se dosata, non si arruola. Stratificazione: DOAC entro 12 h vs >12 h/ignoto | ([[DO-IT — Protocolo — v2.0]], p. 29, p. 31) |
+| [[FASTEST]] | Criterio di **esclusione**: ICH secondaria a uso di anticoagulanti orali (AVK o DOAC) negli ultimi 7 giorni; esclusi anche EBPM <24 h ed eparina non frazionata con PTT alterato | ([[FASTEST — Protocolo — V10.5]], p. 26) |
 
 ## Note
 - Nell'app la domanda "DOAC (NOAC) en las 48h previas?" (`src/lib/i18n/es.ts:114`) non copre l'ora dell'ultima dose ignota, che in DO-IT è inclusa.

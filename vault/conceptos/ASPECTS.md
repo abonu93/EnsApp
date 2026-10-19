@@ -16,6 +16,7 @@ Punteggio da 0 a 10 che quantifica i segni precoci di ischemia nel territorio de
 | [[WETRUST]] | **Nessun criterio**: si randomizza prima dell'imaging. Il protocollo motiva che entro 6 h l'85–90% delle occlusioni prossimali ha ASPECTS ≥6 e che la TM è ragionevole anche con ASPECTS <6; atteso circa 5% di core esteso | ([[WETRUST — Protocolo — Rev 09]], p. 37–38) |
 | [[MOSTE]] | Inclusione: ASPECTS ≥6 in TC senza contrasto o RM-DWI. Per la MT secondaria nel braccio di controllo serve ASPECTS **>6** alla TC di ri-screening. Il core lab verifica l'ASPECTS. L'app non controlla l'ASPECTS (`acute-rules.ts:200-209`) | ([[MOSTE — Protocolo — V5]], p. 24, p. 27, p. 58) |
 | [[ARTEMIS]] | Inclusione: ASPECTS 6–10 su TC o DWI-RM basale; con valutazione automatica, anche core ≤50 cc su TC-perfusione o DWI-RM. L'app controlla solo ASPECTS >5 (`acute-rules.ts:234-235`), non il core | ([[ARTEMIS — Protocolo — V03]], p. 25) |
+| [[REMEDY]] | Esclusione: "large core of established infarction defined as (…) ASPECTS 0-5", quindi serve ≥6. L'app richiede ASPECTS ≥6 (`acute-rules.ts:339-340`), ma per i non candidati a EVT il campo compare solo nella card TENACITY (>4,5 h): entro 4,5 h REMEDY non risulta mai eleggibile. Il foglio del team scrive "5-10" | ([[REMEDY — Protocolo — V6.2]], p. 38) |
 
 ## Note
 - Nato per il territorio della MCA: non è applicabile così com'è alla circolazione posteriore.
