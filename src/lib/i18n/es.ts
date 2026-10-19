@@ -20,6 +20,7 @@ export const es: Dictionary = {
     inProgress: "En curso",
     info: "Info",
     skipToContent: "Ir al contenido",
+    stepOf: "Paso {n} de {total}",
     open: "Abrir",
     theme: "Tema",
     language: "Idioma",

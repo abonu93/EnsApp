@@ -20,6 +20,7 @@ export const ca: Dictionary = {
     inProgress: "En curs",
     info: "Info",
     skipToContent: "Anar al contingut",
+    stepOf: "Pas {n} de {total}",
     open: "Obrir",
     theme: "Tema",
     language: "Idioma",
