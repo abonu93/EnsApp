@@ -11,6 +11,9 @@ import {
   twin2win2,
   nivo,
   orion,
+  doneSymple,
+  doit,
+  sovateltide,
 } from "$lib/domain/acute-rules";
 import {
   reasonSailMevo,
@@ -21,6 +24,10 @@ import {
   reasonNivo,
   reasonOrion,
   reasonTenacity,
+  reasonDoneSymple,
+  reasonDoit,
+  reasonSovateltide,
+  reasonWeTrust,
 } from "$lib/domain/acute-reasons";
 
 describe("acute-rules - smoke (ported from legacy node:test)", () => {
@@ -548,5 +555,148 @@ describe("acute-rules - TENACITY (protocollo V1.0, correzioni)", () => {
       const input = { ...ok, ...v } as unknown as Parameters<typeof tenacity>[0];
       expect(reasonTenacity(input).eligible).toBe(tenacity(input));
     }
+  });
+});
+
+describe("acute-rules - DONE SYMPLE (protocollo v4)", () => {
+  const ok = {
+    age: 70, nihss: 10, premrs: 1, ltsw: 30, candidate: "not eligible",
+    targetVessels: ["m1"], largeCore: "no",
+  } as const;
+  const run = (patch: Record<string, unknown>) =>
+    doneSymple({ ...ok, ...patch } as unknown as Parameters<typeof doneSymple>[0]);
+
+  test("la candidatura a EVT non conta oltre 24 h", () => {
+    expect(run({})).toBe(true);
+    expect(run({ candidate: "eligible" })).toBe(true);
+  });
+
+  test("solo ICA o M1 della circolazione anteriore", () => {
+    expect(run({ targetVessels: ["ica-terminal"] })).toBe(true);
+    expect(run({ targetVessels: ["basilar"] })).toBe(false);
+    expect(run({ targetVessels: ["m2-any"] })).toBe(false);
+    expect(run({ targetVessels: [] })).toBe(false);
+  });
+
+  test("core > 70 cc esclude", () => {
+    expect(run({ largeCore: "yes" })).toBe(false);
+  });
+
+  test("motivi e regola concordano", () => {
+    for (const v of [{}, { targetVessels: ["basilar"] }, { largeCore: "yes" }, { ltsw: 20 }, { candidate: "eligible" }]) {
+      const input = { ...ok, ...v } as unknown as Parameters<typeof doneSymple>[0];
+      expect(reasonDoneSymple(input).eligible).toBe(doneSymple(input));
+    }
+  });
+});
+
+describe("acute-rules - DO-IT (protocollo v2.0)", () => {
+  const ok = { age: 75, nihss: 6, premrs: 1, ltsw: 3, doac: "yes", ivtCandidate: "eligible" } as const;
+  const run = (patch: Record<string, unknown>) =>
+    doit({ ...ok, ...patch } as unknown as Parameters<typeof doit>[0]);
+
+  test("non candidato solo per il DOAC: proponibile", () => {
+    expect(run({ ivtCandidate: "not eligible" })).toBe(false);
+    expect(run({ ivtCandidate: "not eligible", ivtExceptDoac: "yes" })).toBe(true);
+    expect(run({ ivtCandidate: "not eligible", ivtExceptDoac: "no" })).toBe(false);
+  });
+
+  test("randomizzazione entro 4 h 15 min", () => {
+    expect(run({ ltsw: 4.25 })).toBe(true);
+    expect(run({ ltsw: 4.4 })).toBe(false);
+  });
+
+  test("motivi e regola concordano", () => {
+    for (const v of [{}, { ltsw: 4.4 }, { ivtCandidate: "not eligible" }, { ivtCandidate: "not eligible", ivtExceptDoac: "yes" }, { doac: "no" }]) {
+      const input = { ...ok, ...v } as unknown as Parameters<typeof doit>[0];
+      expect(reasonDoit(input).eligible).toBe(doit(input));
+    }
+  });
+});
+
+describe("acute-rules - SOVATELTIDE (protocollo v3.1)", () => {
+  const ok = { age: 60, nihss: 10, premrs: 1, ltsw: 10, candidate: "not eligible" } as const;
+  const run = (patch: Record<string, unknown>) =>
+    sovateltide({ ...ok, ...patch } as unknown as Parameters<typeof sovateltide>[0]);
+
+  test("basta la diagnosi clinica: lesione all'imaging non richiesta", () => {
+    expect(run({ lesionConfirmed: "no" })).toBe(true);
+  });
+
+  test("NIHSS 1a >= 2 esclude", () => {
+    expect(run({ nihss1aGe2: "yes" })).toBe(false);
+    expect(run({ nihss1aGe2: "no" })).toBe(true);
+  });
+
+  test("motivi e regola concordano", () => {
+    for (const v of [{}, { nihss1aGe2: "yes" }, { lesionConfirmed: "no" }, { nihss: 20 }]) {
+      const input = { ...ok, ...v } as unknown as Parameters<typeof sovateltide>[0];
+      expect(reasonSovateltide(input).eligible).toBe(sovateltide(input));
+    }
+  });
+});
+
+describe("acute-rules - WETRUST (protocollo Rev 09)", () => {
+  const ok = { age: 60, nihss: 14, premrs: 1, ltsw: 3, angiograph: "yes" } as const;
+  const run = (patch: Record<string, unknown>) =>
+    weTrust({ ...ok, ...patch } as unknown as Parameters<typeof weTrust>[0]);
+
+  test("limiti stretti: < 6 h e, al risveglio, < 12 h", () => {
+    expect(run({ ltsw: 5.9 })).toBe(true);
+    expect(run({ ltsw: 6 })).toBe(false);
+    expect(run({ ltsw: 11.9, wakeupStroke: true, wakeupSymptomsWithin6h: true })).toBe(true);
+    expect(run({ ltsw: 12, wakeupStroke: true, wakeupSymptomsWithin6h: true })).toBe(false);
+  });
+
+  test("al risveglio serve la risposta sui sintomi scoperti < 6 h", () => {
+    expect(run({ ltsw: 9, wakeupStroke: true, wakeupSymptomsWithin6h: false })).toBe(false);
+    expect(run({ ltsw: 9, wakeupStroke: true })).toBe(false);
+  });
+
+  test("motivi e regola concordano", () => {
+    for (const v of [{}, { ltsw: 6 }, { ltsw: 9, wakeupStroke: true, wakeupSymptomsWithin6h: true }, { ltsw: 9, wakeupStroke: true }]) {
+      const input = { ...ok, ...v } as unknown as Parameters<typeof weTrust>[0];
+      expect(reasonWeTrust(input).eligible).toBe(weTrust(input));
+    }
+  });
+});
+
+describe("acute-rules - REMEDY tronco e cervelletto", () => {
+  const ok = {
+    age: 70, nihss: 8, premrs: 1, ltsw: 3, candidate: "not eligible",
+    targetVessels: [], aspects: 8, acei: "no",
+  } as const;
+  test("ictus del tronco o del cervelletto esclude", () => {
+    const input = { ...ok, posteriorFossa: "yes" } as unknown as Parameters<typeof remedy>[0];
+    expect(remedy(input)).toBe(false);
+    expect(reasonRemedy(input).eligible).toBe(false);
+    expect(remedy({ ...ok, posteriorFossa: "no" } as unknown as Parameters<typeof remedy>[0])).toBe(true);
+  });
+});
+
+describe("correzioni dall'audit", () => {
+  test("ORION: tra 4,5 e 6 h una perfusione negativa esclude, se fatta", () => {
+    const ok = {
+      age: 70, nihss: 8, premrs: 1, ltsw: 5, candidate: "not eligible",
+      targetVessels: ["m1"], contraTpa: "no", largeCore: "no",
+    };
+    const input = (p: Record<string, unknown>) =>
+      ({ ...ok, ...p }) as unknown as Parameters<typeof orion>[0];
+    expect(orion(input({}))).toBe(true);
+    expect(orion(input({ perfusionMismatch: "yes" }))).toBe(true);
+    expect(orion(input({ perfusionMismatch: "no" }))).toBe(false);
+    expect(reasonOrion(input({ perfusionMismatch: "no" })).eligible).toBe(false);
+  });
+
+  test("REMEDY: ASPECTS non richiesto nell'ictus della sola ACP", () => {
+    const ok = {
+      age: 70, nihss: 8, premrs: 1, ltsw: 3, candidate: "not eligible", acei: "no",
+    };
+    const input = (p: Record<string, unknown>) =>
+      ({ ...ok, ...p }) as unknown as Parameters<typeof remedy>[0];
+    expect(remedy(input({ targetVessels: ["p2"] }))).toBe(true);
+    expect(reasonRemedy(input({ targetVessels: ["p2"] })).eligible).toBe(true);
+    expect(remedy(input({ targetVessels: ["m2-any"] }))).toBe(false);
+    expect(remedy(input({ targetVessels: [] }))).toBe(false);
   });
 });

@@ -56,6 +56,12 @@ export type PostData = Partial<{
   pregnant: "yes" | "no" | "";
   lifeExpectancyLt3m: "yes" | "no" | "";
   contrastAllergy: "yes" | "no" | "";
+  /** DO-IT: candidato a IVT se non fosse per il DOAC recente. */
+  ivtExceptDoac: "yes" | "no" | "";
+  /** SOVATELTIDE: voce NIHSS 1a (livello di coscienza) >= 2. */
+  nihss1aGe2: "yes" | "no" | "";
+  /** REMEDY: ictus del tronco encefalico o del cervelletto. */
+  posteriorFossa: "yes" | "no" | "";
 }>;
 
 export type HemData = Partial<HemorrhagicInput>;

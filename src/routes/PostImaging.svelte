@@ -13,7 +13,7 @@
   import { fastestNeedsSpotSign } from "$lib/domain/hemorrhagic-rules";
   import { preData, postData, hemData, ltswHours } from "$lib/stores/patient";
   import { t } from "$lib/i18n";
-  import { VANISH_MAX_HOURS, type VesselCode } from "$lib/domain/acute-rules";
+  import { DOIT_MAX_HOURS, VANISH_MAX_HOURS, type VesselCode } from "$lib/domain/acute-rules";
 
   type YN = "yes" | "no" | "";
   type YNNa = YN | "na";
@@ -47,6 +47,13 @@
   // contraTpa passa da costante a campo: mostrato solo nella card TENACITY,
   // resta "no" (default invariato per ORION) se la card non e' visibile.
   let contraTpaAnswer = $state<YN>(($postData.contraTpa as YN) || "no");
+  // DO-IT: il DOAC recente e' l'unica controindicazione all'IVT ammessa dallo
+  // studio, quindi chi e' "non candidato" per il DOAC va chiesto a parte.
+  let ivtExceptDoac = $state<YN>(($postData.ivtExceptDoac as YN) ?? "");
+  // Non candidati a EVT: esclusioni di SOVATELTIDE (NIHSS 1a >= 2) e REMEDY
+  // (ictus del tronco o del cervelletto).
+  let nihss1aGe2 = $state<boolean>($postData.nihss1aGe2 === "yes");
+  let posteriorFossa = $state<boolean>($postData.posteriorFossa === "yes");
 
   // SAIL-MeVO (EVT in MeVO): campi specifici del trial.
   let aiCoreLt10 = $state<YNNa>(($postData.aiCoreLt10 as YNNa) ?? "");
@@ -84,7 +91,9 @@
       tandem: tandem ? "yes" : "no",
       tortuosity: tortuosity ? "yes" : "no",
       targetVessels,
-      contraTpa: contraTpaAnswer || undefined,
+      // Salvata solo con la scheda TENACITY visibile: una risposta nascosta non
+      // deve escludere ORION dopo un cambio di candidatura.
+      contraTpa: (showTenacity ? contraTpaAnswer : "no") || undefined,
       aspects: aspects ?? undefined,
       lesionConfirmed: lesionConfirmed || undefined,
       perfusionMismatch: perfusionMismatch || undefined,
@@ -97,6 +106,9 @@
       pregnant: pregnant || undefined,
       lifeExpectancyLt3m: lifeExpectancyLt3m || undefined,
       contrastAllergy: contrastAllergy || undefined,
+      ivtExceptDoac: (showDoitQuestion && ivtExceptDoac) || undefined,
+      nihss1aGe2: showNonEvt ? (nihss1aGe2 ? "yes" : "no") : undefined,
+      posteriorFossa: showNonEvt ? (posteriorFossa ? "yes" : "no") : undefined,
     });
   });
 
@@ -134,6 +146,10 @@
   // (obbligatoria per ORION oltre 6 h), quindi sta nella scheda Imaging.
   const showPerfusion = $derived(showImaging && ($ltswHours ?? -1) > 4.5);
   const showNonEvt = $derived(isIschemic && candidate === "not eligible");
+  const showDoitQuestion = $derived(
+    isIschemic && $preData.doac === "yes" && ivtCandidate === "not eligible" &&
+    ($ltswHours ?? 999) <= DOIT_MAX_HOURS
+  );
   // Stesso limite della regola fastest() (ltsw <= 2): a 2,0 h la scheda deve comparire.
   const showFastest = $derived(isHem && ($ltswHours ?? 999) <= 2 && ($preData.premrs ?? 99) <= 2);
   const showSpotSign = $derived(showFastest && fastestNeedsSpotSign($ltswHours ?? 0));
@@ -209,6 +225,12 @@
           <Segmented options={candidateOpts} bind:value={candidate} cols={2} label={$t.postImaging.candidateEvt} />
           <div class="divider"></div>
           <Segmented options={candidateOpts} bind:value={ivtCandidate} cols={2} label={$t.postImaging.candidateIvt} />
+          {#if showDoitQuestion}
+            <div class="field">
+              <span class="lbl">{$t.postImaging.ivtExceptDoacLabel}</span>
+              <Segmented options={ynOpts} bind:value={ivtExceptDoac} cols={2} />
+            </div>
+          {/if}
         </div>
       {/snippet}
     </Card>
@@ -268,7 +290,12 @@
     {:else if showNonEvt}
       <Card title={$t.postImaging.nonEvtTitle}>
         {#snippet children()}
-          <Segmented options={ynOpts} bind:value={lesionConfirmed} cols={2} label={$t.postImaging.lesionConfirmedLabel} />
+          <div class="stack">
+            <Segmented options={ynOpts} bind:value={lesionConfirmed} cols={2} label={$t.postImaging.lesionConfirmedLabel} />
+            <div class="divider"></div>
+            <ToggleRow title={$t.postImaging.nihss1aGe2Label} sub={$t.postImaging.nihss1aGe2Hint} bind:checked={nihss1aGe2} />
+            <ToggleRow title={$t.postImaging.posteriorFossaLabel} sub={$t.postImaging.posteriorFossaHint} bind:checked={posteriorFossa} />
+          </div>
         {/snippet}
       </Card>
     {/if}

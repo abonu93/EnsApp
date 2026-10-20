@@ -28,7 +28,7 @@ test.describe("hemorrhagic flow - FASTEST eligible", () => {
     await setSlider(page, "Volume mL", 20);
     await setSlider(page, "GCS", 12);
     await pickSegment(page, "Secondary cause", "None");
-    await pickSegment(page, "Anticoagulants (last 7 days)", "None (antiplatelets allowed)");
+    await pickSegment(page, "Anticoagulants (ongoing or in the last 7 days; for TICH-3 only ongoing therapy counts)", "None (antiplatelets allowed)");
 
     // FASTEST extra (LTSW=1.5h < 2h e mRS=1 <= 2 -> sezione visibile)
     await expect(page.getByText("FASTEST - Additional questions")).toBeVisible();
