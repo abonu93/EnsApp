@@ -120,6 +120,9 @@ Testo originale (§8.3, [[PIVOTAL — Protocolo — Rev 03]], p. 42–43; sinoss
 - Compatibilità con studi specifici: non riportata nei documenti.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-20 (commit `9895f0a`)
+> - ✅ la domanda sulla tortuosità vale anche per l'accesso vertebrobasilare e cita PIVOTAL
+> - ✅ il motivo "occlusione singola" spiega di selezionare solo il segmento prossimale se M1 e M2 sono lo stesso trombo
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `99d4582`)
 > - ✅ 1 vasi: ICA intracranica e terminale, M1, M2 (dominante e non), vertebrale intracranica, basilare
 > - ✅ 2 ASPECTS ≥6 in circolazione anteriore (in posteriore non si applica: PC-ASPECTS resta [NC])

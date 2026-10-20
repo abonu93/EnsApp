@@ -12,7 +12,7 @@ protocolo_vigente: "Final Version 3.1, 25-04-2024"
 ci_vigente: "v2.0, 21-03-2023 (solo modulo di firma del paziente, in castellano), anteriore al protocollo v3.1"
 drive_carpeta: "https://drive.google.com/drive/folders/1iduIJmqrH__K4NcFo5e91VmiCWBYxAw5"
 fuentes: ["[[TICH-3 — Protocolo — v3.1]]", "[[TICH-3 — CI — v2.0]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # TICH-3
 
@@ -98,6 +98,9 @@ Il foglio del team riporta "7 gg, 180 gg" ([[Esquema ensayos — septiembre 2026
 - In pratica, con ICH entro 2 h ed età 18–80 i due studi sono **alternativi**: bisogna scegliere a quale proporre il paziente.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-20 (commit `9895f0a`)
+> - ✅ l'etichetta degli anticoagulanti precisa che per TICH-3 conta solo la terapia in corso
+> - ✅ i trial emorragici non vengono più proposti per un ischemico (filtro sul tipo di ictus)
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `cce926f`)
 > - ✅ 1 AVK ed eparina/EBPM terapeutica escludono; DOAC ed EBPM profilattica ammessi
 > - ✅ 2 età ≥18

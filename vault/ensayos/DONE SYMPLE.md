@@ -12,7 +12,7 @@ protocolo_vigente: "Versión 4, 09-10-2024"
 ci_vigente: "Versión 03, 27-11-2024"
 drive_carpeta: "https://drive.google.com/drive/folders/15rFhrRi0YL_r76nOk_nnNz6JLg4suNi4"
 fuentes: ["[[DONE SYMPLE — Protocolo — v4]]", "[[DONE SYMPLE — CI — v3]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # DONE SYMPLE
 
@@ -118,6 +118,12 @@ Testo originale (§4.5.2, [[DONE SYMPLE — Protocolo — v4]], p. 36–37):
 - Compatibilità con altri studi specifici: non riportata nel documento.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-20 (commit `9895f0a`)
+> - ✅ 1 non dipende più dalla candidatura a EVT: vaso, ASPECTS e core si chiedono a tutti gli ischemici
+> - ✅ 2 core >70 cc esclude (domanda "core esteso" nella scheda Imaging)
+> - ✅ 3 solo ICA o M1 (circolazione anteriore); M2 esclusa finché il promotore non chiarisce
+> - ✅ 4, 9, 10, 11, 12, 13 testi: niente "IA tPA", consenso, imaging, esami, G30, etichetta oltre 24 h non più "Finestra chiusa"
+> - restano aperti 5 (mRS 0 a 70–80 anni: domanda al promotore), 6, 7
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
 > - ✅ nome 'DONE SYMPLE' risolto: stato, link di randomizzazione e colonna del foglio dati
 
