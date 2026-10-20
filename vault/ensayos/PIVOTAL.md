@@ -12,7 +12,7 @@ protocolo_vigente: "CIP-0002 Revision 03, 29-01-2026"
 ci_vigente: "Versión 3, 29-01-2026 (castellano e catalano; nome Drive: V03 — 2026-04-30)"
 drive_carpeta: "https://drive.google.com/drive/folders/1hUPzCRh8O3kgRRNvcoEwHRbzDp95LzPt"
 fuentes: ["[[PIVOTAL — Protocolo — Rev 03]]", "[[PIVOTAL — Sinopsis — Rev 03]]", "[[PIVOTAL — CI — V03]]", "[[PIVOTAL — CI català — V03]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # PIVOTAL
 
@@ -120,6 +120,12 @@ Testo originale (§8.3, [[PIVOTAL — Protocolo — Rev 03]], p. 42–43; sinoss
 - Compatibilità con studi specifici: non riportata nei documenti.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `99d4582`)
+> - ✅ 1 vasi: ICA intracranica e terminale, M1, M2 (dominante e non), vertebrale intracranica, basilare
+> - ✅ 2 ASPECTS ≥6 in circolazione anteriore (in posteriore non si applica: PC-ASPECTS resta [NC])
+> - ✅ 3 tandem esclude · ✅ 4 occlusione singola (ICA-T + M1 conta come una) · ✅ 5 tortuosità esclude
+> - ✅ 9, 10, 11 testi: consenso scritto, G90 in presenza, finestra alla puntura e 120 min dall'imaging
+> - restano aperti 6, 7, 8 (finestra alla puntura, core automatico/PC-ASPECTS/DSA, esclusioni cliniche)
 Confronto con:
 - `src/lib/domain/trials-info.ts:72-84`;
 - `src/lib/domain/acute-rules.ts:82-85` (`computeVesselFlags`) e `:160-171` (`pivotal()`);

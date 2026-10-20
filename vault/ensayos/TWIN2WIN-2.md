@@ -12,7 +12,7 @@ protocolo_vigente: "Versión (02), 13-08-2024"
 ci_vigente: "V.03, 01-10-2024"
 drive_carpeta: "https://drive.google.com/drive/folders/1oRZGeexi_tGoyBT9rBpXkr4iYbBxyDCI"
 fuentes: ["[[TWIN2WIN-2 — Protocolo — V2]]", "[[TWIN2WIN-2 — CI — V3]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # TWIN2WIN-2
 
@@ -122,6 +122,11 @@ Testo originale ([[TWIN2WIN-2 — Protocolo — V2]], p. 5–6):
 - Compatibilità con studi specifici: non riportata nel documento. Gli studi su un dispositivo o una tecnica del primo passaggio (per esempio [[ARTEMIS]], che vieta il doppio stent, o [[PIVOTAL]]) sono di fatto incompatibili nella stessa procedura: è un'inferenza dai due criteri, da confermare con l'équipe.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `99d4582`)
+> - ✅ 1 occlusioni in più territori escluse · ✅ 2 ASPECTS ≥6 (anteriore; soglia della TC)
+> - ✅ 4 età ≥18 · ✅ 5 finestra ≤24 h (misurata alla valutazione: vedi finestre temporali)
+> - ✅ 11, 12, 13 testi: visite, consenso scritto, intervento DS-EVT vs SS-EVT
+> - restano aperti 3 (M1 distale non distinta), 9 e 10 (dispositivo precedente ed esami come solo testo)
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
 > - ✅ nome 'TWIN-2-WIN 2' risolto: stato, link di randomizzazione e colonna del foglio dati
 

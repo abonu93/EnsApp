@@ -12,7 +12,7 @@ protocolo_vigente: "v2.2 (Protocol Amendment 3), 27-05-2025. In attesa: v3.1 (Am
 ci_vigente: "Main ICF ES v1.0, 24-06-2025"
 drive_carpeta: "https://drive.google.com/drive/folders/1fJShL_DSTr27x_DFsGckyRTIiS_BKJFw"
 fuentes: ["[[ORION — Protocolo — v2.2]]", "[[ORION — Protocolo — v3.1]]", "[[ORION — Cambios — v3.0 a v3.1]]", "[[ORION — CI — v1.0]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # ORION
 
@@ -150,6 +150,13 @@ Fonti: [[ORION — Protocolo — v3.1]], [[ORION — Cambios — v3.0 a v3.1]]. 
 **Per l'app** (vedi le divergenze): la v3.1 non cambia la logica di eleggibilità. Il cambio dell'eGFR non tocca l'app, che non lo controlla. La stenosi serrata non si può indicare nell'app, che chiede solo vasi occlusi: già con la v2.2 (3a) è un [NC]. La v3.1 rende più netta la divergenza sullo stato (punto 1).
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `99d4582`)
+> - ✅ 2 nuova domanda nella scheda EVT: "EVT possibile entro 1 h dall'inizio del farmaco?" (sì esclude)
+> - ✅ 3 la perfusione e il core esteso sono ora nella scheda Imaging comune: anche i non candidati a EVT vengono valutati
+> - ✅ 4 solo vasi del protocollo (ICA intracranica, M1, M2, rami distali ACM/ACA/ACP), un solo territorio
+> - ✅ 5 oltre 6 h serve il mismatch · ✅ 6 NIHSS ≥5 · ✅ 7 mRS 0 tra 86 e 90 anni
+> - ✅ 9, 10, 11 testi di trombolisi, imaging e trombectomia
+> - ORION resta `active` per decisione del team (1 non toccato); restano aperti 8, 12-14
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
 > - ✅ la registrazione rapida ora salva la colonna del foglio dati
 
