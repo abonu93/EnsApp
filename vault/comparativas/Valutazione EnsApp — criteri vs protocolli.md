@@ -27,6 +27,7 @@ Stato nell'app al 2026-10-19 ([[Estado de los estudios]]):
 | secondo blocco | Scheda Imaging comune (T3), [[VANISH]] al protocollo v1.2, [[REMEDY]] (ASPECTS, LVO, ACE-inibitori) | Vaso, tandem e ASPECTS chiesti a tutti gli ischemici; VANISH 9 h, tandem, core/mismatch, ICA intracranica |
 | `99d4582` (terzo blocco) | [[PIVOTAL]], [[TWIN2WIN-2]], [[NiVO]], [[ORION]], [[TENACITY]]; etichette dei vasi | Vasi, occlusione singola/territorio, tandem, ASPECTS, tortuosità; ORION NIHSS 5, mRS 86-90, perfusione oltre 6 h, EVT entro 1 h; TENACITY sopratentoriale e "ictus pregresso + diabete" |
 | `9895f0a` (quarto blocco) | Tipo di ictus (T10), [[DONE SYMPLE]], [[DO-IT]], [[SOVATELTIDE]], [[WETRUST]], [[REMEDY]]; correzioni del controllo incrociato su [[ORION]], [[REMEDY]], [[PIVOTAL]], [[TICH-3]] | Nessun trial ischemico per un'emorragia e viceversa; DONE SYMPLE senza candidatura EVT, ICA/M1, core; DO-IT "a parte il DOAC" e 4 h 15 min; SOVATELTIDE diagnosi clinica e NIHSS 1a; WETRUST wake-up; REMEDY tronco/cervelletto; testi copiati (T7) corretti |
+| `dd2f49f` (secondo controllo) | [[WETRUST]], [[DONE SYMPLE]], [[DO-IT]], [[ORION]], [[REMEDY]]; selezione dei trial | WeTrust non sparisce con l'emorragico; selezione dell'altro tipo ripulita; core DONE SYMPLE separato; antagonizzazione DOAC; perfusione "non eseguita" |
 
 Le sezioni seguenti fotografano lo stato **prima** di queste correzioni; il dettaglio di cosa resta aperto è nel riquadro "Correzioni applicate" di ogni scheda.
 

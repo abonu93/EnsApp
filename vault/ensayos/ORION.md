@@ -154,6 +154,7 @@ Fonti: [[ORION — Protocolo — v3.1]], [[ORION — Cambios — v3.0 a v3.1]]. 
 > - ✅ incl. 4: tra 4,5 e 6 h una perfusione fatta e negativa esclude (prima contava solo oltre 6 h)
 > - ✅ la risposta "controindicazioni" della scheda TENACITY non esclude più ORION quando la scheda è nascosta
 > - ⚠ la domanda sul mismatch usa le soglie di TENACITY (ratio ≥1,2, >10 mL); ORION vuole ratio >1,2 e ≥10 mL: differenza solo ai valori limite
+> - ✅ (dd2f49f) la perfusione ha l'opzione "non eseguita": entro 6 h non esclude
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `99d4582`)
 > - ✅ 2 nuova domanda nella scheda EVT: "EVT possibile entro 1 h dall'inizio del farmaco?" (sì esclude)
 > - ✅ 3 la perfusione e il core esteso sono ora nella scheda Imaging comune: anche i non candidati a EVT vengono valutati

@@ -121,6 +121,7 @@ Testo originale (§7.4.1.2, [[WETRUST — Protocolo — Rev 09]], p. 59–60):
 > - ✅ 3 il messaggio d'esito ricorda di verificare le esclusioni prima di randomizzare
 > - ✅ 5, 6, 7, 8 testi: NIHSS 1a > 1 al posto di "low GCS", consenso differito, visite, popolazione dell'analisi primaria
 > - resta aperto 4 (équipe endovascolare)
+> - ✅ (dd2f49f) resta eleggibile se poi l'ictus è emorragico (si randomizza prima dell'imaging); entro 6 h la domanda wake-up non serve
 Confronto con `src/lib/domain/trials-info.ts:31-43`, `src/lib/domain/acute-rules.ts:121-133`, `src/lib/domain/acute-reasons.ts:23-35` e, per i campi d'ingresso, `src/routes/PreImaging.svelte`, `src/lib/stores/patient.ts` e `src/lib/i18n/it.ts`. Verificato il 2026-10-19 sul commit `6617a91`.
 
 > [!success] Coincide

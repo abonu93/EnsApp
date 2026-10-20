@@ -112,6 +112,7 @@ Nella sinossi E3 è "Pregnancy or lactating women" ([[DO-IT — Protocolo — v2
 > - ✅ 4 randomizzazione entro 4 h 15 min · ✅ 5 trial ischemici mai proposti per un'emorragia
 > - ✅ 11–14 testi: consenso differito, visite, esami, imaging, tetto del 20% per la EVT, livelli del DOAC
 > - restano aperti 2 (DWI-FLAIR: il foglio dice "wake-up excluidos", domanda al team), 6–10
+> - ✅ (dd2f49f) antagonizzazione del DOAC prevista o iniziata esclude (excl. 2), nuova domanda
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
 > - ✅ nome 'DO-IT' risolto: stato e colonna del foglio dati nella registrazione rapida
 

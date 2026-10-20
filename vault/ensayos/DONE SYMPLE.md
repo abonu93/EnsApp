@@ -124,6 +124,7 @@ Testo originale (§4.5.2, [[DONE SYMPLE — Protocolo — v4]], p. 36–37):
 > - ✅ 3 solo ICA o M1 (circolazione anteriore); M2 esclusa finché il promotore non chiarisce
 > - ✅ 4, 9, 10, 11, 12, 13 testi: niente "IA tPA", consenso, imaging, esami, G30, etichetta oltre 24 h non più "Finestra chiusa"
 > - restano aperti 5 (mRS 0 a 70–80 anni: domanda al promotore), 6, 7
+> - ✅ (dd2f49f) domanda propria "core > 70 mL al software" tra 24 e 72 h, obbligatoria: l'ipodensità attesa oltre 24 h non esclude più
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
 > - ✅ nome 'DONE SYMPLE' risolto: stato, link di randomizzazione e colonna del foglio dati
 
