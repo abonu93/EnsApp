@@ -12,7 +12,7 @@ protocolo_vigente: "V6.2, 29-10-2025 [EU Only]"
 ci_vigente: "v2.1, 13-07-2026 (HIP-DCI Spagna, da DCI master UE V3.0 del 03-11-2025)"
 drive_carpeta: "https://drive.google.com/drive/folders/1XulIeeBAMKvliXKixSeFUg7Gto0qyhK6"
 fuentes: ["[[REMEDY — Protocolo — V6.2]]", "[[REMEDY — Sinopsis — V5.0]]", "[[REMEDY — CI — v2.1]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # REMEDY
 
@@ -146,6 +146,10 @@ Testo originale (§6.2, [[REMEDY — Protocolo — V6.2]], p. 38–40; sinossi p
 - Compatibilità con studi specifici: non riportata nel documento.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-20 (commit `9895f0a`)
+> - ✅ 6 nuova domanda "Ictus del tronco o del cervelletto" nella scheda dei non candidati a EVT (esclude)
+> - ✅ ASPECTS non richiesto nell'ictus della sola ACP (prima l'ASPECTS vuoto escludeva anche un'occlusione P2/P3)
+> - restano aperti 4, 5 (condizioni dopo trombolisi), 7, 8
 > [!done] Correzioni (secondo blocco, 2026-10-19, branch `claude/practical-johnson-mo40tz-block2`)
 > - ✅ 1 ASPECTS ora sempre richiesto nella scheda Imaging: REMEDY torna proponibile entro 4,5 h
 > - ✅ 2 vaso occluso sempre richiesto: l'esclusione delle occlusioni di grosso vaso funziona

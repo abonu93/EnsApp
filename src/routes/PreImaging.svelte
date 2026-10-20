@@ -25,7 +25,12 @@
 
   // Aggiornato dall'orologio dell'app: il tempo trascorso avanza a schermo aperto.
   const ltswHrs = $derived(hoursSince(ltswDate, $now));
-  const symptomsWithin6h = $derived(wakeupStroke && ltswHrs !== undefined && ltswHrs <= 6);
+  // WeTrust: per l'ictus al risveglio conta quando i sintomi sono stati
+  // scoperti (< 6 h prima dell'arrivo), non l'ultima volta visto bene: non si
+  // puo' ricavare dal LSW, quindi lo chiede al medico.
+  let wakeupSymptoms = $state<YN>(
+    $preData.wakeupSymptomsWithin6h === true ? "yes" : $preData.wakeupSymptomsWithin6h === false ? "no" : ""
+  );
 
   $effect(() => {
     preData.set({
@@ -36,7 +41,7 @@
       ltswDate: ltswDate || undefined,
       ltsw: ltswHrs,
       wakeupStroke,
-      wakeupSymptomsWithin6h: wakeupStroke ? symptomsWithin6h : undefined,
+      wakeupSymptomsWithin6h: wakeupStroke && wakeupSymptoms !== "" ? wakeupSymptoms === "yes" : undefined,
       angiograph: angiograph || undefined,
       doac: doac || undefined,
       acei: acei || undefined,
@@ -57,7 +62,8 @@
     if (min <= 270) return { tone: "success", label: $t.extras.windowIv };
     if (min <= 360) return { tone: "success", label: $t.extras.windowEvt };
     if (min <= 1440) return { tone: "warn", label: $t.extras.windowEvtSelected };
-    return { tone: "danger", label: $t.extras.windowClosed };
+    // Oltre 24 h arruolano ancora DONE SYMPLE e TENACITY: niente rosso "chiusa".
+    return { tone: "warn", label: $t.extras.windowClosed };
   }
   const win = $derived(windowInfo(ltswHrs));
 
@@ -135,12 +141,10 @@
           </span>
           <Switch bind:checked={wakeupStroke} label={$t.preImaging.wakeupLabel} />
         </div>
-        {#if wakeupStroke && ltswHrs !== undefined}
-          <div class="window tone-{symptomsWithin6h ? 'success' : 'warn'}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-            </svg>
-            <span>{$t.extras.symptomsWithin6h}: <strong>{symptomsWithin6h ? $t.common.yes : $t.common.no}</strong></span>
+        {#if wakeupStroke}
+          <div class="field">
+            <span class="lbl">{$t.preImaging.wakeupSymptomsLabel}</span>
+            <Segmented options={ynOpts} bind:value={wakeupSymptoms} cols={2} />
           </div>
         {/if}
       </div>

@@ -9,8 +9,12 @@ import {
   anteriorAspectsOk,
   athenaVesselOk,
   computeVesselFlags,
+  DOIT_MAX_HOURS,
+  DONE_SYMPLE_VESSELS,
   isSingleOcclusion,
   ORION_PERFUSION_AFTER_H,
+  orionPerfusionOk,
+  remedyAspectsOk,
   ORION_VESSELS,
   PIVOTAL_VESSELS,
   SAIL_MEVO_VESSELS,
@@ -41,8 +45,8 @@ export function reasonWeTrust(input: AcuteInput): ReasonReport {
     { ok: input.age >= 18, label: "age >= 18" },
     { ok: input.nihss >= 10, label: "NIHSS >= 10" },
     { ok: input.premrs <= 2, label: "pre-mRS <= 2" },
-    { ok: input.ltsw <= maxH, label: `LTSW <= ${maxH}h` },
-    { ok: within6h, label: "wake-up sintomi entro 6h" },
+    { ok: input.ltsw < maxH, label: `LTSW < ${maxH}h` },
+    { ok: within6h, label: "wake-up: sintomi scoperti < 6h prima dell'arrivo" },
     { ok: input.angiograph === "yes", label: "angiografo Philips disponibile" },
   ]);
 }
@@ -91,7 +95,7 @@ export function reasonPivotal(input: AcuteInput): ReasonReport {
       ok: vesselsWithin(input.targetVessels, PIVOTAL_VESSELS),
       label: "occlusione di ICA, M1, M2, vertebrale intracranica o basilare",
     },
-    { ok: isSingleOcclusion(input.targetVessels), label: "occlusione singola (no occlusioni multiple)" },
+    { ok: isSingleOcclusion(input.targetVessels), label: "occlusione singola (se M1 e M2 sono lo stesso trombo, selezionare solo il segmento prossimale)" },
     { ok: input.tandem !== "yes", label: "no occlusione tandem" },
     { ok: input.tortuosity !== "yes", label: "no tortuosita' che impedisce l'accesso" },
     { ok: anteriorAspectsOk(input, 6), label: "ASPECTS >= 6 (circolo anteriore)" },
@@ -147,7 +151,7 @@ export function reasonTwin2win2(input: AcuteInput): ReasonReport {
       ok: vesselsWithin(input.targetVessels, TWIN2WIN2_VESSELS),
       label: "occlusione di ICA terminale, M1 o basilare",
     },
-    { ok: isSingleOcclusion(input.targetVessels), label: "un solo territorio (no occlusioni multiple)" },
+    { ok: isSingleOcclusion(input.targetVessels), label: "occlusione singola (se M1 e M2 sono lo stesso trombo, selezionare solo il segmento prossimale)" },
     { ok: anteriorAspectsOk(input, 6), label: "ASPECTS >= 6 in TC (circolo anteriore)" },
   ]);
 }
@@ -184,7 +188,11 @@ export function reasonDoneSymple(input: AcuteInput): ReasonReport {
     { ok: input.age >= 18 && input.age <= 80, label: "age 18-80" },
     { ok: input.premrs <= 1, label: "pre-mRS <= 1" },
     { ok: input.nihss >= 8, label: "NIHSS >= 8" },
-    { ok: input.lvo === "yes", label: "LVO confermato" },
+    {
+      ok: vesselsWithin(input.targetVessels, DONE_SYMPLE_VESSELS),
+      label: "occlusione di ICA o M1 (circolazione anteriore)",
+    },
+    { ok: input.largeCore !== "yes", label: "core <= 70 cc" },
   ]);
 }
 
@@ -204,8 +212,8 @@ export function reasonSovateltide(input: AcuteInput): ReasonReport {
     { ok: input.ltsw < 24, label: "LTSW < 24h" },
     { ok: input.age >= 18 && input.age <= 80, label: "age 18-80" },
     { ok: input.premrs <= 2, label: "pre-mRS <= 2" },
-    { ok: input.lesionConfirmed === "yes", label: "lesione confermata" },
     { ok: input.nihss >= 8 && input.nihss < 20, label: "NIHSS 8-19" },
+    { ok: input.nihss1aGe2 !== "yes", label: "NIHSS 1a < 2" },
   ]);
 }
 
@@ -224,8 +232,8 @@ export function reasonOrion(input: AcuteInput): ReasonReport {
     },
     { ok: territoryCount(input.targetVessels) === 1, label: "un solo territorio vascolare" },
     {
-      ok: input.ltsw <= ORION_PERFUSION_AFTER_H || input.perfusionMismatch === "yes",
-      label: "oltre 6 h: perfusione con mismatch",
+      ok: orionPerfusionOk(input),
+      label: `perfusione con mismatch (obbligatoria oltre ${ORION_PERFUSION_AFTER_H} h; prima, un mismatch negativo esclude)`,
     },
     { ok: input.largeCore !== "yes", label: "no core > 70 mL" },
     {
@@ -239,9 +247,12 @@ export function reasonOrion(input: AcuteInput): ReasonReport {
 export function reasonDoit(input: AcuteInput): ReasonReport {
   return reduce([
     { ok: input.age >= 18, label: "age >= 18" },
-    { ok: input.ltsw <= 4.5, label: "LTSW <= 4.5h" },
-    { ok: input.doac === "yes", label: "DOAC nelle 48h" },
-    { ok: input.ivtCandidate === "eligible", label: "candidato IVT" },
+    { ok: input.ltsw <= DOIT_MAX_HOURS, label: "LTSW <= 4h15 (randomizzazione)" },
+    { ok: input.doac === "yes", label: "DOAC nelle 48h (o ultima dose ignota)" },
+    {
+      ok: input.ivtCandidate === "eligible" || input.ivtExceptDoac === "yes",
+      label: "candidato IVT (a parte il DOAC)",
+    },
   ]);
 }
 
@@ -263,8 +274,9 @@ export function reasonRemedy(input: AcuteInput): ReasonReport {
     { ok: input.nihss >= 5 && input.nihss <= 15, label: "NIHSS 5-15" },
     { ok: input.candidate === "not eligible", label: "non candidato EVT" },
     { ok: !excluded, label: "no occlusione ICA intracr./ICA-T/M1/VA/basilar" },
-    { ok: isNumber(input.aspects) && input.aspects >= 6, label: "ASPECTS >= 6" },
+    { ok: remedyAspectsOk(input), label: "ASPECTS >= 6 (non richiesto nell'ictus della sola ACP)" },
     { ok: input.acei !== "yes", label: "ACE-inibitore: ultima dose >= 24h (48h se eGFR < 45) e sospendibile fino al g. 29" },
+    { ok: input.posteriorFossa !== "yes", label: "no ictus del tronco o del cervelletto" },
   ]);
 }
 

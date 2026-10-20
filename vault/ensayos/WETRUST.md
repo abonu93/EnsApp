@@ -12,7 +12,7 @@ protocolo_vigente: "Rev. 09, 15-09-2025 (ID doc. XCY607-130512)"
 ci_vigente: "Rev. 07, 22-10-2025 (ID doc. XCY607-130671)"
 drive_carpeta: "https://drive.google.com/drive/folders/1VJwaraW_LSliV6tQo17ZOpZ4MzLeGtxD"
 fuentes: ["[[WETRUST — Protocolo — Rev 09]]", "[[WETRUST — CI — Rev 07]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # WETRUST
 
@@ -115,6 +115,12 @@ Testo originale (§7.4.1.2, [[WETRUST — Protocolo — Rev 09]], p. 59–60):
 - Studi specifici compatibili o incompatibili: non riportati nelle pagine lette.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-20 (commit `9895f0a`)
+> - ✅ 1 wake-up: nuova domanda "Sintomi scoperti meno di 6 h prima dell'arrivo?" invece del calcolo dal LSW
+> - ✅ 2 limiti stretti (< 6 h, < 12 h); il tempo resta quello attuale, non quello d'arrivo
+> - ✅ 3 il messaggio d'esito ricorda di verificare le esclusioni prima di randomizzare
+> - ✅ 5, 6, 7, 8 testi: NIHSS 1a > 1 al posto di "low GCS", consenso differito, visite, popolazione dell'analisi primaria
+> - resta aperto 4 (équipe endovascolare)
 Confronto con `src/lib/domain/trials-info.ts:31-43`, `src/lib/domain/acute-rules.ts:121-133`, `src/lib/domain/acute-reasons.ts:23-35` e, per i campi d'ingresso, `src/routes/PreImaging.svelte`, `src/lib/stores/patient.ts` e `src/lib/i18n/it.ts`. Verificato il 2026-10-19 sul commit `6617a91`.
 
 > [!success] Coincide

@@ -35,3 +35,5 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-19 — Finestre temporali ricalcolate nel tempo (7ec19c0); merge di main con SAIL-MeVO in app (fbba0ca).
 - 2026-10-19 — Secondo blocco: scheda Imaging comune, VANISH (9 h, tandem, core/mismatch, ICA intracranica), REMEDY (ASPECTS, LVO, ACE-inibitori).
 - 2026-10-20 — Terzo blocco (`99d4582`): PIVOTAL, TWIN2WIN-2, NiVO, ORION, TENACITY ai protocolli; etichette dei vasi (M2 non dominante, M3-M4, A3, P3); domanda ORION 'EVT entro 1 h'.
+- 2026-10-20 — Controllo incrociato dei 10 studi già corretti: 1 errore alto (ORION, perfusione tra 4,5 e 6 h) e 6 minori, tutti corretti nel quarto blocco.
+- 2026-10-20 — Quarto blocco (`9895f0a`): filtro sul tipo di ictus; DONE SYMPLE, DO-IT, SOVATELTIDE, WETRUST, REMEDY ai protocolli; testi copiati corretti.

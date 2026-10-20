@@ -12,7 +12,7 @@ protocolo_vigente: "v3.1, 25-05-2025"
 ci_vigente: "v4.2.0, 05-05-2025 (Main ICF Spain, centro 3418), anteriore al protocollo v3.1"
 drive_carpeta: "https://drive.google.com/drive/folders/1v4AHrgMrzgA4mIRmCy0maJCBZ_W5malv"
 fuentes: ["[[SOVATELTIDE — Protocolo — v3.1]]", "[[SOVATELTIDE — CI — v4.2.0]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # SOVATELTIDE
 
@@ -102,6 +102,11 @@ Fuori elenco: "Participants not willing to use a highly effective contraception 
 - Compatibilità con studi specifici: non riportata nel documento.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-20 (commit `9895f0a`)
+> - ✅ 1 basta la diagnosi clinica: la "lesione confermata" non è più richiesta
+> - ✅ 2 nuova domanda "NIHSS 1a ≥ 2" nella scheda dei non candidati a EVT (esclude)
+> - ✅ 6–11 testi: trombolisi ammessa, schema di dosi, esclusioni, imaging, visite, chirurgia
+> - restano aperti 3 (finestra alla prima dose), 4 (co-arruolamento), 5
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
 > - ✅ la registrazione rapida ora salva la colonna del foglio dati
 

@@ -46,11 +46,19 @@ function mergedAcute(
   return { ...pre, ...post, ltsw } as unknown as AcuteInput;
 }
 
+// Le regole non leggono il tipo di ictus: i campi ischemici restano in
+// postData anche se poi si sceglie "emorragico" (e viceversa). Il filtro sta
+// qui, cosi' nessun trial ischemico viene proposto per un'emorragia e nessun
+// trial emorragico per un ischemico.
+function allFalse<T extends object>(shape: T): T {
+  return Object.fromEntries(Object.keys(shape).map((k) => [k, false])) as T;
+}
+
 export const acuteEligibility = derived(
   [preData, postData, ltswHours],
   ([$pre, $post, $h]): AcuteEligibility => {
     const input = mergedAcute($pre, $post, $h);
-    return {
+    const result: AcuteEligibility = {
       weTrust: safeBoolean(() => acute.weTrust(input)),
       athena: safeBoolean(() => acute.athena(input)),
       vanish: safeBoolean(() => acute.vanish(input)),
@@ -71,12 +79,21 @@ export const acuteEligibility = derived(
       tenacity: safeBoolean(() => acute.tenacity(input)),
       sailMevo: safeBoolean(() => acute.sailMevo(input)),
     };
+    // Tipo non ancora scelto: resta calcolato, perche' WeTrust si valuta in
+    // PreResult prima dell'imaging.
+    return $post.strokeType === "hemorrhagic" ? allFalse(result) : result;
   }
 );
 
 export const hemEligibility = derived(
-  [hemData, preData, ltswHours],
-  ([$hem, $pre, $h]): HemorrhagicEligibility => {
+  [hemData, preData, postData, ltswHours],
+  ([$hem, $pre, $post, $h]): HemorrhagicEligibility => {
+  if ($post.strokeType !== "hemorrhagic") {
+    return {
+      fastest: { baseCriteriaMet: false, extraMissing: true, eligible: false },
+      tich3: false,
+    };
+  }
   const input = { ...$pre, ...$hem, ltsw: $h } as HemorrhagicInput;
   return {
     fastest: safeFastest(() => hem.fastest(input)),

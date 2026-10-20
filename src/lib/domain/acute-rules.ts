@@ -56,6 +56,12 @@ export interface AcuteInput {
   pregnant?: YesNoEmpty;
   lifeExpectancyLt3m?: YesNoEmpty;
   contrastAllergy?: YesNoEmpty;
+  /** DO-IT: candidato a IVT secondo lo standard se non fosse per il DOAC recente. */
+  ivtExceptDoac?: YesNoEmpty;
+  /** SOVATELTIDE: voce NIHSS 1a (livello di coscienza) >= 2 (excl. 2). */
+  nihss1aGe2?: YesNoEmpty;
+  /** REMEDY: ictus del tronco encefalico o del cervelletto (excl. 6). */
+  posteriorFossa?: YesNoEmpty;
 }
 
 export interface VesselFlags {
@@ -107,6 +113,14 @@ const POSTERIOR_VESSELS: readonly VesselCode[] = ["va", "basilar", "p1", "p2", "
  * se l'occlusione e' solo posteriore l'ASPECTS non si applica (PC-ASPECTS non
  * e' chiesto dall'app); se non e' stato inserito non esclude.
  */
+// REMEDY, excl. 3: ASPECTS 0-5 esclude. Va inserito per la circolazione
+// anteriore; nell'ictus della sola ACP (ammesso, excl. 6) non si calcola.
+export function remedyAspectsOk(input: AcuteInput): boolean {
+  const vessels = toArray(input.targetVessels);
+  if (vessels.length > 0 && vessels.every((v) => POSTERIOR_VESSELS.includes(v))) return true;
+  return isValidNumber(input.aspects) && input.aspects >= 6;
+}
+
 export function anteriorAspectsOk(input: AcuteInput, min: number): boolean {
   const vessels = toArray(input.targetVessels);
   const posteriorOnly = vessels.length > 0 && vessels.every((v) => POSTERIOR_VESSELS.includes(v));
@@ -183,6 +197,9 @@ export function computeVesselFlags(targetVessels: VesselCode[] | undefined): Ves
   };
 }
 
+// WETRUST: protocollo Rev 09, p. 59. Limiti stretti (< 6 h; wake-up < 12 h
+// dall'ultima volta visto bene con sintomi scoperti < 6 h prima dell'arrivo).
+// `wakeupSymptomsWithin6h` e' la risposta del medico, non un calcolo dal LSW.
 export function weTrust(input: AcuteInput): boolean {
   const wakeupStroke = input.wakeupStroke === true;
   const maxHours = wakeupStroke ? 12 : 6;
@@ -191,7 +208,7 @@ export function weTrust(input: AcuteInput): boolean {
     input.age >= 18 &&
     input.nihss >= 10 &&
     input.premrs <= 2 &&
-    input.ltsw <= maxHours &&
+    input.ltsw < maxHours &&
     wakeupSymptomsWithin6h &&
     input.angiograph === "yes"
   );
@@ -365,6 +382,12 @@ export function hybernia(input: AcuteInput): boolean {
   );
 }
 
+// DONE SYMPLE: protocollo v4, p. 12, 32, 36, 43. Oltre le 24 h la EVT non e'
+// lo standard e viene randomizzata, quindi la candidatura a EVT non conta.
+// Occlusione di grosso vaso anteriore (ICA o M1: la M2 non e' citata, da
+// chiarire con il promotore) e core <= 70 cc (incl. 8).
+export const DONE_SYMPLE_VESSELS: readonly VesselCode[] = ["ica-intracranial", "ica-terminal", "m1"];
+
 export function doneSymple(input: AcuteInput): boolean {
   return (
     input.ltsw >= 24 &&
@@ -373,7 +396,8 @@ export function doneSymple(input: AcuteInput): boolean {
     input.age <= 80 &&
     input.premrs <= 1 &&
     input.nihss >= 8 &&
-    isLvo(input.lvo)
+    vesselsWithin(input.targetVessels, DONE_SYMPLE_VESSELS) &&
+    input.largeCore !== "yes"
   );
 }
 
@@ -388,6 +412,9 @@ export function shionogi(input: AcuteInput): boolean {
   );
 }
 
+// SOVATELTIDE: protocollo v3.1, p. 62. Basta la diagnosi clinica di ictus
+// ischemico con TC/RM senza emorragia (incl. 3): non serve una lesione visibile.
+// Esclusi i comatosi con NIHSS 1a >= 2 (incl. 4, excl. 2).
 export function sovateltide(input: AcuteInput): boolean {
   return (
     input.candidate === "not eligible" &&
@@ -395,9 +422,9 @@ export function sovateltide(input: AcuteInput): boolean {
     input.age >= 18 &&
     input.age <= 80 &&
     input.premrs <= 2 &&
-    input.lesionConfirmed === "yes" &&
     input.nihss >= 8 &&
-    input.nihss < 20
+    input.nihss < 20 &&
+    input.nihss1aGe2 !== "yes"
   );
 }
 
@@ -415,9 +442,16 @@ export const ORION_VESSELS: readonly VesselCode[] = [
 ];
 export const ORION_PERFUSION_AFTER_H = 6;
 
+export function orionPerfusionOk(input: AcuteInput): boolean {
+  return input.ltsw <= ORION_PERFUSION_AFTER_H
+    ? input.perfusionMismatch !== "no"
+    : input.perfusionMismatch === "yes";
+}
+
 export function orion(input: AcuteInput): boolean {
-  const perfusionOk =
-    input.ltsw <= ORION_PERFUSION_AFTER_H || input.perfusionMismatch === "yes";
+  // Incl. 4 (p. 46): i criteri di perfusione valgono per tutti se la
+  // perfusione e' stata fatta; oltre 6 h e' obbligatoria.
+  const perfusionOk = orionPerfusionOk(input);
   const evtOk = input.candidate !== "eligible" || input.evtWithin1h === "no";
   return (
     input.ltsw >= 4.5 &&
@@ -435,12 +469,17 @@ export function orion(input: AcuteInput): boolean {
   );
 }
 
+// DO-IT: protocollo v2.0, p. 31, 40. Randomizzazione entro 4 h 15 min dal
+// LKW. Il DOAC recente e' l'unica controindicazione all'IVT ammessa (excl. 1):
+// basta che il paziente sia candidato "a parte il DOAC".
+export const DOIT_MAX_HOURS = 4.25;
+
 export function doit(input: AcuteInput): boolean {
   return (
     input.age >= 18 &&
-    input.ltsw <= 4.5 &&
+    input.ltsw <= DOIT_MAX_HOURS &&
     input.doac === "yes" &&
-    input.ivtCandidate === "eligible"
+    (input.ivtCandidate === "eligible" || input.ivtExceptDoac === "yes")
   );
 }
 
@@ -471,9 +510,10 @@ export function remedy(input: AcuteInput): boolean {
     input.nihss <= 15 &&
     input.candidate === "not eligible" &&
     !hasExcludedVessel &&
-    isValidNumber(input.aspects) &&
-    input.aspects >= 6 &&
-    input.acei !== "yes"
+    remedyAspectsOk(input) &&
+    input.acei !== "yes" &&
+    // Protocollo V6.2, excl. 6: ictus del tronco o del cervelletto.
+    input.posteriorFossa !== "yes"
   );
 }
 

@@ -12,7 +12,7 @@ protocolo_vigente: "v2.0, 01-01-2026"
 ci_vigente: "Appendix ICF Spain V1.3, 01-01-2026 (procedura di consenso; il modulo per il paziente non è in Drive)"
 drive_carpeta: "https://drive.google.com/drive/folders/16YG95cLaqruw6wpbkIugX88oqFi8Myz8"
 fuentes: ["[[DO-IT — Protocolo — v2.0]]", "[[DO-IT — Sinopsis — V1.1]]", "[[DO-IT — CI — V1.3]]", "[[DO-IT — Cambios — v1.0 a v2.0]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # DO-IT
 
@@ -106,6 +106,12 @@ Nella sinossi E3 è "Pregnancy or lactating women" ([[DO-IT — Protocolo — v2
 - Non riportato nel documento: un divieto esplicito di partecipare ad altri studi.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-20 (commit `9895f0a`)
+> - ✅ 1 nuova domanda "Sarebbe candidato a IVT se non fosse per il DOAC?" (compare se DOAC sì e IVT non eleggibile)
+> - ✅ 3 la domanda sul DOAC include "ora dell'ultima dose ignota"
+> - ✅ 4 randomizzazione entro 4 h 15 min · ✅ 5 trial ischemici mai proposti per un'emorragia
+> - ✅ 11–14 testi: consenso differito, visite, esami, imaging, tetto del 20% per la EVT, livelli del DOAC
+> - restano aperti 2 (DWI-FLAIR: il foglio dice "wake-up excluidos", domanda al team), 6–10
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
 > - ✅ nome 'DO-IT' risolto: stato e colonna del foglio dati nella registrazione rapida
 

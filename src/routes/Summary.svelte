@@ -6,7 +6,7 @@
   import Pill from "$lib/components/Pill.svelte";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
   import { selectedStudies } from "$lib/stores/trialSelection";
-  import { acuteInput, hemInput } from "$lib/stores/patient";
+  import { acuteInput, hemInput, postData } from "$lib/stores/patient";
   import { REASON_BY_TRIAL } from "$lib/domain/acute-reasons";
   import { REASON_BY_HEM_TRIAL } from "$lib/domain/hem-reasons";
   import { isTrialOpen } from "$lib/domain/trials-info";
@@ -45,13 +45,20 @@
 
   // I trial con reclutamento chiuso o in pausa (es. SHIONOGI) restano nel
   // catalogo ma non sono selezionabili: vengono esclusi dai risultati di arruolamento.
+  // Solo i trial del tipo di ictus scelto: un'emorragia non deve elencare gli
+  // studi ischemici fra i "non eleggibili" (e viceversa).
+  const candidates = $derived(
+    $postData.strokeType === "ischemic" ? acuteEligible
+      : $postData.strokeType === "hemorrhagic" ? hemEligibleList
+      : []
+  );
   const eligibleItems = $derived(
-    [...acuteEligible, ...hemEligibleList].filter((e) => e.eligible && isTrialOpen(e.display))
+    candidates.filter((e) => e.eligible && isTrialOpen(e.display))
   );
   // Include anche i trial emorragici: prima comparivano solo gli acuti, quindi
   // FASTEST e TICH-3 sparivano senza spiegazione quando non eleggibili.
   const ineligibleItems = $derived(
-    [...acuteEligible, ...hemEligibleList].filter((e) => !e.eligible && isTrialOpen(e.display))
+    candidates.filter((e) => !e.eligible && isTrialOpen(e.display))
   );
 
   function toggle(name: string) {
