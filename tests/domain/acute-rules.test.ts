@@ -7,8 +7,21 @@ import {
   tenacity,
   sailMevo,
   remedy,
+  pivotal,
+  twin2win2,
+  nivo,
+  orion,
 } from "$lib/domain/acute-rules";
-import { reasonSailMevo, reasonVanish, reasonRemedy } from "$lib/domain/acute-reasons";
+import {
+  reasonSailMevo,
+  reasonVanish,
+  reasonRemedy,
+  reasonPivotal,
+  reasonTwin2win2,
+  reasonNivo,
+  reasonOrion,
+  reasonTenacity,
+} from "$lib/domain/acute-reasons";
 
 describe("acute-rules - smoke (ported from legacy node:test)", () => {
   test("weTrust: eligible when all criteria are met", () => {
@@ -39,7 +52,9 @@ describe("acute-rules - smoke (ported from legacy node:test)", () => {
     const nivoAllowed = computeVesselFlags(["p2"]);
     expect(flags.vanish).toBe(true);
     expect(flags.promise).toBe(true);
-    expect(flags.nivo).toBe(false);
+    // "m2-any" e' la M2 non dominante: e' un vaso NiVO (sinossi v2.0 p. 7).
+    expect(flags.nivo).toBe(true);
+    expect(computeVesselFlags(["m1", "m2-proxdom"]).nivo).toBe(false);
     expect(nivoAllowed.nivo).toBe(true);
   });
 
@@ -336,6 +351,202 @@ describe("acute-rules - REMEDY (protocollo V6.2)", () => {
     for (const v of [{}, { aspects: 4 }, { targetVessels: ["m1"] }, { acei: "yes" }, { candidate: "eligible" }]) {
       const input = { ...ok, ...v } as unknown as Parameters<typeof remedy>[0];
       expect(reasonRemedy(input).eligible).toBe(remedy(input));
+    }
+  });
+});
+
+describe("acute-rules - PIVOTAL (RapidPulse)", () => {
+  const ok = {
+    age: 65, nihss: 10, premrs: 1, ltsw: 5, lvo: "yes", tandem: "no",
+    tortuosity: "no", targetVessels: ["m1"], aspects: 8,
+  } as const;
+  const run = (patch: Record<string, unknown>) =>
+    pivotal({ ...ok, ...patch } as unknown as Parameters<typeof pivotal>[0]);
+
+  test("caso tipico proponibile", () => {
+    expect(run({})).toBe(true);
+  });
+
+  test("vasi ammessi: ICA, M1, M2, vertebrale, basilare", () => {
+    for (const v of ["ica-intracranial", "ica-terminal", "m2-proxdom", "m2-any", "va", "basilar"]) {
+      expect(run({ targetVessels: [v] })).toBe(true);
+    }
+    expect(run({ targetVessels: ["a2"] })).toBe(false);
+    expect(run({ targetVessels: ["gt-m2"] })).toBe(false);
+  });
+
+  test("occlusioni multiple escludono, salvo ICA terminale + M1", () => {
+    expect(run({ targetVessels: ["m1", "basilar"] })).toBe(false);
+    expect(run({ targetVessels: ["ica-terminal", "m1"] })).toBe(true);
+  });
+
+  test("tandem e tortuosita' escludono", () => {
+    expect(run({ tandem: "yes" })).toBe(false);
+    expect(run({ tortuosity: "yes" })).toBe(false);
+  });
+
+  test("ASPECTS < 6 esclude solo in circolazione anteriore", () => {
+    expect(run({ aspects: 5 })).toBe(false);
+    expect(run({ aspects: 6 })).toBe(true);
+    expect(run({ targetVessels: ["basilar"], aspects: 3 })).toBe(true);
+  });
+
+  test("finestra < 8 h ed eta' 18-80", () => {
+    expect(run({ ltsw: 8 })).toBe(false);
+    expect(run({ age: 81 })).toBe(false);
+  });
+
+  test("motivi e regola concordano", () => {
+    for (const v of [{}, { tandem: "yes" }, { tortuosity: "yes" }, { aspects: 4 }, { targetVessels: ["m1", "basilar"] }, { targetVessels: ["basilar"], aspects: 3 }, { targetVessels: ["a2"] }]) {
+      const input = { ...ok, ...v } as unknown as Parameters<typeof pivotal>[0];
+      expect(reasonPivotal(input).eligible).toBe(pivotal(input));
+    }
+  });
+});
+
+describe("acute-rules - TWIN2WIN-2 (protocollo V2)", () => {
+  const ok = {
+    age: 18, nihss: 8, premrs: 2, ltsw: 24, lvo: "yes",
+    targetVessels: ["m1"], aspects: 7,
+  } as const;
+  const run = (patch: Record<string, unknown>) =>
+    twin2win2({ ...ok, ...patch } as unknown as Parameters<typeof twin2win2>[0]);
+
+  test("eta' 18 ed entro 24 h proponibile", () => {
+    expect(run({})).toBe(true);
+    expect(run({ ltsw: 24.5 })).toBe(false);
+  });
+
+  test("solo ICA terminale, M1 o basilare", () => {
+    expect(run({ targetVessels: ["ica-terminal"] })).toBe(true);
+    expect(run({ targetVessels: ["basilar"] })).toBe(true);
+    expect(run({ targetVessels: ["m2-proxdom"] })).toBe(false);
+    expect(run({ targetVessels: ["ica-intracranial"] })).toBe(false);
+  });
+
+  test("occlusioni in piu' territori escludono", () => {
+    expect(run({ targetVessels: ["m1", "basilar"] })).toBe(false);
+  });
+
+  test("ASPECTS < 6 esclude in anteriore, non in basilare", () => {
+    expect(run({ aspects: 5 })).toBe(false);
+    expect(run({ targetVessels: ["basilar"], aspects: 2 })).toBe(true);
+  });
+
+  test("motivi e regola concordano", () => {
+    for (const v of [{}, { aspects: 5 }, { targetVessels: ["m1", "basilar"] }, { targetVessels: ["m2-any"] }, { ltsw: 30 }]) {
+      const input = { ...ok, ...v } as unknown as Parameters<typeof twin2win2>[0];
+      expect(reasonTwin2win2(input).eligible).toBe(twin2win2(input));
+    }
+  });
+});
+
+describe("acute-rules - NiVO (sinossi v2.0)", () => {
+  const ok = {
+    age: 70, nihss: 8, premrs: 1, ltsw: 6, lvo: "yes", tandem: "no",
+    targetVessels: ["m2-any"], aspects: 8,
+  } as const;
+  const run = (patch: Record<string, unknown>) =>
+    nivo({ ...ok, ...patch } as unknown as Parameters<typeof nivo>[0]);
+
+  test("M2 non dominante ammessa", () => {
+    expect(run({})).toBe(true);
+  });
+
+  test("tandem esclude", () => {
+    expect(run({ tandem: "yes" })).toBe(false);
+  });
+
+  test("motivi e regola concordano", () => {
+    for (const v of [{}, { tandem: "yes" }, { aspects: 5 }, { targetVessels: ["m1", "m2-any"] }]) {
+      const input = { ...ok, ...v } as unknown as Parameters<typeof nivo>[0];
+      expect(reasonNivo(input).eligible).toBe(nivo(input));
+    }
+  });
+});
+
+describe("acute-rules - ORION (JX10)", () => {
+  const ok = {
+    age: 70, nihss: 8, premrs: 1, ltsw: 5, candidate: "not eligible",
+    targetVessels: ["m1"], contraTpa: "no", largeCore: "no",
+  } as const;
+  const run = (patch: Record<string, unknown>) =>
+    orion({ ...ok, ...patch } as unknown as Parameters<typeof orion>[0]);
+
+  test("caso tipico 4,5-6 h senza perfusione", () => {
+    expect(run({})).toBe(true);
+    expect(run({ ltsw: 4.4 })).toBe(false);
+  });
+
+  test("oltre 6 h serve il mismatch di perfusione", () => {
+    expect(run({ ltsw: 12 })).toBe(false);
+    expect(run({ ltsw: 12, perfusionMismatch: "yes" })).toBe(true);
+    expect(run({ ltsw: 25, perfusionMismatch: "yes" })).toBe(false);
+  });
+
+  test("vasi: ICA intracranica, M1, M2, rami distali; non posteriore prossimale", () => {
+    for (const v of ["ica-intracranial", "m2-any", "gt-m2", "a2", "p2"]) {
+      expect(run({ targetVessels: [v] })).toBe(true);
+    }
+    expect(run({ targetVessels: ["basilar"] })).toBe(false);
+    expect(run({ targetVessels: [] })).toBe(false);
+  });
+
+  test("occlusione in piu' territori esclude", () => {
+    expect(run({ targetVessels: ["m1", "a2"] })).toBe(false);
+    expect(run({ targetVessels: ["m1", "m2-any"] })).toBe(true);
+  });
+
+  test("NIHSS >= 5 e mRS 0 oltre 85 anni", () => {
+    expect(run({ nihss: 4 })).toBe(false);
+    expect(run({ nihss: 5 })).toBe(true);
+    expect(run({ age: 88, premrs: 1 })).toBe(false);
+    expect(run({ age: 88, premrs: 0 })).toBe(true);
+    expect(run({ age: 91, premrs: 0 })).toBe(false);
+  });
+
+  test("candidato a EVT: solo se la EVT inizia almeno 1 h dopo il farmaco", () => {
+    expect(run({ candidate: "eligible" })).toBe(false);
+    expect(run({ candidate: "eligible", evtWithin1h: "yes" })).toBe(false);
+    expect(run({ candidate: "eligible", evtWithin1h: "no" })).toBe(true);
+  });
+
+  test("core esteso e controindicazioni ai trombolitici escludono", () => {
+    expect(run({ largeCore: "yes" })).toBe(false);
+    expect(run({ contraTpa: "yes" })).toBe(false);
+  });
+
+  test("motivi e regola concordano", () => {
+    for (const v of [{}, { ltsw: 12 }, { ltsw: 12, perfusionMismatch: "yes" }, { targetVessels: ["m1", "a2"] }, { age: 88 }, { candidate: "eligible" }, { candidate: "eligible", evtWithin1h: "no" }, { largeCore: "yes" }, { nihss: 4 }]) {
+      const input = { ...ok, ...v } as unknown as Parameters<typeof orion>[0];
+      expect(reasonOrion(input).eligible).toBe(orion(input));
+    }
+  });
+});
+
+describe("acute-rules - TENACITY (protocollo V1.0, correzioni)", () => {
+  const ok = {
+    age: 70, nihss: 12, premrs: 1, ltsw: 20, candidate: "not eligible",
+    ivtCandidate: "not eligible", perfusionMismatch: "yes", contraTpa: "no",
+    targetVessels: ["m1"],
+  } as const;
+  const run = (patch: Record<string, unknown>) =>
+    tenacity({ ...ok, ...patch } as unknown as Parameters<typeof tenacity>[0]);
+
+  test("basilare e vertebrale escludono (solo sopratentoriale)", () => {
+    expect(run({})).toBe(true);
+    expect(run({ targetVessels: ["basilar"] })).toBe(false);
+    expect(run({ targetVessels: ["va"] })).toBe(false);
+  });
+
+  test("tandem esclude", () => {
+    expect(run({ tandem: "yes" })).toBe(false);
+  });
+
+  test("motivi e regola concordano", () => {
+    for (const v of [{}, { targetVessels: ["basilar"] }, { tandem: "yes" }, { diabetes: "yes" }, { aspects: 6 }, { perfusionMismatch: "no" }]) {
+      const input = { ...ok, ...v } as unknown as Parameters<typeof tenacity>[0];
+      expect(reasonTenacity(input).eligible).toBe(tenacity(input));
     }
   });
 });

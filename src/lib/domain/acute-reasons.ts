@@ -5,7 +5,20 @@
 // NON ridefinisce la logica clinica: e' un wrapper diagnostico.
 
 import type { AcuteInput, VesselCode } from "./acute-rules";
-import { athenaVesselOk, computeVesselFlags, SAIL_MEVO_VESSELS, VANISH_MAX_HOURS } from "./acute-rules";
+import {
+  anteriorAspectsOk,
+  athenaVesselOk,
+  computeVesselFlags,
+  isSingleOcclusion,
+  ORION_PERFUSION_AFTER_H,
+  ORION_VESSELS,
+  PIVOTAL_VESSELS,
+  SAIL_MEVO_VESSELS,
+  territoryCount,
+  TWIN2WIN2_VESSELS,
+  VANISH_MAX_HOURS,
+  vesselsWithin,
+} from "./acute-rules";
 import { reduce, type ReasonReport } from "./reason-report";
 
 export type { ReasonReport };
@@ -68,14 +81,20 @@ export function reasonVanish(input: AcuteInput): ReasonReport {
 }
 
 export function reasonPivotal(input: AcuteInput): ReasonReport {
-  const v = computeVesselFlags(input.targetVessels);
   return reduce([
     { ok: input.ltsw < 8, label: "LTSW < 8h" },
     { ok: input.age >= 18 && input.age <= 80, label: "age 18-80" },
     { ok: input.premrs <= 1, label: "pre-mRS <= 1" },
     { ok: input.nihss >= 6, label: "NIHSS >= 6" },
     { ok: input.lvo === "yes", label: "LVO confermato" },
-    { ok: v.pivotal, label: "vessel ICA-T, M1 o basilar" },
+    {
+      ok: vesselsWithin(input.targetVessels, PIVOTAL_VESSELS),
+      label: "occlusione di ICA, M1, M2, vertebrale intracranica o basilare",
+    },
+    { ok: isSingleOcclusion(input.targetVessels), label: "occlusione singola (no occlusioni multiple)" },
+    { ok: input.tandem !== "yes", label: "no occlusione tandem" },
+    { ok: input.tortuosity !== "yes", label: "no tortuosita' che impedisce l'accesso" },
+    { ok: anteriorAspectsOk(input, 6), label: "ASPECTS >= 6 (circolo anteriore)" },
   ]);
 }
 
@@ -99,8 +118,9 @@ export function reasonNivo(input: AcuteInput): ReasonReport {
     { ok: input.nihss >= 5, label: "NIHSS >= 5" },
     { ok: input.premrs <= 2, label: "pre-mRS <= 2" },
     { ok: input.lvo === "yes", label: "LVO confermato" },
-    { ok: v.nivo, label: "vessel distale (>M2, A2/>A2, P1/P2/>P2)" },
+    { ok: v.nivo, label: "MeVO: M2 non dominante, M3-M4, A2-A3, P1-P3" },
     { ok: vcount(input) <= 1, label: "singolo vaso" },
+    { ok: input.tandem !== "yes", label: "no occlusione tandem" },
     { ok: isNumber(input.aspects) && input.aspects >= 6, label: "ASPECTS >= 6" },
   ]);
 }
@@ -117,14 +137,18 @@ export function reasonMoste(input: AcuteInput): ReasonReport {
 }
 
 export function reasonTwin2win2(input: AcuteInput): ReasonReport {
-  const v = computeVesselFlags(input.targetVessels);
   return reduce([
-    { ok: input.ltsw < 24, label: "LTSW < 24h" },
-    { ok: input.age > 18, label: "age > 18" },
+    { ok: input.ltsw <= 24, label: "LTSW <= 24h" },
+    { ok: input.age >= 18, label: "age >= 18" },
     { ok: input.premrs <= 2, label: "pre-mRS <= 2" },
     { ok: input.nihss >= 6, label: "NIHSS >= 6" },
     { ok: input.lvo === "yes", label: "LVO confermato" },
-    { ok: v.twin2win2, label: "vessel ICA-T, M1 o basilar" },
+    {
+      ok: vesselsWithin(input.targetVessels, TWIN2WIN2_VESSELS),
+      label: "occlusione di ICA terminale, M1 o basilare",
+    },
+    { ok: isSingleOcclusion(input.targetVessels), label: "un solo territorio (no occlusioni multiple)" },
+    { ok: anteriorAspectsOk(input, 6), label: "ASPECTS >= 6 in TC (circolo anteriore)" },
   ]);
 }
 
@@ -189,9 +213,25 @@ export function reasonOrion(input: AcuteInput): ReasonReport {
   return reduce([
     { ok: input.ltsw >= 4.5 && input.ltsw <= 24, label: "LTSW 4.5-24h" },
     { ok: input.age >= 18 && input.age <= 90, label: "age 18-90" },
-    { ok: input.premrs <= 1, label: "pre-mRS <= 1" },
-    { ok: input.nihss > 5, label: "NIHSS > 5" },
-    { ok: vcount(input) >= 1, label: "almeno un vessel" },
+    {
+      ok: input.premrs <= (input.age > 85 ? 0 : 1),
+      label: "pre-mRS <= 1 (mRS 0 tra 86 e 90 anni)",
+    },
+    { ok: input.nihss >= 5, label: "NIHSS >= 5" },
+    {
+      ok: vesselsWithin(input.targetVessels, ORION_VESSELS),
+      label: "occlusione di ICA intracranica, M1, M2 o rami distali di ACM/ACA/ACP",
+    },
+    { ok: territoryCount(input.targetVessels) === 1, label: "un solo territorio vascolare" },
+    {
+      ok: input.ltsw <= ORION_PERFUSION_AFTER_H || input.perfusionMismatch === "yes",
+      label: "oltre 6 h: perfusione con mismatch",
+    },
+    { ok: input.largeCore !== "yes", label: "no core > 70 mL" },
+    {
+      ok: input.candidate !== "eligible" || input.evtWithin1h === "no",
+      label: "trombectomia non fattibile entro 1 h dall'inizio del farmaco",
+    },
     { ok: input.contraTpa === "no", label: "no controindicazioni TPA" },
   ]);
 }
@@ -237,6 +277,7 @@ export function reasonTenacity(input: AcuteInput): ReasonReport {
   const imagingNoPerfusion = isNumber(a) && ((hasM1 && a >= 7) || (hasM2 && a >= 9));
   const highRiskImaging = input.largeCore === "yes" || (isNumber(a) && a <= 6);
 
+  const infratentorial = hv(input, "basilar") || hv(input, "va");
   return reduce([
     { ok: input.age >= 18, label: "age >= 18" },
     { ok: input.ltsw > 4.5 && input.ltsw <= 72, label: "LTSW > 4.5h e <= 72h" },
@@ -248,10 +289,12 @@ export function reasonTenacity(input: AcuteInput): ReasonReport {
     },
     { ok: !highRiskImaging, label: "no imaging ad alto rischio (core >=70 mL o ASPECTS <=6)" },
     { ok: !hasIca, label: "no occlusione carotide interna" },
+    { ok: !infratentorial, label: "circolazione sopratentoriale (no basilare/vertebrale)" },
+    { ok: input.tandem !== "yes", label: "no occlusione tandem / ICA cervicale" },
     { ok: input.candidate !== "eligible", label: "non trattato con trombectomia" },
     { ok: input.ivtCandidate !== "eligible", label: "no trombolisi come pratica abituale" },
     { ok: input.contraTpa !== "yes", label: "no controindicazioni a tenecteplasi" },
-    { ok: input.diabetes !== "yes", label: "no diabete" },
+    { ok: input.diabetes !== "yes", label: "no ictus pregresso con diabete" },
   ]);
 }
 

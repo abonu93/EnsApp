@@ -12,7 +12,7 @@ protocolo_vigente: "Plan de Investigación Clínica v2.0, 03-03-2026 — NON pre
 ci_vigente: "v2.0, 03-03-2026: due moduli, pre-procedimiento e post-procedimiento (differito)"
 drive_carpeta: "https://drive.google.com/drive/folders/156lvCUouzxrCX9zpk_g_jBk6Zv3j9EWa"
 fuentes: ["[[NiVO — Sinopsis — v2.0]]", "[[NiVO — CI pre-procedimiento — v2.0]]", "[[NiVO — CI post-procedimiento — v2.0]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # NiVO
 
@@ -112,6 +112,11 @@ La gravidanza **non** esclude ([[NiVO — CI pre-procedimiento — v2.0]], p. 3)
 - **Escluso**: "Sujetos participantes en un ensayo clínico en el momento de la inclusión" ([[NiVO — Sinopsis — v2.0]], p. 8). Vale per qualunque studio, con farmaco o dispositivo. La partecipazione successiva ad altri studi durante il follow-up non è riportata nel documento.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `99d4582`)
+> - ✅ 1 M2 non dominante selezionabile (etichetta "M2 non dominante" nella scelta del vaso)
+> - ✅ 2 tandem esclude
+> - ✅ 4 etichette dei vasi distali: "A3" e "P3" invece di "oltre A2/P2"; testo della scheda allineato
+> - restano aperti 3, 5-12
 Confronto con:
 - `src/lib/domain/trials-info.ts:268-284`;
 - `src/lib/domain/acute-rules.ts:111-117` (`computeVesselFlags`, flag `nivo`) e `:185-198` (`nivo()`);

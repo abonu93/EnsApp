@@ -39,6 +39,8 @@ export interface AcuteInput {
   acei?: YesNoEmpty;
   /** VANISH: core <= 70 mL e mismatch > 1,2 con differenza > 10 mL (Tmax > 6 s). */
   vanishCoreMismatch?: YesNoEmpty;
+  /** ORION: trombectomia (puntura) fattibile entro 1 h dall'inizio del farmaco. */
+  evtWithin1h?: YesNoEmpty;
   contraTpa?: YesNoEmpty;
   /** TENACITY - opzione imaging 1: mismatch CTP >= 20% (ratio >= 1.2) E volume > 10 mL. */
   perfusionMismatch?: YesNoEmpty;
@@ -77,6 +79,52 @@ function hasVessel(targetVessels: VesselCode[] | undefined, code: VesselCode): b
 
 function selectedVesselCount(targetVessels: VesselCode[] | undefined): number {
   return toArray(targetVessels).length;
+}
+
+/**
+ * Un'unica occlusione: un solo segmento selezionato. L'unica coppia ammessa e'
+ * ICA-T + M1, che descrive la stessa occlusione a T.
+ */
+export function isSingleOcclusion(targetVessels: VesselCode[] | undefined): boolean {
+  const vessels = [...new Set(toArray(targetVessels))];
+  if (vessels.length === 1) return true;
+  return vessels.length === 2 && vessels.includes("ica-terminal") && vessels.includes("m1");
+}
+
+/** Almeno un vaso selezionato e tutti fra quelli ammessi dal trial. */
+export function vesselsWithin(
+  targetVessels: VesselCode[] | undefined,
+  allowed: readonly VesselCode[]
+): boolean {
+  const vessels = toArray(targetVessels);
+  return vessels.length > 0 && vessels.every((v) => allowed.includes(v));
+}
+
+const POSTERIOR_VESSELS: readonly VesselCode[] = ["va", "basilar", "p1", "p2", "gt-p2"];
+
+/**
+ * ASPECTS minimo per i trial che lo richiedono solo nel circolo anteriore:
+ * se l'occlusione e' solo posteriore l'ASPECTS non si applica (PC-ASPECTS non
+ * e' chiesto dall'app); se non e' stato inserito non esclude.
+ */
+export function anteriorAspectsOk(input: AcuteInput, min: number): boolean {
+  const vessels = toArray(input.targetVessels);
+  const posteriorOnly = vessels.length > 0 && vessels.every((v) => POSTERIOR_VESSELS.includes(v));
+  if (posteriorOnly) return true;
+  return !isValidNumber(input.aspects) || input.aspects >= min;
+}
+
+type Territory = "anterior" | "aca" | "posterior";
+
+function territoryOf(code: VesselCode): Territory {
+  if (code === "a1" || code === "a2" || code === "gt-a2") return "aca";
+  if (POSTERIOR_VESSELS.includes(code)) return "posterior";
+  return "anterior";
+}
+
+/** Numero di territori vascolari (ICA/ACM, ACA, posteriore) coinvolti. */
+export function territoryCount(targetVessels: VesselCode[] | undefined): number {
+  return new Set(toArray(targetVessels).map(territoryOf)).size;
 }
 
 function isValidNumber(value: unknown): value is number {
@@ -123,7 +171,9 @@ export function computeVesselFlags(targetVessels: VesselCode[] | undefined): Ves
       hasVessel(targetVessels, "m1") ||
       hasVessel(targetVessels, "m2-any") ||
       hasVessel(targetVessels, "m2-proxdom"),
+    // NiVO sinossi v2.0 p. 7: M2 non dominante, M3-M4, A2-A3, P1-P3.
     nivo:
+      hasVessel(targetVessels, "m2-any") ||
       hasVessel(targetVessels, "gt-m2") ||
       hasVessel(targetVessels, "a2") ||
       hasVessel(targetVessels, "gt-a2") ||
@@ -159,13 +209,9 @@ export function weTrust(input: AcuteInput): boolean {
 const ATHENA_VESSELS: VesselCode[] = ["ica-terminal", "m1", "m2-proxdom"];
 
 // Occlusione singola (p. 32, p. 36): un'occlusione secondaria vista prima della
-// procedura esclude. Quindi un solo segmento; l'unica coppia ammessa e'
-// ICA-T + M1, che descrive la stessa occlusione a T.
+// procedura esclude.
 export function athenaVesselOk(targetVessels: VesselCode[] | undefined): boolean {
-  const vessels = [...new Set(toArray(targetVessels))];
-  if (!vessels.every((v) => ATHENA_VESSELS.includes(v))) return false;
-  if (vessels.length === 1) return true;
-  return vessels.length === 2 && vessels.includes("ica-terminal") && vessels.includes("m1");
+  return vesselsWithin(targetVessels, ATHENA_VESSELS) && isSingleOcclusion(targetVessels);
 }
 
 export function athena(input: AcuteInput): boolean {
@@ -206,8 +252,15 @@ export function vanish(input: AcuteInput): boolean {
   );
 }
 
+// PIVOTAL: protocollo Rev 03, p. 41-42. Vasi ammessi: ICA (anche T), M1, M2,
+// vertebrale intracranica, basilare. Esclusi: occlusioni intracraniche multiple
+// (1j), tandem (1k), ASPECTS < 6 (1c; PC-ASPECTS non chiesto), tortuosita' che
+// impedisce l'accesso (1h).
+export const PIVOTAL_VESSELS: readonly VesselCode[] = [
+  "ica-intracranial", "ica-terminal", "m1", "m2-proxdom", "m2-any", "va", "basilar",
+];
+
 export function pivotal(input: AcuteInput): boolean {
-  const vessels = computeVesselFlags(input.targetVessels);
   return (
     input.ltsw < 8 &&
     input.age >= 18 &&
@@ -215,7 +268,11 @@ export function pivotal(input: AcuteInput): boolean {
     input.premrs <= 1 &&
     input.nihss >= 6 &&
     isLvo(input.lvo) &&
-    vessels.pivotal
+    vesselsWithin(input.targetVessels, PIVOTAL_VESSELS) &&
+    isSingleOcclusion(input.targetVessels) &&
+    input.tandem !== "yes" &&
+    input.tortuosity !== "yes" &&
+    anteriorAspectsOk(input, 6)
   );
 }
 
@@ -241,6 +298,8 @@ export function nivo(input: AcuteInput): boolean {
     isLvo(input.lvo) &&
     vessels.nivo &&
     selectedVesselCount(input.targetVessels) <= 1 &&
+    // Sinossi v2.0 esclusione 10: tandem.
+    input.tandem !== "yes" &&
     isValidNumber(input.aspects) &&
     input.aspects >= 6
   );
@@ -257,15 +316,21 @@ export function moste(input: AcuteInput): boolean {
   );
 }
 
+// TWIN2WIN-2: protocollo V2, p. 5-6. ICA terminale, M1 o basilare; escluse le
+// occlusioni in piu' territori e ASPECTS < 6 in TC (< 5 in DWI: l'app ha un
+// solo campo ASPECTS e usa la soglia della TC). Eta' >= 18, entro 24 h.
+export const TWIN2WIN2_VESSELS: readonly VesselCode[] = ["ica-terminal", "m1", "basilar"];
+
 export function twin2win2(input: AcuteInput): boolean {
-  const vessels = computeVesselFlags(input.targetVessels);
   return (
-    input.ltsw < 24 &&
-    input.age > 18 &&
+    input.ltsw <= 24 &&
+    input.age >= 18 &&
     input.premrs <= 2 &&
     input.nihss >= 6 &&
     isLvo(input.lvo) &&
-    vessels.twin2win2
+    vesselsWithin(input.targetVessels, TWIN2WIN2_VESSELS) &&
+    isSingleOcclusion(input.targetVessels) &&
+    anteriorAspectsOk(input, 6)
   );
 }
 
@@ -336,15 +401,36 @@ export function sovateltide(input: AcuteInput): boolean {
   );
 }
 
+// ORION: protocollo v2.2 (Enmienda 3), p. 46-48.
+// - occlusione di ICA intracranica, M1, M2 o rami distali di ACM, ACA o ACP
+//   (incl. 3), in un solo territorio (excl. 1b);
+// - NIHSS >= 5; mRS pre < 2, ma mRS 0 tra 86 e 90 anni (incl. 1 e 7);
+// - oltre 6 h perfusione obbligatoria con penombra (incl. 4-5); core > 70 mL
+//   escluso sempre (excl. 1a);
+// - escluso chi puo' avere la trombectomia entro 1 h dall'inizio del farmaco
+//   (excl. 3): vale solo per i candidati a EVT.
+export const ORION_VESSELS: readonly VesselCode[] = [
+  "ica-intracranial", "ica-terminal", "m1", "m2-proxdom", "m2-any", "gt-m2",
+  "a2", "gt-a2", "p2", "gt-p2",
+];
+export const ORION_PERFUSION_AFTER_H = 6;
+
 export function orion(input: AcuteInput): boolean {
+  const perfusionOk =
+    input.ltsw <= ORION_PERFUSION_AFTER_H || input.perfusionMismatch === "yes";
+  const evtOk = input.candidate !== "eligible" || input.evtWithin1h === "no";
   return (
     input.ltsw >= 4.5 &&
     input.ltsw <= 24 &&
     input.age >= 18 &&
     input.age <= 90 &&
-    input.premrs <= 1 &&
-    input.nihss > 5 &&
-    selectedVesselCount(input.targetVessels) >= 1 &&
+    input.premrs <= (input.age > 85 ? 0 : 1) &&
+    input.nihss >= 5 &&
+    vesselsWithin(input.targetVessels, ORION_VESSELS) &&
+    territoryCount(input.targetVessels) === 1 &&
+    perfusionOk &&
+    input.largeCore !== "yes" &&
+    evtOk &&
     input.contraTpa === "no"
   );
 }
@@ -431,6 +517,13 @@ export function tenacity(input: AcuteInput): boolean {
   // Alto rischio emorragico: core esteso o ASPECTS 0-6 (se ASPECTS e' noto).
   const highRiskImaging = input.largeCore === "yes" || (isValidNumber(aspects) && aspects <= 6);
 
+  // Protocollo V1.0: circolazione sopratentoriale (ACA, ACM, ACP; incl. 3):
+  // basilare e vertebrale escludono. Occlusione della ICA di qualsiasi sede
+  // (excl. 2): anche il tandem/ICA cervicale esclude. `diabetes` significa
+  // "ictus pregresso E diabete" (excl. 21), non il solo diabete.
+  const infratentorial =
+    hasVessel(input.targetVessels, "basilar") || hasVessel(input.targetVessels, "va");
+
   return (
     input.age >= 18 &&
     input.ltsw > 4.5 &&
@@ -441,6 +534,8 @@ export function tenacity(input: AcuteInput): boolean {
     (imagingPerfusion || imagingNoPerfusion) &&
     !highRiskImaging &&
     !hasIca &&
+    !infratentorial &&
+    input.tandem !== "yes" &&
     input.candidate !== "eligible" &&
     input.ivtCandidate !== "eligible" &&
     input.contraTpa !== "yes" &&

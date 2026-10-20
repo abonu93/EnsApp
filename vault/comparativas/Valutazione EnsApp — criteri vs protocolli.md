@@ -1,7 +1,7 @@
 ---
 tipo: comparativa
 fuentes: ["[[Estado de los estudios]]", "[[Esquema ensayos — septiembre 2026]]", "[[ATHENA]]", "[[DO-IT]]", "[[DONE SYMPLE]]", "[[FASTEST]]", "[[NiVO]]", "[[ORION]]", "[[PIVOTAL]]", "[[REMEDY]]", "[[SOVATELTIDE]]", "[[TENACITY]]", "[[TICH-3]]", "[[TWIN2WIN-2]]", "[[VANISH]]", "[[WETRUST]]", "[[ARTEMIS]]", "[[HYBERNIA]]", "[[LIBREXIA]]", "[[MOSTE]]", "[[PROMISE20 RELOADED]]", "[[PROMISE20]]", "[[SHIONOGI]]", "[[MARRS]]", "[[DOAC-CVT]]", "[[SAIL-MeVO]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # Valutazione di EnsApp: criteri dell'app e protocolli
 
@@ -25,6 +25,7 @@ Stato nell'app al 2026-10-19 ([[Estado de los estudios]]):
 | `7ec19c0` | Finestre temporali (T1): orologio dell'app ogni 30 s, LTSW ricalcolato per regole, motivi e schede | Un trial esce dai risultati quando la finestra scade a paziente aperto. Resta a carico del medico che il limite di molti protocolli vale alla puntura, randomizzazione o dose |
 | `fbba0ca` | Merge di `main`: [[SAIL-MeVO]] è ora nell'app (PR #12) | La scheda SAIL-MeVO usa anche lei il tempo aggiornato |
 | secondo blocco | Scheda Imaging comune (T3), [[VANISH]] al protocollo v1.2, [[REMEDY]] (ASPECTS, LVO, ACE-inibitori) | Vaso, tandem e ASPECTS chiesti a tutti gli ischemici; VANISH 9 h, tandem, core/mismatch, ICA intracranica |
+| `99d4582` (terzo blocco) | [[PIVOTAL]], [[TWIN2WIN-2]], [[NiVO]], [[ORION]], [[TENACITY]]; etichette dei vasi | Vasi, occlusione singola/territorio, tandem, ASPECTS, tortuosità; ORION NIHSS 5, mRS 86-90, perfusione oltre 6 h, EVT entro 1 h; TENACITY sopratentoriale e "ictus pregresso + diabete" |
 
 Le sezioni seguenti fotografano lo stato **prima** di queste correzioni; il dettaglio di cosa resta aperto è nel riquadro "Correzioni applicate" di ogni scheda.
 

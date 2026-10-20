@@ -42,6 +42,8 @@
   let diabetes = $state<YN>(($postData.diabetes as YN) ?? "");
   // VANISH: core/mismatch alla perfusione (chiesto nella scheda EVT entro 9 h).
   let vanishCoreMismatch = $state<YN>(($postData.vanishCoreMismatch as YN) ?? "");
+  // ORION: trombectomia fattibile entro 1 h dall'inizio del farmaco (candidati EVT, 4,5-24 h).
+  let evtWithin1h = $state<YN>(($postData.evtWithin1h as YN) ?? "");
   // contraTpa passa da costante a campo: mostrato solo nella card TENACITY,
   // resta "no" (default invariato per ORION) se la card non e' visibile.
   let contraTpaAnswer = $state<YN>(($postData.contraTpa as YN) || "no");
@@ -89,6 +91,7 @@
       largeCore: largeCore || undefined,
       diabetes: diabetes || undefined,
       vanishCoreMismatch: (showVanishQuestion && vanishCoreMismatch) || undefined,
+      evtWithin1h: (showOrionEvtQuestion && evtWithin1h) || undefined,
       aiCoreLt10: aiCoreLt10 || undefined,
       tmaxGt30: tmaxGt30 || undefined,
       pregnant: pregnant || undefined,
@@ -124,6 +127,12 @@
   // scheda per tutti gli ischemici, indipendente dalla candidatura a EVT.
   const showImaging = $derived(isIschemic && candidate !== "");
   const showVanishQuestion = $derived(showEvt && ($ltswHours ?? 999) <= VANISH_MAX_HOURS);
+  const showOrionEvtQuestion = $derived(
+    showEvt && ($ltswHours ?? -1) >= 4.5 && ($ltswHours ?? 999) <= 24
+  );
+  // Perfusione (mismatch, core esteso): oltre 4,5 h la usano TENACITY e ORION
+  // (obbligatoria per ORION oltre 6 h), quindi sta nella scheda Imaging.
+  const showPerfusion = $derived(showImaging && ($ltswHours ?? -1) > 4.5);
   const showNonEvt = $derived(isIschemic && candidate === "not eligible");
   // Stesso limite della regola fastest() (ltsw <= 2): a 2,0 h la scheda deve comparire.
   const showFastest = $derived(isHem && ($ltswHours ?? 999) <= 2 && ($preData.premrs ?? 99) <= 2);
@@ -218,6 +227,17 @@
               <span class="lbl">{$t.postImaging.aspectsLabel}</span>
               <AspectsCells bind:value={aspects} />
             </div>
+            {#if showPerfusion}
+              <div class="divider"></div>
+              <div class="field">
+                <span class="lbl">{$t.postImaging.perfusionMismatchLabel}</span>
+                <Segmented options={ynOpts} bind:value={perfusionMismatch} cols={2} />
+              </div>
+              <div class="field">
+                <span class="lbl">{$t.postImaging.largeCoreLabel}</span>
+                <Segmented options={ynOpts} bind:value={largeCore} cols={2} />
+              </div>
+            {/if}
           </div>
         {/snippet}
       </Card>
@@ -228,6 +248,13 @@
         {#snippet children()}
           <div class="stack">
             <ToggleRow title={$t.postImaging.tortuosityLabel.replace('?', '')} sub={$t.postImaging.tortuosityHint} bind:checked={tortuosity} />
+            {#if showOrionEvtQuestion}
+              <div class="divider"></div>
+              <div class="field">
+                <span class="lbl">{$t.postImaging.orionEvtWithin1hLabel}</span>
+                <Segmented options={ynOpts} bind:value={evtWithin1h} cols={2} />
+              </div>
+            {/if}
             {#if showVanishQuestion}
               <div class="divider"></div>
               <div class="field">
@@ -250,15 +277,6 @@
       <Card title={$t.postImaging.tenacityTitle} subtitle={$t.postImaging.tenacityHint}>
         {#snippet children()}
           <div class="stack">
-            <div class="field">
-              <span class="lbl">{$t.postImaging.perfusionMismatchLabel}</span>
-              <Segmented options={ynOpts} bind:value={perfusionMismatch} cols={2} />
-            </div>
-            <div class="divider"></div>
-            <div class="field">
-              <span class="lbl">{$t.postImaging.largeCoreLabel}</span>
-              <Segmented options={ynOpts} bind:value={largeCore} cols={2} />
-            </div>
             <div class="field">
               <span class="lbl">{$t.postImaging.contraTpaLabel}</span>
               <Segmented options={ynOpts} bind:value={contraTpaAnswer} cols={2} />

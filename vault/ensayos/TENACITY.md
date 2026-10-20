@@ -12,7 +12,7 @@ protocolo_vigente: "V1.0, 25-07-2025 (protocollo originale)"
 ci_vigente: "non presente in Drive"
 drive_carpeta: "https://drive.google.com/drive/folders/1NufGLzueV9wNHZgtS9xMmbDeW2gpEiqb"
 fuentes: ["[[TENACITY — Protocolo — V1.0]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-20
 ---
 # TENACITY
 
@@ -162,6 +162,12 @@ Le visite remote si possono sostituire con visite in presenza se lo chiede il pa
 - Compatibilità con studi specifici: non riportata nel documento.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni applicate all'app il 2026-10-19 (commit `99d4582`)
+> - ✅ 1 la domanda ora è "Ictus pregresso e diabete?": il diabete da solo non esclude
+> - ✅ 2 basilare e vertebrale escludono (solo circolazione sopratentoriale)
+> - ✅ 4 tandem esclude (la ICA cervicale isolata non è un vaso selezionabile: resta [NC])
+> - la perfusione e il core esteso sono nella scheda Imaging comune; la scheda TENACITY chiede solo controindicazioni e diabete
+> - restano aperti 3, 5-10
 Confronto con `src/lib/domain/trials-info.ts:317-335`, `src/lib/domain/acute-rules.ts:345-400`, `src/lib/domain/acute-reasons.ts:221-246` e, per i campi dell'interfaccia, `src/routes/PostImaging.svelte` e `src/lib/i18n/it.ts`. Verificato il 2026-10-19 sul commit `6617a91`.
 
 > [!success] Coincide
