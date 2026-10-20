@@ -137,6 +137,72 @@ describe("acute-rules - TENACITY (TNK > 4.5h - 72h)", () => {
   });
 });
 
+describe("acute-rules - ATHENA (protocollo v2.3)", () => {
+  const ok = {
+    age: 60, nihss: 12, premrs: 1, ltsw: 5, lvo: "yes", tandem: "no",
+    tortuosity: "no", targetVessels: ["m1"], aspects: 8,
+  } as const;
+  const run = (patch: Record<string, unknown>) => athena({ ...ok, ...patch } as unknown as Parameters<typeof athena>[0]);
+
+  test("profilo tipico eleggibile", () => {
+    expect(run({})).toBe(true);
+  });
+
+  test("finestra 16 h (non piu' 24 h)", () => {
+    expect(run({ ltsw: 16 })).toBe(true);
+    expect(run({ ltsw: 17 })).toBe(false);
+  });
+
+  test("NIHSS 6-25 (non piu' >= 8)", () => {
+    expect(run({ nihss: 6 })).toBe(true);
+    expect(run({ nihss: 5 })).toBe(false);
+    expect(run({ nihss: 25 })).toBe(true);
+    expect(run({ nihss: 26 })).toBe(false);
+  });
+
+  test("vaso: solo ICA terminale, M1, M2 prossimale/dominante", () => {
+    expect(run({ targetVessels: ["ica-terminal"] })).toBe(true);
+    expect(run({ targetVessels: ["m2-proxdom"] })).toBe(true);
+    expect(run({ targetVessels: ["ica-terminal", "m1"] })).toBe(true); // occlusione a T
+    expect(run({ targetVessels: ["m1", "m2-proxdom"] })).toBe(false); // possibile occlusione secondaria
+    expect(run({ targetVessels: ["ica-terminal", "m1", "m2-proxdom"] })).toBe(false);
+    expect(run({ targetVessels: ["basilar"] })).toBe(false);
+    expect(run({ targetVessels: ["m2-any"] })).toBe(false);
+    expect(run({ targetVessels: ["ica-intracranial"] })).toBe(false);
+    expect(run({ targetVessels: ["m1", "basilar"] })).toBe(false);
+    expect(run({ targetVessels: [] })).toBe(false);
+  });
+
+  test("ASPECTS 6-10 se indicato", () => {
+    expect(run({ aspects: 6 })).toBe(true);
+    expect(run({ aspects: 5 })).toBe(false);
+    expect(run({ aspects: undefined })).toBe(true);
+  });
+
+  test("il tandem non esclude allo screening (valutato in sala)", () => {
+    expect(run({ tandem: "yes" })).toBe(true);
+  });
+});
+
+describe("acute-reasons - ATHENA concorda con la regola", () => {
+  test("report e regola danno lo stesso esito", async () => {
+    const { reasonAthena } = await import("$lib/domain/acute-reasons");
+    const base = {
+      age: 60, nihss: 12, premrs: 1, ltsw: 5, lvo: "yes", tandem: "no",
+      tortuosity: "no", targetVessels: ["m1"], aspects: 8,
+    };
+    const variants = [
+      {}, { ltsw: 17 }, { nihss: 5 }, { nihss: 30 }, { targetVessels: ["basilar"] },
+      { targetVessels: ["m1", "p1"] }, { aspects: 4 }, { tandem: "yes" }, { tortuosity: "yes" },
+      { tortuosity: "" }, { lvo: "no" }, { age: 90 },
+    ];
+    for (const v of variants) {
+      const input = { ...base, ...v } as Parameters<typeof athena>[0];
+      expect(reasonAthena(input).eligible).toBe(athena(input));
+    }
+  });
+});
+
 describe("acute-rules - SAIL-MeVO (EVT in MeVO)", () => {
   const base = {
     age: 65,

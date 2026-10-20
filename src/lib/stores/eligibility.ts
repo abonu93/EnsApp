@@ -2,7 +2,7 @@
 // cambiano. NON contiene logica clinica - delega a src/lib/domain/*-rules.ts.
 
 import { derived } from "svelte/store";
-import { preData, postData, hemData } from "./patient";
+import { preData, postData, hemData, ltswHours } from "./patient";
 import * as acute from "$lib/domain/acute-rules";
 import * as hem from "$lib/domain/hemorrhagic-rules";
 import type { AcuteInput, VesselCode } from "$lib/domain/acute-rules";
@@ -35,14 +35,21 @@ export interface HemorrhagicEligibility {
   tich3: boolean;
 }
 
-function mergedAcute(pre: Record<string, unknown>, post: Record<string, unknown>): AcuteInput {
-  return { ...pre, ...post } as unknown as AcuteInput;
+// `ltsw` viene sempre da `ltswHours`, che avanza con l'orologio dell'app:
+// cosi' una finestra che scade mentre il paziente e' aperto fa sparire il
+// trial dai risultati (prima restava il valore salvato in pre-imaging).
+function mergedAcute(
+  pre: Record<string, unknown>,
+  post: Record<string, unknown>,
+  ltsw: number | undefined
+): AcuteInput {
+  return { ...pre, ...post, ltsw } as unknown as AcuteInput;
 }
 
 export const acuteEligibility = derived(
-  [preData, postData],
-  ([$pre, $post]): AcuteEligibility => {
-    const input = mergedAcute($pre, $post);
+  [preData, postData, ltswHours],
+  ([$pre, $post, $h]): AcuteEligibility => {
+    const input = mergedAcute($pre, $post, $h);
     return {
       weTrust: safeBoolean(() => acute.weTrust(input)),
       athena: safeBoolean(() => acute.athena(input)),
@@ -67,13 +74,16 @@ export const acuteEligibility = derived(
   }
 );
 
-export const hemEligibility = derived([hemData, preData], ([$hem, $pre]): HemorrhagicEligibility => {
-  const input = { ...$pre, ...$hem } as HemorrhagicInput;
+export const hemEligibility = derived(
+  [hemData, preData, ltswHours],
+  ([$hem, $pre, $h]): HemorrhagicEligibility => {
+  const input = { ...$pre, ...$hem, ltsw: $h } as HemorrhagicInput;
   return {
     fastest: safeFastest(() => hem.fastest(input)),
     tich3: safeBoolean(() => hem.tich3(input)),
   };
-});
+  }
+);
 
 export const vesselFlags = derived(postData, ($post) =>
   acute.computeVesselFlags(($post.targetVessels ?? []) as VesselCode[])

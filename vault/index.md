@@ -1,0 +1,108 @@
+---
+tipo: indice
+actualizado: 2026-10-19
+---
+# Indice — Ensayos
+
+Punto d'ingresso del vault. Regole in [[CLAUDE]]. Cronologia in [[log]].
+Documenti: Drive "ENSAYOS — Copia ordenada (EnsApp)", congelata al 22-09-2026.
+**Stato aperto/chiuso:** fa fede il foglio [[Esquema ensayos — septiembre 2026]] → confronto in [[Estado de los estudios]].
+
+Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
+
+## 1 — Studi presenti in EnsApp
+
+| Studio | Stato app | Stato foglio | Lettura | Scheda |
+|---|---|---|---|---|
+| ARTEMIS | closed (dal 2026-10-19) | reclut. cerrado | 🟨 (pp. 1-81/84) | [[ARTEMIS]] |
+| ATHENA | active (dal 2026-10-19) | aperto | ✅ | [[ATHENA]] |
+| DO-IT | activo | aperto | ✅ | [[DO-IT]] |
+| DONE SYMPLE | activo | aperto | 🟨 (pp. 1-80/98) | [[DONE SYMPLE]] |
+| FASTEST | activo | aperto | ✅ | [[FASTEST]] |
+| HYBERNIA | pausado | en pausa | ✅ | [[HYBERNIA]] |
+| LIBREXIA | closed (dal 2026-10-19) | cerrado | ✅ | [[LIBREXIA]] |
+| MARRS (MARSS nell'app) | cerrado | — | ✅ | [[MARRS]] |
+| MOSTE | closed (dal 2026-10-19) | reclut. cerrado | ✅ | [[MOSTE]] |
+| NiVO | activo | assente ⚠ | ✅ (solo sinossi) | [[NiVO]] |
+| ORION | activo (pausa reclutamiento) | en pausa | ✅ | [[ORION]] |
+| PIVOTAL | active (dal 2026-10-19) | aperto | ✅ | [[PIVOTAL]] |
+| PROMISE20 | cerrado | — | ✅ | [[PROMISE20]] |
+| PROMISE20 RELOADED | paused (dal 2026-10-19) | en pausa | ✅ | [[PROMISE20 RELOADED]] |
+| REMEDY | activo | aperto (REMEDY-2) | ✅ | [[REMEDY]] |
+| SHIONOGI | cerrado | — | ✅ | [[SHIONOGI]] |
+| SOVATELTIDE | activo | aperto | ✅ | [[SOVATELTIDE]] |
+| TENACITY | activo | assente ⚠ | ✅ | [[TENACITY]] |
+| TICH-3 | activo | aperto | ✅ | [[TICH-3]] |
+| TWIN2WIN-2 | activo | aperto | ✅ | [[TWIN2WIN-2]] |
+| VANISH | activo | aperto | ✅ | [[VANISH]] |
+| WETRUST | activo | aperto | 🟨 (pp. 1-80/130) | [[WETRUST]] |
+| NORA HOME | activo | assente ⚠ | — nessun documento in Drive | |
+| SAFER-DOAC | activo | assente ⚠ | — nessun documento in Drive (NON è DOAC-CVT, vedi [[DOAC-CVT]]) |  |
+
+## 2 — Studi in Drive non presenti nell'app
+
+| Studio | Dove (Drive originale) | Stato foglio | Lettura | Scheda |
+|---|---|---|---|---|
+| AZURE (AZD0780) | ABIERTOS / OTROS | assente | — cifrati, non letti | [[AZURE]] |
+| CATIS-ICAS | PENDIENTES ABRIR | assente | ✅ (solo sinossi) | [[CATIS-ICAS]] |
+| CEREFUZE | PENDIENTES ABRIR | assente | ✅ (pp. 2-14/14) | [[CEREFUZE]] |
+| DOAC-CVT | INACTIVOS | assente | ✅ | [[DOAC-CVT]] |
+| EAST-STROKE | ABIERTOS / OTROS | assente | ✅ | [[EAST-STROKE]] |
+| ELAPSE | ABIERTOS / OTROS | assente | ✅ | [[ELAPSE]] |
+| ORBIT-XI | PENDIENTES ABRIR | assente | — nessun documento | [[ORBIT-XI]] |
+| SAIL-MeVO | PENDIENTES ABRIR | aperto — **in app dal 2026-10-19 (PR #12)** | ✅ | [[SAIL-MeVO]] |
+| TargED (TG1-CL-201) | PENDIENTES ABRIR | assente | ✅ | [[TargED]] |
+
+## 3 — Studi nel foglio senza documenti nella copia né in app
+
+> [!note] Non ancora aperti (indicazione del team, 2026-10-19)
+> Compaiono nel foglio ma **non sono ancora aperti**: non aggiungerli all'app finché non aprono.
+
+| Studio | Intervento (dal foglio) | Stato foglio |
+|---|---|---|
+| ACTISAVE | Acticor 6 h vs placebo | non ancora aperto |
+| TNKCAT | alteplasa vs tenecteplasa | non ancora aperto |
+| ICARUS | stenting intracranico precoce dopo fallimento EVT | non ancora aperto |
+| ABBVIE | elezanumab vs placebo | non ancora aperto |
+
+## Concetti
+- [[ABCD2]]
+- [[Alteplasa]]
+- [[ASPECTS]]
+- [[Aspiración directa (ADAPT)]]
+- [[Ateroesclerosis intracraneal (ICAD)]]
+- [[Catéter guía con balón]]
+- [[Clasificación de Heidelberg]]
+- [[Cone-beam CT]]
+- [[Consentimiento diferido]]
+- [[Direct to angio]]
+- [[DOAC]]
+- [[Drip and ship]]
+- [[Fibrilación auricular]]
+- [[First pass effect]]
+- [[GCS]]
+- [[Hemorragia intracraneal sintomática]]
+- [[Ictus del despertar]]
+- [[Ictus minor con LVO]]
+- [[Ictus no discapacitante]]
+- [[MeVO]]
+- [[Mismatch de perfusión]]
+- [[mRS]]
+- [[Neuroprotección]]
+- [[NIHSS]]
+- [[Oclusión en tándem]]
+- [[Potenciales evocados somatosensoriales]]
+- [[Spot sign]]
+- [[Stent retriever]]
+- [[Tenecteplasa]]
+- [[TICI]]
+- [[TOAST]]
+- [[Trombólisis intraarterial]]
+- [[Ventana extendida]]
+- [[Volumen de hematoma]]
+- [[Volumen del core]]
+- [[Ácido tranexámico]]
+
+## Comparative
+- [[Valutazione EnsApp — criteri vs protocolli]] — **valutazione completa degli errori dell'app** (FN/FP/NC/TXT, problemi trasversali, priorità)
+- [[Estado de los estudios]] — foglio vs app vs Drive

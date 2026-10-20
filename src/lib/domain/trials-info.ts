@@ -42,7 +42,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: null,
   },
   MOSTE: {
-    status: "active",
+    // Reclutamento chiuso (foglio "Esquema ensayos", set. 2026): info consultabili,
+    // ma il trial non e' selezionabile per l'arruolamento.
+    status: "closed",
     category: "EVT strategy",
     key: { window: "< 23 h", age: "No upper limit", mrs: "0-1", nihss: "0-5", aspects: "6-10" },
     consent: "Written & oral/phone consent.",
@@ -55,20 +57,24 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: ["Baseline (in-person)", "24 h (in-person)", "Day 5 / discharge (in-person)", "Day 90 (phone)"],
   },
   ATHENA: {
-    status: "paused",
+    // Testi dal protocollo v2.3 (25-11-2025) e CI v4.0: vedi vault/ensayos/ATHENA.md.
+    status: "active",
     category: "EVT device",
-    key: { window: "< 24 h", age: "22-85 y", mrs: "0-2", nihss: ">= 8", aspects: "6-10" },
-    consent: "Written & oral/phone consent.",
-    imaging: "TICA, M1 or M2 occlusion.",
-    thrombolytic: "Optional.",
+    key: { window: "<= 16 h (to arterial puncture)", age: "22-85 y", mrs: "0-2", nihss: "6-25", aspects: "6-10 (or core <= 50 mL on CTP/MRP)" },
+    consent: "Written (patient, representative or witness). Oral/remote only if approved by the Ethics Committee.",
+    imaging: "Single occlusion of terminal ICA, M1, or dominant/proximal M2.",
+    thrombolytic: "Optional, per local practice.",
     thrombectomy: "Yes.",
     preEvtLabs: "No.",
-    intervention: "Stent retriever + ANA vs Stent retriever + DAC.",
-    notes: ["Thrombolysis per local practice (3 h limit removed)."],
-    visits: ["Baseline (in-person)", "24 h (in-person)", "Day 5 / discharge (in-person)", "Day 90 (in-person)"],
+    intervention: "Stent retriever + ANA vs stent retriever +/- intermediate catheter (DAC). Solitaire, Trevo or pRESET only.",
+    notes: [
+      "Assessed in the angio suite: tandem lesion requiring treatment or preventing access to thrombus excludes; tortuosity preventing access excludes.",
+      "Not allowed: balloon guide catheter, double stent, radial or carotid access; another thrombectomy device already used.",
+    ],
+    visits: ["Baseline (in-person)", "24 h (in-person)", "Day 5 / discharge (in-person)", "Day 90 (in-person, phone if not possible)"],
   },
   PIVOTAL: {
-    status: "paused",
+    status: "active",
     category: "EVT aspiration system",
     key: { window: "< 8 h", age: "18-80 y", mrs: "0-1", nihss: ">= 6", aspects: "6-10" },
     consent: "Written & oral/phone consent.",
@@ -81,7 +87,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: ["Baseline (in-person)", "24 h (in-person)", "Day 5 / discharge (in-person)", "Day 90 (phone)"],
   },
   PROMISE: {
-    status: "active",
+    // In pausa (foglio "Esquema ensayos", set. 2026): come i chiusi,
+    // non viene proposto per l'arruolamento finche' non riapre.
+    status: "paused",
     category: "EVT device",
     key: { window: "< 24 h", age: ">= 18 y", mrs: "0-2", nihss: ">= 1", aspects: "-" },
     consent: "Written.",
@@ -107,7 +115,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: ["Baseline (in-person)", "24 h (in-person)", "48 h (in-person)", "Day 3-10 / discharge (in-person)", "Day 30 (phone)", "Day 90 (phone)"],
   },
   ARTEMIS: {
-    status: "active",
+    // Reclutamento chiuso (foglio "Esquema ensayos", set. 2026): info consultabili,
+    // ma il trial non e' selezionabile per l'arruolamento.
+    status: "closed",
     category: "EVT device",
     key: { window: "< 24 h", age: "18-85 y", mrs: "0-2", nihss: "6-25", aspects: "6-10" },
     consent: "Written.",
@@ -190,7 +200,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     ],
   },
   Librexia: {
-    status: "post-acute",
+    // Chiuso (foglio "Esquema ensayos", set. 2026): info consultabili,
+    // ma il trial non e' selezionabile per l'arruolamento.
+    status: "closed",
     category: "Antithrombotic (post-acute)",
     key: { window: "<= 48 h", age: ">= 40 y", mrs: "<= 2", nihss: "<= 7", aspects: "-" },
     consent: "Written.",
@@ -232,30 +244,41 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: null,
   },
   FASTEST: {
+    // Testi dal protocollo V10.5 (Parte 2) e CI v1.5: vedi vault/ensayos/FASTEST.md.
     status: "active",
     category: "ICH hemostatic",
-    key: { window: "<= 2 h", age: "18-80 y", mrs: "0-2", nihss: "-", aspects: "-" },
-    consent: "—",
-    imaging: "— (ICH pathway).",
+    key: { window: "<= 2 h (91-120 min only if spot sign +)", age: "18-80 y", mrs: "0-2", nihss: "GCS >= 8", aspects: "-" },
+    consent: "Written; emergency inclusion without prior consent allowed in Spain.",
+    imaging: "Baseline CT + CTA (mandatory). Spontaneous ICH 2-59 mL, no brainstem ICH, no extensive IVH. CT at 24 h.",
     thrombolytic: "—",
     thrombectomy: "—",
-    preEvtLabs: "—",
-    intervention: "—",
-    notes: [],
-    visits: null,
+    preEvtLabs: "ECG and troponin at baseline; troponin at 24 h.",
+    intervention: "rFVIIa 80 mcg/kg (max 10 mg) vs placebo, IV bolus over 2 min.",
+    notes: [
+      "Part 2: after 90 min from onset, positive spot sign on baseline CTA required.",
+      "Exclude: secondary ICH (trauma, AVM, aneurysm, tumour, coagulopathy); VKA or DOAC in last 7 days; LMWH in last 24 h; UFH with abnormal PTT.",
+      "Exclude: ST elevation consistent with acute MI; thrombo-embolic event in last 90 days; endarterectomy/angioplasty/stent in last 90 days; pregnancy, < 12 weeks post-partum or lactating.",
+      "Exclude: tranexamic acid or other procoagulants in last 24 h; another investigational study in last 30 days (incl. TICH-3).",
+    ],
+    visits: ["1 h", "24 h", "Day 4 / discharge", "Day 30 (remote)", "Day 90 (in-person)", "Day 180 (remote)"],
   },
   TICH3: {
+    // Testi dal protocollo Final v3.1 (25-04-2024): vedi vault/ensayos/TICH-3.md.
     status: "active",
     category: "ICH hemostatic",
-    key: { window: "< 4.5 h", age: "No upper limit", mrs: "-", nihss: "-", aspects: "-" },
-    consent: "—",
-    imaging: "— (ICH pathway).",
+    key: { window: "< 4.5 h (unknown onset: from discovery)", age: ">= 18 y, no upper limit", mrs: "-", nihss: "GCS >= 5", aspects: "-" },
+    consent: "Emergency oral consent from patient or relative (phone allowed), then written within ~24 h; independent physician if nobody available.",
+    imaging: "Routine CT or MRI. Volume < 60 mL (ABC/2) or max diameter <= 5 cm. IVH is not an exclusion.",
     thrombolytic: "—",
     thrombectomy: "—",
-    preEvtLabs: "—",
-    intervention: "—",
-    notes: [],
-    visits: null,
+    preEvtLabs: "None required.",
+    intervention: "Tranexamic acid 2 g IV (1 g bolus over 10 min + 1 g over 8 h) vs placebo.",
+    notes: [
+      "DOACs allowed. Exclude therapeutic anticoagulation with warfarin/VKA or LMWH.",
+      "Exclude: known indication or contraindication for TXA; secondary ICH (trauma, AVM, aneurysm, tumour); palliative care already decided.",
+      "FASTEST excludes patients who received TXA in the last 24 h or another study in the last 30 days: the two trials are alternatives.",
+    ],
+    visits: ["Day 1", "Day 7 / discharge", "Day 180 (central postal or phone follow-up)"],
   },
   NiVO: {
     status: "active",
@@ -369,8 +392,9 @@ export const randomizationLinks: Record<string, string> = {
   ATHENA: "https://www.randomize.net/Randomize/Set.aspx?id=ba510dbb-ab7d-42ee-ae95-d8a46394d6ec&token=0d0bff39-455b-4f60-a95a-154476064f2e",
   VANISH: "https://app.studyrandomizer.com/dashboard/",
   MOSTE: "https://ecrf.chru-lille.fr/EnnovClinical/login?lang=EN",
-  "TWIN-2-WIN 2": "https://www.studyrandomizer.com/",
-  "DONE SYMPLE": "https://www.studyrandomizer.com/",
+  // Chiavi = chiavi di TRIALS_INFO (TrialDetail cerca per chiave di route).
+  Twin2Win2: "https://www.studyrandomizer.com/",
+  DoneSymple: "https://www.studyrandomizer.com/",
 };
 
 export type TrialFilter = "all" | "ischemic" | "hemorrhagic" | "post-acute";
@@ -403,22 +427,37 @@ export function filterTrials(
 }
 
 /**
- * Trova le info di un trial dato un nome che puo' essere la chiave di
- * TRIALS_INFO oppure il display name usato altrove (case-insensitive).
- * Es. "SHIONOGI" -> Shionogi.
+ * Forma canonica di un nome di trial per i confronti: minuscolo, senza
+ * spazi, trattini o altri separatori. Es. "TWIN-2-WIN 2" e "Twin2Win2"
+ * diventano entrambi "twin2win2".
  */
+export function canonicalTrialName(name: string): string {
+  return (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/**
+ * Trova la chiave di TRIALS_INFO dato un nome che puo' essere la chiave
+ * stessa oppure il display name usato altrove (maiuscole, spazi e trattini
+ * ignorati). Es. "SHIONOGI" -> Shionogi, "TWIN-2-WIN 2" -> Twin2Win2,
+ * "DO-IT" -> DOIT, "TICH-3" -> TICH3.
+ */
+export function findTrialKey(name: string): string | undefined {
+  if (TRIALS_INFO[name]) return name;
+  const canon = canonicalTrialName(name);
+  if (!canon) return undefined;
+  return Object.keys(TRIALS_INFO).find((k) => canonicalTrialName(k) === canon);
+}
+
 export function findTrialInfo(name: string): TrialInfo | undefined {
-  if (TRIALS_INFO[name]) return TRIALS_INFO[name];
-  const lower = (name || "").toLowerCase();
-  const key = Object.keys(TRIALS_INFO).find((k) => k.toLowerCase() === lower);
+  const key = findTrialKey(name);
   return key ? TRIALS_INFO[key] : undefined;
 }
 
 /**
- * True se il trial e' arruolabile (reclutamento non chiuso).
+ * True se il trial e' arruolabile (reclutamento non chiuso ne' in pausa).
  * I trial sconosciuti sono considerati aperti (default sicuro).
  */
 export function isTrialOpen(name: string): boolean {
   const info = findTrialInfo(name);
-  return info ? info.status !== "closed" : true;
+  return info ? info.status !== "closed" && info.status !== "paused" : true;
 }

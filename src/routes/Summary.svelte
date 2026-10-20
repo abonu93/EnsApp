@@ -43,8 +43,8 @@
     { display: "TICH-3", eligible: $hemEligibility.tich3, tone: "hemorrhagic" },
   ]);
 
-  // I trial con reclutamento chiuso (es. SHIONOGI) restano nel catalogo ma
-  // non sono selezionabili: vengono esclusi dai risultati di arruolamento.
+  // I trial con reclutamento chiuso o in pausa (es. SHIONOGI) restano nel
+  // catalogo ma non sono selezionabili: vengono esclusi dai risultati di arruolamento.
   const eligibleItems = $derived(
     [...acuteEligible, ...hemEligibleList].filter((e) => e.eligible && isTrialOpen(e.display))
   );
@@ -132,7 +132,10 @@
     {/if}
   {/if}
 
-  <a href="/post-acute" use:link class="post-link">{$t.summary.goToPostAcute} →</a>
+  <!-- Librexia (unico trial post-acuto) chiuso: niente link alla valutazione. -->
+  {#if isTrialOpen("Librexia")}
+    <a href="/post-acute" use:link class="post-link">{$t.summary.goToPostAcute} →</a>
+  {/if}
 </div>
 
 <BottomBar

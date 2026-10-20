@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { freshSession, fillNumber, selectRadio } from "./helpers";
+import { FIXED_NOW, freshSession, fillPreImaging, pickSegment, setSlider } from "./helpers";
 
 /**
  * Flusso emorragico golden end-to-end.
@@ -10,74 +10,54 @@ import { freshSession, fillNumber, selectRadio } from "./helpers";
 
 test.describe("hemorrhagic flow - FASTEST eligible", () => {
   test.beforeEach(async ({ page }) => {
+    await page.clock.setFixedTime(FIXED_NOW);
     await freshSession(page);
   });
 
   test("end-to-end: hemorrhagic with FASTEST eligible", async ({ page }) => {
     await page.goto("/#/pre-imaging");
-    await page.locator("#pre-pid").fill("E2E-HEM-001");
-    await fillNumber(page, "pre-age", 65);
-    await fillNumber(page, "pre-nihss", 5);
-    await fillNumber(page, "pre-mrs", 1);
-    // LTSW datetime: 1.5 ore fa
-    {
-      const dt = new Date(Date.now() - 1.5 * 3600 * 1000).toISOString().slice(0, 16);
-      await page.locator("#pre-ltsw").fill(dt);
-    }
-    await selectRadio(page, "pre-angio", "yes");
-    await selectRadio(page, "pre-doac", "no");
-    await selectRadio(page, "pre-acei", "no");
-    await page.getByRole("button", { name: /^avanti$/i }).click();
+    await fillPreImaging(page, { patientId: "E2E-HEM-001", age: 65, nihss: 5, mrs: 1, ltswHoursAgo: 1.5 });
+    await page.getByRole("button", { name: /^next$/i }).click();
 
     // Continua al post-imaging dal pre-result
-    await page.getByRole("button", { name: /^continua$/i }).click();
+    await page.getByRole("button", { name: /^continue$/i }).click();
     await expect(page).toHaveURL(/\/post-imaging$/);
 
-    // Hemorrhagic path
-    await selectRadio(page, "post-stroke", "hemorrhagic");
-    await fillNumber(page, "post-hemvol", 20);
-    await fillNumber(page, "post-gcs", 12);
-    await selectRadio(page, "post-ivh", "no");
-    await selectRadio(page, "post-sec", "None");
-    await selectRadio(page, "post-seizure", "no");
-    await selectRadio(page, "post-anti", "none");
+    // Hemorrhagic path (IVH isolata e crisi restano spente = "no")
+    await pickSegment(page, "Stroke type", "Hemorrhagic");
+    await setSlider(page, "Volume mL", 20);
+    await setSlider(page, "GCS", 12);
+    await pickSegment(page, "Secondary cause", "None");
+    await pickSegment(page, "Anticoagulants (last 7 days)", "None (antiplatelets allowed)");
 
     // FASTEST extra (LTSW=1.5h < 2h e mRS=1 <= 2 -> sezione visibile)
-    await expect(page.getByText(/FASTEST/i).first()).toBeVisible();
-    await selectRadio(page, "post-brain", "no");
-    await selectRadio(page, "post-proco", "no");
-    await selectRadio(page, "post-ecg", "no");
-    await selectRadio(page, "post-thrombosis", "no");
-    await selectRadio(page, "post-pregn", "no");
-    await selectRadio(page, "post-angio", "no");
-    await selectRadio(page, "post-ivhscore", "yes");
+    await expect(page.getByText("FASTEST - Additional questions")).toBeVisible();
+    await pickSegment(page, "Brainstem hemorrhage?", "No");
+    await pickSegment(page, "Procoagulant drugs in last 24h?", "No");
+    await pickSegment(page, "ECG: ST elevation consistent with acute myocardial ischemia?", "No");
+    await pickSegment(page, "Symptomatic thrombo-embolic event in the past 90 days (ischemic stroke, MI, PE, DVT, unstable angina)?", "No");
+    await pickSegment(page, "Pregnant, within 12 weeks post-partum, or lactating?", "No");
+    await pickSegment(page, "Endarterectomy, angioplasty or stenting (carotid, coronary, cerebral) in the past 90 days?", "No");
+    await pickSegment(page, "Extensive IVH: >= 2/3 of one lateral ventricle or >= 1/3 of both?", "No");
 
-    await page.getByRole("button", { name: /^avanti$/i }).click();
+    await page.getByRole("button", { name: /^next$/i }).click();
     await expect(page).toHaveURL(/\/summary$/);
 
     // FASTEST + TICH-3 devono essere eligible
-    await expect(page.getByText("FASTEST", { exact: true })).toBeVisible();
-    await expect(page.getByText("TICH-3", { exact: true })).toBeVisible();
+    const eligible = page.locator("button.card-pick");
+    await expect(eligible.filter({ hasText: "FASTEST" })).toBeVisible();
+    await expect(eligible.filter({ hasText: "TICH-3" })).toBeVisible();
   });
 
   test("FASTEST extra section hidden when LTSW too long", async ({ page }) => {
     await page.goto("/#/pre-imaging");
-    await fillNumber(page, "pre-age", 65);
-    await fillNumber(page, "pre-nihss", 5);
-    await fillNumber(page, "pre-mrs", 1);
-    {
-      // LTSW 5h fa: oltre la finestra FASTEST extra
-      const dt = new Date(Date.now() - 5 * 3600 * 1000).toISOString().slice(0, 16);
-      await page.locator("#pre-ltsw").fill(dt);
-    }
-    await selectRadio(page, "pre-angio", "yes");
-    await selectRadio(page, "pre-doac", "no");
-    await selectRadio(page, "pre-acei", "no");
-    await page.getByRole("button", { name: /^avanti$/i }).click();
-    await page.getByRole("button", { name: /^continua$/i }).click();
+    await fillPreImaging(page, { age: 65, nihss: 5, mrs: 1, ltswHoursAgo: 5 });
+    await page.getByRole("button", { name: /^next$/i }).click();
+    await page.getByRole("button", { name: /^continue$/i }).click();
 
-    await selectRadio(page, "post-stroke", "hemorrhagic");
+    await pickSegment(page, "Stroke type", "Hemorrhagic");
     // FASTEST extra non deve apparire
-    await expect(page.getByText(/FASTEST - Domande aggiuntive/i)).toHaveCount(0);
+    await expect(page.getByText("Secondary cause")).toBeVisible();
+    await expect(page.getByText("FASTEST - Additional questions")).toHaveCount(0);
   });
 });

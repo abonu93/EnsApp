@@ -10,7 +10,8 @@
   import HIchCard from "$lib/components/HIchCard.svelte";
   import HVolDial from "$lib/components/HVolDial.svelte";
   import HGcs from "$lib/components/HGcs.svelte";
-  import { preData, postData, hemData } from "$lib/stores/patient";
+  import { fastestNeedsSpotSign } from "$lib/domain/hemorrhagic-rules";
+  import { preData, postData, hemData, ltswHours } from "$lib/stores/patient";
   import { t } from "$lib/i18n";
   import type { VesselCode } from "$lib/domain/acute-rules";
 
@@ -67,7 +68,8 @@
   let thrombosis = $state<YN>(($hemData.thrombosis as YN) ?? "");
   let pregnancy = $state<YN>(($hemData.pregnancy as YN) ?? "");
   let angioplasty = $state<YN>(($hemData.angioplasty as YN) ?? "");
-  let ivhScore = $state<YN>(($hemData.ivhScore as YN) ?? "");
+  let ivhLarge = $state<YN>(($hemData.ivhLarge as YN) ?? "");
+  let spotSign = $state<YN>(($hemData.spotSign as YN) ?? "");
 
   $effect(() => {
     postData.set({
@@ -106,7 +108,8 @@
       thrombosis: thrombosis || undefined,
       pregnancy: pregnancy || undefined,
       angioplasty: angioplasty || undefined,
-      ivhScore: ivhScore || undefined,
+      ivhLarge: ivhLarge || undefined,
+      spotSign: (showSpotSign && spotSign) || undefined,
     });
   });
 
@@ -114,17 +117,19 @@
   const isHem = $derived(strokeType === "hemorrhagic");
   const showEvt = $derived(isIschemic && candidate === "eligible");
   const showNonEvt = $derived(isIschemic && candidate === "not eligible");
-  const showFastest = $derived(isHem && ($preData.ltsw ?? 999) < 2 && ($preData.premrs ?? 99) <= 2);
+  // Stesso limite della regola fastest() (ltsw <= 2): a 2,0 h la scheda deve comparire.
+  const showFastest = $derived(isHem && ($ltswHours ?? 999) <= 2 && ($preData.premrs ?? 99) <= 2);
+  const showSpotSign = $derived(showFastest && fastestNeedsSpotSign($ltswHours ?? 0));
   // TENACITY: solo ischemico NON candidato a trombectomia, finestra > 4.5h e <= 72h.
   const showTenacity = $derived(
-    showNonEvt && ($preData.ltsw ?? -1) > 4.5 && ($preData.ltsw ?? -1) <= 72
+    showNonEvt && ($ltswHours ?? -1) > 4.5 && ($ltswHours ?? -1) <= 72
   );
   // SAIL-MeVO: ischemico (EVT randomizzato, quindi entrambi i percorsi) con
   // eta' 18-80, pre-mRS 0-1, NIHSS 9-17 e LTSW < 12h.
   const showSailMevo = $derived(
     isIschemic &&
     candidate !== "" &&
-    ($preData.ltsw ?? 999) < 12 &&
+    ($ltswHours ?? 999) < 12 &&
     ($preData.age ?? -1) >= 18 && ($preData.age ?? 999) <= 80 &&
     ($preData.premrs ?? 99) <= 1 &&
     ($preData.nihss ?? -1) >= 9 && ($preData.nihss ?? 99) <= 17
@@ -158,16 +163,19 @@
     { value: "Tumor", label: $t.extras.causeTumor },
     { value: "Other", label: $t.extras.causeOther },
   ]);
+  // Usata da FASTEST (esclude tutte le voci tranne "none") e da TICH-3
+  // (esclude AVK ed eparina/EBPM terapeutica, ammette DOAC ed EBPM profilattica).
   const anticoagOpts = $derived([
-    { value: "none", label: $t.extras.causeNone },
-    { value: "warfarin", label: "Warfarin" },
+    { value: "none", label: $t.extras.anticoagNoneOrAntiplatelet },
+    { value: "warfarin", label: $t.extras.anticoagVka },
+    { value: "doac", label: $t.extras.anticoagDoac },
     { value: "heparin", label: $t.extras.anticoagHep },
-    { value: "doac", label: "DOAC" },
+    { value: "lmwh", label: $t.extras.anticoagLmwhProphylaxis },
   ]);
 
   const canSubmit = $derived(
     (isIschemic && candidate !== "" && (showEvt ? targetVessels.length > 0 : lesionConfirmed !== "")) ||
-    (isHem && gcs !== null && hemVolume !== null && secondaryCause !== "")
+    (isHem && gcs !== null && hemVolume !== null && secondaryCause !== "" && anticoag !== "")
   );
 </script>
 
@@ -348,7 +356,10 @@
             <div class="field"><span class="lbl">{$t.postImaging.thrombosisLabel}</span><Segmented options={ynOpts} bind:value={thrombosis} cols={2} /></div>
             <div class="field"><span class="lbl">{$t.postImaging.pregnancyLabel}</span><Segmented options={ynOpts} bind:value={pregnancy} cols={2} /></div>
             <div class="field"><span class="lbl">{$t.postImaging.angioplastyLabel}</span><Segmented options={ynOpts} bind:value={angioplasty} cols={2} /></div>
-            <div class="field"><span class="lbl">{$t.postImaging.ivhScoreLabel}</span><Segmented options={ynOpts} bind:value={ivhScore} cols={2} /></div>
+            <div class="field"><span class="lbl">{$t.postImaging.ivhLargeLabel}</span><Segmented options={ynOpts} bind:value={ivhLarge} cols={2} /></div>
+            {#if showSpotSign}
+              <div class="field"><span class="lbl">{$t.postImaging.spotSignLabel}</span><Segmented options={ynOpts} bind:value={spotSign} cols={2} /></div>
+            {/if}
           </div>
         {/snippet}
       </Card>

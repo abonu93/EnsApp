@@ -3,7 +3,7 @@
 // hemorrhagic-rules.ts e colleziona i fail come stringhe.
 // NON ridefinisce la logica clinica: e' un wrapper diagnostico.
 
-import type { HemorrhagicInput } from "./hemorrhagic-rules";
+import { fastestNeedsSpotSign, type HemorrhagicInput } from "./hemorrhagic-rules";
 import { reduce, type ReasonReport } from "./reason-report";
 
 /**
@@ -13,31 +13,43 @@ import { reduce, type ReasonReport } from "./reason-report";
  * come criterio mancante esattamente come un "no" sbagliato.
  */
 export function reasonFastest(input: HemorrhagicInput): ReasonReport {
+  const needsSpotSign = fastestNeedsSpotSign(input.ltsw);
+  const anticoagOk = input.anticoag === "none" || input.anticoag === "antiplatelet";
   return reduce([
     { ok: input.ltsw <= 2, label: "LTSW <= 2h" },
     { ok: input.premrs <= 2, label: "pre-mRS <= 2" },
     { ok: input.age >= 18 && input.age <= 80, label: "age 18-80" },
     { ok: input.gcs >= 8, label: "GCS >= 8" },
     { ok: input.hemVolume >= 2 && input.hemVolume < 60, label: "volume ematoma 2-59 mL" },
+    { ok: input.secondaryCause === "None", label: "ICH spontanea (nessuna causa secondaria)" },
     { ok: input.brainstem === "no", label: "no emorragia del tronco encefalico" },
     { ok: input.procoagulant === "no", label: "no farmaci procoagulanti nelle 24h" },
-    { ok: input.ecg === "no", label: "no anomalie ECG" },
-    { ok: input.thrombosis === "no", label: "no storia di trombosi acuta" },
-    { ok: input.pregnancy === "no", label: "no gravidanza" },
-    { ok: input.angioplasty === "no", label: "no angioplastica recente" },
-    { ok: input.ivhScore === "yes", label: "IVH score noto" },
-    { ok: input.anticoag === "none", label: "nessuna terapia anticoagulante" },
+    { ok: input.ecg === "no", label: "no sopraslivellamento ST da ischemia acuta" },
+    { ok: input.thrombosis === "no", label: "no eventi trombo-embolici negli ultimi 90 giorni" },
+    { ok: input.pregnancy === "no", label: "no gravidanza, puerperio o allattamento" },
+    { ok: input.angioplasty === "no", label: "no endoarteriectomia, angioplastica o stent negli ultimi 90 giorni" },
+    { ok: input.ivhLarge === "no", label: "no IVH estesa" },
+    {
+      ok: !needsSpotSign || input.spotSign === "yes",
+      label: "spot sign positivo (obbligatorio oltre 90 min)",
+    },
+    { ok: anticoagOk, label: "no AVK/DOAC negli ultimi 7 giorni, no eparina/EBPM" },
   ]);
 }
 
 export function reasonTich3(input: HemorrhagicInput): ReasonReport {
   return reduce([
+    { ok: input.age >= 18, label: "age >= 18" },
     { ok: input.ltsw < 4.5, label: "LTSW < 4.5h" },
     { ok: input.hemVolume < 60, label: "volume ematoma < 60 mL" },
     { ok: input.ivh === "no", label: "emorragia non isolata a IVH" },
     { ok: input.gcs >= 5, label: "GCS >= 5" },
     { ok: input.seizure === "no", label: "no convulsioni / trombosi / ipersensibilita' a TXA" },
     { ok: input.secondaryCause === "None", label: "nessuna causa secondaria" },
+    {
+      ok: input.anticoag !== "warfarin" && input.anticoag !== "heparin",
+      label: "no AVK ne' eparina/EBPM terapeutica (DOAC ammessi)",
+    },
   ]);
 }
 

@@ -141,16 +141,39 @@ export function weTrust(input: AcuteInput): boolean {
   );
 }
 
+// ATHENA: protocollo v2.3 (25-11-2025), p. 33-36. La v2.11 (24 h, NIHSS >= 8)
+// e' superata.
+// - finestra 16 h (il protocollo la misura alla puntura arteriosa);
+// - NIHSS 6-25;
+// - occlusione singola di ICA terminale, M1 o M2 dominante/prossimale;
+// - ASPECTS 6-10 (alternativa del protocollo: core <= 50 mL in CTP/MRP,
+//   non disponibile nell'app);
+// - tandem: escluso solo se richiede trattamento o impedisce l'accesso,
+//   valutato in sala (excl. 23): non e' un criterio di screening.
+const ATHENA_VESSELS: VesselCode[] = ["ica-terminal", "m1", "m2-proxdom"];
+
+// Occlusione singola (p. 32, p. 36): un'occlusione secondaria vista prima della
+// procedura esclude. Quindi un solo segmento; l'unica coppia ammessa e'
+// ICA-T + M1, che descrive la stessa occlusione a T.
+export function athenaVesselOk(targetVessels: VesselCode[] | undefined): boolean {
+  const vessels = [...new Set(toArray(targetVessels))];
+  if (!vessels.every((v) => ATHENA_VESSELS.includes(v))) return false;
+  if (vessels.length === 1) return true;
+  return vessels.length === 2 && vessels.includes("ica-terminal") && vessels.includes("m1");
+}
+
 export function athena(input: AcuteInput): boolean {
   if (input.tortuosity === "") return false;
   return (
     input.age >= 22 &&
     input.age <= 85 &&
-    input.nihss >= 8 &&
+    input.nihss >= 6 &&
+    input.nihss <= 25 &&
     input.premrs <= 2 &&
-    input.ltsw <= 24 &&
+    input.ltsw <= 16 &&
     isLvo(input.lvo) &&
-    input.tandem === "no" &&
+    athenaVesselOk(input.targetVessels) &&
+    (!isValidNumber(input.aspects) || input.aspects >= 6) &&
     input.tortuosity === "no"
   );
 }

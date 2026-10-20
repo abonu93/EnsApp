@@ -13,7 +13,8 @@ const tich3Ok: HemorrhagicInput = {
 const fastestOk: HemorrhagicInput = {
   age: 70, premrs: 1, ltsw: 1, gcs: 14, hemVolume: 30,
   brainstem: "no", procoagulant: "no", ecg: "no", thrombosis: "no",
-  pregnancy: "no", angioplasty: "no", ivhScore: "yes", anticoag: "none",
+  pregnancy: "no", angioplasty: "no", ivhLarge: "no", anticoag: "none",
+  secondaryCause: "None",
 };
 
 describe("hem-reasons - parita' con le regole", () => {
@@ -27,6 +28,10 @@ describe("hem-reasons - parita' con le regole", () => {
       { ...tich3Ok, ivh: "" },
       { ...tich3Ok, seizure: "" },
       { ...tich3Ok, secondaryCause: "Traumatic" },
+      { ...tich3Ok, anticoag: "warfarin" },
+      { ...tich3Ok, anticoag: "heparin" },
+      { ...tich3Ok, anticoag: "doac" },
+      { ...tich3Ok, age: 17 },
       {} as HemorrhagicInput,
     ];
     for (const c of cases) {
@@ -42,9 +47,15 @@ describe("hem-reasons - parita' con le regole", () => {
       { ...fastestOk, gcs: 7 },
       { ...fastestOk, hemVolume: 1 },
       { ...fastestOk, hemVolume: 60 },
-      { ...fastestOk, ivhScore: "" },
+      { ...fastestOk, ivhLarge: "" },
       { ...fastestOk, ecg: "yes" },
       { ...fastestOk, anticoag: "doac" },
+      { ...fastestOk, anticoag: "lmwh" },
+      { ...fastestOk, anticoag: "antiplatelet" },
+      { ...fastestOk, secondaryCause: "AVM" },
+      { ...fastestOk, ltsw: 1.8 },
+      { ...fastestOk, ltsw: 1.8, spotSign: "no" },
+      { ...fastestOk, ltsw: 1.8, spotSign: "yes" },
       {} as HemorrhagicInput,
     ];
     for (const c of cases) {

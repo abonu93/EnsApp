@@ -133,7 +133,7 @@
       },
       "expected": {
         "weTrust": false,
-        "athena": true,
+        "athena": false,
         "vanish": true,
         "pivotal": false,
         "promise": true,
@@ -158,7 +158,8 @@
         "hybernia": true,
         "promise": true,
         "nivo": false
-      }
+      },
+      "note": "2026-10-19: athena true (legacy, v2.11 24 h) -> false. ATHENA protocollo v2.3 inclusione 6: entro 16 h."
     },
     {
       "id": "ischemic-distal-m2-nivo",
@@ -539,11 +540,11 @@
         "thrombosis": "no",
         "pregnancy": "no",
         "angioplasty": "no",
-        "ivhScore": "yes",
         "anticoag": "none",
         "ivh": "no",
         "seizure": "no",
-        "secondaryCause": "None"
+        "secondaryCause": "None",
+        "ivhLarge": "no"
       },
       "expected": {
         "fastest": {
@@ -552,7 +553,8 @@
           "eligible": true
         },
         "tich3": true
-      }
+      },
+      "note": "2026-10-19: ivhScore 'yes' (legacy) -> ivhLarge 'no'. FASTEST V10.5 excl. 4 esclude l'IVH estesa, non lo score non calcolato."
     },
     {
       "id": "hem-fastest-missing-info",
@@ -569,11 +571,11 @@
         "thrombosis": "no",
         "pregnancy": "no",
         "angioplasty": "no",
-        "ivhScore": "yes",
         "anticoag": "none",
         "ivh": "no",
         "seizure": "no",
-        "secondaryCause": "None"
+        "secondaryCause": "None",
+        "ivhLarge": "no"
       },
       "expected": {
         "fastest": {
@@ -582,7 +584,8 @@
           "eligible": false
         },
         "tich3": true
-      }
+      },
+      "note": "2026-10-19: ivhScore 'yes' (legacy) -> ivhLarge 'no'. FASTEST V10.5 excl. 4 esclude l'IVH estesa, non lo score non calcolato."
     },
     {
       "id": "hem-fastest-too-late",
@@ -599,11 +602,11 @@
         "thrombosis": "no",
         "pregnancy": "no",
         "angioplasty": "no",
-        "ivhScore": "yes",
         "anticoag": "none",
         "ivh": "no",
         "seizure": "no",
-        "secondaryCause": "None"
+        "secondaryCause": "None",
+        "ivhLarge": "no"
       },
       "expected": {
         "fastest": {
@@ -612,7 +615,8 @@
           "eligible": false
         },
         "tich3": true
-      }
+      },
+      "note": "2026-10-19: ivhScore 'yes' (legacy) -> ivhLarge 'no'. FASTEST V10.5 excl. 4 esclude l'IVH estesa, non lo score non calcolato."
     },
     {
       "id": "hem-tich3-eligible",
@@ -658,5 +662,6 @@
         "tich3": false
       }
     }
-  ]
+  ],
+  "protocolOverrides": "2026-10-19: FASTEST allineato al protocollo V10.5 Parte 2 (spot sign oltre 90 min, causa secondaria, IVH estesa, anticoagulanti). Gli expected dei casi esistenti non cambiano; i nuovi criteri sono coperti in tests/domain/hemorrhagic-rules.test.ts. ATHENA allineato al protocollo v2.3 (16 h, NIHSS 6-25, vasi, ASPECTS, tandem in sala): cambia solo ischemic-late-window-24h."
 }

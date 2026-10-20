@@ -20,3 +20,8 @@ playwright/.cache/
 .env.local
 .env.*.local
 screenshots/
+
+# Obsidian (config locale per utente)
+vault/.obsidian/workspace*.json
+vault/.obsidian/cache
+vault/.trash/

@@ -88,6 +88,37 @@ describe("sheet payload - parity with legacy", () => {
   }
 });
 
+describe("sheet payload - nomi dalla registrazione rapida (chiavi TRIALS_INFO)", () => {
+  // TrialPatient.svelte invia la chiave di TRIALS_INFO, non il display name:
+  // prima questi studi finivano con la colonna "no" nel foglio dati.
+  const cases: Array<[string, string, string]> = [
+    ["Twin2Win2", "TWIN2WIN", "control"],
+    ["DoneSymple", "DONESYMPLE", "intervention"],
+    ["Sovateltide", "SOVATELTIDE", "control"],
+    ["Orion", "ORION", "intervention"],
+    ["DOIT", "DOIT", "control"],
+    ["TICH3", "TICH3", "si"],
+    ["SaferDoac", "SAFERDOAC", "si"],
+  ];
+  for (const [name, column, expected] of cases) {
+    test(`${name} -> ${column} = ${expected}`, () => {
+      const arm = expected === "si" ? {} : { [name]: expected as "intervention" | "control" };
+      const t = buildTrialsForSheet([name], arm);
+      expect(t[column as keyof typeof t]).toBe(expected);
+      const others = Object.entries(t).filter(([k]) => k !== column);
+      expect(others.every(([, v]) => v === "no")).toBe(true);
+    });
+  }
+
+  test("ogni trial aperto di TRIALS_INFO scrive la propria colonna", async () => {
+    const { TRIALS_INFO, isTrialOpen } = await import("$lib/domain/trials-info");
+    const lost = Object.keys(TRIALS_INFO)
+      .filter(isTrialOpen)
+      .filter((k) => Object.values(buildTrialsForSheet([k], { [k]: "intervention" })).every((v) => v === "no"));
+    expect(lost).toEqual([]);
+  });
+});
+
 describe("sheet payload - trialKeys for the Apps Script backend", () => {
   test("CSV lists every trial key in order", () => {
     expect(SHEET_TRIAL_KEYS_CSV.split(",")).toEqual([...SHEET_TRIAL_KEYS]);
