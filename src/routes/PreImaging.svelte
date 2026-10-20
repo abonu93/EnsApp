@@ -50,6 +50,7 @@
 
   const canSubmit = $derived(
     age !== null && nihss !== null && premrs !== null && ltswDate !== "" &&
+    ltswHrs !== undefined && ltswHrs >= 0 &&
     angiograph !== "" && doac !== "" && acei !== ""
   );
 

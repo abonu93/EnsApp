@@ -63,3 +63,13 @@ describe("trial recruitment status", () => {
     for (const k of Object.keys(randomizationLinks)) expect(TRIALS_INFO[k]).toBeDefined();
   });
 });
+
+describe("co-arruolamento: DO-IT, REMEDY e SOVATELTIDE esclusivi", () => {
+  it("ogni studio del gruppo esclude gli altri due", async () => {
+    const { exclusiveWith } = await import("$lib/domain/trials-info");
+    expect(exclusiveWith("DO-IT").sort()).toEqual(["REMEDY", "SOVATELTIDE"]);
+    expect(exclusiveWith("REMEDY").sort()).toEqual(["DO-IT", "SOVATELTIDE"]);
+    expect(exclusiveWith("Sovateltide").sort()).toEqual(["DO-IT", "REMEDY"]);
+    expect(exclusiveWith("TENACITY")).toEqual([]);
+  });
+});

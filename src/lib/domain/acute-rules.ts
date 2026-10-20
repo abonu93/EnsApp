@@ -480,6 +480,8 @@ export function orion(input: AcuteInput): boolean {
 // DO-IT: protocollo v2.0, p. 31, 40. Randomizzazione entro 4 h 15 min dal
 // LKW. Il DOAC recente e' l'unica controindicazione all'IVT ammessa (excl. 1):
 // basta che il paziente sia candidato "a parte il DOAC".
+// Decisione del team (2026-10-20): ictus al risveglio esclusi, perche' nel
+// centro non c'e' la RM DWI-FLAIR che il protocollo richiede per l'esordio ignoto.
 export const DOIT_MAX_HOURS = 4.25;
 
 export function doit(input: AcuteInput): boolean {
@@ -488,7 +490,8 @@ export function doit(input: AcuteInput): boolean {
     input.ltsw <= DOIT_MAX_HOURS &&
     input.doac === "yes" &&
     (input.ivtCandidate === "eligible" || input.ivtExceptDoac === "yes") &&
-    input.doacReversal !== "yes"
+    input.doacReversal !== "yes" &&
+    input.wakeupStroke !== true
   );
 }
 

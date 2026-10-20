@@ -3,6 +3,7 @@
   // datetime-local nativo per allinearsi al prototype.
   import CalendarSheet from "./CalendarSheet.svelte";
   import { t } from "$lib/i18n";
+  import { now } from "$lib/stores/patient";
 
   interface Props {
     id: string;
@@ -15,11 +16,12 @@
 
   let open = $state(false);
 
-  function humanAgo(dateStr: string): string {
+  // Aggiornato dall'orologio dell'app: il tempo trascorso avanza a schermo aperto.
+  function humanAgo(dateStr: string, nowMs: number): string {
     if (!dateStr) return "";
     const t = new Date(dateStr).getTime();
     if (Number.isNaN(t)) return "";
-    const ms = Date.now() - t;
+    const ms = nowMs - t;
     const m = Math.max(0, Math.round(ms / 60_000));
     const h = Math.floor(m / 60);
     const mm = m % 60;
@@ -52,7 +54,7 @@
     {value ? fmt(value) : $t.preImaging.ltswLabel}
   </span>
   {#if value}
-    <span class="ago">{humanAgo(value)}</span>
+    <span class="ago">{humanAgo(value, $now)}</span>
   {/if}
 </button>
 

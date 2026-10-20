@@ -287,6 +287,7 @@ export const ca: Dictionary = {
     windowClosed: "Mes de 24 h: nomes estudis de finestra estesa",
     symptomsWithin6h: "Simptomes en 6h",
     eligibleTrialsCount: "assaigs elegibles",
+    exclusiveWith: "No combinable amb",
     results: "Resultats",
     selectDateTime: "Selecciona data i hora",
     setTime: "Confirmar",

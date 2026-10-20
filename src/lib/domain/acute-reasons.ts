@@ -254,6 +254,7 @@ export function reasonDoit(input: AcuteInput): ReasonReport {
       label: "candidato IVT (a parte il DOAC)",
     },
     { ok: input.doacReversal !== "yes", label: "nessuna antagonizzazione del DOAC prevista o iniziata" },
+    { ok: input.wakeupStroke !== true, label: "no ictus al risveglio (manca la RM DWI-FLAIR nel centro)" },
   ]);
 }
 

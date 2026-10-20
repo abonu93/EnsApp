@@ -730,3 +730,13 @@ describe("correzioni dal secondo controllo", () => {
     expect(orion(input({ ltsw: 8 }))).toBe(false);
   });
 });
+
+describe("decisioni del team (2026-10-20)", () => {
+  test("DO-IT: ictus al risveglio escluso (niente RM DWI-FLAIR)", () => {
+    const ok = { age: 75, nihss: 6, premrs: 1, ltsw: 3, doac: "yes", ivtCandidate: "eligible" };
+    const input = (p: Record<string, unknown>) => ({ ...ok, ...p }) as unknown as Parameters<typeof doit>[0];
+    expect(doit(input({ wakeupStroke: true }))).toBe(false);
+    expect(reasonDoit(input({ wakeupStroke: true })).eligible).toBe(false);
+    expect(doit(input({ wakeupStroke: false }))).toBe(true);
+  });
+});

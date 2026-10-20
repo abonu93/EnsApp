@@ -288,6 +288,7 @@ export const it = {
     windowClosed: "Oltre 24 h: solo studi a finestra estesa",
     symptomsWithin6h: "Sintomi entro 6h",
     eligibleTrialsCount: "trial eleggibili",
+    exclusiveWith: "Non combinabile con",
     results: "Risultati",
     selectDateTime: "Seleziona data e ora",
     setTime: "Imposta",

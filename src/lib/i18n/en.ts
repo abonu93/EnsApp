@@ -287,6 +287,7 @@ export const en: Dictionary = {
     windowClosed: "Beyond 24 h: extended-window trials only",
     symptomsWithin6h: "Symptoms within 6h",
     eligibleTrialsCount: "eligible trials",
+    exclusiveWith: "Cannot be combined with",
     results: "Results",
     selectDateTime: "Select date & time",
     setTime: "Set",

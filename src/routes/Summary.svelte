@@ -9,7 +9,7 @@
   import { acuteInput, hemInput, postData } from "$lib/stores/patient";
   import { REASON_BY_TRIAL } from "$lib/domain/acute-reasons";
   import { REASON_BY_HEM_TRIAL } from "$lib/domain/hem-reasons";
-  import { isTrialOpen } from "$lib/domain/trials-info";
+  import { exclusiveWith, isTrialOpen } from "$lib/domain/trials-info";
   import { t } from "$lib/i18n";
 
   let showIneligible = $state(false);
@@ -73,7 +73,13 @@
   );
 
   function toggle(name: string) {
-    selectedStudies.update((arr) => arr.includes(name) ? arr.filter((n) => n !== name) : [...arr, name]);
+    // Selezionare uno studio di un gruppo esclusivo toglie gli altri del gruppo.
+    const partners = exclusiveWith(name);
+    selectedStudies.update((arr) =>
+      arr.includes(name)
+        ? arr.filter((n) => n !== name)
+        : [...arr.filter((n) => !partners.includes(n)), name]
+    );
   }
   function reasonsFor(name: string): string[] {
     const acuteFn = REASON_BY_TRIAL[name];
@@ -97,6 +103,7 @@
     <div class="list">
       {#each eligibleItems as item (item.display)}
         {@const checked = $selectedStudies.includes(item.display)}
+        {@const rivals = exclusiveWith(item.display).filter((n) => eligibleItems.some((e) => e.display === n))}
         <button class="card-pick" class:on={checked} type="button" onclick={() => toggle(item.display)}>
           <span class="check" class:on={checked} aria-hidden="true">
             {#if checked}
@@ -106,7 +113,12 @@
             {/if}
           </span>
           <span class="card-pick-text">
-            <span class="name">{item.display}</span>
+            <span class="name-col">
+              <span class="name">{item.display}</span>
+              {#if rivals.length > 0}
+                <span class="exclusive">{$t.extras.exclusiveWith} {rivals.join(", ")}</span>
+              {/if}
+            </span>
             <Pill tone={item.tone}>{#snippet children()}{item.tone}{/snippet}</Pill>
           </span>
         </button>
@@ -224,6 +236,8 @@
     gap: 8px;
   }
   .name { font-size: 15px; font-weight: 600; }
+  .name-col { display: flex; flex-direction: column; gap: 2px; text-align: left; }
+  .exclusive { font-size: 12.5px; color: var(--text-muted); }
 
   .ineligible-toggle {
     display: inline-flex;
