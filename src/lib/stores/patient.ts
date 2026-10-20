@@ -46,6 +46,8 @@ export type PostData = Partial<{
   diabetes: "yes" | "no" | "";
   /** VANISH: core <= 70 mL e mismatch > 1,2 con differenza > 10 mL. */
   vanishCoreMismatch: "yes" | "no" | "";
+  /** ORION: trombectomia (puntura) fattibile entro 1 h dall'inizio del farmaco. */
+  evtWithin1h: "yes" | "no" | "";
   /** SAIL-MeVO: core IA < 10 mL ("na" = non disponibile). */
   aiCoreLt10: "yes" | "no" | "na" | "";
   /** SAIL-MeVO: volume Tmax > 6 s > 30 mL ("na" = non disponibile). */

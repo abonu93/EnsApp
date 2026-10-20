@@ -95,7 +95,7 @@
         "doneSymple": false,
         "shionogi": true,
         "sovateltide": false,
-        "orion": true,
+        "orion": false,
         "doit": false,
         "remedy": false
       },
@@ -109,7 +109,7 @@
         "promise": true,
         "nivo": false
       },
-      "note": "2026-10-19: vanish true (legacy) -> false. VANISH v1.2 incl. 6: entro 9 h (LTSW 11 h)."
+      "note": "2026-10-19: vanish true (legacy) -> false. VANISH v1.2 incl. 6: entro 9 h (LTSW 11 h). 2026-10-20: orion true (legacy) -> false. ORION oltre 6 h senza perfusione (incl. 4-5) e candidato EVT senza 'EVT non fattibile entro 1 h' (excl. 3), protocollo v2.2."
     },
     {
       "id": "ischemic-late-window-24h",
@@ -148,7 +148,7 @@
         "doneSymple": false,
         "shionogi": true,
         "sovateltide": false,
-        "orion": true,
+        "orion": false,
         "doit": false,
         "remedy": false
       },
@@ -162,7 +162,7 @@
         "promise": true,
         "nivo": false
       },
-      "note": "2026-10-19: athena true (legacy, v2.11 24 h) -> false. ATHENA protocollo v2.3 inclusione 6: entro 16 h. 2026-10-19: vanish true (legacy) -> false. VANISH v1.2 incl. 6: entro 9 h (LTSW 22 h)."
+      "note": "2026-10-19: athena true (legacy, v2.11 24 h) -> false. ATHENA protocollo v2.3 inclusione 6: entro 16 h. 2026-10-19: vanish true (legacy) -> false. VANISH v1.2 incl. 6: entro 9 h (LTSW 22 h). 2026-10-20: orion true (legacy) -> false. ORION oltre 6 h senza perfusione (incl. 4-5) e candidato EVT senza 'EVT non fattibile entro 1 h' (excl. 3), protocollo v2.2."
     },
     {
       "id": "ischemic-distal-m2-nivo",
@@ -185,7 +185,8 @@
         "ivtCandidate": "eligible",
         "doac": "no",
         "acei": "no",
-        "contraTpa": "no"
+        "contraTpa": "no",
+        "evtWithin1h": "no"
       },
       "expected": {
         "weTrust": false,
@@ -214,7 +215,8 @@
         "hybernia": false,
         "promise": false,
         "nivo": true
-      }
+      },
+      "note": "2026-10-20: aggiunto evtWithin1h 'no' (ORION excl. 3: candidato EVT con trombectomia non fattibile entro 1 h), expected invariato."
     },
     {
       "id": "ischemic-low-nihss-moste",
@@ -463,7 +465,7 @@
         "doneSymple": false,
         "shionogi": true,
         "sovateltide": false,
-        "orion": true,
+        "orion": false,
         "doit": false,
         "remedy": false
       },
@@ -477,7 +479,7 @@
         "promise": true,
         "nivo": false
       },
-      "note": "2026-10-19: aggiunto vanishCoreMismatch 'yes' (nuovo criterio VANISH v1.2 incl. 8-9), expected invariato."
+      "note": "2026-10-19: aggiunto vanishCoreMismatch 'yes' (nuovo criterio VANISH v1.2 incl. 8-9), expected invariato. 2026-10-20: orion true (legacy) -> false. ORION: tra 86 e 90 anni serve mRS 0 (incl. 7), protocollo v2.2."
     },
     {
       "id": "ischemic-tortuosity-missing",
@@ -673,5 +675,5 @@
       }
     }
   ],
-  "protocolOverrides": "2026-10-19: FASTEST allineato al protocollo V10.5 Parte 2 (spot sign oltre 90 min, causa secondaria, IVH estesa, anticoagulanti). Gli expected dei casi esistenti non cambiano; i nuovi criteri sono coperti in tests/domain/hemorrhagic-rules.test.ts. ATHENA allineato al protocollo v2.3 (16 h, NIHSS 6-25, vasi, ASPECTS, tandem in sala): cambia solo ischemic-late-window-24h. VANISH allineato al protocollo v1.2 (9 h, tandem, core/mismatch, ICA intracranica): cambiano ischemic-wakeup-12h, ischemic-late-window-24h, ischemic-done-simple-late."
+  "protocolOverrides": "2026-10-19: FASTEST allineato al protocollo V10.5 Parte 2 (spot sign oltre 90 min, causa secondaria, IVH estesa, anticoagulanti). Gli expected dei casi esistenti non cambiano; i nuovi criteri sono coperti in tests/domain/hemorrhagic-rules.test.ts. ATHENA allineato al protocollo v2.3 (16 h, NIHSS 6-25, vasi, ASPECTS, tandem in sala): cambia solo ischemic-late-window-24h. VANISH allineato al protocollo v1.2 (9 h, tandem, core/mismatch, ICA intracranica): cambiano ischemic-wakeup-12h, ischemic-late-window-24h, ischemic-done-simple-late. ORION allineato al protocollo v2.2 (vasi, territorio, NIHSS >= 5, mRS 0 tra 86 e 90, perfusione oltre 6 h, EVT entro 1 h): cambiano ischemic-wakeup-12h, ischemic-late-window-24h, ischemic-elderly-90-orion."
 }
