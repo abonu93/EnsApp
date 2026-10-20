@@ -38,3 +38,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-20 — Controllo incrociato dei 10 studi già corretti: 1 errore alto (ORION, perfusione tra 4,5 e 6 h) e 6 minori, tutti corretti nel quarto blocco.
 - 2026-10-20 — Quarto blocco (`9895f0a`): filtro sul tipo di ictus; DONE SYMPLE, DO-IT, SOVATELTIDE, WETRUST, REMEDY ai protocolli; testi copiati corretti.
 - 2026-10-20 — Secondo controllo incrociato (blocco 4) e 15 casi clinici simulati nell'interfaccia: 11 punti, corretti in `dd2f49f`.
+- 2026-10-20 — Decisioni del team: DO-IT senza ictus al risveglio (niente DWI); DO-IT, REMEDY e SOVATELTIDE esclusivi. Corretto il calendario dell'LTSW (orari nel futuro). Commit `4742d0d`.

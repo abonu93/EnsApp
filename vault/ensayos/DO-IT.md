@@ -113,6 +113,8 @@ Nella sinossi E3 è "Pregnancy or lactating women" ([[DO-IT — Protocolo — v2
 > - ✅ 11–14 testi: consenso differito, visite, esami, imaging, tetto del 20% per la EVT, livelli del DOAC
 > - restano aperti 2 (DWI-FLAIR: il foglio dice "wake-up excluidos", domanda al team), 6–10
 > - ✅ (dd2f49f) antagonizzazione del DOAC prevista o iniziata esclude (excl. 2), nuova domanda
+> - ✅ (4742d0d) **decisione del team (2026-10-20):** ictus al risveglio esclusi, perché nel centro non c'è la RM DWI-FLAIR (chiude la divergenza 2)
+> - ✅ (4742d0d) **co-arruolamento:** DO-IT, REMEDY e SOVATELTIDE sono esclusivi nel Riepilogo (decisione del team)
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
 > - ✅ nome 'DO-IT' risolto: stato e colonna del foglio dati nella registrazione rapida
 

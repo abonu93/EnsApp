@@ -107,6 +107,7 @@ Fuori elenco: "Participants not willing to use a highly effective contraception 
 > - ✅ 2 nuova domanda "NIHSS 1a ≥ 2" nella scheda dei non candidati a EVT (esclude)
 > - ✅ 6–11 testi: trombolisi ammessa, schema di dosi, esclusioni, imaging, visite, chirurgia
 > - restano aperti 3 (finestra alla prima dose), 4 (co-arruolamento), 5
+> - ✅ (4742d0d) **co-arruolamento (4):** esclusivo con DO-IT e REMEDY nel Riepilogo (decisione del team)
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `ac10c24`)
 > - ✅ la registrazione rapida ora salva la colonna del foglio dati
 
