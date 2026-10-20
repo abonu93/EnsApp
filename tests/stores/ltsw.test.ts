@@ -129,6 +129,10 @@ describe("finestre temporali: il tempo avanza a paziente aperto", () => {
     expect(tich3).toBe(false);
     postData.update((p) => ({ ...p, strokeType: "hemorrhagic" }));
     expect(athena).toBe(false);
+    let weTrust: boolean | undefined;
+    const u3 = acuteEligibility.subscribe((e) => (weTrust = e.weTrust));
+    expect(weTrust).toBe(false); // NIHSS 12 ma angiografo non indicato
+    u3();
     expect(tich3).toBe(true);
     u1();
     u2();

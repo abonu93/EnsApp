@@ -43,7 +43,7 @@ export interface AcuteInput {
   evtWithin1h?: YesNoEmpty;
   contraTpa?: YesNoEmpty;
   /** TENACITY - opzione imaging 1: mismatch CTP >= 20% (ratio >= 1.2) E volume > 10 mL. */
-  perfusionMismatch?: YesNoEmpty;
+  perfusionMismatch?: YesNoNa;
   /** TENACITY - imaging ad alto rischio: core/DWI >= 70 mL o ipodensita' intensa in TC. */
   largeCore?: YesNoEmpty;
   /** TENACITY - diabete (criterio di esclusione). */
@@ -62,6 +62,10 @@ export interface AcuteInput {
   nihss1aGe2?: YesNoEmpty;
   /** REMEDY: ictus del tronco encefalico o del cervelletto (excl. 6). */
   posteriorFossa?: YesNoEmpty;
+  /** DONE SYMPLE: core > 70 mL al software automatico (incl. 8). */
+  coreGt70?: YesNoEmpty;
+  /** DO-IT: antagonizzazione del DOAC prevista o iniziata (excl. 2). */
+  doacReversal?: YesNoEmpty;
 }
 
 export interface VesselFlags {
@@ -197,19 +201,22 @@ export function computeVesselFlags(targetVessels: VesselCode[] | undefined): Ves
   };
 }
 
+// Entro 6 h il criterio e' soddisfatto anche al risveglio (la domanda sui
+// sintomi serve solo per l'estensione a 12 h).
+export function weTrustTimeOk(input: AcuteInput): boolean {
+  if (input.ltsw < 6) return true;
+  return input.wakeupStroke === true && input.ltsw < 12 && input.wakeupSymptomsWithin6h === true;
+}
+
 // WETRUST: protocollo Rev 09, p. 59. Limiti stretti (< 6 h; wake-up < 12 h
 // dall'ultima volta visto bene con sintomi scoperti < 6 h prima dell'arrivo).
 // `wakeupSymptomsWithin6h` e' la risposta del medico, non un calcolo dal LSW.
 export function weTrust(input: AcuteInput): boolean {
-  const wakeupStroke = input.wakeupStroke === true;
-  const maxHours = wakeupStroke ? 12 : 6;
-  const wakeupSymptomsWithin6h = wakeupStroke ? input.wakeupSymptomsWithin6h === true : true;
   return (
     input.age >= 18 &&
     input.nihss >= 10 &&
     input.premrs <= 2 &&
-    input.ltsw < maxHours &&
-    wakeupSymptomsWithin6h &&
+    weTrustTimeOk(input) &&
     input.angiograph === "yes"
   );
 }
@@ -397,7 +404,8 @@ export function doneSymple(input: AcuteInput): boolean {
     input.premrs <= 1 &&
     input.nihss >= 8 &&
     vesselsWithin(input.targetVessels, DONE_SYMPLE_VESSELS) &&
-    input.largeCore !== "yes"
+    // Criterio di inclusione: va confermato (core <= 70 cc), non solo non negato.
+    input.coreGt70 === "no"
   );
 }
 
@@ -479,7 +487,8 @@ export function doit(input: AcuteInput): boolean {
     input.age >= 18 &&
     input.ltsw <= DOIT_MAX_HOURS &&
     input.doac === "yes" &&
-    (input.ivtCandidate === "eligible" || input.ivtExceptDoac === "yes")
+    (input.ivtCandidate === "eligible" || input.ivtExceptDoac === "yes") &&
+    input.doacReversal !== "yes"
   );
 }
 

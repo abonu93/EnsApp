@@ -47,11 +47,22 @@
   // catalogo ma non sono selezionabili: vengono esclusi dai risultati di arruolamento.
   // Solo i trial del tipo di ictus scelto: un'emorragia non deve elencare gli
   // studi ischemici fra i "non eleggibili" (e viceversa).
+  // WeTrust (randomizzato prima dell'imaging) resta anche per l'emorragico.
   const candidates = $derived(
     $postData.strokeType === "ischemic" ? acuteEligible
-      : $postData.strokeType === "hemorrhagic" ? hemEligibleList
+      : $postData.strokeType === "hemorrhagic" ? [...acuteEligible.filter((e) => e.display === "WeTrust"), ...hemEligibleList]
       : []
   );
+  // Una selezione fatta con l'altro tipo di ictus non e' piu' visibile qui, ma
+  // resterebbe nel conteggio e nel foglio: la si toglie.
+  $effect(() => {
+    if (!$postData.strokeType) return;
+    const allowed = new Set(candidates.map((e) => e.display));
+    const known = new Set([...acuteEligible, ...hemEligibleList].map((e) => e.display));
+    if ($selectedStudies.some((n) => known.has(n) && !allowed.has(n))) {
+      selectedStudies.update((arr) => arr.filter((n) => !known.has(n) || allowed.has(n)));
+    }
+  });
   const eligibleItems = $derived(
     candidates.filter((e) => e.eligible && isTrialOpen(e.display))
   );

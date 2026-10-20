@@ -39,7 +39,7 @@ export type PostData = Partial<{
   lesionConfirmed: "yes" | "no" | "";
   contraTpa: "yes" | "no" | "";
   /** TENACITY: mismatch CTP >= 20% (ratio >= 1.2) E volume mismatch > 10 mL. */
-  perfusionMismatch: "yes" | "no" | "";
+  perfusionMismatch: "yes" | "no" | "na" | "";
   /** TENACITY: core/DWI >= 70 mL o ipodensita' intensa in TC basale. */
   largeCore: "yes" | "no" | "";
   /** TENACITY: diabete (criterio di esclusione). */
@@ -62,6 +62,10 @@ export type PostData = Partial<{
   nihss1aGe2: "yes" | "no" | "";
   /** REMEDY: ictus del tronco encefalico o del cervelletto. */
   posteriorFossa: "yes" | "no" | "";
+  /** DONE SYMPLE: core > 70 mL al software automatico. */
+  coreGt70: "yes" | "no" | "";
+  /** DO-IT: antagonizzazione del DOAC prevista o iniziata. */
+  doacReversal: "yes" | "no" | "";
 }>;
 
 export type HemData = Partial<HemorrhagicInput>;

@@ -395,7 +395,8 @@
         "ivtCandidate": "not eligible",
         "doac": "no",
         "acei": "no",
-        "contraTpa": "no"
+        "contraTpa": "no",
+        "coreGt70": "no"
       },
       "expected": {
         "weTrust": false,
@@ -675,5 +676,5 @@
       }
     }
   ],
-  "protocolOverrides": "2026-10-19: FASTEST allineato al protocollo V10.5 Parte 2 (spot sign oltre 90 min, causa secondaria, IVH estesa, anticoagulanti). Gli expected dei casi esistenti non cambiano; i nuovi criteri sono coperti in tests/domain/hemorrhagic-rules.test.ts. ATHENA allineato al protocollo v2.3 (16 h, NIHSS 6-25, vasi, ASPECTS, tandem in sala): cambia solo ischemic-late-window-24h. VANISH allineato al protocollo v1.2 (9 h, tandem, core/mismatch, ICA intracranica): cambiano ischemic-wakeup-12h, ischemic-late-window-24h, ischemic-done-simple-late. ORION allineato al protocollo v2.2 (vasi, territorio, NIHSS >= 5, mRS 0 tra 86 e 90, perfusione oltre 6 h, EVT entro 1 h): cambiano ischemic-wakeup-12h, ischemic-late-window-24h, ischemic-elderly-90-orion."
+  "protocolOverrides": "2026-10-19: FASTEST allineato al protocollo V10.5 Parte 2 (spot sign oltre 90 min, causa secondaria, IVH estesa, anticoagulanti). Gli expected dei casi esistenti non cambiano; i nuovi criteri sono coperti in tests/domain/hemorrhagic-rules.test.ts. ATHENA allineato al protocollo v2.3 (16 h, NIHSS 6-25, vasi, ASPECTS, tandem in sala): cambia solo ischemic-late-window-24h. VANISH allineato al protocollo v1.2 (9 h, tandem, core/mismatch, ICA intracranica): cambiano ischemic-wakeup-12h, ischemic-late-window-24h, ischemic-done-simple-late. ORION allineato al protocollo v2.2 (vasi, territorio, NIHSS >= 5, mRS 0 tra 86 e 90, perfusione oltre 6 h, EVT entro 1 h): cambiano ischemic-wakeup-12h, ischemic-late-window-24h, ischemic-elderly-90-orion. 2026-10-20: DONE SYMPLE richiede la conferma del core <= 70 cc al software (incl. 8): ischemic-done-simple-late riceve coreGt70 = no in input, expected invariato."
 }

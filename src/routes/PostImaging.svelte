@@ -37,7 +37,12 @@
   let lesionConfirmed = $state<YN>(($postData.lesionConfirmed as YN) ?? "");
 
   // TENACITY (TNK > 4.5h - 72h): campi specifici del trial.
-  let perfusionMismatch = $state<YN>(($postData.perfusionMismatch as YN) ?? "");
+  let perfusionMismatch = $state<YNNa>(($postData.perfusionMismatch as YNNa) ?? "");
+  // DONE SYMPLE (24-72 h): core al software automatico, separato dal "core
+  // esteso o ipodensita'" di TENACITY (oltre 24 h l'ipodensita' e' attesa).
+  let coreGt70 = $state<YN>(($postData.coreGt70 as YN) ?? "");
+  // DO-IT: antagonizzazione prevista o iniziata (excl. 2).
+  let doacReversal = $state<YN>(($postData.doacReversal as YN) ?? "");
   let largeCore = $state<YN>(($postData.largeCore as YN) ?? "");
   let diabetes = $state<YN>(($postData.diabetes as YN) ?? "");
   // VANISH: core/mismatch alla perfusione (chiesto nella scheda EVT entro 9 h).
@@ -96,8 +101,10 @@
       contraTpa: (showTenacity ? contraTpaAnswer : "no") || undefined,
       aspects: aspects ?? undefined,
       lesionConfirmed: lesionConfirmed || undefined,
-      perfusionMismatch: perfusionMismatch || undefined,
-      largeCore: largeCore || undefined,
+      perfusionMismatch: (showPerfusion && perfusionMismatch) || undefined,
+      largeCore: (showPerfusion && largeCore) || undefined,
+      coreGt70: (showDoneSympleCore && coreGt70) || undefined,
+      doacReversal: (showDoitReversal && doacReversal) || undefined,
       diabetes: diabetes || undefined,
       vanishCoreMismatch: (showVanishQuestion && vanishCoreMismatch) || undefined,
       evtWithin1h: (showOrionEvtQuestion && evtWithin1h) || undefined,
@@ -146,9 +153,14 @@
   // (obbligatoria per ORION oltre 6 h), quindi sta nella scheda Imaging.
   const showPerfusion = $derived(showImaging && ($ltswHours ?? -1) > 4.5);
   const showNonEvt = $derived(isIschemic && candidate === "not eligible");
+  const showDoneSympleCore = $derived(showImaging && ($ltswHours ?? -1) >= 24 && ($ltswHours ?? 999) <= 72);
   const showDoitQuestion = $derived(
     isIschemic && $preData.doac === "yes" && ivtCandidate === "not eligible" &&
     ($ltswHours ?? 999) <= DOIT_MAX_HOURS
+  );
+  const showDoitReversal = $derived(
+    isIschemic && $preData.doac === "yes" && ($ltswHours ?? 999) <= DOIT_MAX_HOURS &&
+    (ivtCandidate === "eligible" || (showDoitQuestion && ivtExceptDoac === "yes"))
   );
   // Stesso limite della regola fastest() (ltsw <= 2): a 2,0 h la scheda deve comparire.
   const showFastest = $derived(isHem && ($ltswHours ?? 999) <= 2 && ($preData.premrs ?? 99) <= 2);
@@ -231,6 +243,12 @@
               <Segmented options={ynOpts} bind:value={ivtExceptDoac} cols={2} />
             </div>
           {/if}
+          {#if showDoitReversal}
+            <div class="field">
+              <span class="lbl">{$t.postImaging.doacReversalLabel}</span>
+              <Segmented options={ynOpts} bind:value={doacReversal} cols={2} />
+            </div>
+          {/if}
         </div>
       {/snippet}
     </Card>
@@ -253,12 +271,18 @@
               <div class="divider"></div>
               <div class="field">
                 <span class="lbl">{$t.postImaging.perfusionMismatchLabel}</span>
-                <Segmented options={ynOpts} bind:value={perfusionMismatch} cols={2} />
+                <Segmented options={ynNaOpts} bind:value={perfusionMismatch} cols={3} />
               </div>
               <div class="field">
                 <span class="lbl">{$t.postImaging.largeCoreLabel}</span>
                 <Segmented options={ynOpts} bind:value={largeCore} cols={2} />
               </div>
+              {#if showDoneSympleCore}
+                <div class="field">
+                  <span class="lbl">{$t.postImaging.coreGt70Label}</span>
+                  <Segmented options={ynOpts} bind:value={coreGt70} cols={2} />
+                </div>
+              {/if}
             {/if}
           </div>
         {/snippet}
