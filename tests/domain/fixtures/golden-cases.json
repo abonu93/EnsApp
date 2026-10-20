@@ -23,7 +23,8 @@
         "ivtCandidate": "eligible",
         "doac": "no",
         "acei": "no",
-        "contraTpa": "no"
+        "contraTpa": "no",
+        "vanishCoreMismatch": "yes"
       },
       "expected": {
         "weTrust": true,
@@ -52,7 +53,8 @@
         "hybernia": true,
         "promise": true,
         "nivo": false
-      }
+      },
+      "note": "2026-10-19: aggiunto vanishCoreMismatch 'yes' (nuovo criterio VANISH v1.2 incl. 8-9), expected invariato."
     },
     {
       "id": "ischemic-wakeup-12h",
@@ -82,7 +84,7 @@
       "expected": {
         "weTrust": true,
         "athena": true,
-        "vanish": true,
+        "vanish": false,
         "pivotal": false,
         "promise": true,
         "nivo": false,
@@ -106,7 +108,8 @@
         "hybernia": true,
         "promise": true,
         "nivo": false
-      }
+      },
+      "note": "2026-10-19: vanish true (legacy) -> false. VANISH v1.2 incl. 6: entro 9 h (LTSW 11 h)."
     },
     {
       "id": "ischemic-late-window-24h",
@@ -134,7 +137,7 @@
       "expected": {
         "weTrust": false,
         "athena": false,
-        "vanish": true,
+        "vanish": false,
         "pivotal": false,
         "promise": true,
         "nivo": false,
@@ -159,7 +162,7 @@
         "promise": true,
         "nivo": false
       },
-      "note": "2026-10-19: athena true (legacy, v2.11 24 h) -> false. ATHENA protocollo v2.3 inclusione 6: entro 16 h."
+      "note": "2026-10-19: athena true (legacy, v2.11 24 h) -> false. ATHENA protocollo v2.3 inclusione 6: entro 16 h. 2026-10-19: vanish true (legacy) -> false. VANISH v1.2 incl. 6: entro 9 h (LTSW 22 h)."
     },
     {
       "id": "ischemic-distal-m2-nivo",
@@ -336,7 +339,8 @@
         "ivtCandidate": "eligible",
         "doac": "yes",
         "acei": "no",
-        "contraTpa": "no"
+        "contraTpa": "no",
+        "vanishCoreMismatch": "yes"
       },
       "expected": {
         "weTrust": false,
@@ -365,7 +369,8 @@
         "hybernia": true,
         "promise": true,
         "nivo": false
-      }
+      },
+      "note": "2026-10-19: aggiunto vanishCoreMismatch 'yes' (nuovo criterio VANISH v1.2 incl. 8-9), expected invariato."
     },
     {
       "id": "ischemic-done-simple-late",
@@ -393,7 +398,7 @@
       "expected": {
         "weTrust": false,
         "athena": false,
-        "vanish": true,
+        "vanish": false,
         "pivotal": false,
         "promise": false,
         "nivo": false,
@@ -417,7 +422,8 @@
         "hybernia": true,
         "promise": true,
         "nivo": false
-      }
+      },
+      "note": "2026-10-19: vanish true (legacy) -> false. VANISH v1.2 incl. 6: entro 9 h (LTSW 48 h)."
     },
     {
       "id": "ischemic-elderly-90-orion",
@@ -440,7 +446,8 @@
         "ivtCandidate": "not eligible",
         "doac": "no",
         "acei": "no",
-        "contraTpa": "no"
+        "contraTpa": "no",
+        "vanishCoreMismatch": "yes"
       },
       "expected": {
         "weTrust": false,
@@ -469,7 +476,8 @@
         "hybernia": true,
         "promise": true,
         "nivo": false
-      }
+      },
+      "note": "2026-10-19: aggiunto vanishCoreMismatch 'yes' (nuovo criterio VANISH v1.2 incl. 8-9), expected invariato."
     },
     {
       "id": "ischemic-tortuosity-missing",
@@ -492,7 +500,8 @@
         "ivtCandidate": "eligible",
         "doac": "no",
         "acei": "no",
-        "contraTpa": "no"
+        "contraTpa": "no",
+        "vanishCoreMismatch": "yes"
       },
       "expected": {
         "weTrust": true,
@@ -521,7 +530,8 @@
         "hybernia": true,
         "promise": true,
         "nivo": false
-      }
+      },
+      "note": "2026-10-19: aggiunto vanishCoreMismatch 'yes' (nuovo criterio VANISH v1.2 incl. 8-9), expected invariato."
     }
   ],
   "hemorrhagic": [
@@ -663,5 +673,5 @@
       }
     }
   ],
-  "protocolOverrides": "2026-10-19: FASTEST allineato al protocollo V10.5 Parte 2 (spot sign oltre 90 min, causa secondaria, IVH estesa, anticoagulanti). Gli expected dei casi esistenti non cambiano; i nuovi criteri sono coperti in tests/domain/hemorrhagic-rules.test.ts. ATHENA allineato al protocollo v2.3 (16 h, NIHSS 6-25, vasi, ASPECTS, tandem in sala): cambia solo ischemic-late-window-24h."
+  "protocolOverrides": "2026-10-19: FASTEST allineato al protocollo V10.5 Parte 2 (spot sign oltre 90 min, causa secondaria, IVH estesa, anticoagulanti). Gli expected dei casi esistenti non cambiano; i nuovi criteri sono coperti in tests/domain/hemorrhagic-rules.test.ts. ATHENA allineato al protocollo v2.3 (16 h, NIHSS 6-25, vasi, ASPECTS, tandem in sala): cambia solo ischemic-late-window-24h. VANISH allineato al protocollo v1.2 (9 h, tandem, core/mismatch, ICA intracranica): cambiano ischemic-wakeup-12h, ischemic-late-window-24h, ischemic-done-simple-late."
 }

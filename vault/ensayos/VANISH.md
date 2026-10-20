@@ -107,6 +107,14 @@ Tutte le valutazioni sono di pratica clinica: nessuna procedura aggiuntiva ([[VA
 Non riportato nel documento: il protocollo non esclude la partecipazione ad altri studi e non cita studi compatibili.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni (secondo blocco, 2026-10-19, branch `claude/practical-johnson-mo40tz-block2`)
+> - ✅ 1 finestra ≤9 h (risveglio: l'app usa l'LTSW, più restrittivo del punto medio del sonno)
+> - ✅ 2 core ≤70 mL con mismatch: nuova domanda nella scheda EVT
+> - ✅ 3 il tandem esclude
+> - ✅ 4 ICA intracranica ammessa
+> - ✅ 8–14 testi della scheda (niente ASPECTS ≥4, dose, consenso, visite, età ≥18)
+> - ⬜ 5 controindicazioni alla trombolisi, 6 TICI, 7 altre esclusioni
+
 Confronto con `src/lib/domain/trials-info.ts:154-166`, `src/lib/domain/acute-rules.ts:79-81` e `:149-158`, `src/lib/domain/acute-reasons.ts:49-58`; campi dell'interfaccia in `src/routes/PostImaging.svelte` e `src/lib/domain/vessels.ts`. Verificato il 2026-10-19 sul commit `6617a91`.
 
 > [!success] Coincide

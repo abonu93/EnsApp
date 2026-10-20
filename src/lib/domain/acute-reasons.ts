@@ -5,7 +5,7 @@
 // NON ridefinisce la logica clinica: e' un wrapper diagnostico.
 
 import type { AcuteInput, VesselCode } from "./acute-rules";
-import { athenaVesselOk, computeVesselFlags, SAIL_MEVO_VESSELS } from "./acute-rules";
+import { athenaVesselOk, computeVesselFlags, SAIL_MEVO_VESSELS, VANISH_MAX_HOURS } from "./acute-rules";
 import { reduce, type ReasonReport } from "./reason-report";
 
 export type { ReasonReport };
@@ -59,8 +59,11 @@ export function reasonVanish(input: AcuteInput): ReasonReport {
     { ok: input.age >= 18, label: "age >= 18" },
     { ok: input.premrs <= 1, label: "pre-mRS <= 1" },
     { ok: input.nihss >= 6, label: "NIHSS >= 6" },
+    { ok: input.ltsw <= VANISH_MAX_HOURS, label: "LTSW <= 9h (risveglio: 9 h dal punto medio del sonno, verificare)" },
     { ok: input.lvo === "yes", label: "LVO confermato" },
-    { ok: v.vanish, label: "vessel ICA-T o M1" },
+    { ok: v.vanish, label: "occlusione ICA intracranica o M1" },
+    { ok: input.tandem !== "yes", label: "no occlusione tandem" },
+    { ok: input.vanishCoreMismatch === "yes", label: "core <= 70 mL e mismatch > 1,2 (differenza > 10 mL)" },
   ]);
 }
 
@@ -221,7 +224,7 @@ export function reasonRemedy(input: AcuteInput): ReasonReport {
     { ok: input.candidate === "not eligible", label: "non candidato EVT" },
     { ok: !excluded, label: "no occlusione ICA intracr./ICA-T/M1/VA/basilar" },
     { ok: isNumber(input.aspects) && input.aspects >= 6, label: "ASPECTS >= 6" },
-    { ok: input.acei !== "yes", label: "non in ACE-inibitori" },
+    { ok: input.acei !== "yes", label: "ACE-inibitore: ultima dose >= 24h (48h se eGFR < 45) e sospendibile fino al g. 29" },
   ]);
 }
 

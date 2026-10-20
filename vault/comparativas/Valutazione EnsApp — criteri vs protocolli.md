@@ -24,6 +24,7 @@ Stato nell'app al 2026-10-19 ([[Estado de los estudios]]):
 | `7b77a2e` | [[ATHENA]] al protocollo v2.3 | 16 h, NIHSS 6–25, vasi, ASPECTS, tandem, tortuosità, scheda |
 | `7ec19c0` | Finestre temporali (T1): orologio dell'app ogni 30 s, LTSW ricalcolato per regole, motivi e schede | Un trial esce dai risultati quando la finestra scade a paziente aperto. Resta a carico del medico che il limite di molti protocolli vale alla puntura, randomizzazione o dose |
 | `fbba0ca` | Merge di `main`: [[SAIL-MeVO]] è ora nell'app (PR #12) | La scheda SAIL-MeVO usa anche lei il tempo aggiornato |
+| secondo blocco | Scheda Imaging comune (T3), [[VANISH]] al protocollo v1.2, [[REMEDY]] (ASPECTS, LVO, ACE-inibitori) | Vaso, tandem e ASPECTS chiesti a tutti gli ischemici; VANISH 9 h, tandem, core/mismatch, ICA intracranica |
 
 Le sezioni seguenti fotografano lo stato **prima** di queste correzioni; il dettaglio di cosa resta aperto è nel riquadro "Correzioni applicate" di ogni scheda.
 

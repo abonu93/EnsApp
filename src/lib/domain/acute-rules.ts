@@ -37,6 +37,8 @@ export interface AcuteInput {
   ivtCandidate?: CandidateStatus;
   doac?: YesNoEmpty;
   acei?: YesNoEmpty;
+  /** VANISH: core <= 70 mL e mismatch > 1,2 con differenza > 10 mL (Tmax > 6 s). */
+  vanishCoreMismatch?: YesNoEmpty;
   contraTpa?: YesNoEmpty;
   /** TENACITY - opzione imaging 1: mismatch CTP >= 20% (ratio >= 1.2) E volume > 10 mL. */
   perfusionMismatch?: YesNoEmpty;
@@ -87,7 +89,11 @@ function isLvo(lvo: YesNoEmpty | undefined): boolean {
 
 export function computeVesselFlags(targetVessels: VesselCode[] | undefined): VesselFlags {
   return {
-    vanish: hasVessel(targetVessels, "ica-terminal") || hasVessel(targetVessels, "m1"),
+    // VANISH v1.2 incl. 7: "intracranial ICA and the M1 segments" (non solo la ICA-T).
+    vanish:
+      hasVessel(targetVessels, "ica-intracranial") ||
+      hasVessel(targetVessels, "ica-terminal") ||
+      hasVessel(targetVessels, "m1"),
     pivotal:
       hasVessel(targetVessels, "ica-terminal") ||
       hasVessel(targetVessels, "m1") ||
@@ -178,14 +184,25 @@ export function athena(input: AcuteInput): boolean {
   );
 }
 
+// VANISH: protocollo v1.2, p. 17-18.
+// - entro 9 h (incl. 6); nel risveglio il protocollo conta dal punto medio del
+//   sonno: l'app non ha l'ora del risveglio e usa l'LTSW (piu' restrittivo);
+// - core <= 70 mL e mismatch > 1,2 con differenza > 10 mL (incl. 8-9);
+// - tandem di qualsiasi causa escluso (excl. 12).
+// Nessun criterio ASPECTS nel protocollo: l'ASPECTS e' solo di stratificazione.
+export const VANISH_MAX_HOURS = 9;
+
 export function vanish(input: AcuteInput): boolean {
   const vessels = computeVesselFlags(input.targetVessels);
   return (
     input.age >= 18 &&
     input.premrs <= 1 &&
     input.nihss >= 6 &&
+    input.ltsw <= VANISH_MAX_HOURS &&
     isLvo(input.lvo) &&
-    vessels.vanish
+    vessels.vanish &&
+    input.tandem !== "yes" &&
+    input.vanishCoreMismatch === "yes"
   );
 }
 

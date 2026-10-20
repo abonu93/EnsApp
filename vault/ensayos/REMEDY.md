@@ -146,6 +146,13 @@ Testo originale (§6.2, [[REMEDY — Protocolo — V6.2]], p. 38–40; sinossi p
 - Compatibilità con studi specifici: non riportata nel documento.
 
 ## Divergenze con EnsApp
+> [!done] Correzioni (secondo blocco, 2026-10-19, branch `claude/practical-johnson-mo40tz-block2`)
+> - ✅ 1 ASPECTS ora sempre richiesto nella scheda Imaging: REMEDY torna proponibile entro 4,5 h
+> - ✅ 2 vaso occluso sempre richiesto: l'esclusione delle occlusioni di grosso vaso funziona
+> - ✅ 3 domanda sugli ACE-inibitori riformulata come le esclusioni 8–9
+> - ✅ 9–10 testi della scheda
+> - ⬜ 4 angiografia diagnostica, 5 condizioni dopo trombolisi, 6 tronco/cervelletto, 7 co-arruolamento, 8 altri criteri
+
 Confronto con:
 - `src/lib/domain/trials-info.ts:301-316`;
 - `src/lib/domain/acute-rules.ts:322-343` (`remedy()`);
