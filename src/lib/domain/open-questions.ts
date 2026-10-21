@@ -51,14 +51,6 @@ export const OPEN_QUESTIONS: readonly OpenQuestion[] = [
     appliesTo: (i) => (i.targetVessels ?? []).includes("m1"),
   },
   {
-    id: "sail-mrs",
-    trials: ["SAIL-MeVO"],
-    owner: "team",
-    question: "Pre-stroke mRS 0-1 or 0-2?",
-    detail: "Protocol V2.1 and synopsis say mRS 0-1 (p. 28); the team sheet says 0-2. The app uses 0-1.",
-    appliesTo: (i) => i.premrs === 2,
-  },
-  {
     id: "nivo-protocol",
     trials: ["NiVO"],
     owner: "team",

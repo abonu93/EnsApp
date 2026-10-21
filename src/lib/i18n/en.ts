@@ -62,6 +62,7 @@ export const en: Dictionary = {
     trialsDesc: "Catalog with inclusion/exclusion criteria.",
     quickTitle: "Quick patient",
     quickDesc: "Fast entry for a patient already enrolled.",
+    newBadge: "New",
   },
   trials: {
     title: "Clinical trials",

@@ -88,7 +88,7 @@
     padding: 12px 24px 0;
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 200px);
+    flex: 1;
   }
   .intro {
     margin-top: 18px;
