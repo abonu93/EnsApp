@@ -45,6 +45,35 @@ describe("patient-record", () => {
     );
   });
 
+  test("dettagli clinici: occlusione, tandem, ASPECTS, candidature, emorragia", () => {
+    const m = buildShareMessage({
+      age: 70, selected: [], outcomes: {}, notes: "", wakeup: true,
+      targetVessels: ["m1"], tandem: "yes", aspects: 8, evtCandidate: "eligible", ivtCandidate: "not eligible",
+      gcs: 13, hemVolume: 18, anticoag: "none", secondaryCause: "None", spotSign: "no",
+    });
+    expect(m).toBe([
+      "Age: 70",
+      "Onset: wake-up / unknown (LTSW from last seen well)",
+      "Occlusion: M1 + extracranial ICA/CCA (tandem)",
+      "ASPECTS: 8",
+      "EVT candidate: yes",
+      "IVT candidate: no",
+      "GCS: 13",
+      "Hematoma volume: 18 mL",
+      "Anticoagulation: none",
+      "Secondary cause: None",
+      "Spot sign: no",
+    ].join("\n"));
+  });
+
+  test("emorragia: reversione nel messaggio e nel foglio", () => {
+    const r = { age: 70, selected: [], outcomes: {}, notes: "", reversal: "Yes", reversalAgent: "pcc" };
+    expect(buildShareMessage(r)).toBe("Age: 70\n\nAcute treatments:\n- Anticoagulation reversal: Yes (PCC)");
+    const { payload } = buildSheetPayload(r, [], "board", "2026-10-21T10:00:00.000Z");
+    expect(payload.Reversal).toBe("Yes");
+    expect(payload.Reversal_agent).toBe("PCC");
+  });
+
   test("riga del foglio", () => {
     const { payload, missed } = buildSheetPayload(rec, ["ATHENA", "PIVOTAL"], "guided", "2026-10-21T10:00:00.000Z");
     const trials = buildTrialsForSheet(rec.selected, rec.outcomes);
@@ -63,6 +92,8 @@ describe("patient-record", () => {
       TEV: "Yes",
       mTICI: "2b67",
       TIV: "No",
+      Reversal: "",
+      Reversal_agent: "",
       Notes: "  note  ",
       missed_trials: "PIVOTAL",
       eligible_at_submit: "ATHENA,PIVOTAL",

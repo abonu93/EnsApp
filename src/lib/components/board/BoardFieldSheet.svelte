@@ -9,10 +9,12 @@
   interface Props {
     field: string;
     value: unknown;
+    /** Tutti i valori (il selettore dei vasi legge e scrive anche `tandem`). */
+    values?: Record<string, unknown>;
     onSet: (key: string, value: unknown) => void;
     onClose: () => void;
   }
-  let { field, value, onSet, onClose }: Props = $props();
+  let { field, value, values = {}, onSet, onClose }: Props = $props();
 
   const def = $derived(FIELD_BY_KEY[field]);
   const label = $derived(fieldLabel($t, field));
@@ -21,6 +23,15 @@
   let num = $state<number>(typeof value === "number" ? value : (FIELD_BY_KEY[field]?.start ?? 0));
   // svelte-ignore state_referenced_locally
   let vessels = $state<string[]>(Array.isArray(value) ? [...value] : []);
+  // ICA/CCA extracranica: con un'occlusione intracranica e' un tandem; da sola
+  // e' un'occlusione cervicale. Si salva nel campo `tandem` che leggono le
+  // regole (VANISH, PIVOTAL, NiVO, TENACITY, SAIL-MeVO).
+  // svelte-ignore state_referenced_locally
+  let extra = $state<boolean>(values.tandem === "yes");
+  function saveVessels(v: string[]) {
+    onSet("tandem", extra ? "yes" : "no");
+    done(v);
+  }
 
   const clamp = (v: number) => Math.max(def.min ?? 0, Math.min(def.max ?? 100, v));
   const unit = $derived(def?.unit === " mL" ? " mL" : "");
@@ -54,9 +65,13 @@
           </button>
         {/each}
       </div>
+      <button type="button" class="extra ens-press" class:on={extra} aria-pressed={extra} onclick={() => (extra = !extra)}>
+        <span class="extra-l">{$t.board.extraLabel}</span>
+        <span class="extra-h">{$t.board.extraHint}</span>
+      </button>
       <div class="pair">
-        <button type="button" class="big soft ens-press" onclick={() => done([])}>{$t.board.noOcclusion}</button>
-        <button type="button" class="big ens-press" disabled={!vessels.length} onclick={() => done(vessels)}>{$t.board.set}</button>
+        <button type="button" class="big soft ens-press" onclick={() => saveVessels([])}>{$t.board.noOcclusion}</button>
+        <button type="button" class="big ens-press" disabled={!vessels.length && !extra} onclick={() => saveVessels(vessels)}>{$t.board.set}</button>
       </div>
     {:else if def.kind === "num"}
       <div class="value" aria-hidden="true">{num}<span class="unit">{unit}</span></div>
@@ -140,6 +155,26 @@
     color: var(--text-inverted);
     font-weight: 600;
   }
+  .extra {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: calc(100% - 12px);
+    margin: 10px 6px 0;
+    padding: 10px 12px;
+    text-align: left;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .extra.on {
+    border-color: var(--primary-hover);
+    background: var(--primary-hover);
+    color: var(--text-inverted);
+  }
+  .extra-l { font-size: 14px; font-weight: 600; }
+  .extra-h { font-size: 12px; opacity: 0.85; }
   .ogrid {
     display: grid;
     gap: 8px;

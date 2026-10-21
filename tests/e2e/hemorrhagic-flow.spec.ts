@@ -47,6 +47,15 @@ test.describe("hemorrhagic flow - FASTEST eligible", () => {
     const eligible = page.locator("button.card-pick");
     await expect(eligible.filter({ hasText: "FASTEST" })).toBeVisible();
     await expect(eligible.filter({ hasText: "TICH-3" })).toBeVisible();
+
+    // Invio: nell'emorragia niente TEV/TIV, si chiede la reversione e con cosa
+    await page.locator(".bar .next").click();
+    await expect(page).toHaveURL(/\/share$/);
+    await expect(page.getByText("Thrombectomy (TEV)?")).toHaveCount(0);
+    await expect(page.getByText("Thrombolysis (IVT)?")).toHaveCount(0);
+    await page.getByRole("radiogroup").filter({ hasText: "Yes" }).last().getByText("Yes", { exact: true }).click();
+    await page.locator("#share-reversal-agent").selectOption("pcc");
+    await expect(page.locator("pre.preview")).toContainText("Anticoagulation reversal: Yes (PCC)");
   });
 
   test("FASTEST extra section hidden when LTSW too long", async ({ page }) => {

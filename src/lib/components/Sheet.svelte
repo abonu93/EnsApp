@@ -25,6 +25,7 @@
   let dragY = $state(0);
   let startY: number | null = null;
   function dragStart(e: PointerEvent) {
+    if (e.pointerType === "touch") return; // il touch e' gestito su tutto il foglio
     startY = e.clientY;
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
   }
@@ -37,6 +38,53 @@
     if (dragY > 90) onClose();
     dragY = 0;
   }
+
+  // Swipe verso il basso ovunque sul foglio (quando il contenuto e' in cima):
+  // segue il dito e oltre 90 px chiude. Non interferisce con slider e campi.
+  $effect(() => {
+    const el = panel;
+    if (!open || !el) return;
+    let y0: number | null = null;
+    let x0 = 0;
+    let dragging = false;
+    const skip = (t: EventTarget | null) =>
+      t instanceof Element && !!t.closest("input, select, textarea, [data-no-swipe]");
+    const start = (e: TouchEvent) => {
+      if (el.scrollTop > 0 || skip(e.target)) { y0 = null; return; }
+      y0 = e.touches[0].clientY;
+      x0 = e.touches[0].clientX;
+      dragging = false;
+    };
+    const move = (e: TouchEvent) => {
+      if (y0 === null) return;
+      const dy = e.touches[0].clientY - y0;
+      const dx = Math.abs(e.touches[0].clientX - x0);
+      if (!dragging) {
+        if (dy > 8 && dy > dx && el.scrollTop <= 0) dragging = true;
+        else if (dy < -4 || dx > 12) { y0 = null; return; }
+      }
+      if (dragging) {
+        e.preventDefault();
+        dragY = Math.max(0, dy);
+      }
+    };
+    const end = () => {
+      if (dragging && dragY > 90) onClose();
+      y0 = null;
+      dragging = false;
+      dragY = 0;
+    };
+    el.addEventListener("touchstart", start, { passive: true });
+    el.addEventListener("touchmove", move, { passive: false });
+    el.addEventListener("touchend", end);
+    el.addEventListener("touchcancel", end);
+    return () => {
+      el.removeEventListener("touchstart", start);
+      el.removeEventListener("touchmove", move);
+      el.removeEventListener("touchend", end);
+      el.removeEventListener("touchcancel", end);
+    };
+  });
 
   $effect(() => {
     if (open && panel) {

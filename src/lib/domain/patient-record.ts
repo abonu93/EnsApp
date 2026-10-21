@@ -3,6 +3,7 @@
 // NON contiene logica clinica.
 
 import { buildTrialsForSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV, type StudyOutcomes } from "./sheet-payload";
+import { VESSEL_OPTIONS } from "./vessels";
 import { fmtHoursAsClock } from "$lib/utils/time";
 import { maskPatientId } from "$lib/utils/mask";
 
@@ -20,6 +21,59 @@ export interface PatientRecord {
   tev?: string;
   mtici?: string;
   tiv?: string;
+  /** Emorragia: reversione dell'anticoagulazione e farmaco usato. */
+  reversal?: string;
+  reversalAgent?: string;
+  /** Dettagli clinici per il messaggio (non vanno nel foglio). */
+  wakeup?: boolean;
+  targetVessels?: string[];
+  tandem?: string;
+  aspects?: number;
+  evtCandidate?: string;
+  ivtCandidate?: string;
+  gcs?: number;
+  hemVolume?: number;
+  anticoag?: string;
+  secondaryCause?: string;
+  spotSign?: string;
+}
+
+/** Farmaci di reversione (etichette per messaggio e foglio, come nei protocolli). */
+export const REVERSAL_LABEL: Record<string, string> = {
+  idarucizumab: "idarucizumab",
+  andexanet: "andexanet alfa",
+  pcc: "PCC",
+  vitk: "vitamin K",
+  ffp: "FFP",
+  protamine: "protamine",
+  other: "other",
+};
+
+const yesNo = (v: string | undefined) => (v === "eligible" || v === "yes" ? "yes" : v === "not eligible" || v === "no" ? "no" : undefined);
+
+/** Righe cliniche del messaggio: sede dell'occlusione, ASPECTS, candidature, dati dell'emorragia. */
+function clinicalLines(r: PatientRecord): string[] {
+  const lines: string[] = [];
+  if (r.wakeup) lines.push("Onset: wake-up / unknown (LTSW from last seen well)");
+  if (Array.isArray(r.targetVessels)) {
+    const sites = r.targetVessels.map((v) => VESSEL_OPTIONS.find((o) => o.value === v)?.label ?? v);
+    if (r.tandem === "yes") sites.push("extracranial ICA/CCA (tandem)");
+    lines.push(`Occlusion: ${sites.length ? sites.join(" + ") : "none"}`);
+  } else if (r.tandem === "yes") {
+    lines.push("Occlusion: extracranial ICA/CCA (tandem)");
+  }
+  if (r.aspects != null) lines.push(`ASPECTS: ${r.aspects}`);
+  const evt = yesNo(r.evtCandidate);
+  if (evt) lines.push(`EVT candidate: ${evt}`);
+  const ivt = yesNo(r.ivtCandidate);
+  if (ivt) lines.push(`IVT candidate: ${ivt}`);
+  if (r.gcs != null) lines.push(`GCS: ${r.gcs}`);
+  if (r.hemVolume != null) lines.push(`Hematoma volume: ${r.hemVolume} mL`);
+  if (r.anticoag) lines.push(`Anticoagulation: ${r.anticoag}`);
+  if (r.secondaryCause) lines.push(`Secondary cause: ${r.secondaryCause}`);
+  const spot = yesNo(r.spotSign);
+  if (spot) lines.push(`Spot sign: ${spot}`);
+  return lines;
 }
 
 export function buildShareMessage(r: PatientRecord): string {
@@ -30,6 +84,7 @@ export function buildShareMessage(r: PatientRecord): string {
   if (r.premrs != null) lines.push(`pre-mRS: ${r.premrs}`);
   if (r.ltswHours != null) lines.push(`LTSW: ${fmtHoursAsClock(r.ltswHours)}`);
   if (r.strokeType) lines.push(`Stroke type: ${r.strokeType}`);
+  lines.push(...clinicalLines(r));
 
   if (r.selected.length > 0) {
     lines.push("");
@@ -47,6 +102,7 @@ export function buildShareMessage(r: PatientRecord): string {
   if (r.tev) extras.push(`TEV: ${r.tev}`);
   if (r.mtici) extras.push(`mTICI: ${r.mtici}`);
   if (r.tiv) extras.push(`TIV: ${r.tiv}`);
+  if (r.reversal) extras.push(`Anticoagulation reversal: ${r.reversal}${r.reversalAgent ? ` (${REVERSAL_LABEL[r.reversalAgent] ?? r.reversalAgent})` : ""}`);
   if (extras.length > 0) {
     lines.push("");
     lines.push("Acute treatments:");
@@ -94,6 +150,9 @@ export function buildSheetPayload(
     TEV: r.tev ?? "",
     mTICI: r.mtici ?? "",
     TIV: r.tiv ?? "",
+    // Salvate quando il foglio ha le colonne "Reversal" e "Reversal_agent".
+    Reversal: r.reversal ?? "",
+    Reversal_agent: r.reversalAgent ? REVERSAL_LABEL[r.reversalAgent] ?? r.reversalAgent : "",
     Notes: r.notes,
     missed_trials: missed.join(","),
     eligible_at_submit: eligibleNow.join(","),

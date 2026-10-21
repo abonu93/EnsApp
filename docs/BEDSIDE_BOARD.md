@@ -61,6 +61,23 @@ flusso guidato (Share: WhatsApp e foglio). `flowOrigin` ricorda che si arriva
 dal board: "indietro" nel Riepilogo torna al board e la riga del foglio ha
 `source: "board"`. L'ID paziente si inserisce in cima al board.
 
+## Comportamenti
+
+- Finestra non ancora aperta (es. DONE SYMPLE prima delle 24 h, TENACITY prima
+  delle 4,5 h): lo studio e' *fuori*, con "apre fra ...".
+- Occlusione: oltre ai vasi intracranici c'e' "ICA/CCA extracranica", salvata
+  nel campo `tandem` (VANISH, PIVOTAL, NiVO, TENACITY e SAIL-MeVO lo escludono;
+  ATHENA lo valuta in sala; gli altri non lo citano).
+- Un dato inserito dalla scheda di uno studio riapre la scheda.
+- Fogli: X, swipe verso il basso ovunque (contenuto in cima), indietro del
+  telefono.
+- Invio (Share): ID paziente obbligatorio; TEV/TIV non richiesti se la
+  candidatura EVT/IVT e' gia' nota (solo mTICI); nell'emorragia al posto di
+  TEV/TIV si chiede la reversione dell'anticoagulazione e il farmaco
+  (colonne del foglio `Reversal` e `Reversal_agent`, da creare nel foglio).
+  Il messaggio include sede dell'occlusione, tandem, ASPECTS, candidature e
+  dati dell'emorragia.
+
 ## Lingue
 
 Le etichette dei criteri (`*-reasons.ts`) sono in italiano clinico: il board e
