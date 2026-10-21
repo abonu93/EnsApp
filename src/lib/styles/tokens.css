@@ -98,7 +98,7 @@
   --container-max: 480px;
   --container-max-tablet: 760px;
   --header-h: 56px;
-  --bottom-nav-h: 64px;
+  --bottom-nav-h: 80px;            /* altezza reale della barra fluttuante (pill + margini) */
   --touch-min: 48px;
 
   /* Motion */

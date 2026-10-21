@@ -89,8 +89,8 @@
 
 <style>
   .page {
-    /* Spazio sotto per non finire dietro alla barra fluttuante. */
-    padding: 8px 22px calc(96px + env(safe-area-inset-bottom, 0px));
+    /* Lo spazio per la barra fluttuante lo riserva gia App.svelte (html padding-bottom). */
+    padding: 8px 22px 16px;
   }
   .intro {
     margin-bottom: 22px;

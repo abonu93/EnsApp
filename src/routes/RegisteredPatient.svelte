@@ -394,7 +394,7 @@
   .alerts li.hard { color: var(--warn); }
   .alerts li.hard::before { background: var(--warn); }
   /* In fondo alla pagina, come il "Avanti" del board. */
-  .save-bar { padding: 22px 0 calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .save-bar { padding: 22px 0 16px; }
   .needs { margin: 0 0 8px; text-align: center; font-size: 12.5px; color: var(--text-muted); }
   .warn { margin: 0 0 8px; padding: 10px 12px; border-radius: 12px; background: var(--warn-soft); color: var(--warn); font-size: 13.5px; }
   .save { width: 100%; border-radius: 14px; padding: 15px 0; font-size: 15px; font-weight: 600; color: var(--text-inverted); background: var(--primary-hover); }
