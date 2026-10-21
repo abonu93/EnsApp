@@ -349,7 +349,7 @@ export const es: Dictionary = {
     causeOther: "Otra",
     anticoagHep: "Heparina o HBPM a dosis terapeutica",
     anticoagNoneOrAntiplatelet: "Ninguno (antiagregantes permitidos)",
-    anticoagVka: "AVK (warfarina, acenocumarol)",
+    anticoagVka: "AVK (warfarina, acenocumarol/Sintrom)",
     anticoagDoac: "ACOD",
     anticoagLmwhProphylaxis: "HBPM profilactica en 24h",
     regionPosterior: "Posterior",

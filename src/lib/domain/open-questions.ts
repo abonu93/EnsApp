@@ -43,76 +43,12 @@ export const OPEN_QUESTIONS: readonly OpenQuestion[] = [
     appliesTo: (i) => (i.targetVessels ?? []).some((v) => v === "m2-proxdom" || v === "m2-any"),
   },
   {
-    id: "vanish-aspects",
-    trials: ["VANISH"],
-    owner: "sponsor",
-    question: "Is there an ASPECTS >= 4 criterion?",
-    detail:
-      "The team sheet and the bedside card say ASPECTS >= 4; protocol v1.2 has no ASPECTS criterion (stratification only). The app does not check ASPECTS.",
-    appliesTo: (i) => typeof i.aspects === "number" && i.aspects < 4,
-  },
-  {
-    id: "vanish-perfusion",
-    trials: ["VANISH"],
-    owner: "sponsor",
-    question: "Do core <= 70 mL and mismatch > 1.2 apply to all patients or only between 4.5 and 9 h?",
-    detail: "Protocol v1.2 (incl. 8-9, p. 17) is ambiguous. The app asks it for every patient within 9 h.",
-  },
-  {
-    id: "vanish-m2",
-    trials: ["VANISH"],
-    owner: "sponsor",
-    question: "Is a dominant M2 eligible?",
-    detail:
-      "The team sheet says ICA, M1 or dominant M2; protocol v1.2 lists only intracranial ICA and M1. The app follows the protocol.",
-    appliesTo: (i) => (i.targetVessels ?? []).includes("m2-proxdom"),
-  },
-  {
     id: "twin2win2-m1",
     trials: ["TWIN-2-WIN 2"],
     owner: "sponsor",
     question: "Is a proximal M1 occlusion excluded (\"M1 distal\" in the protocol)?",
     detail: "Protocol V2 (p. 5) says distal M1. The app has a single M1 code and accepts any M1.",
     appliesTo: (i) => (i.targetVessels ?? []).includes("m1"),
-  },
-  {
-    id: "tenacity-centre",
-    trials: ["TENACITY"],
-    owner: "team",
-    question: "Is the centre registered as a perfusion centre?",
-    detail:
-      "Protocol V1.0 allows the CTA + ASPECTS route (no perfusion) only in centres without perfusion imaging (p. 30, 46). The app accepts it everywhere.",
-    appliesTo: (i) => i.perfusionMismatch !== "yes",
-  },
-  {
-    id: "orion-perfusion-thresholds",
-    trials: ["ORION"],
-    owner: "team",
-    question: "Perfusion thresholds differ from the app question",
-    detail:
-      "ORION requires ratio > 1.2 and mismatch >= 10 mL (p. 46); the app question uses the TENACITY thresholds (ratio >= 1.2, > 10 mL). Only borderline values differ.",
-  },
-  {
-    id: "orion-status",
-    trials: ["ORION"],
-    owner: "team",
-    question: "ORION is \"en pausa\" in the team sheet but active in the app",
-    detail:
-      "The sheet says recruitment paused pending part 2; the team chose to keep it active in the app (2026-10-19). Check before enrolling.",
-  },
-  {
-    id: "tich3-anticoag",
-    trials: ["TICH-3"],
-    owner: "sponsor",
-    question: "Are acenocoumarol and unfractionated heparin equivalent to warfarin for the exclusion?",
-    detail: "Protocol v3.1 (p. 25) names warfarin and therapeutic LMWH. The app excludes any VKA and therapeutic heparin.",
-  },
-  {
-    id: "tich3-ivh",
-    trials: ["TICH-3"],
-    owner: "sponsor",
-    question: "Is isolated primary IVH excluded?",
-    detail: "The protocol does not say so; the app excludes it (legacy rule).",
   },
   {
     id: "nivo-protocol",

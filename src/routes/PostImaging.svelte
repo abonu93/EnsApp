@@ -13,7 +13,8 @@
   import { fastestNeedsSpotSign } from "$lib/domain/hemorrhagic-rules";
   import { preData, postData, hemData, ltswHours } from "$lib/stores/patient";
   import { t } from "$lib/i18n";
-  import { DOIT_MAX_HOURS, VANISH_MAX_HOURS, type VesselCode } from "$lib/domain/acute-rules";
+  import { isTrialOpen } from "$lib/domain/trials-info";
+  import { DOIT_MAX_HOURS, VANISH_MAX_HOURS, VANISH_PERFUSION_AFTER_H, type VesselCode } from "$lib/domain/acute-rules";
 
   type YN = "yes" | "no" | "";
   type YNNa = YN | "na";
@@ -145,9 +146,13 @@
   // usa per escludere, ORION/SAIL-MeVO/TENACITY per includere): una sola
   // scheda per tutti gli ischemici, indipendente dalla candidatura a EVT.
   const showImaging = $derived(isIschemic && candidate !== "");
-  const showVanishQuestion = $derived(showEvt && ($ltswHours ?? 999) <= VANISH_MAX_HOURS);
+  // VANISH: core/mismatch solo nei pazienti tardivi (oltre 4,5 h, fino a 9 h).
+  const showVanishQuestion = $derived(
+    showEvt && ($ltswHours ?? -1) > VANISH_PERFUSION_AFTER_H && ($ltswHours ?? 999) <= VANISH_MAX_HOURS
+  );
+  // Domanda nascosta finche' ORION e' in pausa (non viene proposto).
   const showOrionEvtQuestion = $derived(
-    showEvt && ($ltswHours ?? -1) >= 4.5 && ($ltswHours ?? 999) <= 24
+    isTrialOpen("ORION") && showEvt && ($ltswHours ?? -1) >= 4.5 && ($ltswHours ?? 999) <= 24
   );
   // Perfusione (mismatch, core esteso): oltre 4,5 h la usano TENACITY e ORION
   // (obbligatoria per ORION oltre 6 h), quindi sta nella scheda Imaging.

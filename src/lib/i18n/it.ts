@@ -350,7 +350,7 @@ export const it = {
     causeOther: "Altro",
     anticoagHep: "Eparina o EBPM a dose terapeutica",
     anticoagNoneOrAntiplatelet: "Nessuno (antiaggreganti ammessi)",
-    anticoagVka: "AVK (warfarin, acenocumarolo)",
+    anticoagVka: "AVK (warfarin, acenocumarolo/Sintrom)",
     anticoagDoac: "DOAC",
     anticoagLmwhProphylaxis: "EBPM profilattica nelle 24h",
     regionPosterior: "Posteriori",

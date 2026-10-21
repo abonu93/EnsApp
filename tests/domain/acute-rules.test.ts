@@ -81,8 +81,8 @@ describe("acute-rules - smoke (ported from legacy node:test)", () => {
 
   test("vanish: requires vessel ica-terminal or m1", () => {
     // vanishCoreMismatch: criterio di perfusione del protocollo v1.2 (incl. 8-9).
-    expect(vanish({ age: 50, nihss: 8, premrs: 1, ltsw: 5, lvo: "yes", targetVessels: ["m1"], vanishCoreMismatch: "yes" })).toBe(true);
-    expect(vanish({ age: 50, nihss: 8, premrs: 1, ltsw: 5, lvo: "yes", targetVessels: ["basilar"], vanishCoreMismatch: "yes" })).toBe(false);
+    expect(vanish({ age: 50, nihss: 8, premrs: 1, ltsw: 5, lvo: "yes", targetVessels: ["m1"], aspects: 7, vanishCoreMismatch: "yes" })).toBe(true);
+    expect(vanish({ age: 50, nihss: 8, premrs: 1, ltsw: 5, lvo: "yes", targetVessels: ["basilar"], aspects: 7, vanishCoreMismatch: "yes" })).toBe(false);
   });
 });
 
@@ -101,22 +101,14 @@ describe("acute-rules - TENACITY (TNK > 4.5h - 72h)", () => {
     expect(tenacity(base)).toBe(true);
   });
 
-  test("eligible via CTA M1 + ASPECTS >= 7 without perfusion (option 2)", () => {
+  test("centro con perfusione: l'opzione angio-TC + ASPECTS non vale", () => {
     expect(
       tenacity({ ...base, perfusionMismatch: "no", targetVessels: ["m1"], aspects: 7 })
-    ).toBe(true);
-    expect(
-      tenacity({ ...base, perfusionMismatch: "no", targetVessels: ["m1"], aspects: 6 })
-    ).toBe(false);
-  });
-
-  test("M2 occlusion requires ASPECTS 9-10", () => {
-    expect(
-      tenacity({ ...base, perfusionMismatch: "no", targetVessels: ["m2-any"], aspects: 8 })
     ).toBe(false);
     expect(
       tenacity({ ...base, perfusionMismatch: "no", targetVessels: ["m2-any"], aspects: 9 })
-    ).toBe(true);
+    ).toBe(false);
+    expect(tenacity({ ...base, targetVessels: ["m1"], aspects: 7 })).toBe(true);
   });
 
   test("no imaging criterion met -> not eligible", () => {
@@ -294,41 +286,51 @@ describe("acute-rules - SAIL-MeVO (EVT in MeVO)", () => {
   });
 });
 
-describe("acute-rules - VANISH (protocollo v1.2)", () => {
+describe("acute-rules - VANISH (protocollo v1.2 + decisioni del team)", () => {
   const ok = {
     age: 60, nihss: 10, premrs: 0, ltsw: 4, lvo: "yes", tandem: "no",
-    targetVessels: ["m1"], vanishCoreMismatch: "yes",
+    targetVessels: ["m1"], aspects: 7,
   } as const;
   const run = (patch: Record<string, unknown>) =>
     vanish({ ...ok, ...patch } as unknown as Parameters<typeof vanish>[0]);
 
   test("finestra 9 h", () => {
-    expect(run({ ltsw: 9 })).toBe(true);
-    expect(run({ ltsw: 9.5 })).toBe(false);
+    expect(run({ ltsw: 9, vanishCoreMismatch: "yes" })).toBe(true);
+    expect(run({ ltsw: 9.5, vanishCoreMismatch: "yes" })).toBe(false);
   });
 
-  test("ICA intracranica non terminale ammessa", () => {
+  test("ICA intracranica, M1 e M2 dominante ammesse; M2 non dominante no", () => {
     expect(run({ targetVessels: ["ica-intracranial"] })).toBe(true);
     expect(run({ targetVessels: ["ica-terminal"] })).toBe(true);
-    expect(run({ targetVessels: ["m2-proxdom"] })).toBe(false);
+    expect(run({ targetVessels: ["m2-proxdom"] })).toBe(true);
+    expect(run({ targetVessels: ["m2-any"] })).toBe(false);
+  });
+
+  test("ASPECTS > 4 richiesto", () => {
+    expect(run({ aspects: 4 })).toBe(false);
+    expect(run({ aspects: 5 })).toBe(true);
+    expect(run({ aspects: undefined })).toBe(false);
   });
 
   test("tandem esclude", () => {
     expect(run({ tandem: "yes" })).toBe(false);
   });
 
-  test("core <= 70 mL con mismatch richiesto", () => {
-    expect(run({ vanishCoreMismatch: "no" })).toBe(false);
-    expect(run({ vanishCoreMismatch: undefined })).toBe(false);
+  test("core/mismatch solo nei pazienti tardivi (oltre 4,5 h)", () => {
+    expect(run({ ltsw: 4 })).toBe(true);
+    expect(run({ ltsw: 6 })).toBe(false);
+    expect(run({ ltsw: 6, vanishCoreMismatch: "no" })).toBe(false);
+    expect(run({ ltsw: 6, vanishCoreMismatch: "yes" })).toBe(true);
   });
 
   test("motivi e regola concordano", () => {
-    for (const v of [{}, { ltsw: 10 }, { tandem: "yes" }, { vanishCoreMismatch: "no" }, { targetVessels: ["basilar"] }, { lvo: "no" }]) {
+    for (const v of [{}, { ltsw: 10 }, { ltsw: 6 }, { ltsw: 6, vanishCoreMismatch: "yes" }, { tandem: "yes" }, { aspects: 3 }, { targetVessels: ["basilar"] }, { lvo: "no" }]) {
       const input = { ...ok, ...v } as unknown as Parameters<typeof vanish>[0];
       expect(reasonVanish(input).eligible).toBe(vanish(input));
     }
   });
 });
+
 
 describe("acute-rules - REMEDY (protocollo V6.2)", () => {
   const ok = {

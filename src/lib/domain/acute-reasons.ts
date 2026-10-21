@@ -21,6 +21,7 @@ import {
   territoryCount,
   TWIN2WIN2_VESSELS,
   VANISH_MAX_HOURS,
+  vanishPerfusionOk,
   vesselsWithin,
   weTrustTimeOk,
 } from "./acute-rules";
@@ -78,9 +79,13 @@ export function reasonVanish(input: AcuteInput): ReasonReport {
     { ok: input.nihss >= 6, label: "NIHSS >= 6" },
     { ok: input.ltsw <= VANISH_MAX_HOURS, label: "LTSW <= 9h (risveglio: 9 h dal punto medio del sonno, verificare)" },
     { ok: input.lvo === "yes", label: "LVO confermato" },
-    { ok: v.vanish, label: "occlusione ICA intracranica o M1" },
+    { ok: v.vanish, label: "occlusione ICA intracranica, M1 o M2 dominante" },
     { ok: input.tandem !== "yes", label: "no occlusione tandem" },
-    { ok: input.vanishCoreMismatch === "yes", label: "core <= 70 mL e mismatch > 1,2 (differenza > 10 mL)" },
+    { ok: isNumber(input.aspects) && input.aspects > 4, label: "ASPECTS > 4" },
+    {
+      ok: vanishPerfusionOk(input),
+      label: "oltre 4,5 h: core <= 70 mL e mismatch > 1,2 (differenza > 10 mL)",
+    },
   ]);
 }
 
@@ -284,11 +289,8 @@ export function reasonRemedy(input: AcuteInput): ReasonReport {
 
 export function reasonTenacity(input: AcuteInput): ReasonReport {
   const hasIca = hv(input, "ica-intracranial") || hv(input, "ica-terminal");
-  const hasM1 = hv(input, "m1");
-  const hasM2 = hv(input, "m2-any") || hv(input, "m2-proxdom");
   const a = input.aspects;
   const imagingPerfusion = input.perfusionMismatch === "yes";
-  const imagingNoPerfusion = isNumber(a) && ((hasM1 && a >= 7) || (hasM2 && a >= 9));
   const highRiskImaging = input.largeCore === "yes" || (isNumber(a) && a <= 6);
 
   const infratentorial = hv(input, "basilar") || hv(input, "va");
@@ -298,8 +300,8 @@ export function reasonTenacity(input: AcuteInput): ReasonReport {
     { ok: input.premrs <= 1, label: "pre-mRS <= 1" },
     { ok: input.nihss > 5 && input.nihss <= 25, label: "NIHSS 6-25" },
     {
-      ok: imagingPerfusion || imagingNoPerfusion,
-      label: "imaging: mismatch CTP (>=1.2 e >10 mL) oppure M1 con ASPECTS >=7 / M2 con ASPECTS >=9",
+      ok: imagingPerfusion,
+      label: "mismatch alla TC perfusione (>=1.2 e >10 mL): centro con perfusione",
     },
     { ok: !highRiskImaging, label: "no imaging ad alto rischio (core >=70 mL o ASPECTS <=6)" },
     { ok: !hasIca, label: "no occlusione carotide interna" },

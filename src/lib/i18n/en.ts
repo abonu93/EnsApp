@@ -349,7 +349,7 @@ export const en: Dictionary = {
     causeOther: "Other",
     anticoagHep: "Heparin or LMWH at therapeutic dose",
     anticoagNoneOrAntiplatelet: "None (antiplatelets allowed)",
-    anticoagVka: "VKA (warfarin, acenocoumarol)",
+    anticoagVka: "VKA (warfarin, acenocoumarol/Sintrom)",
     anticoagDoac: "DOAC",
     anticoagLmwhProphylaxis: "Prophylactic LMWH in last 24h",
     regionPosterior: "Posterior",

@@ -173,9 +173,9 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     // Testi dal protocollo v1.2, sinossi e CI: vedi vault/ensayos/VANISH.md.
     status: "active",
     category: "Thrombolysis with EVT pathway",
-    key: { window: "<= 9 h (wake-up: 9 h from mid-sleep)", age: ">= 18 y", mrs: "0-1", nihss: ">= 6", aspects: "- (stratification only, not a criterion in protocol v1.2)" },
+    key: { window: "<= 9 h (wake-up: 9 h from mid-sleep)", age: ">= 18 y", mrs: "0-1", nihss: ">= 6", aspects: "> 4 (team criterion; stratification only in protocol v1.2)" },
     consent: "Written; oral by the patient with later signature; representative also by phone, with written ratification.",
-    imaging: "Occlusion (TICI 0-1) of the intracranial ICA or M1 on CTA/MRA. Core <= 70 mL and perfusion mismatch > 1.2 with absolute difference > 10 mL (Tmax > 6 s). Tandem occlusion of any cause excludes.",
+    imaging: "Occlusion (TICI 0-1) of the intracranial ICA, M1 or dominant M2 on CTA/MRA (M2: team decision). Beyond 4.5 h: core <= 70 mL and perfusion mismatch > 1.2 with absolute difference > 10 mL (Tmax > 6 s). Tandem occlusion of any cause excludes.",
     thrombolytic: "Optional.",
     thrombectomy: "Yes (randomized before the procedure).",
     preEvtLabs: "Pregnancy test in women of childbearing potential.",
@@ -249,7 +249,8 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     visits: ["Days 1, 2, 3, 6 (dosing)", "Day 30 (in-person)", "Day 60 (phone)", "Day 90 (in-person)"],
   },
   Orion: {
-    status: "active",
+    // In pausa come nel foglio del team (seconda parte del reclutamento in attesa).
+    status: "paused",
     category: "Thrombolytic",
     key: { window: "4.5-24 h (perfusion mandatory > 6 h; if done earlier, criteria apply too)", age: "18-90 y", mrs: "0-1 (0 if 86-90 y)", nihss: ">= 5", aspects: "-" },
     consent: "Written (impartial witness permitted).",
@@ -356,10 +357,10 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
   TENACITY: {
     status: "active",
     category: "Thrombolytic (late window)",
-    key: { window: "> 4.5 h and <= 72 h", age: ">= 18 y", mrs: "0-1", nihss: "6-25", aspects: ">= 7 (M1) / 9-10 (M2)" },
+    key: { window: "> 4.5 h and <= 72 h", age: ">= 18 y", mrs: "0-1", nihss: "6-25", aspects: "> 6 (0-6 excluded)" },
     consent: "Written & oral/phone consent.",
     imaging:
-      "Acute ischemic stroke (wake-up included) of the supratentorial circulation (ACA, MCA or PCA). Option 1 - CT perfusion: perfusion/core mismatch >= 20% (ratio >= 1.2) AND mismatch volume > 10 mL. Option 2 - no MRI/CTP: M1 or M2 MCA occlusion on CTA with small core on NCCT (ASPECTS >= 7 for M1; ASPECTS 9-10 for M2, max one region distal to the occlusion).",
+      "Acute ischemic stroke (wake-up included) of the supratentorial circulation (ACA, MCA or PCA). CT perfusion: perfusion/core mismatch >= 20% (ratio >= 1.2) AND mismatch volume > 10 mL. Our centre is registered as a perfusion centre, so the CTA + ASPECTS option (centres without perfusion) does not apply.",
     thrombolytic: "Yes - tenecteplase (TNK) vs standard care in the > 4.5 h window.",
     thrombectomy: "No - patients treated with mechanical thrombectomy are excluded.",
     preEvtLabs: "No.",
