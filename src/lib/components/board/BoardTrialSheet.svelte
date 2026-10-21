@@ -4,15 +4,19 @@
   import { CLOCK, type BoardJudgement, type BoardRow } from "$lib/domain/board";
   import { exclusiveWith } from "$lib/domain/trials-info";
   import { t } from "$lib/i18n";
+  import type { SelectionAlert } from "$lib/domain/open-questions";
+  import BoardAlerts from "./BoardAlerts.svelte";
   import { fill, fmtMin, fmtValue } from "./format";
 
   interface Props {
     trial: BoardJudgement;
     values: Record<string, unknown>;
+    /** Dubbi aperti e avvertenze (open-questions.ts) per questo studio. */
+    alerts: SelectionAlert[];
     onField: (key: string) => void;
     onClose: () => void;
   }
-  let { trial, values, onField, onClose }: Props = $props();
+  let { trial, values, alerts, onField, onClose }: Props = $props();
 
   const status = $derived(
     trial.status === "eligible" ? $t.board.statusEligible : trial.status === "possible" ? $t.board.statusPossible : $t.board.statusOut
@@ -49,6 +53,9 @@
       </div>
       <span class="status {trial.status}">{status}</span>
     </div>
+    {#if trial.status !== "out"}
+      <BoardAlerts {alerts} />
+    {/if}
     <ul class="rows">
       {#each trial.rows as r, i (i)}
         {@const m = mark(r)}

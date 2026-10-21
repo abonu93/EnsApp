@@ -41,6 +41,17 @@ completamento non risulti mai *fuori*. Aggiungere un trial a
 `board.ts` basta perche' compaia nel board; un campo nuovo va aggiunto a
 `BOARD_FIELDS` (con i valori da provare) e alle traduzioni `board.fields`.
 
+## Dubbi aperti, avvertenze e co-arruolamento (vault)
+
+Le decisioni e i dubbi del vault (`vault/`, costruito dalla copia Drive
+"ENSAYOS — Copia ordenada") arrivano al board da `open-questions.ts`, senza
+copie: `selectionAlerts` per ogni studio aperto (etichetta "check" quando un
+dubbio o un'avvertenza cambia l'esito per questo paziente, riquadro nel foglio
+dello studio), `COENROLMENT_RULES` fra gli eleggibili ("limiti di
+co-arruolamento") e gli stessi avvisi del Riepilogo nel foglio di invio.
+Lo stato degli studi segue `trials-info.ts`, allineato al foglio del team
+"Esquema ensayos" (fonte di verita' secondo `vault/CLAUDE.md`).
+
 ## Invio
 
 "Send to coordinator" mostra il riepilogo, permette di indicare gli studi in

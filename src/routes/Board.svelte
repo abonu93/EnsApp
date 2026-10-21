@@ -3,7 +3,9 @@
   // bene, gli 8 dati decisivi e tutti gli studi aperti in tre stati
   // (eleggibile, possibile con cosa manca, fuori con il motivo).
   import { CLOCK, BOARD_GRID, FIELD_BY_KEY, NOT_RECRUITING, isMissing, type BoardJudgement } from "$lib/domain/board";
-  import { boardClock, boardElapsedMin, boardResult, boardValues, setBoardClock, setBoardField } from "$lib/stores/board";
+  import { boardAlertInput, boardClock, boardElapsedMin, boardResult, boardValues, setBoardClock, setBoardField } from "$lib/stores/board";
+  import { selectionAlerts } from "$lib/domain/open-questions";
+  import BoardAlerts from "$lib/components/board/BoardAlerts.svelte";
   import { now } from "$lib/stores/patient";
   import { t, locale } from "$lib/i18n";
   import BoardFieldSheet from "$lib/components/board/BoardFieldSheet.svelte";
@@ -19,6 +21,7 @@
     | { kind: "trial"; name: string }
     | { kind: "compete"; names: string[] }
     | { kind: "all" }
+    | { kind: "colimits" }
     | { kind: "send" }
     | null;
   let sheet = $state<SheetState>(null);
@@ -31,6 +34,15 @@
   const grid = $derived(BOARD_GRID[values.strokeType === "hemorrhagic" ? "hemo" : "isch"]);
   const possibleCount = $derived(res.open.length - res.eligible.length);
   const competing = $derived(new Set(res.conflicts.flat()));
+  // Dubbi aperti e avvertenze del vault (open-questions.ts) per ogni studio aperto.
+  const trialAlerts = $derived(
+    new Map(res.open.map((j) => [j.name, selectionAlerts([j.name], $boardAlertInput)]))
+  );
+  const needsCheck = (name: string) => trialAlerts.get(name)?.some((a) => a.relevant) ?? false;
+  // Limiti di co-arruolamento dei protocolli fra gli studi eleggibili.
+  const coLimits = $derived(
+    selectionAlerts(res.eligible.map((j) => j.name), $boardAlertInput).filter((a) => a.kind === "coenrolment")
+  );
   const extraSet = $derived(res.extra.filter((k) => !isMissing(values[k])).length);
   const notRecruiting = $derived(
     NOT_RECRUITING.map((n) => `${n.name} (${n.status === "paused" ? $t.board.pausedStatus : $t.board.closedStatus})`).join(", ")
@@ -121,6 +133,9 @@
       {#each res.conflicts as g (g.join())}
         <button type="button" class="link warn" onclick={() => (sheet = { kind: "compete", names: g })}>{fill($t.board.compete, { names: g.join(", ") })} →</button>
       {/each}
+      {#if coLimits.length}
+        <button type="button" class="link warn" onclick={() => (sheet = { kind: "colimits" })}>{fill($t.board.coLimits, { n: coLimits.length })} →</button>
+      {/if}
     </div>
 
     <ul class="trials">
@@ -160,6 +175,7 @@
       <span class="name-row">
         <span class="name" class:out={j.status === "out"}>{j.name}</span>
         {#if competing.has(j.name)}<span class="tag">{$t.board.competing}</span>{/if}
+        {#if j.status !== "out" && needsCheck(j.name)}<span class="tag check">{$t.board.checkTag}</span>{/if}
         <span class="sr-only">— {j.status === "eligible" ? $t.board.statusEligible : j.status === "possible" ? $t.board.statusPossible : $t.board.statusOut}</span>
       </span>
       <span class="reason" class:ok={j.status === "eligible"}>{reason(j)}</span>
@@ -186,7 +202,7 @@
 {:else if sheet?.kind === "trial"}
   {@const j = trial(sheet.name)}
   {#if j}
-    <BoardTrialSheet trial={j} {values} onField={openField} onClose={() => (sheet = null)} />
+    <BoardTrialSheet trial={j} {values} alerts={selectionAlerts([j.name], $boardAlertInput)} onField={openField} onClose={() => (sheet = null)} />
   {/if}
 {:else if sheet?.kind === "compete"}
   {@const names = sheet.names}
@@ -225,6 +241,14 @@
           </li>
         {/each}
       </ul>
+    {/snippet}
+  </Sheet>
+{:else if sheet?.kind === "colimits"}
+  <Sheet open={true} tall ariaLabel={fill($t.board.coLimits, { n: coLimits.length })} onClose={() => (sheet = null)}>
+    {#snippet children()}
+      <h2 class="sheet-title">{fill($t.board.coLimits, { n: coLimits.length })}</h2>
+      <p class="sheet-desc">{$t.board.coLimitsDesc}</p>
+      <BoardAlerts alerts={coLimits} />
     {/snippet}
   </Sheet>
 {:else if sheet?.kind === "send"}
@@ -407,6 +431,7 @@
     font-weight: 600;
     color: var(--warn);
   }
+  .tag.check { color: var(--danger); }
   .reason {
     margin-top: 2px;
     font-size: 12.5px;

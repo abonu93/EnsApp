@@ -7,6 +7,9 @@
   import { buildShareMessage, buildSheetPayload, type PatientRecord } from "$lib/domain/patient-record";
   import { hasKnownStudyArm, sendToSheet, type SendStatus } from "$lib/domain/sheet-payload";
   import { exclusiveWith } from "$lib/domain/trials-info";
+  import { selectionAlerts } from "$lib/domain/open-questions";
+  import { boardAlertInput } from "$lib/stores/board";
+  import BoardAlerts from "./BoardAlerts.svelte";
   import { preData, postData, hemData, ltswHours, now } from "$lib/stores/patient";
   import { selectedStudies, studyOutcomes, notesText } from "$lib/stores/trialSelection";
   import { eligibleOpenTrials } from "$lib/stores/eligibility";
@@ -171,6 +174,8 @@
           </div>
         {/each}
       </fieldset>
+      <!-- Stessi avvisi del Riepilogo per gli studi scelti. -->
+      <BoardAlerts alerts={selectionAlerts($selectedStudies, $boardAlertInput)} />
     {/if}
 
     <div class="actions">

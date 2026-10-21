@@ -42,6 +42,9 @@ test.describe("bedside board", () => {
     await page.getByRole("button", { name: "Ischemic", exact: true }).click();
     await expect(page.getByRole("button", { name: /^Imaging: Ischemic/ })).toBeVisible();
 
+    // Dubbi aperti del vault (open-questions.ts): DONE SYMPLE con mRS 1 a 70 anni
+    await expect(page.locator("button.trial", { hasText: "DONE SYMPLE" }).locator(".tag.check")).toBeVisible();
+
     // Dettaglio studio: i criteri si aprono come dialog
     await page.locator("button.trial", { hasText: "PIVOTAL" }).click();
     const dialog = page.getByRole("dialog", { name: "PIVOTAL" });

@@ -5,6 +5,7 @@
 import { derived } from "svelte/store";
 import { preData, postData, hemData, acuteInput, hemInput, now } from "./patient";
 import { CLOCK, FIELD_BY_KEY, isMissing, judgeBoard } from "$lib/domain/board";
+import type { AcuteInput } from "$lib/domain/acute-rules";
 
 export type ClockMode = "known" | "wakeup";
 
@@ -51,6 +52,11 @@ export const boardResult = derived(
       strokeType: $post.strokeType,
       clockSet: !!$pre.ltswDate || typeof $pre.ltsw === "number",
     })
+);
+
+/** Input per gli avvisi di open-questions.ts (dati ischemici; niente per l'emorragia, come il Riepilogo). */
+export const boardAlertInput = derived([acuteInput, postData], ([$acute, $post]) =>
+  $post.strokeType === "hemorrhagic" ? undefined : ($acute as AcuteInput)
 );
 
 /** Minuti dall'ultima volta visto bene, aggiornati con l'orologio dell'app. */
