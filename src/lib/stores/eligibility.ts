@@ -7,6 +7,7 @@ import * as acute from "$lib/domain/acute-rules";
 import * as hem from "$lib/domain/hemorrhagic-rules";
 import type { AcuteInput, VesselCode } from "$lib/domain/acute-rules";
 import type { HemorrhagicInput } from "$lib/domain/hemorrhagic-rules";
+import { isTrialOpen } from "$lib/domain/trials-info";
 
 export interface AcuteEligibility {
   weTrust: boolean;
@@ -112,6 +113,24 @@ export const vesselFlags = derived(postData, ($post) =>
 export const acuteEligibleCount = derived(acuteEligibility, ($e) =>
   Object.values($e).filter(Boolean).length
 );
+
+/**
+ * Trial eleggibili e con reclutamento aperto (display name), per identificare
+ * i "missed" all'invio. I trial chiusi non sono una missed opportunity.
+ */
+export const eligibleOpenTrials = derived([acuteEligibility, hemEligibility], ([e, h]) => {
+  const map: Array<[string, boolean]> = [
+    ["WeTrust", e.weTrust], ["ATHENA", e.athena], ["VANISH", e.vanish], ["PIVOTAL", e.pivotal],
+    ["PROMISE", e.promise], ["MOSTE", e.moste], ["TWIN-2-WIN 2", e.twin2win2], ["ARTEMIS", e.artemis],
+    ["HYBERNIA", e.hybernia], ["DONE SYMPLE", e.doneSymple], ["SHIONOGI", e.shionogi],
+    ["SOVATELTIDE", e.sovateltide], ["ORION", e.orion], ["NiVO", e.nivo],
+    ["DO-IT", e.doit], ["REMEDY", e.remedy], ["TENACITY", e.tenacity],
+    ["SAIL-MeVO", e.sailMevo],
+    ["NORA HOME", e.noraHome],
+    ["FASTEST", h.fastest.eligible], ["TICH-3", h.tich3],
+  ];
+  return map.filter(([name, ok]) => ok && isTrialOpen(name)).map(([n]) => n);
+});
 
 function safeBoolean(fn: () => boolean): boolean {
   try {

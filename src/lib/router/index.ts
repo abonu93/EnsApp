@@ -18,10 +18,12 @@ import Components from "../../routes/Components.svelte";
 import FormDemo from "../../routes/FormDemo.svelte";
 import NotFound from "../../routes/NotFound.svelte";
 import OpenQuestions from "../../routes/OpenQuestions.svelte";
+import Board from "../../routes/Board.svelte";
 
 export const routes = {
   "/": Landing,
   "/workflow": WorkflowSelector,
+  "/board": Board,
   "/trials": TrialsList,
   "/trial/:name": TrialDetail,
   "/pre-imaging": PreImaging,

@@ -24,6 +24,16 @@
       route: "/trial-patient",
       icon: "bolt" as const,
     },
+    {
+      key: "board",
+      title: $t.board.entryTitle,
+      desc: $t.board.entryDesc,
+      tag: $t.board.entryTag,
+      accent: "var(--ischemic-text)",
+      bg: "var(--ischemic-soft)",
+      route: "/board",
+      icon: "grid" as const,
+    },
   ]);
 
   function pick(route: string) { push(route); }
@@ -47,6 +57,11 @@
                 <path d="M6 2v6a4 4 0 0 0 8 0V2" />
                 <path d="M10 12v3a5 5 0 0 0 10 0v-2" />
                 <circle cx="20" cy="10" r="2" />
+              </svg>
+            {:else if o.icon === "grid"}
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
               </svg>
             {:else}
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
