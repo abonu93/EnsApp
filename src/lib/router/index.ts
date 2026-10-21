@@ -11,7 +11,7 @@ import PostImaging from "../../routes/PostImaging.svelte";
 import Summary from "../../routes/Summary.svelte";
 import Share from "../../routes/Share.svelte";
 import PostAcute from "../../routes/PostAcute.svelte";
-import TrialPatient from "../../routes/TrialPatient.svelte";
+import RegisteredPatient from "../../routes/RegisteredPatient.svelte";
 import SavedPatients from "../../routes/SavedPatients.svelte";
 import SavedPatientDetail from "../../routes/SavedPatientDetail.svelte";
 import Components from "../../routes/Components.svelte";
@@ -32,7 +32,9 @@ export const routes = {
   "/summary": Summary,
   "/share": Share,
   "/post-acute": PostAcute,
-  "/trial-patient": TrialPatient,
+  "/registered": RegisteredPatient,
+  // Vecchio indirizzo della registrazione rapida.
+  "/trial-patient": RegisteredPatient,
   "/saved": SavedPatients,
   "/saved/:id": SavedPatientDetail,
   "/components": Components,

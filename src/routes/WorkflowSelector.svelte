@@ -25,13 +25,13 @@
       icon: "stetho" as const,
     },
     {
-      key: "direct",
-      title: $t.extras.directEnroll,
-      desc: $t.extras.directEnrollDesc,
-      tag: $t.extras.fastTag,
+      key: "registered",
+      title: $t.registered.title,
+      desc: $t.registered.entryDesc,
+      tag: $t.registered.entryTag,
       accent: "var(--post-acute)",
       bg: "var(--post-acute-soft)",
-      route: "/trial-patient",
+      route: "/registered",
       icon: "bolt" as const,
     },
   ]);

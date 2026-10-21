@@ -70,7 +70,33 @@ const NAME_TO_KEY: Record<string, SheetTrialKey> = {
   "SAIL-MeVO": "SAILMEVO",
 };
 
-const STUDIES_WITHOUT_ARM = new Set(["SAFER-DOAC", "FASTEST", "TICH-3", "NiVO", "REMEDY"]);
+/**
+ * Disegno dello studio (schede del vault, vault/ensayos/*): decide se al
+ * momento dell'arruolamento si conosce il braccio.
+ * - "open": randomizzato in aperto (anche PROBE): si registra intervention/control;
+ * - "blinded": in cieco contro placebo, il braccio non si conosce;
+ * - "single-arm": non randomizzato, nessun braccio di controllo;
+ * - "unknown": nessun documento (SAFER-DOAC).
+ * Gli studi non elencati sono "open". Gli studi chiusi o in pausa restano come
+ * nel legacy (non selezionabili; da rivedere se riaprono).
+ */
+export type StudyDesign = "open" | "blinded" | "single-arm" | "unknown";
+const STUDY_DESIGN: Record<string, StudyDesign> = {
+  FASTEST: "blinded", // rFVIIa vs placebo, doppio cieco
+  "TICH-3": "blinded", // acido tranexamico vs placebo, in cieco
+  REMEDY: "blinded", // DM199 vs placebo, doppio cieco
+  SOVATELTIDE: "blinded", // sovateltide vs placebo, doppio cieco
+  NiVO: "single-arm", // iNstroke 4F, braccio singolo
+  PIVOTAL: "single-arm", // RapidPulse, braccio singolo
+  "SAFER-DOAC": "unknown",
+};
+const DESIGN_BY_CANON: Record<string, StudyDesign> = Object.fromEntries(
+  Object.entries(STUDY_DESIGN).map(([name, d]) => [canonicalTrialName(name), d])
+);
+
+export function studyDesign(name: string): StudyDesign {
+  return DESIGN_BY_CANON[canonicalTrialName(normalizeStudyName(name))] ?? "open";
+}
 
 export function normalizeStudyName(name: string): string {
   if (name === "SaferDoac") return "SAFER-DOAC";
@@ -79,8 +105,9 @@ export function normalizeStudyName(name: string): string {
   return name || "";
 }
 
+/** Si registra intervention/control solo per gli studi randomizzati in aperto. */
 export function hasKnownStudyArm(name: string): boolean {
-  return !STUDIES_WITHOUT_ARM.has(normalizeStudyName(name));
+  return studyDesign(name) === "open";
 }
 
 // Per la colonna del foglio si accetta anche la chiave di TRIALS_INFO

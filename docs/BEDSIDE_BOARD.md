@@ -52,14 +52,14 @@ co-arruolamento") e gli stessi avvisi del Riepilogo nel foglio di invio.
 Lo stato degli studi segue `trials-info.ts`, allineato al foglio del team
 "Esquema ensayos" (fonte di verita' secondo `vault/CLAUDE.md`).
 
-## Selezione e Riepilogo
+## Selezione e invio
 
 Gli studi eleggibili si selezionano direttamente nel board (stessi gruppi
 esclusivi del Riepilogo, `toggleStudy` in `stores/trialSelection.ts`). Il
-pulsante in basso porta al Riepilogo (`/summary`) e da li' si prosegue come nel
-flusso guidato (Share: WhatsApp e foglio). `flowOrigin` ricorda che si arriva
-dal board: "indietro" nel Riepilogo torna al board e la riga del foglio ha
-`source: "board"`. L'ID paziente si inserisce in cima al board.
+pulsante "Avanti" in fondo alla pagina porta alla schermata di invio (Share:
+ID paziente, TEV/mTICI/TIV o reversione, note, WhatsApp e foglio).
+`flowOrigin` ricorda che si arriva dal board: "indietro" torna al board e la
+riga del foglio ha `source: "board"`.
 
 ## Comportamenti
 

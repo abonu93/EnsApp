@@ -8,6 +8,7 @@ import {
   buildTrialsForSheet,
   normalizeStudyName,
   hasKnownStudyArm,
+  studyDesign,
   SHEET_TRIAL_KEYS,
   SHEET_TRIAL_KEYS_CSV,
   type StudyOutcomes,
@@ -94,7 +95,8 @@ describe("sheet payload - nomi dalla registrazione rapida (chiavi TRIALS_INFO)",
   const cases: Array<[string, string, string]> = [
     ["Twin2Win2", "TWIN2WIN", "control"],
     ["DoneSymple", "DONESYMPLE", "intervention"],
-    ["Sovateltide", "SOVATELTIDE", "control"],
+    // Doppio cieco contro placebo: nessun braccio, si registra "si".
+    ["Sovateltide", "SOVATELTIDE", "si"],
     ["Orion", "ORION", "intervention"],
     ["DOIT", "DOIT", "control"],
     ["TICH3", "TICH3", "si"],
@@ -128,5 +130,17 @@ describe("sheet payload - trialKeys for the Apps Script backend", () => {
     for (const key of SHEET_TRIAL_KEYS) {
       expect(key).toMatch(/^[A-Za-z0-9_]{1,40}$/);
     }
+  });
+});
+
+describe("sheet payload - disegno dello studio (braccio noto solo se in aperto)", () => {
+  test.each([
+    ["ATHENA", "open"], ["WeTrust", "open"], ["Twin2Win2", "open"], ["VANISH", "open"], ["DoneSymple", "open"],
+    ["SAIL-MeVO", "open"], ["TENACITY", "open"], ["DOIT", "open"], ["NORA HOME", "open"],
+    ["FASTEST", "blinded"], ["TICH3", "blinded"], ["REMEDY", "blinded"], ["Sovateltide", "blinded"],
+    ["NiVO", "single-arm"], ["PIVOTAL", "single-arm"], ["SaferDoac", "unknown"],
+  ])("%s -> %s", (name, design) => {
+    expect(studyDesign(name)).toBe(design);
+    expect(hasKnownStudyArm(name)).toBe(design === "open");
   });
 });

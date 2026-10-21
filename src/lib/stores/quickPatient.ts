@@ -1,4 +1,5 @@
-// Stato del quick-patient flow (separato dal flusso guided).
+// Stato della registrazione di un paziente gia' arruolato (Paziente registrato,
+// ex quick-patient), separato dal flusso guided.
 // Persistito 24h cosi' l'utente puo' tornare al form se navigato fuori.
 
 import { persisted } from "./persistence";
@@ -26,6 +27,25 @@ export interface QuickPatientData {
   mtici?: string;
   tiv?: "Yes" | "No" | "";
   notes?: string;
+  // --- Paziente registrato (non acuto, anche giorni dopo) ---
+  /** ISO: quando il paziente e' stato visto/valutato. */
+  seenDate?: string;
+  /** LTSW alla valutazione: da data e ora ("clock") o riferito in ore ("hours"). */
+  ltswMode?: "clock" | "hours";
+  /** Ore fra ultima volta visto bene e valutazione. */
+  ltswH?: number;
+  /** ISO dell'ultima volta visto bene (modalita' "clock"). */
+  lsw?: string;
+  wakeup?: boolean;
+  /** Studi in cui e' arruolato, con il braccio se lo studio ne ha uno. */
+  trials?: { name: string; arm: "intervention" | "control" | "" }[];
+  aspects?: number;
+  gcs?: number;
+  hemVolume?: number;
+  reversal?: "Yes" | "No" | "";
+  reversalAgent?: string;
+  /** Campi aggiuntivi mostrati (via "+ Aggiungi dato"). */
+  shown?: string[];
 }
 
 export const quickPatient = persisted<QuickPatientData>({
