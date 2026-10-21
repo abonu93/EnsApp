@@ -23,6 +23,10 @@ export interface PatientRecord {
   tiv?: string;
   /** Emorragia: reversione dell'anticoagulazione e farmaco usato. */
   reversal?: string;
+  /** Paziente registrato (non acuto): quando e' stato visto e da dove viene l'LTSW. */
+  seen?: string;
+  seenAt?: string;
+  ltswDetail?: string;
   reversalAgent?: string;
   /** Dettagli clinici per il messaggio (non vanno nel foglio). */
   wakeup?: boolean;
@@ -82,7 +86,10 @@ export function buildShareMessage(r: PatientRecord): string {
   if (r.age != null) lines.push(`Age: ${r.age}`);
   if (r.nihss != null) lines.push(`NIHSS: ${r.nihss}`);
   if (r.premrs != null) lines.push(`pre-mRS: ${r.premrs}`);
-  if (r.ltswHours != null) lines.push(`LTSW: ${fmtHoursAsClock(r.ltswHours)}`);
+  if (r.seen) lines.push(`Seen: ${r.seen}`);
+  if (r.ltswHours != null) {
+    lines.push(`LTSW${r.seen ? " at evaluation" : ""}: ${fmtHoursAsClock(r.ltswHours)}${r.ltswDetail ? ` (${r.ltswDetail})` : ""}`);
+  }
   if (r.strokeType) lines.push(`Stroke type: ${r.strokeType}`);
   lines.push(...clinicalLines(r));
 
@@ -153,6 +160,8 @@ export function buildSheetPayload(
     // Salvate quando il foglio ha le colonne "Reversal" e "Reversal_agent".
     Reversal: r.reversal ?? "",
     Reversal_agent: r.reversalAgent ? REVERSAL_LABEL[r.reversalAgent] ?? r.reversalAgent : "",
+    // Paziente registrato: data della valutazione (colonna "Seen_at" nel foglio).
+    Seen_at: r.seenAt ?? "",
     Notes: r.notes,
     missed_trials: missed.join(","),
     eligible_at_submit: eligibleNow.join(","),

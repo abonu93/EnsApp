@@ -13,7 +13,7 @@ const ROUTES = [
   { name: "summary", path: "/summary" },
   { name: "share", path: "/share" },
   { name: "post-acute", path: "/post-acute" },
-  { name: "trial-patient", path: "/trial-patient" },
+  { name: "registered", path: "/registered" },
   { name: "open-questions", path: "/open-questions" },
   { name: "board", path: "/board" },
 ];

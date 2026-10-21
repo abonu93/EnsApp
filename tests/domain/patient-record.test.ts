@@ -74,6 +74,11 @@ describe("patient-record", () => {
     expect(payload.Reversal_agent).toBe("PCC");
   });
 
+  test("paziente registrato: visto il, LTSW alla valutazione", () => {
+    const m = buildShareMessage({ age: 70, ltswHours: 3.5, seen: "20 Oct 2026 14:00", ltswDetail: "reported", selected: [], outcomes: {}, notes: "" });
+    expect(m).toBe("Age: 70\nSeen: 20 Oct 2026 14:00\nLTSW at evaluation: 3h 30m (reported)");
+  });
+
   test("riga del foglio", () => {
     const { payload, missed } = buildSheetPayload(rec, ["ATHENA", "PIVOTAL"], "guided", "2026-10-21T10:00:00.000Z");
     const trials = buildTrialsForSheet(rec.selected, rec.outcomes);
@@ -94,6 +99,7 @@ describe("patient-record", () => {
       TIV: "No",
       Reversal: "",
       Reversal_agent: "",
+      Seen_at: "",
       Notes: "  note  ",
       missed_trials: "PIVOTAL",
       eligible_at_submit: "ATHENA,PIVOTAL",
