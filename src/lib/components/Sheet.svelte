@@ -8,11 +8,15 @@
   interface Props {
     open: boolean;
     title?: string;
+    /** Nome accessibile quando il titolo e' disegnato dentro il contenuto. */
+    ariaLabel?: string;
+    /** Foglio alto (88%) per liste lunghe. */
+    tall?: boolean;
     onClose: () => void;
     children: Snippet;
   }
 
-  let { open, title = "", onClose, children }: Props = $props();
+  let { open, title = "", ariaLabel = "", tall = false, onClose, children }: Props = $props();
   let panel: HTMLDivElement | null = $state(null);
   let trap: ReturnType<typeof focusTrap> | null = null;
 
@@ -34,9 +38,10 @@
     <div
       bind:this={panel}
       class="panel ens-sheet-up"
+      class:tall
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-label={ariaLabel || title}
       tabindex="-1"
       onclick={(e) => e.stopPropagation()}
     >
@@ -67,6 +72,10 @@
     max-height: 76dvh;
     overflow: auto;
     color: var(--text);
+  }
+  .panel.tall {
+    max-height: 88vh;
+    max-height: 88dvh;
   }
   .grip {
     width: 38px;

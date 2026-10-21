@@ -12,32 +12,11 @@
     clearSelection,
   } from "$lib/stores/trialSelection";
   import { addSavedPatient } from "$lib/stores/savedPatients";
-  import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV, type SendStatus } from "$lib/domain/sheet-payload";
-  import { isTrialOpen } from "$lib/domain/trials-info";
-  import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
-  import { fmtHoursAsClock } from "$lib/utils/time";
-  import { maskPatientId } from "$lib/utils/mask";
+  import { sendToSheet, hasKnownStudyArm, type SendStatus } from "$lib/domain/sheet-payload";
+  import { buildShareMessage, buildSheetPayload, type PatientRecord } from "$lib/domain/patient-record";
+  import { eligibleOpenTrials } from "$lib/stores/eligibility";
   import { announce } from "$lib/a11y/liveRegion";
   import { t } from "$lib/i18n";
-
-  // Trial eleggibili calcolati al momento dell'invio, per identificare
-  // quelli "missed" (eleggibili ma non selezionati dall'utente).
-  function eligibleNamesNow(): string[] {
-    const e = $acuteEligibility;
-    const h = $hemEligibility;
-    const map: Array<[string, boolean]> = [
-      ["WeTrust", e.weTrust], ["ATHENA", e.athena], ["VANISH", e.vanish], ["PIVOTAL", e.pivotal],
-      ["PROMISE", e.promise], ["MOSTE", e.moste], ["TWIN-2-WIN 2", e.twin2win2], ["ARTEMIS", e.artemis],
-      ["HYBERNIA", e.hybernia], ["DONE SYMPLE", e.doneSymple], ["SHIONOGI", e.shionogi],
-      ["SOVATELTIDE", e.sovateltide], ["ORION", e.orion], ["NiVO", e.nivo],
-      ["DO-IT", e.doit], ["REMEDY", e.remedy], ["TENACITY", e.tenacity],
-      ["SAIL-MeVO", e.sailMevo],
-      ["NORA HOME", e.noraHome],
-      ["FASTEST", h.fastest.eligible], ["TICH-3", h.tich3],
-    ];
-    // Esclude i trial con reclutamento chiuso: non sono "missed opportunity".
-    return map.filter(([name, ok]) => ok && isTrialOpen(name)).map(([n]) => n);
-  }
 
   let saving = $state(false);
   let saved = $state(false);
@@ -55,44 +34,21 @@
 
   const showMtici = $derived(tev === "Yes");
 
-  const message = $derived.by(() => {
-    const lines: string[] = [];
-    if ($preData.patientId) lines.push(`Patient ID: ${maskPatientId($preData.patientId)}`);
-    if ($preData.age != null) lines.push(`Age: ${$preData.age}`);
-    if ($preData.nihss != null) lines.push(`NIHSS: ${$preData.nihss}`);
-    if ($preData.premrs != null) lines.push(`pre-mRS: ${$preData.premrs}`);
-    if ($ltswHours != null) lines.push(`LTSW: ${fmtHoursAsClock($ltswHours)}`);
-    if ($postData.strokeType) lines.push(`Stroke type: ${$postData.strokeType}`);
-
-    if ($selectedStudies.length > 0) {
-      lines.push("");
-      lines.push("Selected trials:");
-      for (const name of $selectedStudies) {
-        if (hasKnownStudyArm(name)) {
-          lines.push(`- ${name}: ${$studyOutcomes[name] ?? "intervention"}`);
-        } else {
-          lines.push(`- ${name}`);
-        }
-      }
-    }
-
-    // Acute treatments
-    const extras: string[] = [];
-    if (tev) extras.push(`TEV: ${tev}`);
-    if (showMtici && mtici) extras.push(`mTICI: ${mtici}`);
-    if (tiv) extras.push(`TIV: ${tiv}`);
-    if (extras.length > 0) {
-      lines.push("");
-      lines.push("Acute treatments:");
-      for (const e of extras) lines.push(`- ${e}`);
-    }
-
-    if ($notesText.trim()) {
-      lines.push("");
-      lines.push(`Notes: ${$notesText.trim()}`);
-    }
-    return lines.join("\n");
+  const record = $derived<PatientRecord>({
+    patientId: $preData.patientId,
+    age: $preData.age,
+    nihss: $preData.nihss,
+    premrs: $preData.premrs,
+    ltswHours: $ltswHours,
+    strokeType: $postData.strokeType,
+    selected: $selectedStudies,
+    outcomes: $studyOutcomes,
+    notes: $notesText,
+    tev,
+    mtici: showMtici ? mtici : "",
+    tiv,
   });
+  const message = $derived(buildShareMessage(record));
 
   async function copy() {
     try {
@@ -111,37 +67,7 @@
   async function save() {
     if (saving) return;
     saving = true;
-    const sheetTrials = buildTrialsForSheet($selectedStudies, $studyOutcomes);
-    const eligibleNow = eligibleNamesNow();
-    const enrolledSet = new Set($selectedStudies);
-    const missed = eligibleNow.filter((name) => !enrolledSet.has(name));
-
-    const payload = {
-      // Le chiavi DEVONO combaciare ESATTAMENTE (case-sensitive) con le
-      // intestazioni di colonna del foglio EnsApp_Data: il backend Apps
-      // Script scrive ogni colonna leggendo payload[nomeColonna]. Nomi come
-      // patientId/age/nihss/premrs/ltsw/timestamp non combaciavano e finivano
-      // vuoti nel DB (ID paziente, NIHSS, mRS, LTSW, data mancanti).
-      Timestamp: new Date().toISOString(),
-      N_patient: $preData.patientId,
-      Age: $preData.age,
-      NIHSS: $preData.nihss,
-      LTSW_h: $ltswHours,
-      pre_mRS: $preData.premrs,
-      ...sheetTrials,
-      // Colonne trial con intestazioni non normalizzate nel foglio:
-      "DO  IT": sheetTrials.DOIT,
-      NiVO: sheetTrials.NIVO,
-      // Elenco dei trial: il backend crea da qui le colonne che mancano.
-      trialKeys: SHEET_TRIAL_KEYS_CSV,
-      TEV: tev,
-      mTICI: showMtici ? mtici : "",
-      TIV: tiv,
-      Notes: $notesText,
-      missed_trials: missed.join(","),
-      eligible_at_submit: eligibleNow.join(","),
-      source: "guided",
-    };
+    const { payload, missed } = buildSheetPayload(record, $eligibleOpenTrials, "guided");
     const result = await sendToSheet(payload);
     sendStatus = result.status;
 
