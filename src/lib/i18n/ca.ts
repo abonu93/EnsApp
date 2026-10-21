@@ -231,6 +231,10 @@ export const ca: Dictionary = {
     sendToSheet: "Enviar a Sheet",
     saveSuccess: "Desat correctament",
     saveError: "Error en desar",
+    saveNotFound: "Enviat, pero la fila no apareix al full. Revisa el full abans de reintentar, per no duplicar-la.",
+    saveUnverified: "Enviat, pero no s'ha pogut rellegir el full per verificar-ho (xarxa). Revisa el full.",
+    saveFailed: "Enviament fallit (sense xarxa?). El pacient esta desat al telefon: torna-ho a provar.",
+    retrySend: "Torna a enviar",
   },
   postAcute: {
     title: "Post-agut (Librexia)",

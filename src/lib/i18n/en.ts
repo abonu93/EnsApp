@@ -231,6 +231,10 @@ export const en: Dictionary = {
     sendToSheet: "Send to Sheet",
     saveSuccess: "Saved successfully",
     saveError: "Save error",
+    saveNotFound: "Sent, but the row does not appear in the sheet. Check the sheet before retrying, to avoid a duplicate.",
+    saveUnverified: "Sent, but the sheet could not be read back to verify it (network). Check the sheet.",
+    saveFailed: "Sending failed (no network?). The patient is saved on this phone: retry.",
+    retrySend: "Retry sending",
   },
   postAcute: {
     title: "Post-acute (Librexia)",

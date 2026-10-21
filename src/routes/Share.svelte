@@ -12,7 +12,7 @@
     clearSelection,
   } from "$lib/stores/trialSelection";
   import { addSavedPatient } from "$lib/stores/savedPatients";
-  import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV } from "$lib/domain/sheet-payload";
+  import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV, type SendStatus } from "$lib/domain/sheet-payload";
   import { isTrialOpen } from "$lib/domain/trials-info";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
   import { fmtHoursAsClock } from "$lib/utils/time";
@@ -41,6 +41,9 @@
 
   let saving = $state(false);
   let saved = $state(false);
+  // Esito verificato dell'invio: "saved" solo se la riga e' nel foglio.
+  let sendStatus = $state<SendStatus | null>(null);
+  let savedLocally = false;
 
   // Trattamenti acuti aggiuntivi (TEV + mTICI + TIV)
   type YesNo = "Yes" | "No" | "";
@@ -139,9 +142,12 @@
       eligible_at_submit: eligibleNow.join(","),
       source: "guided",
     };
-    await sendToSheet(payload);
+    const result = await sendToSheet(payload);
+    sendStatus = result.status;
 
-    // Salva localmente per accesso futuro
+    // Salva localmente per accesso futuro (una sola volta, anche se si riprova l'invio).
+    if (!savedLocally) {
+    savedLocally = true;
     addSavedPatient({
       patientId: $preData.patientId,
       strokeType: $postData.strokeType,
@@ -164,10 +170,18 @@
         },
       },
     });
+    }
 
     saving = false;
-    saved = true;
-    announce($t.share.saveSuccess);
+    saved = result.status === "confirmed";
+    announce(saved ? $t.share.saveSuccess : sendMessage(result.status));
+  }
+
+  function sendMessage(status: SendStatus): string {
+    if (status === "not-found") return $t.share.saveNotFound;
+    if (status === "unverified") return $t.share.saveUnverified;
+    if (status === "failed") return $t.share.saveFailed;
+    return $t.share.saveSuccess;
   }
 
   function newPatient() {
@@ -273,8 +287,11 @@
           {#snippet children()}WhatsApp{/snippet}
         </Button>
       </div>
+      {#if sendStatus && sendStatus !== "confirmed"}
+        <p class="send-warn" role="alert">{sendMessage(sendStatus)}</p>
+      {/if}
       <Button variant="primary" fullWidth loading={saving} onclick={save}>
-        {#snippet children()}{$t.share.sendToSheet}{/snippet}
+        {#snippet children()}{sendStatus && sendStatus !== "confirmed" ? $t.share.retrySend : $t.share.sendToSheet}{/snippet}
       </Button>
     {:else}
       <div class="success">
@@ -296,6 +313,14 @@
 
 <style>
   .body { padding: 6px 16px 16px; }
+  .send-warn {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--warn-soft);
+    color: var(--warn);
+    font-size: 13.5px;
+  }
   .stack { display: flex; flex-direction: column; gap: var(--sp-4); }
   .form-stack { display: flex; flex-direction: column; gap: var(--sp-4); }
   .field { display: flex; flex-direction: column; gap: var(--sp-1); }

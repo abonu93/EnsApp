@@ -71,8 +71,16 @@ test.describe("ischemic flow - golden patient", () => {
     // -- Share: intercetta la POST verso Apps Script --
     // page.route serve sia a catturare il payload sia a simulare una risposta
     // immediata (in CI la rete esterna verso script.google.com non e' garantita).
+    // La GET (?op=list) e' la rilettura di verifica: restituisce la riga appena
+    // "scritta", come farebbe il foglio.
     let capturedBody = "";
     await page.route("**/script.google.com/**", async (route) => {
+      if (route.request().method() === "GET") {
+        const sent = JSON.parse(new URLSearchParams(capturedBody).get("payload") ?? "{}");
+        const rows = capturedBody ? [{ timestamp: sent.Timestamp, N_patient: sent.N_patient }] : [];
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(rows) });
+        return;
+      }
       capturedBody = route.request().postData() ?? "";
       await route.fulfill({ status: 200, contentType: "text/plain", body: "OK" });
     });
@@ -92,7 +100,7 @@ test.describe("ischemic flow - golden patient", () => {
     expect(payload.WeTrust).toBe("intervention");
 
     // Feedback successo
-    await expect(page.getByText(/saved successfully/i)).toBeVisible();
+    await expect(page.locator(".success").getByText(/saved successfully/i)).toBeVisible({ timeout: 10_000 });
   });
 
   test("persistence: refresh keeps wizard state mid-flow", async ({ page }) => {

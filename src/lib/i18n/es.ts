@@ -231,6 +231,10 @@ export const es: Dictionary = {
     sendToSheet: "Enviar a Sheet",
     saveSuccess: "Guardado correctamente",
     saveError: "Error al guardar",
+    saveNotFound: "Enviado, pero la fila no aparece en la hoja. Revisa la hoja antes de reintentar, para no duplicarla.",
+    saveUnverified: "Enviado, pero no se pudo releer la hoja para verificarlo (red). Revisa la hoja.",
+    saveFailed: "Envio fallido (sin red?). El paciente esta guardado en el telefono: reintenta.",
+    retrySend: "Reintentar envio",
   },
   postAcute: {
     title: "Post-agudo (Librexia)",
