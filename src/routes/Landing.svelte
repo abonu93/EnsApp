@@ -13,7 +13,6 @@
   function resume() { push("/workflow"); }
   function goCatalog() { push("/trials"); }
   function goPast() { push("/saved"); }
-  function goBoard() { push("/board"); }
 
   // Active session timer (mm:ss da LTSW)
   const ltswHours = $derived($ltswHoursStore);
@@ -80,13 +79,6 @@
         <path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2" />
       </svg>
       <span>{$t.landing.pastPatients}</span>
-    </button>
-    <button class="footer-link" type="button" onclick={goBoard}>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
-        <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
-      </svg>
-      <span>{$t.board.entryTitle}</span>
     </button>
   </div>
 </div>

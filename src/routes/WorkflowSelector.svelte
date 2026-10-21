@@ -5,6 +5,16 @@
 
   const choices = $derived([
     {
+      key: "board",
+      title: $t.board.entryTitle,
+      desc: $t.board.entryDesc,
+      tag: $t.board.entryTag,
+      accent: "var(--ischemic-text)",
+      bg: "var(--ischemic-soft)",
+      route: "/board",
+      icon: "grid" as const,
+    },
+    {
       key: "check",
       title: $t.workflow.eligibilityTitle,
       desc: $t.workflow.eligibilityDesc,
@@ -23,16 +33,6 @@
       bg: "var(--post-acute-soft)",
       route: "/trial-patient",
       icon: "bolt" as const,
-    },
-    {
-      key: "board",
-      title: $t.board.entryTitle,
-      desc: $t.board.entryDesc,
-      tag: $t.board.entryTag,
-      accent: "var(--ischemic-text)",
-      bg: "var(--ischemic-soft)",
-      route: "/board",
-      icon: "grid" as const,
     },
   ]);
 
