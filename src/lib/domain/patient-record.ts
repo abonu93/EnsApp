@@ -1,5 +1,5 @@
 // Messaggio condiviso (WhatsApp / copia) e riga del foglio per un paziente.
-// Usati da Share.svelte e dal Bedside Board, cosi' i due invii non divergono.
+// Usati da Share.svelte.
 // NON contiene logica clinica.
 
 import { buildTrialsForSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV, type StudyOutcomes } from "./sheet-payload";
@@ -22,7 +22,7 @@ export interface PatientRecord {
   tiv?: string;
 }
 
-export function buildShareMessage(r: PatientRecord, extraLines: string[] = []): string {
+export function buildShareMessage(r: PatientRecord): string {
   const lines: string[] = [];
   if (r.patientId) lines.push(`Patient ID: ${maskPatientId(r.patientId)}`);
   if (r.age != null) lines.push(`Age: ${r.age}`);
@@ -30,7 +30,6 @@ export function buildShareMessage(r: PatientRecord, extraLines: string[] = []): 
   if (r.premrs != null) lines.push(`pre-mRS: ${r.premrs}`);
   if (r.ltswHours != null) lines.push(`LTSW: ${fmtHoursAsClock(r.ltswHours)}`);
   if (r.strokeType) lines.push(`Stroke type: ${r.strokeType}`);
-  lines.push(...extraLines);
 
   if (r.selected.length > 0) {
     lines.push("");

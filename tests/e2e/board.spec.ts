@@ -12,7 +12,7 @@ test.describe("bedside board", () => {
     await freshSession(page);
   });
 
-  test("dati parziali -> studi possibili -> invio al foglio", async ({ page }) => {
+  test("dati parziali -> selezione -> riepilogo -> invio al foglio", async ({ page }) => {
     await page.getByRole("button", { name: /new patient/i }).click();
     await page.getByRole("button", { name: /bedside board/i }).click();
     await expect(page).toHaveURL(/\/board$/);
@@ -49,10 +49,21 @@ test.describe("bedside board", () => {
     await page.locator("button.trial", { hasText: "PIVOTAL" }).click();
     const dialog = page.getByRole("dialog", { name: "PIVOTAL" });
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText("LTSW < 8h")).toBeVisible();
+    await expect(dialog.getByText("LTSW < 8 h")).toBeVisible();
     await page.keyboard.press("Escape");
 
-    // Invio
+    // WeTrust: manca solo l'angiografo, si risponde dal suo criterio
+    await page.locator("button.trial", { hasText: "WeTrust" }).click();
+    await page.getByRole("dialog", { name: "WeTrust" }).getByRole("button", { name: /Philips angiograph available/ }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Yes", exact: true }).click();
+    await page.keyboard.press("Escape");
+
+    // Studio eleggibile -> selezione -> Avanti -> schermata di invio
+    await page.getByRole("button", { name: "Select WeTrust" }).click();
+    await page.getByRole("button", { name: /^Next · 1/ }).click();
+    await expect(page).toHaveURL(/\/share$/);
+
+    // Share con source "board"
     let capturedBody = "";
     await page.route("**/script.google.com/**", async (route) => {
       if (route.request().method() === "GET") {
@@ -64,15 +75,49 @@ test.describe("bedside board", () => {
       capturedBody = route.request().postData() ?? "";
       await route.fulfill({ status: 200, contentType: "text/plain", body: "OK" });
     });
-    await page.getByRole("button", { name: "Send to coordinator" }).click();
     await page.getByRole("textbox", { name: "Patient ID" }).fill("E2E-BOARD-1");
+    // Il primo radiogroup e' la trombectomia (TEV); poi la TIV.
+    await page.getByRole("radiogroup").first().getByText("Yes", { exact: true }).click();
+    await page.locator("#share-mtici").selectOption("2b67");
+    await page.locator("textarea.notes").fill("board e2e");
     await page.getByRole("button", { name: /send to sheet/i }).click();
     await expect.poll(() => capturedBody.length, { timeout: 5_000 }).toBeGreaterThan(0);
     const payload = JSON.parse(new URLSearchParams(capturedBody).get("payload") ?? "{}");
     expect(payload.source).toBe("board");
     expect(payload.N_patient).toBe("E2E-BOARD-1");
     expect(payload.NIHSS).toBe(14);
-    expect(payload.Age).toBe(70);
-    await expect(page.locator(".done")).toBeVisible({ timeout: 10_000 });
+    expect(payload.WeTrust).toBe("intervention");
+    expect(payload.TEV).toBe("Yes");
+    expect(payload.mTICI).toBe("2b67");
+    expect(payload.Notes).toBe("board e2e");
+  });
+
+  test("le schede si chiudono: indietro del telefono e pulsante X", async ({ page }) => {
+    await page.goto("/#/board");
+    await page.locator("button.trial", { hasText: "PIVOTAL" }).click();
+    const dialog = page.getByRole("dialog", { name: "PIVOTAL" });
+    await expect(dialog).toBeVisible();
+    await page.goBack();
+    await expect(dialog).toBeHidden();
+    await expect(page).toHaveURL(/\/board$/);
+
+    await page.locator("button.trial", { hasText: "PIVOTAL" }).click();
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Close" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page).toHaveURL(/\/board$/);
+    // La voce aggiunta per il foglio e' stata tolta: indietro lascia il board.
+    await page.goBack();
+    await expect(page).not.toHaveURL(/\/board$/);
+  });
+
+  test("lingua: i criteri sono tradotti (spagnolo)", async ({ page }) => {
+    await page.evaluate(() => localStorage.setItem("ensapp:locale:v1", "es"));
+    await page.goto("/#/board");
+    await page.reload();
+    await page.locator("button.trial", { hasText: "PIVOTAL" }).click();
+    const dialog = page.getByRole("dialog", { name: "PIVOTAL" });
+    await expect(dialog.getByText("sin oclusión en tándem")).toBeVisible();
+    await expect(dialog.getByText("no occlusione tandem")).toHaveCount(0);
   });
 });

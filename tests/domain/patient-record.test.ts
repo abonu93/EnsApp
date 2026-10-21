@@ -1,5 +1,5 @@
-// Messaggio e riga del foglio condivisi da Share e Bedside Board: devono
-// restare identici a quelli che Share costruiva prima dell'estrazione.
+// Messaggio e riga del foglio di Share: devono restare identici a quelli che
+// Share costruiva prima dell'estrazione.
 
 import { describe, test, expect } from "vitest";
 import { buildShareMessage, buildSheetPayload, type PatientRecord } from "$lib/domain/patient-record";
@@ -43,11 +43,6 @@ describe("patient-record", () => {
         "Notes: note",
       ].join("\n")
     );
-  });
-
-  test("righe extra dopo i dati del paziente", () => {
-    const m = buildShareMessage({ age: 70, selected: [], outcomes: {}, notes: "" }, ["Eligible: WeTrust"]);
-    expect(m).toBe("Age: 70\nEligible: WeTrust");
   });
 
   test("riga del foglio", () => {

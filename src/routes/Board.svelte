@@ -7,11 +7,13 @@
   import { selectionAlerts } from "$lib/domain/open-questions";
   import BoardAlerts from "$lib/components/board/BoardAlerts.svelte";
   import { now } from "$lib/stores/patient";
+  import { selectedStudies, toggleStudy, flowOrigin } from "$lib/stores/trialSelection";
+  import { criterionLabel } from "$lib/i18n/criteria";
+  import { push } from "svelte-spa-router";
   import { t, locale } from "$lib/i18n";
   import BoardFieldSheet from "$lib/components/board/BoardFieldSheet.svelte";
   import BoardClockSheet from "$lib/components/board/BoardClockSheet.svelte";
   import BoardTrialSheet from "$lib/components/board/BoardTrialSheet.svelte";
-  import BoardSendSheet from "$lib/components/board/BoardSendSheet.svelte";
   import Sheet from "$lib/components/Sheet.svelte";
   import { fieldLabel, fill, fmtClock, fmtMin, fmtValue } from "$lib/components/board/format";
 
@@ -22,10 +24,33 @@
     | { kind: "compete"; names: string[] }
     | { kind: "all" }
     | { kind: "colimits" }
-    | { kind: "send" }
     | null;
   let sheet = $state<SheetState>(null);
   let showOut = $state(false);
+
+  // Indietro del telefono: con un foglio aperto chiude il foglio invece di
+  // lasciare il board. Un'unica voce di cronologia finche' c'e' un foglio
+  // aperto (anche passando da un foglio all'altro).
+  let sheetInHistory = false;
+  $effect(() => {
+    if (sheet && !sheetInHistory) {
+      history.pushState({ ...(history.state ?? {}), boardSheet: true }, "");
+      sheetInHistory = true;
+    } else if (!sheet && sheetInHistory) {
+      sheetInHistory = false;
+      if (history.state?.boardSheet) history.back();
+    }
+  });
+  $effect(() => {
+    const onPop = () => {
+      if (sheetInHistory) {
+        sheetInHistory = false;
+        sheet = null;
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  });
 
   const res = $derived($boardResult);
   const values = $derived($boardValues);
@@ -62,15 +87,25 @@
       if (j.closed) return $t.board.windowClosed;
       const f = j.fails[0];
       if (!f) return "";
-      return f.kind === "type" ? (f.label === "hemorrhagic" ? $t.board.ruleHemorrhagic : $t.board.ruleIschemic) : f.label;
+      return f.kind === "type" ? (f.label === "hemorrhagic" ? $t.board.ruleHemorrhagic : $t.board.ruleIschemic) : criterionLabel(f.label, $locale);
     }
     if (j.status === "possible") {
       if (j.needs.length) return needText(j.needs);
-      return j.rows.filter((r) => r.kind === "time").map((r) => r.label).join(" · ");
+      return j.rows.filter((r) => r.kind === "time").map((r) => criterionLabel(r.label, $locale)).join(" · ");
     }
     return $t.board.allMet;
   }
   const trial = (name: string) => [...res.open, ...res.out].find((j) => j.name === name);
+
+  // Selezione come nel Riepilogo: solo studi eleggibili; una selezione che non
+  // e' piu' eleggibile (dati cambiati) non resta nel conteggio.
+  const eligibleNames = $derived(new Set(res.eligible.map((j) => j.name)));
+  const selectedHere = $derived($selectedStudies.filter((n) => eligibleNames.has(n)));
+  // Avanti: alla schermata di invio (Share: ID paziente, TEV/mTICI/TIV, note).
+  function next() {
+    flowOrigin.set("board");
+    push("/share");
+  }
 </script>
 
 <div class="board">
@@ -113,6 +148,7 @@
     {#if res.extra.length}
       <button type="button" class="link muted" onclick={() => (sheet = { kind: "all" })}>{$t.board.otherData} · {extraSet}/{res.extra.length} →</button>
     {/if}
+
   </div>
 
   <hr class="divider" />
@@ -162,13 +198,17 @@
   </section>
 
   <div class="send-bar">
-    <button type="button" class="send ens-press" onclick={() => (sheet = { kind: "send" })}>{$t.board.sendButton}</button>
+    <button type="button" class="send ens-press" class:ready={selectedHere.length > 0} onclick={next}>
+      {$t.common.next}{selectedHere.length ? ` · ${selectedHere.length}` : ""}
+    </button>
   </div>
 </div>
 
 {#snippet row(j: BoardJudgement)}
   {@const w = j.window}
   {@const urgent = !!w && j.status !== "out" && !j.early && w.leftMin <= 60}
+  {@const picked = $selectedStudies.includes(j.name)}
+  <div class="row-wrap">
   <button type="button" class="trial ens-press" onclick={() => (sheet = { kind: "trial", name: j.name })}>
     <span class="dot {j.status}" aria-hidden="true"></span>
     <span class="body">
@@ -191,6 +231,14 @@
       {/if}
     </span>
   </button>
+  {#if j.status === "eligible"}
+    <button type="button" class="pick-btn ens-press" class:on={picked} aria-pressed={picked} aria-label={fill($t.board.selectTrial, { name: j.name })} onclick={() => toggleStudy(j.name)}>
+      {#if picked}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l4 4 10-10" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      {/if}
+    </button>
+  {/if}
+  </div>
 {/snippet}
 
 {#if sheet?.kind === "field"}
@@ -251,8 +299,6 @@
       <BoardAlerts alerts={coLimits} />
     {/snippet}
   </Sheet>
-{:else if sheet?.kind === "send"}
-  <BoardSendSheet result={res} {clock} {values} onClose={() => (sheet = null)} />
 {/if}
 
 <style>
@@ -492,6 +538,32 @@
     z-index: 5;
     padding: 18px 22px 8px;
     background: linear-gradient(180deg, transparent, var(--bg) 40%);
+  }
+  .row-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .row-wrap .trial { border-bottom: none; flex: 1; min-width: 0; }
+  .pick-btn {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    border: 2px solid var(--success);
+    color: var(--text-inverted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .pick-btn::after { content: ""; position: absolute; inset: -8px; } /* bersaglio 44px */
+  .pick-btn.on { background: var(--success); }
+  .send.ready {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: var(--text-inverted);
   }
   .send {
     width: 100%;

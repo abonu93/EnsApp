@@ -11,8 +11,8 @@ Design: Claude Design, "Eligo Bedside Board v3".
 | Valutazione con dati parziali (pura, testata) | `src/lib/domain/board.ts` |
 | Collegamento agli store del paziente | `src/lib/stores/board.ts` |
 | Schermata | `src/routes/Board.svelte` |
-| Fogli (dato, orologio, studio, invio) | `src/lib/components/board/*` |
-| Messaggio WhatsApp e riga del foglio (condivisi con Share) | `src/lib/domain/patient-record.ts` |
+| Fogli (dato, orologio, studio) | `src/lib/components/board/*` |
+| Messaggio WhatsApp e riga del foglio (Share) | `src/lib/domain/patient-record.ts` |
 
 Ingressi: terza scelta in `/workflow` e link nel footer della Home.
 
@@ -52,9 +52,18 @@ co-arruolamento") e gli stessi avvisi del Riepilogo nel foglio di invio.
 Lo stato degli studi segue `trials-info.ts`, allineato al foglio del team
 "Esquema ensayos" (fonte di verita' secondo `vault/CLAUDE.md`).
 
-## Invio
+## Selezione e Riepilogo
 
-"Send to coordinator" mostra il riepilogo, permette di indicare gli studi in
-cui il paziente entra (con braccio, se previsto) e usa gli stessi invii di
-Share: WhatsApp / copia e riga del foglio (`source: "board"`), con la stessa
-verifica di scrittura e il salvataggio locale.
+Gli studi eleggibili si selezionano direttamente nel board (stessi gruppi
+esclusivi del Riepilogo, `toggleStudy` in `stores/trialSelection.ts`). Il
+pulsante in basso porta al Riepilogo (`/summary`) e da li' si prosegue come nel
+flusso guidato (Share: WhatsApp e foglio). `flowOrigin` ricorda che si arriva
+dal board: "indietro" nel Riepilogo torna al board e la riga del foglio ha
+`source: "board"`. L'ID paziente si inserisce in cima al board.
+
+## Lingue
+
+Le etichette dei criteri (`*-reasons.ts`) sono in italiano clinico: il board e
+il Riepilogo le mostrano tradotte con `src/lib/i18n/criteria.ts`.
+`tests/i18n/criteria.test.ts` fallisce se un criterio nuovo non ha la
+traduzione in catalano, spagnolo e inglese.

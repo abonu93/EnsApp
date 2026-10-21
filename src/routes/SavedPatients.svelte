@@ -275,7 +275,7 @@
                     {/if}
                     <small class="saved-date">{formatDate(p.savedAt)}</small>
                   </button>
-                  <button class="remove-btn ens-press" type="button" onclick={() => remove(p.id, p.patientId || p.id)} aria-label="Rimuovi">
+                  <button class="remove-btn ens-press" type="button" onclick={() => remove(p.id, p.patientId || p.id)} aria-label={$t.extras.deleteAction}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <polyline points="3 6 5 6 21 6" />
                       <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
@@ -289,13 +289,13 @@
       </ul>
       {#if pageCount > 1}
         <div class="pager">
-          <button class="page-btn" type="button" onclick={() => (page = Math.max(1, page - 1))} disabled={page === 1} aria-label="Pagina precedente">
+          <button class="page-btn" type="button" onclick={() => (page = Math.max(1, page - 1))} disabled={page === 1} aria-label={$t.common.prevPage}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
           <span class="page-info">{page} / {pageCount}</span>
-          <button class="page-btn" type="button" onclick={() => (page = Math.min(pageCount, page + 1))} disabled={page === pageCount} aria-label="Pagina successiva">
+          <button class="page-btn" type="button" onclick={() => (page = Math.min(pageCount, page + 1))} disabled={page === pageCount} aria-label={$t.common.nextPage}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="9 18 15 12 9 6" />
             </svg>

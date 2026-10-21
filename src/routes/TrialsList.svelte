@@ -42,7 +42,7 @@
     placeholder={$t.trials.searchPlaceholder}
     bind:value={query}
   />
-  <div class="pills" role="tablist" aria-label="Filtri">
+  <div class="pills" role="tablist" aria-label={$t.common.filters}>
     {#each filters as f (f.value)}
       <button
         class="filter-pill"

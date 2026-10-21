@@ -5,13 +5,14 @@
   import Card from "$lib/components/Card.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import { acuteEligibility, hemEligibility } from "$lib/stores/eligibility";
-  import { selectedStudies } from "$lib/stores/trialSelection";
+  import { selectedStudies, toggleStudy } from "$lib/stores/trialSelection";
   import { acuteInput, hemInput, postData } from "$lib/stores/patient";
   import { REASON_BY_TRIAL } from "$lib/domain/acute-reasons";
   import { REASON_BY_HEM_TRIAL } from "$lib/domain/hem-reasons";
   import { exclusiveWith, isTrialOpen } from "$lib/domain/trials-info";
   import { selectionAlerts } from "$lib/domain/open-questions";
-  import { t } from "$lib/i18n";
+  import { t, locale } from "$lib/i18n";
+  import { criterionLabel } from "$lib/i18n/criteria";
 
   let showIneligible = $state(false);
 
@@ -73,15 +74,8 @@
     candidates.filter((e) => !e.eligible && isTrialOpen(e.display))
   );
 
-  function toggle(name: string) {
-    // Selezionare uno studio di un gruppo esclusivo toglie gli altri del gruppo.
-    const partners = exclusiveWith(name);
-    selectedStudies.update((arr) =>
-      arr.includes(name)
-        ? arr.filter((n) => n !== name)
-        : [...arr.filter((n) => !partners.includes(n)), name]
-    );
-  }
+  const toggle = toggleStudy;
+  const back = () => push("/post-imaging");
   function reasonsFor(name: string): string[] {
     const acuteFn = REASON_BY_TRIAL[name];
     if (acuteFn) return acuteFn($acuteInput as Parameters<typeof acuteFn>[0]).fail;
@@ -98,7 +92,7 @@
   );
 </script>
 
-<AppHeader title={$t.extras.results} sub={`${eligibleItems.length} ${$t.extras.eligibleTrialsCount}`} step={2} steps={3} onBack={() => push("/post-imaging")} />
+<AppHeader title={$t.extras.results} sub={`${eligibleItems.length} ${$t.extras.eligibleTrialsCount}`} step={2} steps={3} onBack={back} />
 
 <div class="body">
   {#if eligibleItems.length === 0}
@@ -172,7 +166,7 @@
                 {#if fails.length > 0}
                   <details class="reasons">
                     <summary>{$t.extras.criteriaMissing} ({fails.length})</summary>
-                    <ul>{#each fails as f}<li>{f}</li>{/each}</ul>
+                    <ul>{#each fails as f}<li>{criterionLabel(f, $locale)}</li>{/each}</ul>
                   </details>
                 {/if}
               </li>
@@ -190,7 +184,7 @@
 </div>
 
 <BottomBar
-  onBack={() => push("/post-imaging")}
+  onBack={back}
   onNext={() => push("/share")}
   nextLabel={selectedCount > 0 ? `${$t.extras.review} · ${selectedCount}` : $t.extras.continueWithoutSelection}
 />
