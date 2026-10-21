@@ -3,6 +3,7 @@
   // Usato da CalendarSheet (e qualsiasi altro picker mobile-first).
   import type { Snippet } from "svelte";
   import { focusTrap } from "$lib/a11y/focusTrap";
+  import { portal } from "$lib/actions/portal";
 
   interface Props {
     open: boolean;
@@ -29,7 +30,7 @@
 </script>
 
 {#if open}
-  <div class="backdrop ens-fade" onclick={onClose} role="presentation">
+  <div class="backdrop ens-fade" onclick={onClose} role="presentation" use:portal>
     <div
       bind:this={panel}
       class="panel ens-sheet-up"
@@ -63,6 +64,7 @@
     border-top-right-radius: 24px;
     padding: 10px 16px calc(30px + env(safe-area-inset-bottom, 0));
     max-height: 76vh;
+    max-height: 76dvh;
     overflow: auto;
     color: var(--text);
   }
