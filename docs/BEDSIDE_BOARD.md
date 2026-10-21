@@ -14,7 +14,7 @@ Design: Claude Design, "Eligo Bedside Board v3".
 | Fogli (dato, orologio, studio) | `src/lib/components/board/*` |
 | Messaggio WhatsApp e riga del foglio (Share) | `src/lib/domain/patient-record.ts` |
 
-Ingressi: terza scelta in `/workflow` e link nel footer della Home.
+Ingresso: prima scelta in `/workflow` (Nuovo paziente).
 
 ## Logica: nessuna regola duplicata
 
