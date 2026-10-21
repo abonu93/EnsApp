@@ -138,7 +138,7 @@
       <ul lang="en">
         {#each alerts as a (a.kind + a.title)}
           <li class="alert" class:relevant={a.relevant}>
-            <span class="alert-tag">{a.kind === "coenrolment" ? $t.extras.coenrolmentTag : a.relevant ? $t.extras.relevantTag : $t.extras.questionTag}</span>
+            <span class="alert-tag">{a.kind === "coenrolment" ? $t.extras.coenrolmentTag : a.kind === "warning" ? $t.extras.warningTag : a.relevant ? $t.extras.relevantTag : $t.extras.questionTag}</span>
             <strong>{a.title}</strong>
             <span class="alert-detail">{a.detail}</span>
           </li>

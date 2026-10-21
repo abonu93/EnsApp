@@ -36,4 +36,11 @@ describe("dubbi aperti sui protocolli", () => {
     expect(selectionAlerts(["TICH-3"]).filter((x) => x.kind === "coenrolment")).toHaveLength(0);
     expect(selectionAlerts(["FASTEST", "TICH-3"]).filter((x) => x.kind === "coenrolment")).toHaveLength(1);
   });
+
+  it("REMEDY dopo trombolisi: avviso TC a 6 h, solo se il paziente fa la trombolisi", () => {
+    const withIvt = selectionAlerts(["REMEDY"], patient({ ivtCandidate: "eligible" }));
+    expect(withIvt.some((a) => a.kind === "warning" && a.title.includes("6 h"))).toBe(true);
+    const noIvt = selectionAlerts(["REMEDY"], patient({ ivtCandidate: "not eligible" }));
+    expect(noIvt.some((a) => a.kind === "warning")).toBe(false);
+  });
 });

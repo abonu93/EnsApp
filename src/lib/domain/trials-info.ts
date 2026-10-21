@@ -465,13 +465,19 @@ export function canonicalTrialName(name: string): string {
  * team, 2026-10-20). REMEDY (excl. 17) e SOVATELTIDE (excl. 6) escludono la
  * partecipazione ad altri studi con farmaco; DO-IT e' uno studio di trattamento.
  */
-export const EXCLUSIVE_GROUPS: readonly (readonly string[])[] = [["DO-IT", "REMEDY", "SOVATELTIDE"]];
+export const EXCLUSIVE_GROUPS: readonly (readonly string[])[] = [
+  ["DO-IT", "REMEDY", "SOVATELTIDE"],
+  // Team, 2026-10-21: stessa popolazione MeVO, non co-arruolabili.
+  ["SAIL-MeVO", "NiVO"],
+];
 
 /** Studi che non si possono selezionare insieme a `name` (nomi come nel gruppo). */
 export function exclusiveWith(name: string): string[] {
   const key = canonicalTrialName(name);
-  const group = EXCLUSIVE_GROUPS.find((g) => g.some((n) => canonicalTrialName(n) === key));
-  return group ? group.filter((n) => canonicalTrialName(n) !== key) : [];
+  const partners = EXCLUSIVE_GROUPS.filter((g) => g.some((n) => canonicalTrialName(n) === key))
+    .flat()
+    .filter((n) => canonicalTrialName(n) !== key);
+  return [...new Set(partners)];
 }
 
 /**

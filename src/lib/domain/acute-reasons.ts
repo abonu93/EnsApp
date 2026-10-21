@@ -15,7 +15,6 @@ import {
   ORION_PERFUSION_AFTER_H,
   orionPerfusionOk,
   remedyAspectsOk,
-  remedyPostIvtOk,
   ORION_VESSELS,
   PIVOTAL_VESSELS,
   SAIL_MEVO_VESSELS,
@@ -286,10 +285,6 @@ export function reasonRemedy(input: AcuteInput): ReasonReport {
     { ok: remedyAspectsOk(input), label: "ASPECTS >= 6 (ictus della sola ACP: selezionare il vaso posteriore o inserire ASPECTS 10)" },
     { ok: input.acei !== "yes", label: "ACE-inibitore: ultima dose >= 24h (48h se eGFR < 45) e sospendibile fino al g. 29" },
     { ok: input.posteriorFossa !== "yes", label: "no ictus del tronco o del cervelletto" },
-    {
-      ok: remedyPostIvtOk(input),
-      label: "dopo trombolisi: >= 6 h dalla fine, NIHSS ancora 5-15, miglioramento < 4, no PH1/PH2",
-    },
   ]);
 }
 
