@@ -120,7 +120,44 @@ export function buildTrialsForSheet(
   return t;
 }
 
-export async function sendToSheet(payload: unknown): Promise<void> {
+/**
+ * Esito dell'invio. La POST e' `no-cors` (risposta illeggibile), quindi prima
+ * l'app diceva sempre "salvato" anche se il foglio non riceveva nulla. Ora,
+ * dopo l'invio, rilegge il foglio (doGet) e cerca la riga appena scritta.
+ * - confirmed: riga trovata nel foglio;
+ * - not-found: il foglio risponde ma la riga non c'e';
+ * - unverified: inviato, ma il foglio non si e' potuto rileggere;
+ * - failed: la richiesta non e' partita (rete).
+ */
+export type SendStatus = "confirmed" | "not-found" | "unverified" | "failed";
+export interface SendResult {
+  status: SendStatus;
+  reason?: string;
+}
+
+/** Attese prima di ogni rilettura (lo script scrive dopo qualche secondo). */
+const VERIFY_DELAYS_MS = [1500, 3500];
+/** Scarto ammesso fra il Timestamp inviato e quello riletto dal foglio. */
+const TIMESTAMP_TOLERANCE_MS = 10 * 60_000;
+
+type SheetPayload = Record<string, unknown> & { Timestamp?: string; N_patient?: unknown };
+
+/** La riga del foglio corrisponde al record inviato? */
+export function rowMatchesPayload(row: SheetPatientRow, payload: SheetPayload): boolean {
+  const sent = Date.parse(String(payload.Timestamp ?? ""));
+  const got = Date.parse(String(row.timestamp ?? row.Timestamp ?? ""));
+  if (!Number.isFinite(sent) || !Number.isFinite(got) || Math.abs(sent - got) > TIMESTAMP_TOLERANCE_MS) {
+    return false;
+  }
+  const id = String(payload.N_patient ?? "").trim();
+  if (id) return String(row.N_patient ?? "").trim() === id;
+  return String(row.Age ?? "") === String(payload.Age ?? "") && String(row.NIHSS ?? "") === String(payload.NIHSS ?? "");
+}
+
+export async function sendToSheet(
+  payload: SheetPayload,
+  verifyDelaysMs: number[] = VERIFY_DELAYS_MS
+): Promise<SendResult> {
   try {
     const body = new URLSearchParams({ payload: JSON.stringify(payload) });
     await fetch(GAS_URL, {
@@ -131,7 +168,22 @@ export async function sendToSheet(payload: unknown): Promise<void> {
     });
   } catch (e) {
     console.warn("sendToSheet error:", e);
+    return { status: "failed", reason: e instanceof Error ? e.message : String(e) };
   }
+
+  let readOk = false;
+  let reason = "";
+  for (const ms of verifyDelaysMs) {
+    await new Promise((r) => setTimeout(r, ms));
+    const res = await fetchPatientsFromSheet();
+    if (!res.ok) {
+      reason = res.reason;
+      continue;
+    }
+    readOk = true;
+    if (res.rows.some((row) => rowMatchesPayload(row, payload))) return { status: "confirmed" };
+  }
+  return readOk ? { status: "not-found" } : { status: "unverified", reason };
 }
 
 /**

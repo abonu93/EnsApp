@@ -14,7 +14,7 @@
   import type { VesselCode } from "$lib/domain/acute-rules";
   import { VESSEL_OPTIONS } from "$lib/domain/vessels";
   import { TRIALS_INFO, isTrialOpen } from "$lib/domain/trials-info";
-  import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV } from "$lib/domain/sheet-payload";
+  import { buildTrialsForSheet, sendToSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV, type SendStatus } from "$lib/domain/sheet-payload";
   import { addSavedPatient } from "$lib/stores/savedPatients";
   import { quickPatient, clearQuickPatient } from "$lib/stores/quickPatient";
   import { hoursSince } from "$lib/stores/patient";
@@ -46,6 +46,9 @@
 
   let saving = $state(false);
   let saved = $state(false);
+  // Esito verificato dell'invio: "saved" solo se la riga e' nel foglio.
+  let sendStatus = $state<SendStatus | null>(null);
+  let savedLocally = false;
 
   const ltswHrs = $derived(hoursSince(ltswDate));
   const showMtici = $derived(tev === "Yes");
@@ -203,8 +206,12 @@
       Notes: notes,
       source: "quick-patient",
     };
-    await sendToSheet(payload);
+    const result = await sendToSheet(payload);
+    sendStatus = result.status;
 
+    // Copia locale una sola volta, anche se si riprova l'invio.
+    if (!savedLocally) {
+    savedLocally = true;
     addSavedPatient({
       patientId,
       strokeType,
@@ -236,10 +243,18 @@
         },
       },
     });
+    }
 
     saving = false;
-    saved = true;
-    announce($t.share.saveSuccess);
+    saved = result.status === "confirmed";
+    announce(saved ? $t.share.saveSuccess : sendMessage(result.status));
+  }
+
+  function sendMessage(status: SendStatus): string {
+    if (status === "not-found") return $t.share.saveNotFound;
+    if (status === "unverified") return $t.share.saveUnverified;
+    if (status === "failed") return $t.share.saveFailed;
+    return $t.share.saveSuccess;
   }
 
   function backHome() {
@@ -388,6 +403,10 @@
     {/snippet}
   </Card>
 
+  {#if sendStatus && sendStatus !== "confirmed"}
+    <p class="send-warn" role="alert">{sendMessage(sendStatus)}</p>
+  {/if}
+
   {#if saved}
     <Card>
       {#snippet children()}
@@ -407,7 +426,7 @@
     onBack={() => push("/workflow")}
     onNext={submit}
     nextDisabled={!canSubmit || saving}
-    nextLabel={$t.extras.sendDirect}
+    nextLabel={sendStatus && sendStatus !== "confirmed" ? $t.share.retrySend : $t.extras.sendDirect}
   />
 {:else}
   <BottomBar
@@ -417,6 +436,14 @@
 {/if}
 
 <style>
+  .send-warn {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: var(--warn-soft);
+    color: var(--warn);
+    font-size: 13.5px;
+  }
   .body {
     flex: 1;
     overflow: auto;

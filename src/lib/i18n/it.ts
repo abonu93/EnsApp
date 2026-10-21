@@ -232,6 +232,10 @@ export const it = {
     sendToSheet: "Invia a Sheet",
     saveSuccess: "Salvato con successo",
     saveError: "Errore nel salvataggio",
+    saveNotFound: "Inviato, ma la riga non compare nel foglio. Controlla il foglio prima di riprovare, per non duplicarla.",
+    saveUnverified: "Inviato, ma non è stato possibile rileggere il foglio per verificarlo (rete). Controlla il foglio.",
+    saveFailed: "Invio non riuscito (rete assente?). Il paziente è salvato sul telefono: riprova.",
+    retrySend: "Riprova l'invio",
   },
   postAcute: {
     title: "Post-acuto (Librexia)",
