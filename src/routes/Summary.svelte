@@ -10,6 +10,7 @@
   import { REASON_BY_TRIAL } from "$lib/domain/acute-reasons";
   import { REASON_BY_HEM_TRIAL } from "$lib/domain/hem-reasons";
   import { exclusiveWith, isTrialOpen } from "$lib/domain/trials-info";
+  import { selectionAlerts } from "$lib/domain/open-questions";
   import { t } from "$lib/i18n";
 
   let showIneligible = $state(false);
@@ -90,6 +91,11 @@
   }
 
   const selectedCount = $derived($selectedStudies.length);
+  // Contraddizioni e dubbi aperti sugli studi scelti (co-arruolamento non
+  // deciso, protocolli ambigui): da leggere prima di procedere.
+  const alerts = $derived(
+    selectionAlerts($selectedStudies, $postData.strokeType === "ischemic" ? ($acuteInput as Parameters<typeof selectionAlerts>[1]) : undefined)
+  );
 </script>
 
 <AppHeader title={$t.extras.results} sub={`${eligibleItems.length} ${$t.extras.eligibleTrialsCount}`} step={2} steps={3} onBack={() => push("/post-imaging")} />
@@ -123,6 +129,21 @@
           </span>
         </button>
       {/each}
+    </div>
+  {/if}
+
+  {#if alerts.length > 0}
+    <div class="alerts" role="status">
+      <h2 class="alerts-title">{$t.extras.selectionAlertsTitle}</h2>
+      <ul lang="en">
+        {#each alerts as a (a.kind + a.title)}
+          <li class="alert" class:relevant={a.relevant}>
+            <span class="alert-tag">{a.kind === "coenrolment" ? $t.extras.coenrolmentTag : a.relevant ? $t.extras.relevantTag : $t.extras.questionTag}</span>
+            <strong>{a.title}</strong>
+            <span class="alert-detail">{a.detail}</span>
+          </li>
+        {/each}
+      </ul>
     </div>
   {/if}
 
@@ -238,6 +259,18 @@
   .name { font-size: 15px; font-weight: 600; }
   .name-col { display: flex; flex-direction: column; gap: 2px; text-align: left; }
   .exclusive { font-size: 12.5px; color: var(--text-muted); }
+  .alerts {
+    border: 1px solid var(--warn);
+    background: var(--warn-soft);
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+  .alerts-title { margin: 0 0 8px; font-size: 14px; color: var(--warn); }
+  .alerts ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .alert { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; color: var(--text); }
+  .alert-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+  .alert.relevant .alert-tag { color: var(--danger); }
+  .alert-detail { color: var(--text-muted); }
 
   .ineligible-toggle {
     display: inline-flex;

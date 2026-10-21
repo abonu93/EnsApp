@@ -6,6 +6,7 @@
   import Splash from "$lib/components/Splash.svelte";
   import InstallPrompt from "$lib/components/InstallPrompt.svelte";
   import { t, locale, cycleLocale } from "$lib/i18n";
+  import { OPEN_QUESTIONS } from "$lib/domain/open-questions";
 
   // Splash visibile al primo load di sessione. Lo skip persiste in
   // sessionStorage (cosi' tornando indietro non si rivede di continuo,
@@ -50,9 +51,17 @@
     </span>
     <span class="brand-name">Eligo</span>
   </a>
-  <button class="lang-btn" type="button" onclick={cycleLocale} aria-label="{$t.common.language}: {$locale.toUpperCase()}">
-    {$locale.toUpperCase()}
-  </button>
+  <div class="hdr-actions">
+    <a href="/open-questions" use:link class="bell" aria-label="{$t.extras.openQuestionsTitle}: {OPEN_QUESTIONS.length}">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+      {#if OPEN_QUESTIONS.length > 0}<span class="badge" aria-hidden="true">{OPEN_QUESTIONS.length}</span>{/if}
+    </a>
+    <button class="lang-btn" type="button" onclick={cycleLocale} aria-label="{$t.common.language}: {$locale.toUpperCase()}">
+      {$locale.toUpperCase()}
+    </button>
+  </div>
 </header>
 
 <main id="main" tabindex="-1">
@@ -127,5 +136,34 @@
 
   main {
     outline: none;
+  }
+
+  .hdr-actions { display: flex; align-items: center; gap: 4px; }
+  .bell {
+    position: relative;
+    color: var(--text-muted);
+    min-height: 32px;
+    min-width: 32px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bell:hover { background: var(--primary-soft); color: var(--primary); }
+  .bell:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+  .badge {
+    position: absolute;
+    top: 0;
+    right: -2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: var(--warn);
+    color: var(--text-inverted);
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
   }
 </style>
