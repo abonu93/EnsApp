@@ -15,16 +15,6 @@
       icon: "grid" as const,
     },
     {
-      key: "check",
-      title: $t.workflow.eligibilityTitle,
-      desc: $t.workflow.eligibilityDesc,
-      tag: $t.extras.guidedTag,
-      accent: "var(--primary)",
-      bg: "var(--primary-soft)",
-      route: "/pre-imaging",
-      icon: "stetho" as const,
-    },
-    {
       key: "registered",
       title: $t.registered.title,
       desc: $t.registered.entryDesc,
@@ -33,6 +23,18 @@
       bg: "var(--post-acute-soft)",
       route: "/registered",
       icon: "bolt" as const,
+    },
+    {
+      key: "check",
+      title: $t.workflow.eligibilityTitle,
+      desc: $t.workflow.eligibilityDesc,
+      tag: $t.extras.guidedTag,
+      accent: "var(--primary)",
+      bg: "var(--primary-soft)",
+      route: "/pre-imaging",
+      icon: "stetho" as const,
+      // Flusso guidato completo: resta disponibile ma in secondo piano.
+      muted: true,
     },
   ]);
 
@@ -49,7 +51,7 @@
 
   <div class="opts">
     {#each choices as o (o.key)}
-      <button class="opt ens-press ens-rise" type="button" onclick={() => pick(o.route)} style="animation-delay: 140ms">
+      <button class="opt ens-press ens-rise" class:muted={"muted" in o && o.muted} type="button" onclick={() => pick(o.route)} style="animation-delay: 140ms">
         <div class="opt-top">
           <span class="opt-icon" style="background: {o.bg}; color: {o.accent}">
             {#if o.icon === "stetho"}
@@ -87,7 +89,8 @@
 
 <style>
   .page {
-    padding: 8px 22px 0;
+    /* Spazio sotto per non finire dietro alla barra fluttuante. */
+    padding: 8px 22px calc(96px + env(safe-area-inset-bottom, 0px));
   }
   .intro {
     margin-bottom: 22px;
@@ -129,6 +132,17 @@
   .opt:focus-visible { outline: none; box-shadow: var(--focus-ring); }
   .opt:hover { box-shadow: var(--shadow-lg); }
 
+  /* In secondo piano (flusso guidato completo): grigio, senza ombra. */
+  .opt.muted {
+    background: var(--surface-elevated);
+    box-shadow: none;
+  }
+  .opt.muted .opt-icon,
+  .opt.muted .opt-tag {
+    background: var(--border) !important;
+    color: var(--text-muted) !important;
+  }
+  .opt.muted .opt-title { color: var(--text-muted); }
   .opt-top {
     display: flex;
     align-items: center;

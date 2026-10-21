@@ -1,9 +1,12 @@
-# Paziente registrato (`/registered`)
+# Registro differito (`/registered`)
 
-Sostituisce la registrazione rapida ("Direct enrollment"). Serve a registrare
-un paziente **gia' arruolato, dopo la fase acuta**, anche giorni dopo.
-Design: Claude Design, "Eligo Registered Patient". Ingresso: terza scelta in
-`/workflow` (Nuovo paziente); `/trial-patient` resta come vecchio indirizzo.
+Sostituisce la registrazione rapida ("Direct enrollment"). Nome in app:
+"Registro diferido" / "Registre diferit" / "Deferred entry" / "Inserimento
+differito". Serve per i pazienti **che non si sono potuti inserire durante
+l'urgenza** e che si registrano dopo, anche giorni dopo.
+Design: Claude Design, "Eligo Registered Patient". Ingresso: seconda scelta in
+`/workflow` (Nuovo paziente), dopo il Bedside board; il flusso guidato e'
+l'ultima scelta, in grigio. `/trial-patient` resta come vecchio indirizzo.
 
 ## Tempo: "Visto" e LTSW alla visita
 
