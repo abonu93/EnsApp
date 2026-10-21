@@ -5,7 +5,7 @@ import { FIXED_NOW, freshSession } from "./helpers";
  * Paziente registrato (ex Direct enrollment): paziente gia' arruolato,
  * registrato dopo la fase acuta. LTSW alla visita, studi con braccio, invio.
  */
-test.describe("registered patient", () => {
+test.describe("deferred entry (ex registered patient)", () => {
   test.beforeEach(async ({ page }) => {
     await page.clock.setFixedTime(FIXED_NOW);
     await freshSession(page);
@@ -13,9 +13,9 @@ test.describe("registered patient", () => {
 
   test("dati -> LTSW riferito -> studio con braccio -> salvataggio", async ({ page }) => {
     await page.getByRole("button", { name: /new patient/i }).click();
-    await page.getByRole("button", { name: /registered patient/i }).click();
+    await page.getByRole("button", { name: /deferred entry/i }).click();
     await expect(page).toHaveURL(/\/registered$/);
-    await expect(page.locator("main h1")).toHaveText("Registered patient");
+    await expect(page.locator("main h1")).toHaveText("Deferred entry");
 
     // ID ed eta' (obbligatori)
     await expect(page.locator(".save")).toBeDisabled();
