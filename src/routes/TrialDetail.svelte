@@ -5,6 +5,7 @@
   import Pill from "$lib/components/Pill.svelte";
   import Button from "$lib/components/Button.svelte";
   import { TRIALS_INFO, getTrialCategory, randomizationLinks } from "$lib/domain/trials-info";
+  import { questionsFor } from "$lib/domain/open-questions";
   import { t } from "$lib/i18n";
 
   interface Props {
@@ -13,6 +14,7 @@
   let { params }: Props = $props();
   const name = $derived(params?.name ? decodeURIComponent(params.name) : "");
   const info = $derived(TRIALS_INFO[name]);
+  const questions = $derived(questionsFor(name));
 
   function statusTone(status: string) {
     if (status === "active") return "success" as const;
@@ -64,6 +66,18 @@
         </dl>
       {/snippet}
     </Card>
+
+    {#if questions.length > 0}
+      <Card title={$t.extras.openQuestionsTitle} subtitle={$t.extras.openQuestionsTrialDesc}>
+        {#snippet children()}
+          <ul class="notes" lang="en">
+            {#each questions as q (q.id)}
+              <li><strong>{q.question}</strong> {q.detail}</li>
+            {/each}
+          </ul>
+        {/snippet}
+      </Card>
+    {/if}
 
     {#if info.notes.length > 0}
       <Card title={$t.trials.notes}>

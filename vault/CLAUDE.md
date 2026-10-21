@@ -85,6 +85,24 @@ link al file.
   (`ASPECTS.md`, `Oclusión en tándem.md`).
 - **Frontmatter YAML** obbligatorio, con i campi dei template.
 
+## Dubbi non risolvibili dai documenti
+
+Quando un protocollo non è chiaro, si contraddice o manca un documento, e il
+dubbio non si può risolvere leggendo le fonti (regola del team, 2026-10-20):
+
+1. callout `> [!warning] Contraddizione` nella scheda dello studio, come sempre;
+2. aggiungere la domanda a `src/lib/domain/open-questions.ts` (`OPEN_QUESTIONS`):
+   studio, a chi chiedere (promotore o team), cosa dicono i documenti, cosa fa
+   l'app; se il dubbio cambia l'esito per certi pazienti, la funzione `appliesTo`;
+3. l'app la mostra nella pagina "Dubbi aperti" (campanella in alto) e come
+   avviso nel Riepilogo quando si seleziona lo studio;
+4. quando arriva la risposta: toglierla da `OPEN_QUESTIONS`, correggere la
+   regola e annotare la decisione nella scheda e nel log.
+
+Le regole di co-arruolamento dei protocolli stanno in `COENROLMENT_RULES`; i
+gruppi di studi che il team ha deciso esclusivi in `EXCLUSIVE_GROUPS`
+(`src/lib/domain/trials-info.ts`).
+
 ## Manutenzione
 
 Su richiesta "controlla il vault": link rotti, note orfane, concetti citati

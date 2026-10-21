@@ -324,7 +324,7 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     category: "Thrombolysis in anticoagulated patients",
     key: { window: "Randomization <= 4 h 15 min, treatment <= 4.5 h from LKW", age: ">= 18 y", mrs: "-", nihss: "-", aspects: "-" },
     consent: "Deferred; in Spain the relative or legal representative must give verbal consent by phone, then sign; patient consent post hoc.",
-    imaging: "CT or MRI. Protocol allows unknown onset with MRI DWI-FLAIR mismatch (team sheet: wake-up excluded). Control CT/MRI at 24 ± 12 h.",
+    imaging: "CT or MRI. Wake-up / unknown onset excluded at our centre (no DWI-FLAIR MRI available), although the protocol allows it. Control CT/MRI at 24 ± 12 h.",
     thrombolytic: "Required: IVT indication per standard of care, apart from recent DOAC intake.",
     thrombectomy: "Optional (planned EVT capped at 20% of patients).",
     preEvtLabs: "Routine labs; pregnancy test before randomization in women of childbearing potential.",
@@ -457,6 +457,20 @@ export function filterTrials(
  */
 export function canonicalTrialName(name: string): string {
   return (name || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/**
+ * Co-arruolamento: gruppi di studi che si escludono a vicenda (decisione del
+ * team, 2026-10-20). REMEDY (excl. 17) e SOVATELTIDE (excl. 6) escludono la
+ * partecipazione ad altri studi con farmaco; DO-IT e' uno studio di trattamento.
+ */
+export const EXCLUSIVE_GROUPS: readonly (readonly string[])[] = [["DO-IT", "REMEDY", "SOVATELTIDE"]];
+
+/** Studi che non si possono selezionare insieme a `name` (nomi come nel gruppo). */
+export function exclusiveWith(name: string): string[] {
+  const key = canonicalTrialName(name);
+  const group = EXCLUSIVE_GROUPS.find((g) => g.some((n) => canonicalTrialName(n) === key));
+  return group ? group.filter((n) => canonicalTrialName(n) !== key) : [];
 }
 
 /**

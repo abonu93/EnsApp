@@ -9,7 +9,8 @@
   import { acuteInput, hemInput, postData } from "$lib/stores/patient";
   import { REASON_BY_TRIAL } from "$lib/domain/acute-reasons";
   import { REASON_BY_HEM_TRIAL } from "$lib/domain/hem-reasons";
-  import { isTrialOpen } from "$lib/domain/trials-info";
+  import { exclusiveWith, isTrialOpen } from "$lib/domain/trials-info";
+  import { selectionAlerts } from "$lib/domain/open-questions";
   import { t } from "$lib/i18n";
 
   let showIneligible = $state(false);
@@ -47,11 +48,22 @@
   // catalogo ma non sono selezionabili: vengono esclusi dai risultati di arruolamento.
   // Solo i trial del tipo di ictus scelto: un'emorragia non deve elencare gli
   // studi ischemici fra i "non eleggibili" (e viceversa).
+  // WeTrust (randomizzato prima dell'imaging) resta anche per l'emorragico.
   const candidates = $derived(
     $postData.strokeType === "ischemic" ? acuteEligible
-      : $postData.strokeType === "hemorrhagic" ? hemEligibleList
+      : $postData.strokeType === "hemorrhagic" ? [...acuteEligible.filter((e) => e.display === "WeTrust"), ...hemEligibleList]
       : []
   );
+  // Una selezione fatta con l'altro tipo di ictus non e' piu' visibile qui, ma
+  // resterebbe nel conteggio e nel foglio: la si toglie.
+  $effect(() => {
+    if (!$postData.strokeType) return;
+    const allowed = new Set(candidates.map((e) => e.display));
+    const known = new Set([...acuteEligible, ...hemEligibleList].map((e) => e.display));
+    if ($selectedStudies.some((n) => known.has(n) && !allowed.has(n))) {
+      selectedStudies.update((arr) => arr.filter((n) => !known.has(n) || allowed.has(n)));
+    }
+  });
   const eligibleItems = $derived(
     candidates.filter((e) => e.eligible && isTrialOpen(e.display))
   );
@@ -62,7 +74,13 @@
   );
 
   function toggle(name: string) {
-    selectedStudies.update((arr) => arr.includes(name) ? arr.filter((n) => n !== name) : [...arr, name]);
+    // Selezionare uno studio di un gruppo esclusivo toglie gli altri del gruppo.
+    const partners = exclusiveWith(name);
+    selectedStudies.update((arr) =>
+      arr.includes(name)
+        ? arr.filter((n) => n !== name)
+        : [...arr.filter((n) => !partners.includes(n)), name]
+    );
   }
   function reasonsFor(name: string): string[] {
     const acuteFn = REASON_BY_TRIAL[name];
@@ -73,6 +91,11 @@
   }
 
   const selectedCount = $derived($selectedStudies.length);
+  // Contraddizioni e dubbi aperti sugli studi scelti (co-arruolamento non
+  // deciso, protocolli ambigui): da leggere prima di procedere.
+  const alerts = $derived(
+    selectionAlerts($selectedStudies, $postData.strokeType === "ischemic" ? ($acuteInput as Parameters<typeof selectionAlerts>[1]) : undefined)
+  );
 </script>
 
 <AppHeader title={$t.extras.results} sub={`${eligibleItems.length} ${$t.extras.eligibleTrialsCount}`} step={2} steps={3} onBack={() => push("/post-imaging")} />
@@ -86,6 +109,7 @@
     <div class="list">
       {#each eligibleItems as item (item.display)}
         {@const checked = $selectedStudies.includes(item.display)}
+        {@const rivals = exclusiveWith(item.display).filter((n) => eligibleItems.some((e) => e.display === n))}
         <button class="card-pick" class:on={checked} type="button" onclick={() => toggle(item.display)}>
           <span class="check" class:on={checked} aria-hidden="true">
             {#if checked}
@@ -95,11 +119,31 @@
             {/if}
           </span>
           <span class="card-pick-text">
-            <span class="name">{item.display}</span>
+            <span class="name-col">
+              <span class="name">{item.display}</span>
+              {#if rivals.length > 0}
+                <span class="exclusive">{$t.extras.exclusiveWith} {rivals.join(", ")}</span>
+              {/if}
+            </span>
             <Pill tone={item.tone}>{#snippet children()}{item.tone}{/snippet}</Pill>
           </span>
         </button>
       {/each}
+    </div>
+  {/if}
+
+  {#if alerts.length > 0}
+    <div class="alerts" role="status">
+      <h2 class="alerts-title">{$t.extras.selectionAlertsTitle}</h2>
+      <ul lang="en">
+        {#each alerts as a (a.kind + a.title)}
+          <li class="alert" class:relevant={a.relevant}>
+            <span class="alert-tag">{a.kind === "coenrolment" ? $t.extras.coenrolmentTag : a.relevant ? $t.extras.relevantTag : $t.extras.questionTag}</span>
+            <strong>{a.title}</strong>
+            <span class="alert-detail">{a.detail}</span>
+          </li>
+        {/each}
+      </ul>
     </div>
   {/if}
 
@@ -213,6 +257,20 @@
     gap: 8px;
   }
   .name { font-size: 15px; font-weight: 600; }
+  .name-col { display: flex; flex-direction: column; gap: 2px; text-align: left; }
+  .exclusive { font-size: 12.5px; color: var(--text-muted); }
+  .alerts {
+    border: 1px solid var(--warn);
+    background: var(--warn-soft);
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+  .alerts-title { margin: 0 0 8px; font-size: 14px; color: var(--warn); }
+  .alerts ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .alert { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; color: var(--text); }
+  .alert-tag { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+  .alert.relevant .alert-tag { color: var(--danger); }
+  .alert-detail { color: var(--text-muted); }
 
   .ineligible-toggle {
     display: inline-flex;

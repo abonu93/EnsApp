@@ -150,6 +150,8 @@ Testo originale (§6.2, [[REMEDY — Protocolo — V6.2]], p. 38–40; sinossi p
 > - ✅ 6 nuova domanda "Ictus del tronco o del cervelletto" nella scheda dei non candidati a EVT (esclude)
 > - ✅ ASPECTS non richiesto nell'ictus della sola ACP (prima l'ASPECTS vuoto escludeva anche un'occlusione P2/P3)
 > - restano aperti 4, 5 (condizioni dopo trombolisi), 7, 8
+> - ✅ (dd2f49f) motivo più chiaro per l'ictus della sola ACP senza occlusione (inserire ASPECTS 10)
+> - ✅ (4742d0d) **co-arruolamento (7):** esclusivo con DO-IT e SOVATELTIDE nel Riepilogo (decisione del team)
 > [!done] Correzioni (secondo blocco, 2026-10-19, branch `claude/practical-johnson-mo40tz-block2`)
 > - ✅ 1 ASPECTS ora sempre richiesto nella scheda Imaging: REMEDY torna proponibile entro 4,5 h
 > - ✅ 2 vaso occluso sempre richiesto: l'esclusione delle occlusioni di grosso vaso funziona

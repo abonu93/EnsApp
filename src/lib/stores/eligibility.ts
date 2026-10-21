@@ -81,7 +81,9 @@ export const acuteEligibility = derived(
     };
     // Tipo non ancora scelto: resta calcolato, perche' WeTrust si valuta in
     // PreResult prima dell'imaging.
-    return $post.strokeType === "hemorrhagic" ? allFalse(result) : result;
+    // WeTrust si randomizza prima dell'imaging: resta valido anche se poi
+    // l'ictus risulta emorragico.
+    return $post.strokeType === "hemorrhagic" ? { ...allFalse(result), weTrust: result.weTrust } : result;
   }
 );
 

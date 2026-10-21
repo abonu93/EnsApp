@@ -22,6 +22,7 @@ import {
   TWIN2WIN2_VESSELS,
   VANISH_MAX_HOURS,
   vesselsWithin,
+  weTrustTimeOk,
 } from "./acute-rules";
 import { reduce, type ReasonReport } from "./reason-report";
 
@@ -38,15 +39,14 @@ function isNumber(v: unknown): v is number {
 }
 
 export function reasonWeTrust(input: AcuteInput): ReasonReport {
-  const wakeup = input.wakeupStroke === true;
-  const maxH = wakeup ? 12 : 6;
-  const within6h = wakeup ? input.wakeupSymptomsWithin6h === true : true;
   return reduce([
     { ok: input.age >= 18, label: "age >= 18" },
     { ok: input.nihss >= 10, label: "NIHSS >= 10" },
     { ok: input.premrs <= 2, label: "pre-mRS <= 2" },
-    { ok: input.ltsw < maxH, label: `LTSW < ${maxH}h` },
-    { ok: within6h, label: "wake-up: sintomi scoperti < 6h prima dell'arrivo" },
+    {
+      ok: weTrustTimeOk(input),
+      label: "LTSW < 6h (wake-up: < 12h con sintomi scoperti < 6h prima dell'arrivo)",
+    },
     { ok: input.angiograph === "yes", label: "angiografo Philips disponibile" },
   ]);
 }
@@ -192,7 +192,7 @@ export function reasonDoneSymple(input: AcuteInput): ReasonReport {
       ok: vesselsWithin(input.targetVessels, DONE_SYMPLE_VESSELS),
       label: "occlusione di ICA o M1 (circolazione anteriore)",
     },
-    { ok: input.largeCore !== "yes", label: "core <= 70 cc" },
+    { ok: input.coreGt70 === "no", label: "core <= 70 cc al software (risposta richiesta)" },
   ]);
 }
 
@@ -253,6 +253,8 @@ export function reasonDoit(input: AcuteInput): ReasonReport {
       ok: input.ivtCandidate === "eligible" || input.ivtExceptDoac === "yes",
       label: "candidato IVT (a parte il DOAC)",
     },
+    { ok: input.doacReversal !== "yes", label: "nessuna antagonizzazione del DOAC prevista o iniziata" },
+    { ok: input.wakeupStroke !== true, label: "no ictus al risveglio (manca la RM DWI-FLAIR nel centro)" },
   ]);
 }
 
@@ -274,7 +276,7 @@ export function reasonRemedy(input: AcuteInput): ReasonReport {
     { ok: input.nihss >= 5 && input.nihss <= 15, label: "NIHSS 5-15" },
     { ok: input.candidate === "not eligible", label: "non candidato EVT" },
     { ok: !excluded, label: "no occlusione ICA intracr./ICA-T/M1/VA/basilar" },
-    { ok: remedyAspectsOk(input), label: "ASPECTS >= 6 (non richiesto nell'ictus della sola ACP)" },
+    { ok: remedyAspectsOk(input), label: "ASPECTS >= 6 (ictus della sola ACP: selezionare il vaso posteriore o inserire ASPECTS 10)" },
     { ok: input.acei !== "yes", label: "ACE-inibitore: ultima dose >= 24h (48h se eGFR < 45) e sospendibile fino al g. 29" },
     { ok: input.posteriorFossa !== "yes", label: "no ictus del tronco o del cervelletto" },
   ]);

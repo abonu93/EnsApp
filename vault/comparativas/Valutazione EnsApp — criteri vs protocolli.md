@@ -27,6 +27,8 @@ Stato nell'app al 2026-10-19 ([[Estado de los estudios]]):
 | secondo blocco | Scheda Imaging comune (T3), [[VANISH]] al protocollo v1.2, [[REMEDY]] (ASPECTS, LVO, ACE-inibitori) | Vaso, tandem e ASPECTS chiesti a tutti gli ischemici; VANISH 9 h, tandem, core/mismatch, ICA intracranica |
 | `99d4582` (terzo blocco) | [[PIVOTAL]], [[TWIN2WIN-2]], [[NiVO]], [[ORION]], [[TENACITY]]; etichette dei vasi | Vasi, occlusione singola/territorio, tandem, ASPECTS, tortuosità; ORION NIHSS 5, mRS 86-90, perfusione oltre 6 h, EVT entro 1 h; TENACITY sopratentoriale e "ictus pregresso + diabete" |
 | `9895f0a` (quarto blocco) | Tipo di ictus (T10), [[DONE SYMPLE]], [[DO-IT]], [[SOVATELTIDE]], [[WETRUST]], [[REMEDY]]; correzioni del controllo incrociato su [[ORION]], [[REMEDY]], [[PIVOTAL]], [[TICH-3]] | Nessun trial ischemico per un'emorragia e viceversa; DONE SYMPLE senza candidatura EVT, ICA/M1, core; DO-IT "a parte il DOAC" e 4 h 15 min; SOVATELTIDE diagnosi clinica e NIHSS 1a; WETRUST wake-up; REMEDY tronco/cervelletto; testi copiati (T7) corretti |
+| `dd2f49f` (secondo controllo) | [[WETRUST]], [[DONE SYMPLE]], [[DO-IT]], [[ORION]], [[REMEDY]]; selezione dei trial | WeTrust non sparisce con l'emorragico; selezione dell'altro tipo ripulita; core DONE SYMPLE separato; antagonizzazione DOAC; perfusione "non eseguita" |
+| `4742d0d` | Calendario dell'LTSW; [[DO-IT]] senza wake-up; co-arruolamento (T6) | Le frecce non producono più un orario nel futuro (LTSW negativo = paziente "in finestra" ovunque); DO-IT, REMEDY e SOVATELTIDE esclusivi (decisione del team, 2026-10-20) |
 
 Le sezioni seguenti fotografano lo stato **prima** di queste correzioni; il dettaglio di cosa resta aperto è nel riquadro "Correzioni applicate" di ogni scheda.
 
@@ -166,6 +168,8 @@ Studi toccati: **9 attivi** (ATHENA, VANISH, PIVOTAL, NiVO, TWIN2WIN-2, FASTEST,
 Studi toccati: **8 attivi** (VANISH, PIVOTAL, NiVO, TENACITY, TWIN2WIN-2, ORION, ATHENA, DONE SYMPLE); **4 latenti**.
 
 ### T6. Co-arruolamento: l'app propone insieme studi che si escludono
+> [!done] 2026-10-20: il team ha deciso che DO-IT, REMEDY e SOVATELTIDE sono esclusivi; implementato nel Riepilogo (`EXCLUSIVE_GROUPS` in `trials-info.ts`). Le altre combinazioni restano da decidere.
+
 **Verifica nel codice.** Non esiste alcuna logica di co-arruolamento (nessuna occorrenza in `src/`). Il Riepilogo permette di selezionare più studi insieme (`Summary.svelte:47-49`, `:56-58`). Le regole permettono queste combinazioni:
 
 - **[[FASTEST]] + [[TICH-3]]**: ICH <2 h con età 18–80, mRS ≤2, GCS ≥8 e volume 2–59 mL. FASTEST esclude procoagulanti e TXA (escl. 12) e altri studi negli ultimi 30 giorni (escl. 16).

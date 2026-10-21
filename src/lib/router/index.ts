@@ -17,6 +17,7 @@ import SavedPatientDetail from "../../routes/SavedPatientDetail.svelte";
 import Components from "../../routes/Components.svelte";
 import FormDemo from "../../routes/FormDemo.svelte";
 import NotFound from "../../routes/NotFound.svelte";
+import OpenQuestions from "../../routes/OpenQuestions.svelte";
 
 export const routes = {
   "/": Landing,
@@ -34,6 +35,7 @@ export const routes = {
   "/saved/:id": SavedPatientDetail,
   "/components": Components,
   "/form-demo": FormDemo,
+  "/open-questions": OpenQuestions,
   "*": NotFound,
 };
 

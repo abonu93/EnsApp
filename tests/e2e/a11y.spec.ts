@@ -14,6 +14,7 @@ const ROUTES = [
   { name: "share", path: "/share" },
   { name: "post-acute", path: "/post-acute" },
   { name: "trial-patient", path: "/trial-patient" },
+  { name: "open-questions", path: "/open-questions" },
 ];
 
 test.describe("a11y - WCAG 2.1 AA scan", () => {

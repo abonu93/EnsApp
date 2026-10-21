@@ -3,6 +3,7 @@
   // Mobile-first, niente preset rapidi (il calendario comanda).
   import Sheet from "./Sheet.svelte";
   import { t } from "$lib/i18n";
+  import { now } from "$lib/stores/patient";
 
   interface Props {
     open: boolean;
@@ -39,13 +40,28 @@
   const startDow = $derived((new Date(y, m, 1).getDay() + 6) % 7);
   const daysInMonth = $derived(new Date(y, m + 1, 0).getDate());
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Dall'orologio dell'app: con l'app aperta dopo mezzanotte il nuovo giorno
+  // deve essere selezionabile (prima "oggi" restava quello dell'apertura).
+  const today = $derived.by(() => {
+    const d = new Date($now);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+
+  // L'ultima volta visto bene non puo' essere nel futuro: un LTSW negativo
+  // farebbe risultare il paziente "in finestra" per quasi tutti i trial.
+  function clampPast(d: Date): Date {
+    const limit = Date.now();
+    return d.getTime() > limit ? new Date(limit) : d;
+  }
 
   function monthName(month: number, locale: string): string {
     return new Date(2000, month, 1).toLocaleString(locale, { month: "long" });
   }
-  const weekdays = ["L", "M", "M", "G", "V", "S", "D"];
+  // Iniziali dei giorni nella lingua del browser, da lunedi' (1 gen 2001 e' lunedi').
+  const weekdays = Array.from({ length: 7 }, (_, i) =>
+    new Date(2001, 0, 1 + i).toLocaleString("default", { weekday: "narrow" })
+  );
 
   // griglia di 42 celle al massimo (6 settimane)
   const cells = $derived.by(() => {
@@ -58,20 +74,21 @@
   function pickDay(d: number) {
     const n = new Date(sel);
     n.setFullYear(y, m, d);
-    sel = n;
+    sel = clampPast(n);
   }
 
-  function bumpHours(delta: number) {
-    const n = new Date(sel);
-    const h = (n.getHours() + delta + 24) % 24;
-    n.setHours(h);
+  // Le frecce spostano l'ora reale (con riporto su ora e giorno): prima
+  // 00 - 1 h diventava le 23 dello stesso giorno, cioe' nel futuro.
+  function shift(ms: number) {
+    const n = clampPast(new Date(sel.getTime() + ms));
     sel = n;
+    if (n.getFullYear() !== y || n.getMonth() !== m) view = new Date(n.getFullYear(), n.getMonth(), 1);
+  }
+  function bumpHours(delta: number) {
+    shift(delta * 3_600_000);
   }
   function bumpMinutes(delta: number) {
-    const n = new Date(sel);
-    const mn = (n.getMinutes() + delta + 60) % 60;
-    n.setMinutes(mn);
-    sel = n;
+    shift(delta * 60_000);
   }
 
   function navMonth(delta: number) {
@@ -85,7 +102,7 @@
   }
 
   function confirmPick() {
-    onSet(toISO(sel));
+    onSet(toISO(clampPast(sel)));
   }
 
   function selectedDay(d: number | null): boolean {
