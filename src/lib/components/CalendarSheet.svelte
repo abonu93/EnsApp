@@ -11,8 +11,10 @@
     value: string;
     onClose: () => void;
     onSet: (iso: string) => void;
+    /** Titolo del foglio (default: etichetta dell'LTSW). */
+    title?: string;
   }
-  let { open, value, onClose, onSet }: Props = $props();
+  let { open, value, onClose, onSet, title = "" }: Props = $props();
 
   function parseInit(v: string): Date {
     if (v) {
@@ -131,7 +133,7 @@
   }
 </script>
 
-<Sheet {open} {onClose} title={$t.preImaging.ltswLabel}>
+<Sheet {open} {onClose} title={title || $t.preImaging.ltswLabel}>
   {#snippet children()}
     <!-- Month navigation -->
     <div class="mnav">

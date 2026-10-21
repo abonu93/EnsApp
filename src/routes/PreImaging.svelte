@@ -19,6 +19,13 @@
   let premrs = $state<number | null>($preData.premrs ?? null);
   let ltswDate = $state<string>($preData.ltswDate ?? "");
   let wakeupStroke = $state<boolean>($preData.wakeupStroke ?? false);
+  // Ictus al risveglio: ora della scoperta dei sintomi. TICH-3 conta la
+  // finestra da qui, VANISH dal punto medio fra LSW e scoperta.
+  let discoveryDate = $state<string>($preData.discoveryDate ?? "");
+  const discoveryBeforeLsw = $derived(
+    wakeupStroke && discoveryDate !== "" && ltswDate !== "" &&
+    new Date(discoveryDate).getTime() < new Date(ltswDate).getTime()
+  );
   let angiograph = $state<YN>(($preData.angiograph as YN) ?? "");
   let doac = $state<YN>(($preData.doac as YN) ?? "");
   let acei = $state<YN>(($preData.acei as YN) ?? "");
@@ -41,6 +48,7 @@
       ltswDate: ltswDate || undefined,
       ltsw: ltswHrs,
       wakeupStroke,
+      discoveryDate: wakeupStroke && discoveryDate ? discoveryDate : undefined,
       wakeupSymptomsWithin6h: wakeupStroke && wakeupSymptoms !== "" ? wakeupSymptoms === "yes" : undefined,
       angiograph: angiograph || undefined,
       doac: doac || undefined,
@@ -50,7 +58,7 @@
 
   const canSubmit = $derived(
     age !== null && nihss !== null && premrs !== null && ltswDate !== "" &&
-    ltswHrs !== undefined && ltswHrs >= 0 &&
+    ltswHrs !== undefined && ltswHrs >= 0 && !discoveryBeforeLsw &&
     angiograph !== "" && doac !== "" && acei !== ""
   );
 
@@ -144,6 +152,13 @@
         </div>
         {#if wakeupStroke}
           <div class="field">
+            <span class="lbl">{$t.preImaging.discoveryLabel}</span>
+            <DateTimeField id="pre-discovery" bind:value={discoveryDate} label={$t.preImaging.discoveryLabel} />
+            {#if discoveryBeforeLsw}
+              <small class="err" role="alert">{$t.preImaging.discoveryBeforeLsw}</small>
+            {/if}
+          </div>
+          <div class="field">
             <span class="lbl">{$t.preImaging.wakeupSymptomsLabel}</span>
             <Segmented options={ynOpts} bind:value={wakeupSymptoms} cols={2} />
           </div>
@@ -185,6 +200,7 @@
   }
   .stack { display: flex; flex-direction: column; gap: 20px; }
   .field { display: block; }
+  .err { display: block; margin-top: 6px; color: var(--danger); font-size: 12.5px; }
   .row-lbl {
     display: flex;
     align-items: baseline;

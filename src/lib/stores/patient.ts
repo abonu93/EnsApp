@@ -20,6 +20,8 @@ export type PreData = Partial<{
   ltsw: number;
   wakeupStroke: boolean;
   wakeupSymptomsWithin6h: boolean;
+  /** Ictus al risveglio: ISO datetime della scoperta dei sintomi (risveglio). */
+  discoveryDate: string;
   angiograph: "yes" | "no" | "";
   doac: "yes" | "no" | "";
   acei: "yes" | "no" | "";
@@ -66,6 +68,8 @@ export type PostData = Partial<{
   coreGt70: "yes" | "no" | "";
   /** DO-IT: antagonizzazione del DOAC prevista o iniziata. */
   doacReversal: "yes" | "no" | "";
+  /** REMEDY dopo trombolisi: condizioni dell'incl. 6 verificate. */
+  remedyPostIvt: "yes" | "no" | "";
 }>;
 
 export type HemData = Partial<HemorrhagicInput>;
@@ -122,19 +126,34 @@ export const ltswHours = derived([preData, now], ([$pre, $now]) => {
   return $pre.ltsw;
 });
 
+/**
+ * Ictus al risveglio: ore dalla scoperta dei sintomi (TICH-3 conta da qui;
+ * VANISH dal punto medio fra LSW e scoperta). Undefined se non e' un
+ * risveglio o l'ora non e' stata inserita.
+ */
+export const discoveryHours = derived([preData, now], ([$pre, $now]) =>
+  $pre.wakeupStroke ? hoursSince($pre.discoveryDate, $now) : undefined
+);
+
 /** Snapshot completo per le regole acute (preData + postData merged + ltswHours derived). */
-export const acuteInput = derived([preData, postData, ltswHours], ([$pre, $post, $h]) => {
-  return { ...$pre, ...$post, ltsw: $h } as Partial<AcuteInput>;
-});
+export const acuteInput = derived(
+  [preData, postData, ltswHours, discoveryHours],
+  ([$pre, $post, $h, $d]) => {
+    return { ...$pre, ...$post, ltsw: $h, hoursSinceDiscovery: $d } as Partial<AcuteInput>;
+  }
+);
 
 /**
  * Snapshot per le regole emorragiche. Rispecchia ESATTAMENTE il merge usato da
  * `hemEligibility` ({...pre, ...hem}), cosi' i reason report mostrati in
  * Summary non possono divergere dal calcolo di eleggibilita'.
  */
-export const hemInput = derived([preData, hemData, ltswHours], ([$pre, $hem, $h]) => {
-  return { ...$pre, ...$hem, ltsw: $h } as Partial<HemorrhagicInput>;
-});
+export const hemInput = derived(
+  [preData, hemData, ltswHours, discoveryHours],
+  ([$pre, $hem, $h, $d]) => {
+    return { ...$pre, ...$hem, ltsw: $h, hoursSinceDiscovery: $d } as Partial<HemorrhagicInput>;
+  }
+);
 
 export function clearPatient(): void {
   preData.clear();

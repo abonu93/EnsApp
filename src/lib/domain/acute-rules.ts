@@ -26,6 +26,8 @@ export interface AcuteInput {
   ltsw: number;
   wakeupStroke?: boolean;
   wakeupSymptomsWithin6h?: boolean;
+  /** Ictus al risveglio: ore dalla scoperta dei sintomi (se inserita). */
+  hoursSinceDiscovery?: number;
   angiograph?: YesNoEmpty;
   lvo?: YesNoEmpty;
   tandem?: YesNoEmpty;
@@ -66,6 +68,8 @@ export interface AcuteInput {
   coreGt70?: YesNoEmpty;
   /** DO-IT: antagonizzazione del DOAC prevista o iniziata (excl. 2). */
   doacReversal?: YesNoEmpty;
+  /** REMEDY dopo trombolisi: condizioni dell'incl. 6 verificate. */
+  remedyPostIvt?: YesNoEmpty;
 }
 
 export interface VesselFlags {
@@ -119,6 +123,13 @@ const POSTERIOR_VESSELS: readonly VesselCode[] = ["va", "basilar", "p1", "p2", "
  */
 // REMEDY, excl. 3: ASPECTS 0-5 esclude. Va inserito per la circolazione
 // anteriore; nell'ictus della sola ACP (ammesso, excl. 6) non si calcola.
+// REMEDY, incl. 6 (p. 37): dopo trombolisi si valuta >= 6 h dopo la fine,
+// con NIHSS pre-trombolisi <= 15, NIHSS ancora 5-15, miglioramento < 4 punti
+// e imaging di controllo senza PH1/PH2. Va confermato dal medico.
+export function remedyPostIvtOk(input: AcuteInput): boolean {
+  return input.ivtCandidate !== "eligible" || input.remedyPostIvt === "yes";
+}
+
 export function remedyAspectsOk(input: AcuteInput): boolean {
   const vessels = toArray(input.targetVessels);
   if (vessels.length > 0 && vessels.every((v) => POSTERIOR_VESSELS.includes(v))) return true;
@@ -257,8 +268,7 @@ export function athena(input: AcuteInput): boolean {
 }
 
 // VANISH: protocollo v1.2, p. 17-18.
-// - entro 9 h (incl. 6); nel risveglio il protocollo conta dal punto medio del
-//   sonno: l'app non ha l'ora del risveglio e usa l'LTSW (piu' restrittivo);
+// - entro 9 h (incl. 6); nel risveglio dal punto medio del sonno (vanishHours);
 // - core <= 70 mL e mismatch > 1,2 con differenza > 10 mL (incl. 8-9): per
 //   decisione del team (2026-10-21) solo nei pazienti tardivi, oltre 4,5 h;
 // - tandem di qualsiasi causa escluso (excl. 12);
@@ -267,8 +277,18 @@ export function athena(input: AcuteInput): boolean {
 export const VANISH_MAX_HOURS = 9;
 export const VANISH_PERFUSION_AFTER_H = 4.5;
 
+// Ictus al risveglio: il protocollo conta 9 h dal punto medio del sonno
+// (incl. 6). Con l'ora della scoperta il punto medio cade a meta' fra LSW e
+// risveglio; senza, si usa l'LTSW (piu' restrittivo).
+export function vanishHours(input: AcuteInput): number {
+  if (input.wakeupStroke === true && isValidNumber(input.hoursSinceDiscovery)) {
+    return (input.ltsw + input.hoursSinceDiscovery) / 2;
+  }
+  return input.ltsw;
+}
+
 export function vanishPerfusionOk(input: AcuteInput): boolean {
-  return input.ltsw <= VANISH_PERFUSION_AFTER_H || input.vanishCoreMismatch === "yes";
+  return vanishHours(input) <= VANISH_PERFUSION_AFTER_H || input.vanishCoreMismatch === "yes";
 }
 
 export function vanish(input: AcuteInput): boolean {
@@ -277,7 +297,7 @@ export function vanish(input: AcuteInput): boolean {
     input.age >= 18 &&
     input.premrs <= 1 &&
     input.nihss >= 6 &&
-    input.ltsw <= VANISH_MAX_HOURS &&
+    vanishHours(input) <= VANISH_MAX_HOURS &&
     isLvo(input.lvo) &&
     vessels.vanish &&
     input.tandem !== "yes" &&
@@ -536,7 +556,8 @@ export function remedy(input: AcuteInput): boolean {
     remedyAspectsOk(input) &&
     input.acei !== "yes" &&
     // Protocollo V6.2, excl. 6: ictus del tronco o del cervelletto.
-    input.posteriorFossa !== "yes"
+    input.posteriorFossa !== "yes" &&
+    remedyPostIvtOk(input)
   );
 }
 

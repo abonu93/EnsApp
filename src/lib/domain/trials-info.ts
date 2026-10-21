@@ -306,7 +306,7 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     status: "active",
     category: "EVT device - distal aspiration catheter (MeVO)",
     key: { window: "<= 24 h", age: ">= 18 y", mrs: "<= 2", nihss: ">= 5", aspects: ">= 6" },
-    consent: "Per local practice.",
+    consent: "Written before the procedure (patient, legal representative or relative; impartial witness if needed); deferred consent after the procedure if the patient could not decide.",
     imaging: "Isolated primary occlusion in a distal medium vessel (non-dominant/distal M2, M3/M4; A2/A3; P1/P2/P3) on CTA or MRA.",
     thrombolytic: "Optional.",
     thrombectomy: "Yes (distal aspiration catheter strategy).",
@@ -317,7 +317,7 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
       "M2 proximal/dominant is not an inclusion vessel for NiVO.",
       "Requires ASPECTS >= 6.",
     ],
-    visits: null,
+    visits: ["Selection (< 24 h, before the procedure)", "Procedure", "24 h (-8/+12 h; NIHSS, imaging)", "Day 3 or discharge (± 24 h)", "Day 90 ± 14 (mRS; phone allowed)"],
   },
   DOIT: {
     // Testi dal protocollo v2.0 e CI V1.3: vedi vault/ensayos/DO-IT.md.
@@ -358,7 +358,7 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     status: "active",
     category: "Thrombolytic (late window)",
     key: { window: "> 4.5 h and <= 72 h", age: ">= 18 y", mrs: "0-1", nihss: "6-25", aspects: "> 6 (0-6 excluded)" },
-    consent: "Written & oral/phone consent.",
+    consent: "Written; abbreviated written consent in emergencies, full consent before discharge; legal representative or caregiver; impartial witness if the patient consents orally but cannot sign. Phone consent not provided for.",
     imaging:
       "Acute ischemic stroke (wake-up included) of the supratentorial circulation (ACA, MCA or PCA). CT perfusion: perfusion/core mismatch >= 20% (ratio >= 1.2) AND mismatch volume > 10 mL. Our centre is registered as a perfusion centre, so the CTA + ASPECTS option (centres without perfusion) does not apply.",
     thrombolytic: "Yes - tenecteplase (TNK) vs standard care in the > 4.5 h window.",
@@ -371,7 +371,7 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
       "Exclusion: contraindications to tenecteplase; prior stroke AND concomitant diabetes (diabetes alone does not exclude); basilar or vertebral occlusion (supratentorial circulation only); occlusion of the ICA, including cervical/tandem.",
       "App logic: 'treated with thrombectomy' = EVT candidate; 'thrombolysis as routine practice' = IVT candidate.",
     ],
-    visits: null,
+    visits: ["V1 screening", "V2 randomization (day 1)", "V3 2 h after randomization", "V4 day 2-3 (blinded NIHSS at 24 h ± 6 h, imaging)", "V5 day 8 or discharge (imaging)", "V6 day 30 (central mRS by phone)", "V7 day 90 (central mRS, EQ-5D-5L; remote)"],
   },
   "SAIL-MeVO": {
     status: "active",

@@ -38,6 +38,9 @@ export interface HemorrhagicInput {
   ivh?: YesNoEmpty;
   seizure?: YesNoEmpty;
   secondaryCause?: SecondaryCause;
+  wakeupStroke?: boolean;
+  /** Ictus al risveglio: ore dalla scoperta dei sintomi (se inserita). */
+  hoursSinceDiscovery?: number;
 }
 
 export interface FastestResult {
@@ -111,10 +114,17 @@ export function fastest(input: HemorrhagicInput): FastestResult {
 // a dose terapeutica; l'IVH primaria isolata e' esclusa.
 const TICH3_EXCLUDED_ANTICOAG: AnticoagStatus[] = ["warfarin", "heparin"];
 
+// TICH-3, p. 25-26: con esordio ignoto (anche al risveglio) la finestra di
+// 4,5 h parte dalla scoperta dei sintomi.
+export function tich3Hours(input: HemorrhagicInput): number {
+  const d = input.hoursSinceDiscovery;
+  return input.wakeupStroke === true && typeof d === "number" && Number.isFinite(d) ? d : input.ltsw;
+}
+
 export function tich3(input: HemorrhagicInput): boolean {
   return (
     input.age >= 18 &&
-    input.ltsw < 4.5 &&
+    tich3Hours(input) < 4.5 &&
     input.hemVolume < 60 &&
     input.ivh === "no" &&
     input.gcs >= 5 &&

@@ -51,6 +51,36 @@ export const OPEN_QUESTIONS: readonly OpenQuestion[] = [
     appliesTo: (i) => (i.targetVessels ?? []).includes("m1"),
   },
   {
+    id: "sail-mrs",
+    trials: ["SAIL-MeVO"],
+    owner: "team",
+    question: "Pre-stroke mRS 0-1 or 0-2?",
+    detail: "Protocol V2.1 and synopsis say mRS 0-1 (p. 28); the team sheet says 0-2. The app uses 0-1.",
+    appliesTo: (i) => i.premrs === 2,
+  },
+  {
+    id: "sail-nivo",
+    trials: ["SAIL-MeVO", "NiVO"],
+    owner: "sponsor",
+    question: "Can SAIL-MeVO and NiVO co-enrol?",
+    detail:
+      "Both recruit MeVO (non-dominant M2, A2-A3, P2-P3). SAIL-MeVO forbids experimental endovascular devices (p. 32); NiVO excludes patients in any trial. Ask both sponsors.",
+  },
+  {
+    id: "saferdoac-docs",
+    trials: ["SAFER-DOAC"],
+    owner: "team",
+    question: "Which study is SAFER-DOAC, and is it still open?",
+    detail: "No documents in Drive and not in the team sheet; it is not DOAC-CVT. The app has no rule for it (manual selection only).",
+  },
+  {
+    id: "norahome-docs",
+    trials: ["NORA HOME"],
+    owner: "team",
+    question: "Is NORA HOME still open? No protocol available",
+    detail: "No documents in Drive and not in the team sheet. The app rule (age > 18, NIHSS < 5) cannot be checked against a protocol.",
+  },
+  {
     id: "nivo-protocol",
     trials: ["NiVO"],
     owner: "team",

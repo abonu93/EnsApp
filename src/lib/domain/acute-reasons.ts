@@ -15,12 +15,14 @@ import {
   ORION_PERFUSION_AFTER_H,
   orionPerfusionOk,
   remedyAspectsOk,
+  remedyPostIvtOk,
   ORION_VESSELS,
   PIVOTAL_VESSELS,
   SAIL_MEVO_VESSELS,
   territoryCount,
   TWIN2WIN2_VESSELS,
   VANISH_MAX_HOURS,
+  vanishHours,
   vanishPerfusionOk,
   vesselsWithin,
   weTrustTimeOk,
@@ -77,7 +79,7 @@ export function reasonVanish(input: AcuteInput): ReasonReport {
     { ok: input.age >= 18, label: "age >= 18" },
     { ok: input.premrs <= 1, label: "pre-mRS <= 1" },
     { ok: input.nihss >= 6, label: "NIHSS >= 6" },
-    { ok: input.ltsw <= VANISH_MAX_HOURS, label: "LTSW <= 9h (risveglio: 9 h dal punto medio del sonno, verificare)" },
+    { ok: vanishHours(input) <= VANISH_MAX_HOURS, label: "<= 9h (risveglio: dal punto medio fra LSW e scoperta)" },
     { ok: input.lvo === "yes", label: "LVO confermato" },
     { ok: v.vanish, label: "occlusione ICA intracranica, M1 o M2 dominante" },
     { ok: input.tandem !== "yes", label: "no occlusione tandem" },
@@ -284,6 +286,10 @@ export function reasonRemedy(input: AcuteInput): ReasonReport {
     { ok: remedyAspectsOk(input), label: "ASPECTS >= 6 (ictus della sola ACP: selezionare il vaso posteriore o inserire ASPECTS 10)" },
     { ok: input.acei !== "yes", label: "ACE-inibitore: ultima dose >= 24h (48h se eGFR < 45) e sospendibile fino al g. 29" },
     { ok: input.posteriorFossa !== "yes", label: "no ictus del tronco o del cervelletto" },
+    {
+      ok: remedyPostIvtOk(input),
+      label: "dopo trombolisi: >= 6 h dalla fine, NIHSS ancora 5-15, miglioramento < 4, no PH1/PH2",
+    },
   ]);
 }
 

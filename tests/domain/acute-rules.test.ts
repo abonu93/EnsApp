@@ -742,3 +742,30 @@ describe("decisioni del team (2026-10-20)", () => {
     expect(doit(input({ wakeupStroke: false }))).toBe(true);
   });
 });
+
+describe("ictus al risveglio: ora della scoperta e REMEDY dopo trombolisi", () => {
+  test("VANISH al risveglio conta dal punto medio fra LSW e scoperta", () => {
+    const ok = {
+      age: 60, nihss: 10, premrs: 0, lvo: "yes", tandem: "no", targetVessels: ["m1"], aspects: 7,
+      vanishCoreMismatch: "yes", wakeupStroke: true,
+    };
+    const input = (p: Record<string, unknown>) => ({ ...ok, ...p }) as unknown as Parameters<typeof vanish>[0];
+    // LSW 14 h fa, scoperta 2 h fa: punto medio 8 h fa -> in finestra.
+    expect(vanish(input({ ltsw: 14, hoursSinceDiscovery: 2 }))).toBe(true);
+    expect(reasonVanish(input({ ltsw: 14, hoursSinceDiscovery: 2 })).eligible).toBe(true);
+    // Senza l'ora della scoperta si usa l'LSW: fuori finestra.
+    expect(vanish(input({ ltsw: 14 }))).toBe(false);
+  });
+
+  test("REMEDY dopo trombolisi richiede la conferma delle condizioni a >= 6 h", () => {
+    const ok = {
+      age: 70, nihss: 8, premrs: 1, ltsw: 10, candidate: "not eligible", ivtCandidate: "eligible",
+      targetVessels: [], aspects: 8, acei: "no",
+    };
+    const input = (p: Record<string, unknown>) => ({ ...ok, ...p }) as unknown as Parameters<typeof remedy>[0];
+    expect(remedy(input({}))).toBe(false);
+    expect(remedy(input({ remedyPostIvt: "yes" }))).toBe(true);
+    expect(reasonRemedy(input({})).eligible).toBe(false);
+    expect(remedy(input({ ivtCandidate: "not eligible" }))).toBe(true);
+  });
+});

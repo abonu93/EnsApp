@@ -2,7 +2,7 @@
 // cambiano. NON contiene logica clinica - delega a src/lib/domain/*-rules.ts.
 
 import { derived } from "svelte/store";
-import { preData, postData, hemData, ltswHours } from "./patient";
+import { preData, postData, hemData, ltswHours, discoveryHours } from "./patient";
 import * as acute from "$lib/domain/acute-rules";
 import * as hem from "$lib/domain/hemorrhagic-rules";
 import type { AcuteInput, VesselCode } from "$lib/domain/acute-rules";
@@ -41,9 +41,10 @@ export interface HemorrhagicEligibility {
 function mergedAcute(
   pre: Record<string, unknown>,
   post: Record<string, unknown>,
-  ltsw: number | undefined
+  ltsw: number | undefined,
+  hoursSinceDiscovery: number | undefined
 ): AcuteInput {
-  return { ...pre, ...post, ltsw } as unknown as AcuteInput;
+  return { ...pre, ...post, ltsw, hoursSinceDiscovery } as unknown as AcuteInput;
 }
 
 // Le regole non leggono il tipo di ictus: i campi ischemici restano in
@@ -55,9 +56,9 @@ function allFalse<T extends object>(shape: T): T {
 }
 
 export const acuteEligibility = derived(
-  [preData, postData, ltswHours],
-  ([$pre, $post, $h]): AcuteEligibility => {
-    const input = mergedAcute($pre, $post, $h);
+  [preData, postData, ltswHours, discoveryHours],
+  ([$pre, $post, $h, $d]): AcuteEligibility => {
+    const input = mergedAcute($pre, $post, $h, $d);
     const result: AcuteEligibility = {
       weTrust: safeBoolean(() => acute.weTrust(input)),
       athena: safeBoolean(() => acute.athena(input)),
@@ -88,15 +89,15 @@ export const acuteEligibility = derived(
 );
 
 export const hemEligibility = derived(
-  [hemData, preData, postData, ltswHours],
-  ([$hem, $pre, $post, $h]): HemorrhagicEligibility => {
+  [hemData, preData, postData, ltswHours, discoveryHours],
+  ([$hem, $pre, $post, $h, $d]): HemorrhagicEligibility => {
   if ($post.strokeType !== "hemorrhagic") {
     return {
       fastest: { baseCriteriaMet: false, extraMissing: true, eligible: false },
       tich3: false,
     };
   }
-  const input = { ...$pre, ...$hem, ltsw: $h } as HemorrhagicInput;
+  const input = { ...$pre, ...$hem, ltsw: $h, hoursSinceDiscovery: $d } as HemorrhagicInput;
   return {
     fastest: safeFastest(() => hem.fastest(input)),
     tich3: safeBoolean(() => hem.tich3(input)),
