@@ -539,12 +539,10 @@
     line-height: 1.5;
     color: var(--text-muted);
   }
+  /* In fondo alla pagina, dopo la lista (non segue la barra di navigazione).
+     Margine sotto per non finire dietro alla barra fluttuante. */
   .send-bar {
-    position: sticky;
-    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
-    z-index: 5;
-    padding: 18px 22px 8px;
-    background: linear-gradient(180deg, transparent, var(--bg) 40%);
+    padding: 22px 22px calc(96px + env(safe-area-inset-bottom, 0px));
   }
   .row-wrap {
     display: flex;
