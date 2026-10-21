@@ -29,6 +29,7 @@ Stato nell'app al 2026-10-19 ([[Estado de los estudios]]):
 | `9895f0a` (quarto blocco) | Tipo di ictus (T10), [[DONE SYMPLE]], [[DO-IT]], [[SOVATELTIDE]], [[WETRUST]], [[REMEDY]]; correzioni del controllo incrociato su [[ORION]], [[REMEDY]], [[PIVOTAL]], [[TICH-3]] | Nessun trial ischemico per un'emorragia e viceversa; DONE SYMPLE senza candidatura EVT, ICA/M1, core; DO-IT "a parte il DOAC" e 4 h 15 min; SOVATELTIDE diagnosi clinica e NIHSS 1a; WETRUST wake-up; REMEDY tronco/cervelletto; testi copiati (T7) corretti |
 | `dd2f49f` (secondo controllo) | [[WETRUST]], [[DONE SYMPLE]], [[DO-IT]], [[ORION]], [[REMEDY]]; selezione dei trial | WeTrust non sparisce con l'emorragico; selezione dell'altro tipo ripulita; core DONE SYMPLE separato; antagonizzazione DOAC; perfusione "non eseguita" |
 | `4742d0d` | Calendario dell'LTSW; [[DO-IT]] senza wake-up; co-arruolamento (T6) | Le frecce non producono più un orario nel futuro (LTSW negativo = paziente "in finestra" ovunque); DO-IT, REMEDY e SOVATELTIDE esclusivi (decisione del team, 2026-10-20) |
+| `081270e` | Risposte del team ai dubbi aperti | [[VANISH]] ASPECTS > 4, perfusione oltre 4,5 h, M2 dominante; [[TENACITY]] solo perfusione; [[ORION]] in pausa; [[TICH-3]] tutti i cumarinici ed eparine terapeutiche, IVH primaria esclusa |
 
 Le sezioni seguenti fotografano lo stato **prima** di queste correzioni; il dettaglio di cosa resta aperto è nel riquadro "Correzioni applicate" di ogni scheda.
 
