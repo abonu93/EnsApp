@@ -10,6 +10,7 @@
     studyOutcomes,
     notesText,
     clearSelection,
+    flowOrigin,
   } from "$lib/stores/trialSelection";
   import { addSavedPatient } from "$lib/stores/savedPatients";
   import { sendToSheet, hasKnownStudyArm, type SendStatus } from "$lib/domain/sheet-payload";
@@ -53,9 +54,9 @@
   async function copy() {
     try {
       await navigator.clipboard.writeText(message);
-      announce("Copiato");
+      announce($t.share.copied);
     } catch {
-      announce("Errore nella copia");
+      announce($t.common.error);
     }
   }
 
@@ -67,7 +68,7 @@
   async function save() {
     if (saving) return;
     saving = true;
-    const { payload, missed } = buildSheetPayload(record, $eligibleOpenTrials, "guided");
+    const { payload, missed } = buildSheetPayload(record, $eligibleOpenTrials, $flowOrigin === "board" ? "board" : "guided");
     const result = await sendToSheet(payload);
     sendStatus = result.status;
 
@@ -135,7 +136,7 @@
   ];
 </script>
 
-<AppHeader title={$t.share.title} sub={$t.share.subtitle} step={2} steps={3} onBack={() => push("/summary")} />
+<AppHeader title={$t.share.title} sub={$t.share.subtitle} step={2} steps={3} onBack={() => push($flowOrigin === "board" ? "/board" : "/summary")} />
 
 <div class="body"><div class="stack">
   {#each $selectedStudies as name (name)}
@@ -166,10 +167,23 @@
     {/if}
   {/each}
 
+  <Card title={$t.share.patientId}>
+    {#snippet children()}
+      <input
+        class="pid"
+        type="text"
+        autocomplete="off"
+        aria-label={$t.share.patientId}
+        value={$preData.patientId ?? ""}
+        oninput={(e) => preData.update((s) => ({ ...s, patientId: e.currentTarget.value.trim() || undefined }))}
+      />
+    {/snippet}
+  </Card>
+
   <Card title={$t.extras.acuteTreatments}>
     {#snippet children()}
       <div class="form-stack">
-        <RadioGroup id="share-tev" label="Trombectomia (TEV)?" name="tev" columns={2} bind:value={tev} options={ynOpts} />
+        <RadioGroup id="share-tev" label={$t.trialPatient.tevLabel} name="tev" columns={2} bind:value={tev} options={ynOpts} />
         {#if showMtici}
           <div class="field">
             <label for="share-mtici" class="lbl">mTICI</label>
@@ -181,7 +195,7 @@
             </select>
           </div>
         {/if}
-        <RadioGroup id="share-tiv" label="Trombolisi (TIV)?" name="tiv" columns={2} bind:value={tiv} options={ynOpts} />
+        <RadioGroup id="share-tiv" label={$t.trialPatient.tivLabel} name="tiv" columns={2} bind:value={tiv} options={ynOpts} />
       </div>
     {/snippet}
   </Card>
@@ -227,7 +241,7 @@
         <span>{$t.share.saveSuccess}</span>
       </div>
       <Button variant="secondary" fullWidth onclick={() => push("/saved")}>
-        {#snippet children()}Vai ai pazienti salvati{/snippet}
+        {#snippet children()}{$t.share.goToSaved}{/snippet}
       </Button>
       <Button variant="primary" fullWidth onclick={newPatient}>
         {#snippet children()}{$t.landing.newPatient}{/snippet}
@@ -259,6 +273,17 @@
     background: var(--surface-elevated);
     color: var(--text);
     font: inherit;
+  }
+  .pid {
+    width: 100%;
+    min-height: var(--touch-min);
+    padding: 0 var(--sp-3);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--surface-elevated);
+    color: var(--text);
+    font: inherit;
+    font-family: var(--font-mono);
   }
   .notes {
     width: 100%;

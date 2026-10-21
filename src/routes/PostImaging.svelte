@@ -13,6 +13,7 @@
   import { fastestNeedsSpotSign } from "$lib/domain/hemorrhagic-rules";
   import { preData, postData, hemData, ltswHours, acuteInput } from "$lib/stores/patient";
   import { t } from "$lib/i18n";
+  import { flowOrigin } from "$lib/stores/trialSelection";
   import { isTrialOpen } from "$lib/domain/trials-info";
   import { DOIT_MAX_HOURS, VANISH_MAX_HOURS, VANISH_PERFUSION_AFTER_H, vanishHours, type AcuteInput, type VesselCode } from "$lib/domain/acute-rules";
 
@@ -442,7 +443,7 @@
   {/if}
 </div>
 
-<BottomBar onBack={() => push("/pre-result")} onNext={() => push("/summary")} nextDisabled={!canSubmit} />
+<BottomBar onBack={() => push("/pre-result")} onNext={() => { flowOrigin.set("guided"); push("/summary"); }} nextDisabled={!canSubmit} />
 
 <style>
   .body {

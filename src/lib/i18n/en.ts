@@ -2,6 +2,10 @@ import type { Dictionary } from "./it";
 
 export const en: Dictionary = {
   common: {
+    mainNav: "Main navigation",
+    filters: "Filters",
+    prevPage: "Previous page",
+    nextPage: "Next page",
     appName: "Eligo",
     next: "Next",
     back: "Back",
@@ -219,6 +223,9 @@ export const en: Dictionary = {
     selectedCount: "selected",
   },
   share: {
+    patientId: "Patient ID",
+    copied: "Copied",
+    goToSaved: "Go to saved patients",
     title: "Save to Google Sheet",
     subtitle: "Review and submit patient record.",
     outcomeFor: "Outcome for",
@@ -442,14 +449,7 @@ export const en: Dictionary = {
     minutesDown: "Minutes −5",
     prevMonth: "Previous month",
     nextMonth: "Next month",
-    sendTitle: "Send to research coordinator",
-    sendButton: "Send to coordinator",
-    enrolling: "Enrolling in",
-    enrollingHint: "Optional: tick the trials the patient enters. Trials that cannot be combined untick each other.",
-    patientId: "Patient ID",
-    eligible: "Eligible",
-    possible: "Possible",
-    none: "none",
+    selectTrial: "Select {name}",
     preCt: "pre-CT",
     noneValue: "None",
     opt: {

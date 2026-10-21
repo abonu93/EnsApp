@@ -3,7 +3,8 @@
   import Sheet from "../Sheet.svelte";
   import { CLOCK, type BoardJudgement, type BoardRow } from "$lib/domain/board";
   import { exclusiveWith } from "$lib/domain/trials-info";
-  import { t } from "$lib/i18n";
+  import { t, locale } from "$lib/i18n";
+  import { criterionLabel } from "$lib/i18n/criteria";
   import type { SelectionAlert } from "$lib/domain/open-questions";
   import BoardAlerts from "./BoardAlerts.svelte";
   import { fill, fmtMin, fmtValue } from "./format";
@@ -25,7 +26,7 @@
 
   function rowLabel(r: BoardRow): string {
     if (r.kind === "type") return r.label === "hemorrhagic" ? $t.board.ruleHemorrhagic : $t.board.ruleIschemic;
-    return r.label;
+    return criterionLabel(r.label, $locale);
   }
   function rowValue(r: BoardRow): string {
     if (r.kind === "time" && trial.window) {

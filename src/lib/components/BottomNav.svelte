@@ -1,5 +1,6 @@
 <script lang="ts">
   import { link, location } from "svelte-spa-router";
+  import { t } from "$lib/i18n";
 
   interface NavItem {
     href: string;
@@ -14,7 +15,7 @@
   let { items }: Props = $props();
 </script>
 
-<nav class="dock" aria-label="Navigazione principale">
+<nav class="dock" aria-label={$t.common.mainNav}>
   <div class="pill">
     {#each items as item (item.href)}
       {@const active = $location === item.href || $location.startsWith(item.href + "/")}

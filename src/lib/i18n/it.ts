@@ -3,6 +3,10 @@
 
 export const it = {
   common: {
+    mainNav: "Navigazione principale",
+    filters: "Filtri",
+    prevPage: "Pagina precedente",
+    nextPage: "Pagina successiva",
     appName: "Eligo",
     next: "Avanti",
     back: "Indietro",
@@ -220,6 +224,9 @@ export const it = {
     selectedCount: "selezionati",
   },
   share: {
+    patientId: "ID paziente",
+    copied: "Copiato",
+    goToSaved: "Vai ai pazienti salvati",
     title: "Salva su Google Sheet",
     subtitle: "Verifica e invia il record paziente.",
     outcomeFor: "Outcome per",
@@ -443,14 +450,7 @@ export const it = {
     minutesDown: "Minuti −5",
     prevMonth: "Mese precedente",
     nextMonth: "Mese successivo",
-    sendTitle: "Invia al coordinatore di ricerca",
-    sendButton: "Invia al coordinatore",
-    enrolling: "Arruolato in",
-    enrollingHint: "Facoltativo: spunta gli studi in cui entra il paziente. Quelli non combinabili si escludono a vicenda.",
-    patientId: "ID paziente",
-    eligible: "Eleggibili",
-    possible: "Possibili",
-    none: "nessuno",
+    selectTrial: "Seleziona {name}",
     preCt: "pre-TC",
     noneValue: "Nessuna",
     opt: {
