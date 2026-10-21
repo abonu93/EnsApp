@@ -12,7 +12,7 @@ protocolo_vigente: "v2.2 (Protocol Amendment 3), 27-05-2025. In attesa: v3.1 (Am
 ci_vigente: "Main ICF ES v1.0, 24-06-2025"
 drive_carpeta: "https://drive.google.com/drive/folders/1fJShL_DSTr27x_DFsGckyRTIiS_BKJFw"
 fuentes: ["[[ORION — Protocolo — v2.2]]", "[[ORION — Protocolo — v3.1]]", "[[ORION — Cambios — v3.0 a v3.1]]", "[[ORION — CI — v1.0]]"]
-actualizado: 2026-10-20
+actualizado: 2026-10-21
 ---
 # ORION
 
@@ -150,6 +150,9 @@ Fonti: [[ORION — Protocolo — v3.1]], [[ORION — Cambios — v3.0 a v3.1]]. 
 **Per l'app** (vedi le divergenze): la v3.1 non cambia la logica di eleggibilità. Il cambio dell'eGFR non tocca l'app, che non lo controlla. La stenosi serrata non si può indicare nell'app, che chiede solo vasi occlusi: già con la v2.2 (3a) è un [NC]. La v3.1 rende più netta la divergenza sullo stato (punto 1).
 
 ## Divergenze con EnsApp
+> [!done] Decisioni del team applicate il 2026-10-21 (commit `081270e`)
+> - ORION messo **in pausa** nell'app come nel foglio: non viene proposto e la domanda "EVT entro 1 h" è nascosta (chiude la divergenza 1)
+> - soglie di perfusione: le stesse di TENACITY
 > [!done] Correzioni applicate all'app il 2026-10-20 (commit `9895f0a`, dopo il controllo incrociato)
 > - ✅ incl. 4: tra 4,5 e 6 h una perfusione fatta e negativa esclude (prima contava solo oltre 6 h)
 > - ✅ la risposta "controindicazioni" della scheda TENACITY non esclude più ORION quando la scheda è nascosta

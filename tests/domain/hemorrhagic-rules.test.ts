@@ -132,3 +132,18 @@ describe("TICH-3 - criteri del protocollo Final v3.1", () => {
     expect(tich3({ ...ok, age: 99 })).toBe(true);
   });
 });
+
+describe("TICH-3 al risveglio: finestra dalla scoperta dei sintomi", () => {
+  const base = {
+    age: 70, premrs: 1, gcs: 12, hemVolume: 20, ivh: "no", seizure: "no",
+    secondaryCause: "None", anticoag: "none",
+  };
+  test("LSW 9 h fa ma sintomi scoperti 2 h fa: in finestra", async () => {
+    const { tich3 } = await import("$lib/domain/hemorrhagic-rules");
+    const { reasonTich3 } = await import("$lib/domain/hem-reasons");
+    const input = { ...base, ltsw: 9, wakeupStroke: true, hoursSinceDiscovery: 2 } as unknown as Parameters<typeof tich3>[0];
+    expect(tich3(input)).toBe(true);
+    expect(reasonTich3(input).eligible).toBe(true);
+    expect(tich3({ ...input, hoursSinceDiscovery: undefined })).toBe(false);
+  });
+});

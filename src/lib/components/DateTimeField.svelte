@@ -51,7 +51,7 @@
     <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
   </svg>
   <span class="text">
-    {value ? fmt(value) : $t.preImaging.ltswLabel}
+    {value ? fmt(value) : label || $t.preImaging.ltswLabel}
   </span>
   {#if value}
     <span class="ago">{humanAgo(value, $now)}</span>
@@ -61,6 +61,7 @@
 <CalendarSheet
   {open}
   {value}
+  title={label}
   onClose={() => (open = false)}
   {onSet}
 />

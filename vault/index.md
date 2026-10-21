@@ -24,7 +24,7 @@ Stato lettura: ⬜ da leggere · 🟨 parziale · ✅ completato
 | MARRS (MARSS nell'app) | cerrado | — | ✅ | [[MARRS]] |
 | MOSTE | closed (dal 2026-10-19) | reclut. cerrado | ✅ | [[MOSTE]] |
 | NiVO | activo | assente ⚠ | ✅ (solo sinossi) | [[NiVO]] |
-| ORION | activo (pausa reclutamiento) | en pausa | ✅ | [[ORION]] |
+| ORION | paused (dal 2026-10-21) | en pausa | ✅ | [[ORION]] |
 | PIVOTAL | active (dal 2026-10-19) | aperto | ✅ | [[PIVOTAL]] |
 | PROMISE20 | cerrado | — | ✅ | [[PROMISE20]] |
 | PROMISE20 RELOADED | paused (dal 2026-10-19) | en pausa | ✅ | [[PROMISE20 RELOADED]] |

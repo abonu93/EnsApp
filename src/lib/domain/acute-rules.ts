@@ -26,6 +26,8 @@ export interface AcuteInput {
   ltsw: number;
   wakeupStroke?: boolean;
   wakeupSymptomsWithin6h?: boolean;
+  /** Ictus al risveglio: ore dalla scoperta dei sintomi (se inserita). */
+  hoursSinceDiscovery?: number;
   angiograph?: YesNoEmpty;
   lvo?: YesNoEmpty;
   tandem?: YesNoEmpty;
@@ -66,6 +68,8 @@ export interface AcuteInput {
   coreGt70?: YesNoEmpty;
   /** DO-IT: antagonizzazione del DOAC prevista o iniziata (excl. 2). */
   doacReversal?: YesNoEmpty;
+  /** REMEDY dopo trombolisi: condizioni dell'incl. 6 verificate. */
+  remedyPostIvt?: YesNoEmpty;
 }
 
 export interface VesselFlags {
@@ -119,6 +123,13 @@ const POSTERIOR_VESSELS: readonly VesselCode[] = ["va", "basilar", "p1", "p2", "
  */
 // REMEDY, excl. 3: ASPECTS 0-5 esclude. Va inserito per la circolazione
 // anteriore; nell'ictus della sola ACP (ammesso, excl. 6) non si calcola.
+// REMEDY, incl. 6 (p. 37): dopo trombolisi si valuta >= 6 h dopo la fine,
+// con NIHSS pre-trombolisi <= 15, NIHSS ancora 5-15, miglioramento < 4 punti
+// e imaging di controllo senza PH1/PH2. Va confermato dal medico.
+export function remedyPostIvtOk(input: AcuteInput): boolean {
+  return input.ivtCandidate !== "eligible" || input.remedyPostIvt === "yes";
+}
+
 export function remedyAspectsOk(input: AcuteInput): boolean {
   const vessels = toArray(input.targetVessels);
   if (vessels.length > 0 && vessels.every((v) => POSTERIOR_VESSELS.includes(v))) return true;
@@ -155,11 +166,13 @@ function isLvo(lvo: YesNoEmpty | undefined): boolean {
 
 export function computeVesselFlags(targetVessels: VesselCode[] | undefined): VesselFlags {
   return {
-    // VANISH v1.2 incl. 7: "intracranial ICA and the M1 segments" (non solo la ICA-T).
+    // VANISH v1.2 incl. 7: ICA intracranica e M1; decisione del team
+    // (2026-10-21): anche la M2 dominante, come nel foglio.
     vanish:
       hasVessel(targetVessels, "ica-intracranial") ||
       hasVessel(targetVessels, "ica-terminal") ||
-      hasVessel(targetVessels, "m1"),
+      hasVessel(targetVessels, "m1") ||
+      hasVessel(targetVessels, "m2-proxdom"),
     pivotal:
       hasVessel(targetVessels, "ica-terminal") ||
       hasVessel(targetVessels, "m1") ||
@@ -255,12 +268,28 @@ export function athena(input: AcuteInput): boolean {
 }
 
 // VANISH: protocollo v1.2, p. 17-18.
-// - entro 9 h (incl. 6); nel risveglio il protocollo conta dal punto medio del
-//   sonno: l'app non ha l'ora del risveglio e usa l'LTSW (piu' restrittivo);
-// - core <= 70 mL e mismatch > 1,2 con differenza > 10 mL (incl. 8-9);
-// - tandem di qualsiasi causa escluso (excl. 12).
-// Nessun criterio ASPECTS nel protocollo: l'ASPECTS e' solo di stratificazione.
+// - entro 9 h (incl. 6); nel risveglio dal punto medio del sonno (vanishHours);
+// - core <= 70 mL e mismatch > 1,2 con differenza > 10 mL (incl. 8-9): per
+//   decisione del team (2026-10-21) solo nei pazienti tardivi, oltre 4,5 h;
+// - tandem di qualsiasi causa escluso (excl. 12);
+// - ASPECTS > 4: criterio del team e della scheda di sala (il protocollo v1.2
+//   lo usa solo per la stratificazione), deciso il 2026-10-21.
 export const VANISH_MAX_HOURS = 9;
+export const VANISH_PERFUSION_AFTER_H = 4.5;
+
+// Ictus al risveglio: il protocollo conta 9 h dal punto medio del sonno
+// (incl. 6). Con l'ora della scoperta il punto medio cade a meta' fra LSW e
+// risveglio; senza, si usa l'LTSW (piu' restrittivo).
+export function vanishHours(input: AcuteInput): number {
+  if (input.wakeupStroke === true && isValidNumber(input.hoursSinceDiscovery)) {
+    return (input.ltsw + input.hoursSinceDiscovery) / 2;
+  }
+  return input.ltsw;
+}
+
+export function vanishPerfusionOk(input: AcuteInput): boolean {
+  return vanishHours(input) <= VANISH_PERFUSION_AFTER_H || input.vanishCoreMismatch === "yes";
+}
 
 export function vanish(input: AcuteInput): boolean {
   const vessels = computeVesselFlags(input.targetVessels);
@@ -268,11 +297,13 @@ export function vanish(input: AcuteInput): boolean {
     input.age >= 18 &&
     input.premrs <= 1 &&
     input.nihss >= 6 &&
-    input.ltsw <= VANISH_MAX_HOURS &&
+    vanishHours(input) <= VANISH_MAX_HOURS &&
     isLvo(input.lvo) &&
     vessels.vanish &&
     input.tandem !== "yes" &&
-    input.vanishCoreMismatch === "yes"
+    isValidNumber(input.aspects) &&
+    input.aspects > 4 &&
+    vanishPerfusionOk(input)
   );
 }
 
@@ -525,7 +556,8 @@ export function remedy(input: AcuteInput): boolean {
     remedyAspectsOk(input) &&
     input.acei !== "yes" &&
     // Protocollo V6.2, excl. 6: ictus del tronco o del cervelletto.
-    input.posteriorFossa !== "yes"
+    input.posteriorFossa !== "yes" &&
+    remedyPostIvtOk(input)
   );
 }
 
@@ -556,15 +588,12 @@ export function tenacity(input: AcuteInput): boolean {
   const hasIca =
     hasVessel(input.targetVessels, "ica-intracranial") ||
     hasVessel(input.targetVessels, "ica-terminal");
-  const hasM1 = hasVessel(input.targetVessels, "m1");
-  const hasM2 =
-    hasVessel(input.targetVessels, "m2-any") || hasVessel(input.targetVessels, "m2-proxdom");
   const aspects = input.aspects;
 
-  // Opzione 1 (perfusione) OPPURE opzione 2 (angio-TC + ASPECTS).
+  // Il centro e' registrato come centro con perfusione (team, 2026-10-21):
+  // vale solo l'opzione 1, mismatch alla TC perfusione. L'opzione angio-TC +
+  // ASPECTS e' riservata ai centri senza perfusione (protocollo p. 30, 46).
   const imagingPerfusion = input.perfusionMismatch === "yes";
-  const imagingNoPerfusion =
-    isValidNumber(aspects) && ((hasM1 && aspects >= 7) || (hasM2 && aspects >= 9));
 
   // Alto rischio emorragico: core esteso o ASPECTS 0-6 (se ASPECTS e' noto).
   const highRiskImaging = input.largeCore === "yes" || (isValidNumber(aspects) && aspects <= 6);
@@ -583,7 +612,7 @@ export function tenacity(input: AcuteInput): boolean {
     input.premrs <= 1 &&
     input.nihss > 5 &&
     input.nihss <= 25 &&
-    (imagingPerfusion || imagingNoPerfusion) &&
+    imagingPerfusion &&
     !highRiskImaging &&
     !hasIca &&
     !infratentorial &&

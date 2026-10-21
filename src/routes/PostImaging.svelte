@@ -11,9 +11,10 @@
   import HVolDial from "$lib/components/HVolDial.svelte";
   import HGcs from "$lib/components/HGcs.svelte";
   import { fastestNeedsSpotSign } from "$lib/domain/hemorrhagic-rules";
-  import { preData, postData, hemData, ltswHours } from "$lib/stores/patient";
+  import { preData, postData, hemData, ltswHours, acuteInput } from "$lib/stores/patient";
   import { t } from "$lib/i18n";
-  import { DOIT_MAX_HOURS, VANISH_MAX_HOURS, type VesselCode } from "$lib/domain/acute-rules";
+  import { isTrialOpen } from "$lib/domain/trials-info";
+  import { DOIT_MAX_HOURS, VANISH_MAX_HOURS, VANISH_PERFUSION_AFTER_H, vanishHours, type AcuteInput, type VesselCode } from "$lib/domain/acute-rules";
 
   type YN = "yes" | "no" | "";
   type YNNa = YN | "na";
@@ -59,6 +60,8 @@
   // (ictus del tronco o del cervelletto).
   let nihss1aGe2 = $state<boolean>($postData.nihss1aGe2 === "yes");
   let posteriorFossa = $state<boolean>($postData.posteriorFossa === "yes");
+  // REMEDY dopo trombolisi (incl. 6): valutazione >= 6 h dopo la fine.
+  let remedyPostIvt = $state<YN>(($postData.remedyPostIvt as YN) ?? "");
 
   // SAIL-MeVO (EVT in MeVO): campi specifici del trial.
   let aiCoreLt10 = $state<YNNa>(($postData.aiCoreLt10 as YNNa) ?? "");
@@ -116,6 +119,7 @@
       ivtExceptDoac: (showDoitQuestion && ivtExceptDoac) || undefined,
       nihss1aGe2: showNonEvt ? (nihss1aGe2 ? "yes" : "no") : undefined,
       posteriorFossa: showNonEvt ? (posteriorFossa ? "yes" : "no") : undefined,
+      remedyPostIvt: (showRemedyPostIvt && remedyPostIvt) || undefined,
     });
   });
 
@@ -145,14 +149,21 @@
   // usa per escludere, ORION/SAIL-MeVO/TENACITY per includere): una sola
   // scheda per tutti gli ischemici, indipendente dalla candidatura a EVT.
   const showImaging = $derived(isIschemic && candidate !== "");
-  const showVanishQuestion = $derived(showEvt && ($ltswHours ?? 999) <= VANISH_MAX_HOURS);
+  // VANISH: core/mismatch solo nei pazienti tardivi (oltre 4,5 h, fino a 9 h).
+  // Al risveglio conta dal punto medio del sonno (vanishHours).
+  const vanishH = $derived($ltswHours === undefined ? undefined : vanishHours($acuteInput as AcuteInput));
+  const showVanishQuestion = $derived(
+    showEvt && (vanishH ?? -1) > VANISH_PERFUSION_AFTER_H && (vanishH ?? 999) <= VANISH_MAX_HOURS
+  );
+  // Domanda nascosta finche' ORION e' in pausa (non viene proposto).
   const showOrionEvtQuestion = $derived(
-    showEvt && ($ltswHours ?? -1) >= 4.5 && ($ltswHours ?? 999) <= 24
+    isTrialOpen("ORION") && showEvt && ($ltswHours ?? -1) >= 4.5 && ($ltswHours ?? 999) <= 24
   );
   // Perfusione (mismatch, core esteso): oltre 4,5 h la usano TENACITY e ORION
   // (obbligatoria per ORION oltre 6 h), quindi sta nella scheda Imaging.
   const showPerfusion = $derived(showImaging && ($ltswHours ?? -1) > 4.5);
   const showNonEvt = $derived(isIschemic && candidate === "not eligible");
+  const showRemedyPostIvt = $derived(showNonEvt && ivtCandidate === "eligible");
   const showDoneSympleCore = $derived(showImaging && ($ltswHours ?? -1) >= 24 && ($ltswHours ?? 999) <= 72);
   const showDoitQuestion = $derived(
     isIschemic && $preData.doac === "yes" && ivtCandidate === "not eligible" &&
@@ -319,6 +330,12 @@
             <div class="divider"></div>
             <ToggleRow title={$t.postImaging.nihss1aGe2Label} sub={$t.postImaging.nihss1aGe2Hint} bind:checked={nihss1aGe2} />
             <ToggleRow title={$t.postImaging.posteriorFossaLabel} sub={$t.postImaging.posteriorFossaHint} bind:checked={posteriorFossa} />
+            {#if showRemedyPostIvt}
+              <div class="field">
+                <span class="lbl">{$t.postImaging.remedyPostIvtLabel}</span>
+                <Segmented options={ynOpts} bind:value={remedyPostIvt} cols={2} />
+              </div>
+            {/if}
           </div>
         {/snippet}
       </Card>

@@ -117,6 +117,7 @@ La gravidanza **non** esclude ([[NiVO — CI pre-procedimiento — v2.0]], p. 3)
 > - ✅ 2 tandem esclude
 > - ✅ 4 etichette dei vasi distali: "A3" e "P3" invece di "oltre A2/P2"; testo della scheda allineato
 > - restano aperti 3, 5-12
+> - ✅ (d8cfe9a) 8, 9: consenso (scritto prima, differito dopo la procedura) e visite
 Confronto con:
 - `src/lib/domain/trials-info.ts:268-284`;
 - `src/lib/domain/acute-rules.ts:111-117` (`computeVesselFlags`, flag `nivo`) e `:185-198` (`nivo()`);

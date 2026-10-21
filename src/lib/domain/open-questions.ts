@@ -43,31 +43,6 @@ export const OPEN_QUESTIONS: readonly OpenQuestion[] = [
     appliesTo: (i) => (i.targetVessels ?? []).some((v) => v === "m2-proxdom" || v === "m2-any"),
   },
   {
-    id: "vanish-aspects",
-    trials: ["VANISH"],
-    owner: "sponsor",
-    question: "Is there an ASPECTS >= 4 criterion?",
-    detail:
-      "The team sheet and the bedside card say ASPECTS >= 4; protocol v1.2 has no ASPECTS criterion (stratification only). The app does not check ASPECTS.",
-    appliesTo: (i) => typeof i.aspects === "number" && i.aspects < 4,
-  },
-  {
-    id: "vanish-perfusion",
-    trials: ["VANISH"],
-    owner: "sponsor",
-    question: "Do core <= 70 mL and mismatch > 1.2 apply to all patients or only between 4.5 and 9 h?",
-    detail: "Protocol v1.2 (incl. 8-9, p. 17) is ambiguous. The app asks it for every patient within 9 h.",
-  },
-  {
-    id: "vanish-m2",
-    trials: ["VANISH"],
-    owner: "sponsor",
-    question: "Is a dominant M2 eligible?",
-    detail:
-      "The team sheet says ICA, M1 or dominant M2; protocol v1.2 lists only intracranial ICA and M1. The app follows the protocol.",
-    appliesTo: (i) => (i.targetVessels ?? []).includes("m2-proxdom"),
-  },
-  {
     id: "twin2win2-m1",
     trials: ["TWIN-2-WIN 2"],
     owner: "sponsor",
@@ -76,43 +51,34 @@ export const OPEN_QUESTIONS: readonly OpenQuestion[] = [
     appliesTo: (i) => (i.targetVessels ?? []).includes("m1"),
   },
   {
-    id: "tenacity-centre",
-    trials: ["TENACITY"],
+    id: "sail-mrs",
+    trials: ["SAIL-MeVO"],
     owner: "team",
-    question: "Is the centre registered as a perfusion centre?",
-    detail:
-      "Protocol V1.0 allows the CTA + ASPECTS route (no perfusion) only in centres without perfusion imaging (p. 30, 46). The app accepts it everywhere.",
-    appliesTo: (i) => i.perfusionMismatch !== "yes",
+    question: "Pre-stroke mRS 0-1 or 0-2?",
+    detail: "Protocol V2.1 and synopsis say mRS 0-1 (p. 28); the team sheet says 0-2. The app uses 0-1.",
+    appliesTo: (i) => i.premrs === 2,
   },
   {
-    id: "orion-perfusion-thresholds",
-    trials: ["ORION"],
-    owner: "team",
-    question: "Perfusion thresholds differ from the app question",
-    detail:
-      "ORION requires ratio > 1.2 and mismatch >= 10 mL (p. 46); the app question uses the TENACITY thresholds (ratio >= 1.2, > 10 mL). Only borderline values differ.",
-  },
-  {
-    id: "orion-status",
-    trials: ["ORION"],
-    owner: "team",
-    question: "ORION is \"en pausa\" in the team sheet but active in the app",
-    detail:
-      "The sheet says recruitment paused pending part 2; the team chose to keep it active in the app (2026-10-19). Check before enrolling.",
-  },
-  {
-    id: "tich3-anticoag",
-    trials: ["TICH-3"],
+    id: "sail-nivo",
+    trials: ["SAIL-MeVO", "NiVO"],
     owner: "sponsor",
-    question: "Are acenocoumarol and unfractionated heparin equivalent to warfarin for the exclusion?",
-    detail: "Protocol v3.1 (p. 25) names warfarin and therapeutic LMWH. The app excludes any VKA and therapeutic heparin.",
+    question: "Can SAIL-MeVO and NiVO co-enrol?",
+    detail:
+      "Both recruit MeVO (non-dominant M2, A2-A3, P2-P3). SAIL-MeVO forbids experimental endovascular devices (p. 32); NiVO excludes patients in any trial. Ask both sponsors.",
   },
   {
-    id: "tich3-ivh",
-    trials: ["TICH-3"],
-    owner: "sponsor",
-    question: "Is isolated primary IVH excluded?",
-    detail: "The protocol does not say so; the app excludes it (legacy rule).",
+    id: "saferdoac-docs",
+    trials: ["SAFER-DOAC"],
+    owner: "team",
+    question: "Which study is SAFER-DOAC, and is it still open?",
+    detail: "No documents in Drive and not in the team sheet; it is not DOAC-CVT. The app has no rule for it (manual selection only).",
+  },
+  {
+    id: "norahome-docs",
+    trials: ["NORA HOME"],
+    owner: "team",
+    question: "Is NORA HOME still open? No protocol available",
+    detail: "No documents in Drive and not in the team sheet. The app rule (age > 18, NIHSS < 5) cannot be checked against a protocol.",
   },
   {
     id: "nivo-protocol",

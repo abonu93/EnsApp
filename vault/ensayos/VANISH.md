@@ -12,7 +12,7 @@ protocolo_vigente: "v1.2, 25-04-2024"
 ci_vigente: "V1.2, 25-04-2024 (solo spagnolo)"
 drive_carpeta: "https://drive.google.com/drive/folders/1XJiAMiFinLD2r-hBcxQRSQRRnFxB_QNQ"
 fuentes: ["[[VANISH — Protocolo — v1.2]]", "[[VANISH — Sinopsis — v1.2]]", "[[VANISH — CI — V1.2]]"]
-actualizado: 2026-10-19
+actualizado: 2026-10-21
 ---
 # VANISH
 
@@ -107,6 +107,11 @@ Tutte le valutazioni sono di pratica clinica: nessuna procedura aggiuntiva ([[VA
 Non riportato nel documento: il protocollo non esclude la partecipazione ad altri studi e non cita studi compatibili.
 
 ## Divergenze con EnsApp
+> [!done] Decisioni del team applicate il 2026-10-21 (commit `081270e`)
+> - ASPECTS > 4 richiesto (criterio del foglio e della scheda di sala; nel protocollo v1.2 è solo di stratificazione)
+> - core ≤ 70 mL e mismatch > 1,2 solo nei pazienti tardivi, oltre 4,5 h
+> - M2 dominante eleggibile, oltre a ICA intracranica e M1
+> - ✅ (d8cfe9a) al risveglio le 9 h partono dal punto medio fra LSW e scoperta dei sintomi (nuovo campo)
 > [!done] Correzioni (secondo blocco, 2026-10-19, branch `claude/practical-johnson-mo40tz-block2`)
 > - ✅ 1 finestra ≤9 h (risveglio: l'app usa l'LTSW, più restrittivo del punto medio del sonno)
 > - ✅ 2 core ≤70 mL con mismatch: nuova domanda nella scheda EVT

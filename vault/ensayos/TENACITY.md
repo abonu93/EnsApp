@@ -12,7 +12,7 @@ protocolo_vigente: "V1.0, 25-07-2025 (protocollo originale)"
 ci_vigente: "non presente in Drive"
 drive_carpeta: "https://drive.google.com/drive/folders/1NufGLzueV9wNHZgtS9xMmbDeW2gpEiqb"
 fuentes: ["[[TENACITY — Protocolo — V1.0]]"]
-actualizado: 2026-10-20
+actualizado: 2026-10-21
 ---
 # TENACITY
 
@@ -162,6 +162,9 @@ Le visite remote si possono sostituire con visite in presenza se lo chiede il pa
 - Compatibilità con studi specifici: non riportata nel documento.
 
 ## Divergenze con EnsApp
+> [!done] Decisione del team applicata il 2026-10-21 (commit `081270e`)
+> - il centro è registrato come centro con perfusione: vale solo il mismatch alla TC perfusione; l'opzione angio-TC + ASPECTS è tolta (chiude la divergenza 3)
+> - ✅ (d8cfe9a) 10 e consenso: visite V1–V7 e consenso del protocollo (scritto, abbreviato in emergenza, testimone; il telefonico non è previsto)
 > [!done] Correzioni applicate all'app il 2026-10-19 (commit `99d4582`)
 > - ✅ 1 la domanda ora è "Ictus pregresso e diabete?": il diabete da solo non esclude
 > - ✅ 2 basilare e vertebrale escludono (solo circolazione sopratentoriale)

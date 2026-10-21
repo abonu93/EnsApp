@@ -3,7 +3,7 @@
 // hemorrhagic-rules.ts e colleziona i fail come stringhe.
 // NON ridefinisce la logica clinica: e' un wrapper diagnostico.
 
-import { fastestNeedsSpotSign, type HemorrhagicInput } from "./hemorrhagic-rules";
+import { fastestNeedsSpotSign, tich3Hours, type HemorrhagicInput } from "./hemorrhagic-rules";
 import { reduce, type ReasonReport } from "./reason-report";
 
 /**
@@ -40,7 +40,7 @@ export function reasonFastest(input: HemorrhagicInput): ReasonReport {
 export function reasonTich3(input: HemorrhagicInput): ReasonReport {
   return reduce([
     { ok: input.age >= 18, label: "age >= 18" },
-    { ok: input.ltsw < 4.5, label: "LTSW < 4.5h" },
+    { ok: tich3Hours(input) < 4.5, label: "< 4.5h (risveglio: dalla scoperta dei sintomi)" },
     { ok: input.hemVolume < 60, label: "volume ematoma < 60 mL" },
     { ok: input.ivh === "no", label: "emorragia non isolata a IVH" },
     { ok: input.gcs >= 5, label: "GCS >= 5" },

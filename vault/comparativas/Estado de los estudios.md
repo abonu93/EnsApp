@@ -47,7 +47,8 @@ del team, modificato il 2026-10-09). Lo stato in EnsApp viene da
 - MOSTE, ARTEMIS, LIBREXIA → `closed`; ATHENA, PIVOTAL → `active`; PROMISE20 RELOADED (chiave `PROMISE`) → `paused`.
 - Gli studi `paused` ora **non vengono proposti** come i `closed` (`isTrialOpen` in `trials-info.ts`): non compaiono tra gli eleggibili né nella selezione manuale; la scheda resta nel catalogo. Vale anche per HYBERNIA.
 - LIBREXIA chiuso: nascosto il link alla valutazione post-acuta (`Summary.svelte`), mai eleggibile in `PostAcute.svelte`.
-- TENACITY, NiVO, NORA HOME, SAFER-DOAC, ORION: lasciati come sono.
+- TENACITY, NiVO, NORA HOME, SAFER-DOAC: lasciati come sono.
+- ORION: in pausa anche nell'app dal 2026-10-21 (decisione del team), come nel foglio.
 - ACTISAVE, TNKCAT, ICARUS, ABBVIE: **non ancora aperti**, non vanno in app per ora.
 - SAIL-MeVO: aperto nel foglio, non in app — decisione aperta.
 
