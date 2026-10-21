@@ -26,9 +26,8 @@
 
   onMount(() => {
     if (typeof window === "undefined") return;
-    // gia in standalone? niente prompt
-    const mql = window.matchMedia("(display-mode: standalone)");
-    isStandalone = mql.matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    // gia installata (fullscreen o standalone)? niente prompt
+    isStandalone = window.matchMedia("(display-mode: fullscreen), (display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
     // iOS Safari sniff
     isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(navigator as Navigator & { MSStream?: unknown }).MSStream;
 
