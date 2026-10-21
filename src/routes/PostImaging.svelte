@@ -60,8 +60,6 @@
   // (ictus del tronco o del cervelletto).
   let nihss1aGe2 = $state<boolean>($postData.nihss1aGe2 === "yes");
   let posteriorFossa = $state<boolean>($postData.posteriorFossa === "yes");
-  // REMEDY dopo trombolisi (incl. 6): valutazione >= 6 h dopo la fine.
-  let remedyPostIvt = $state<YN>(($postData.remedyPostIvt as YN) ?? "");
 
   // SAIL-MeVO (EVT in MeVO): campi specifici del trial.
   let aiCoreLt10 = $state<YNNa>(($postData.aiCoreLt10 as YNNa) ?? "");
@@ -119,7 +117,6 @@
       ivtExceptDoac: (showDoitQuestion && ivtExceptDoac) || undefined,
       nihss1aGe2: showNonEvt ? (nihss1aGe2 ? "yes" : "no") : undefined,
       posteriorFossa: showNonEvt ? (posteriorFossa ? "yes" : "no") : undefined,
-      remedyPostIvt: (showRemedyPostIvt && remedyPostIvt) || undefined,
     });
   });
 
@@ -163,7 +160,6 @@
   // (obbligatoria per ORION oltre 6 h), quindi sta nella scheda Imaging.
   const showPerfusion = $derived(showImaging && ($ltswHours ?? -1) > 4.5);
   const showNonEvt = $derived(isIschemic && candidate === "not eligible");
-  const showRemedyPostIvt = $derived(showNonEvt && ivtCandidate === "eligible");
   const showDoneSympleCore = $derived(showImaging && ($ltswHours ?? -1) >= 24 && ($ltswHours ?? 999) <= 72);
   const showDoitQuestion = $derived(
     isIschemic && $preData.doac === "yes" && ivtCandidate === "not eligible" &&
@@ -330,12 +326,6 @@
             <div class="divider"></div>
             <ToggleRow title={$t.postImaging.nihss1aGe2Label} sub={$t.postImaging.nihss1aGe2Hint} bind:checked={nihss1aGe2} />
             <ToggleRow title={$t.postImaging.posteriorFossaLabel} sub={$t.postImaging.posteriorFossaHint} bind:checked={posteriorFossa} />
-            {#if showRemedyPostIvt}
-              <div class="field">
-                <span class="lbl">{$t.postImaging.remedyPostIvtLabel}</span>
-                <Segmented options={ynOpts} bind:value={remedyPostIvt} cols={2} />
-              </div>
-            {/if}
           </div>
         {/snippet}
       </Card>

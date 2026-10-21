@@ -68,8 +68,6 @@ export type PostData = Partial<{
   coreGt70: "yes" | "no" | "";
   /** DO-IT: antagonizzazione del DOAC prevista o iniziata. */
   doacReversal: "yes" | "no" | "";
-  /** REMEDY dopo trombolisi: condizioni dell'incl. 6 verificate. */
-  remedyPostIvt: "yes" | "no" | "";
 }>;
 
 export type HemData = Partial<HemorrhagicInput>;

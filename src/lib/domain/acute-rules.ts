@@ -68,8 +68,6 @@ export interface AcuteInput {
   coreGt70?: YesNoEmpty;
   /** DO-IT: antagonizzazione del DOAC prevista o iniziata (excl. 2). */
   doacReversal?: YesNoEmpty;
-  /** REMEDY dopo trombolisi: condizioni dell'incl. 6 verificate. */
-  remedyPostIvt?: YesNoEmpty;
 }
 
 export interface VesselFlags {
@@ -123,13 +121,6 @@ const POSTERIOR_VESSELS: readonly VesselCode[] = ["va", "basilar", "p1", "p2", "
  */
 // REMEDY, excl. 3: ASPECTS 0-5 esclude. Va inserito per la circolazione
 // anteriore; nell'ictus della sola ACP (ammesso, excl. 6) non si calcola.
-// REMEDY, incl. 6 (p. 37): dopo trombolisi si valuta >= 6 h dopo la fine,
-// con NIHSS pre-trombolisi <= 15, NIHSS ancora 5-15, miglioramento < 4 punti
-// e imaging di controllo senza PH1/PH2. Va confermato dal medico.
-export function remedyPostIvtOk(input: AcuteInput): boolean {
-  return input.ivtCandidate !== "eligible" || input.remedyPostIvt === "yes";
-}
-
 export function remedyAspectsOk(input: AcuteInput): boolean {
   const vessels = toArray(input.targetVessels);
   if (vessels.length > 0 && vessels.every((v) => POSTERIOR_VESSELS.includes(v))) return true;
@@ -556,8 +547,7 @@ export function remedy(input: AcuteInput): boolean {
     remedyAspectsOk(input) &&
     input.acei !== "yes" &&
     // Protocollo V6.2, excl. 6: ictus del tronco o del cervelletto.
-    input.posteriorFossa !== "yes" &&
-    remedyPostIvtOk(input)
+    input.posteriorFossa !== "yes"
   );
 }
 

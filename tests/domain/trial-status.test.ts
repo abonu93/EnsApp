@@ -71,5 +71,7 @@ describe("co-arruolamento: DO-IT, REMEDY e SOVATELTIDE esclusivi", () => {
     expect(exclusiveWith("REMEDY").sort()).toEqual(["DO-IT", "SOVATELTIDE"]);
     expect(exclusiveWith("Sovateltide").sort()).toEqual(["DO-IT", "REMEDY"]);
     expect(exclusiveWith("TENACITY")).toEqual([]);
+    expect(exclusiveWith("SAIL-MeVO")).toEqual(["NiVO"]);
+    expect(exclusiveWith("NiVO")).toEqual(["SAIL-MeVO"]);
   });
 });

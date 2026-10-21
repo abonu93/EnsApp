@@ -59,28 +59,6 @@ export const OPEN_QUESTIONS: readonly OpenQuestion[] = [
     appliesTo: (i) => i.premrs === 2,
   },
   {
-    id: "sail-nivo",
-    trials: ["SAIL-MeVO", "NiVO"],
-    owner: "sponsor",
-    question: "Can SAIL-MeVO and NiVO co-enrol?",
-    detail:
-      "Both recruit MeVO (non-dominant M2, A2-A3, P2-P3). SAIL-MeVO forbids experimental endovascular devices (p. 32); NiVO excludes patients in any trial. Ask both sponsors.",
-  },
-  {
-    id: "saferdoac-docs",
-    trials: ["SAFER-DOAC"],
-    owner: "team",
-    question: "Which study is SAFER-DOAC, and is it still open?",
-    detail: "No documents in Drive and not in the team sheet; it is not DOAC-CVT. The app has no rule for it (manual selection only).",
-  },
-  {
-    id: "norahome-docs",
-    trials: ["NORA HOME"],
-    owner: "team",
-    question: "Is NORA HOME still open? No protocol available",
-    detail: "No documents in Drive and not in the team sheet. The app rule (age > 18, NIHSS < 5) cannot be checked against a protocol.",
-  },
-  {
     id: "nivo-protocol",
     trials: ["NiVO"],
     owner: "team",
@@ -121,8 +99,33 @@ export const COENROLMENT_RULES: Readonly<Record<string, { strict: boolean; text:
   "WeTrust": { strict: false, text: "excludes a drug/device study that could cause confusion (excl. 18)" },
 };
 
+/**
+ * Avvertenze operative (non dubbi): lo studio resta selezionabile, ma prima di
+ * arruolare va fatto un passo indicato dal protocollo. Decise dal team.
+ */
+export interface ProtocolWarning {
+  id: string;
+  trials: string[];
+  title: string;
+  detail: string;
+  /** Vero se l'avvertenza vale per il paziente inserito. */
+  when: (input: AcuteInput) => boolean;
+}
+
+export const PROTOCOL_WARNINGS: readonly ProtocolWarning[] = [
+  {
+    // Team, 2026-10-21: REMEDY resta selezionabile dopo trombolisi, con l'avviso.
+    id: "remedy-after-ivt",
+    trials: ["REMEDY"],
+    title: "REMEDY after thrombolysis: control CT at 6 h",
+    detail:
+      "Start the study drug only >= 6 h after the end of IV thrombolysis, after a control CT without PH1/PH2 or haemorrhage with worsening; pre-thrombolysis NIHSS <= 15, NIHSS still 5-15 and improvement < 4 points (incl. 6, p. 37).",
+    when: (i) => i.ivtCandidate === "eligible",
+  },
+];
+
 export interface SelectionAlert {
-  kind: "coenrolment" | "question";
+  kind: "coenrolment" | "question" | "warning";
   trials: string[];
   title: string;
   detail: string;
@@ -167,6 +170,13 @@ export function selectionAlerts(selected: string[], input?: AcuteInput): Selecti
     }
   }
   for (const trial of selected) {
+    const key = canonicalTrialName(trial);
+    for (const w of PROTOCOL_WARNINGS) {
+      if (!w.trials.some((n) => canonicalTrialName(n) === key)) continue;
+      if (input && safe(() => w.when(input))) {
+        alerts.push({ kind: "warning", trials: [trial], title: w.title, detail: w.detail, relevant: true });
+      }
+    }
     for (const q of questionsFor(trial)) {
       const relevant = input && q.appliesTo ? safe(() => q.appliesTo!(input)) : false;
       alerts.push({ kind: "question", trials: [trial], title: `${trial}: ${q.question}`, detail: q.detail, relevant });

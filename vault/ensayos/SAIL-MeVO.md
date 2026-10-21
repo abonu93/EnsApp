@@ -111,6 +111,9 @@ Nel CI "Some visits may be conducted by telephone" ([[SAIL-MeVO — CI — v1.1]
 - **Orale o telefonico**: non previsto.
 
 ## Co-arruolamento
+> [!done] Decisione del team (2026-10-21, commit `a99924f`)
+> - SAIL-MeVO e NiVO non si possono co-arruolare (esclusivi nel Riepilogo)
+
 Non riportato nei documenti. Il protocollo vieta "experimental endovascular devices or drugs" ([[SAIL-MeVO — Protocolo — V2.1]], p. 32).
 
 Nota per il team: [[NiVO]] (attivo in app) recluta MeVO con un catetere da aspirazione dentro un'indagine clinica, e le popolazioni si sovrappongono (NIHSS ≥5, M2 non dominante, A2–A3, P2–P3). La compatibilità va chiesta ai promotori.

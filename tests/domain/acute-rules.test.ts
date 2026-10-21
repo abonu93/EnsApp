@@ -757,15 +757,13 @@ describe("ictus al risveglio: ora della scoperta e REMEDY dopo trombolisi", () =
     expect(vanish(input({ ltsw: 14 }))).toBe(false);
   });
 
-  test("REMEDY dopo trombolisi richiede la conferma delle condizioni a >= 6 h", () => {
+  test("REMEDY dopo trombolisi resta proponibile (avviso nel Riepilogo)", () => {
     const ok = {
       age: 70, nihss: 8, premrs: 1, ltsw: 10, candidate: "not eligible", ivtCandidate: "eligible",
       targetVessels: [], aspects: 8, acei: "no",
     };
-    const input = (p: Record<string, unknown>) => ({ ...ok, ...p }) as unknown as Parameters<typeof remedy>[0];
-    expect(remedy(input({}))).toBe(false);
-    expect(remedy(input({ remedyPostIvt: "yes" }))).toBe(true);
-    expect(reasonRemedy(input({})).eligible).toBe(false);
-    expect(remedy(input({ ivtCandidate: "not eligible" }))).toBe(true);
+    const input = ok as unknown as Parameters<typeof remedy>[0];
+    expect(remedy(input)).toBe(true);
+    expect(reasonRemedy(input).eligible).toBe(true);
   });
 });

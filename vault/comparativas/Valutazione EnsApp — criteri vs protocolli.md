@@ -31,6 +31,7 @@ Stato nell'app al 2026-10-19 ([[Estado de los estudios]]):
 | `4742d0d` | Calendario dell'LTSW; [[DO-IT]] senza wake-up; co-arruolamento (T6) | Le frecce non producono più un orario nel futuro (LTSW negativo = paziente "in finestra" ovunque); DO-IT, REMEDY e SOVATELTIDE esclusivi (decisione del team, 2026-10-20) |
 | `081270e` | Risposte del team ai dubbi aperti | [[VANISH]] ASPECTS > 4, perfusione oltre 4,5 h, M2 dominante; [[TENACITY]] solo perfusione; [[ORION]] in pausa; [[TICH-3]] tutti i cumarinici ed eparine terapeutiche, IVH primaria esclusa |
 | `d8cfe9a` | Ora della scoperta (T11), [[REMEDY]] dopo trombolisi, testi [[TENACITY]] e [[NiVO]], nuovi dubbi aperti | TICH-3 e VANISH al risveglio contano dalla scoperta / dal punto medio del sonno; REMEDY non proposto dopo IVT senza conferma a ≥ 6 h |
+| `a99924f` | Decisioni del team: [[REMEDY]] dopo trombolisi con avviso; [[SAIL-MeVO]]/[[NiVO]] esclusivi | Restano 6 dubbi aperti |
 
 Le sezioni seguenti fotografano lo stato **prima** di queste correzioni; il dettaglio di cosa resta aperto è nel riquadro "Correzioni applicate" di ogni scheda.
 
