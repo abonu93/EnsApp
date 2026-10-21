@@ -101,6 +101,7 @@ Il foglio del team riporta "7 gg, 180 gg" ([[Esquema ensayos — septiembre 2026
 > [!done] Decisioni del team applicate il 2026-10-21 (commit `081270e`)
 > - esclusi tutti i cumarinici (warfarin, acenocumarolo/Sintrom) e qualsiasi eparina a dose terapeutica; DOAC ammessi
 > - IVH primaria isolata esclusa
+> - ✅ (d8cfe9a) 3: con ictus al risveglio la finestra di 4,5 h parte dall'ora della scoperta (nuovo campo)
 > [!done] Correzioni applicate all'app il 2026-10-20 (commit `9895f0a`)
 > - ✅ l'etichetta degli anticoagulanti precisa che per TICH-3 conta solo la terapia in corso
 > - ✅ i trial emorragici non vengono più proposti per un ischemico (filtro sul tipo di ictus)

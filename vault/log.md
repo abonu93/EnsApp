@@ -41,3 +41,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-20 — Decisioni del team: DO-IT senza ictus al risveglio (niente DWI); DO-IT, REMEDY e SOVATELTIDE esclusivi. Corretto il calendario dell'LTSW (orari nel futuro). Commit `4742d0d`.
 - 2026-10-20 — Nuova sezione "Dubbi aperti" nell'app e avvisi di contraddizione nel Riepilogo (`12f11e3`): 13 dubbi da [[Valutazione EnsApp — criteri vs protocolli]] §6 e regole di co-arruolamento. Regola aggiunta in [[CLAUDE]].
 - 2026-10-21 — Risposte del team a 8 dei 13 dubbi aperti (VANISH, TENACITY, ORION, TICH-3), applicate in `081270e`. Restano 5 dubbi (DONE SYMPLE mRS e M2, TWIN2WIN-2 M1 prossimale, NiVO protocollo, WETRUST §14).
+- 2026-10-21 — Blocco successivo (`d8cfe9a`): ora della scoperta dei sintomi al risveglio (TICH-3, VANISH), REMEDY dopo trombolisi, consenso e visite di TENACITY e NiVO, 4 nuovi dubbi aperti (SAIL-MeVO mRS e co-arruolamento con NiVO, SAFER-DOAC, NORA HOME).

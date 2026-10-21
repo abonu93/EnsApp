@@ -111,6 +111,7 @@ Non riportato nel documento: il protocollo non esclude la partecipazione ad altr
 > - ASPECTS > 4 richiesto (criterio del foglio e della scheda di sala; nel protocollo v1.2 è solo di stratificazione)
 > - core ≤ 70 mL e mismatch > 1,2 solo nei pazienti tardivi, oltre 4,5 h
 > - M2 dominante eleggibile, oltre a ICA intracranica e M1
+> - ✅ (d8cfe9a) al risveglio le 9 h partono dal punto medio fra LSW e scoperta dei sintomi (nuovo campo)
 > [!done] Correzioni (secondo blocco, 2026-10-19, branch `claude/practical-johnson-mo40tz-block2`)
 > - ✅ 1 finestra ≤9 h (risveglio: l'app usa l'LTSW, più restrittivo del punto medio del sonno)
 > - ✅ 2 core ≤70 mL con mismatch: nuova domanda nella scheda EVT
