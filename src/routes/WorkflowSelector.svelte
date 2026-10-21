@@ -13,6 +13,7 @@
       bg: "var(--ischemic-soft)",
       route: "/board",
       icon: "grid" as const,
+      isNew: true,
     },
     {
       key: "registered",
@@ -23,6 +24,7 @@
       bg: "var(--post-acute-soft)",
       route: "/registered",
       icon: "bolt" as const,
+      isNew: true,
     },
     {
       key: "check",
@@ -76,6 +78,7 @@
         <div class="opt-body">
           <div class="opt-title">
             {o.title}
+            {#if "isNew" in o && o.isNew}<span class="new-badge">{$t.workflow.newBadge}</span>{/if}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="9 18 15 12 9 6" />
             </svg>
@@ -89,8 +92,8 @@
 
 <style>
   .page {
-    /* Spazio sotto per non finire dietro alla barra fluttuante. */
-    padding: 8px 22px calc(96px + env(safe-area-inset-bottom, 0px));
+    /* Lo spazio per la barra fluttuante lo riserva App.svelte. */
+    padding: 8px 22px 8px;
   }
   .intro {
     margin-bottom: 22px;
@@ -172,6 +175,16 @@
     align-items: center;
     gap: 7px;
     color: var(--text);
+  }
+  .new-badge {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: var(--text-inverted);
   }
   .opt-desc {
     font-size: 13.5px;

@@ -63,6 +63,7 @@ export const it = {
     trialsDesc: "Catalogo dei trial con criteri di inclusione/esclusione.",
     quickTitle: "Quick patient",
     quickDesc: "Inserimento rapido per paziente gia' arruolato.",
+    newBadge: "Nuovo",
   },
   trials: {
     title: "Trial clinici",

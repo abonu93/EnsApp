@@ -66,7 +66,7 @@
 
 <main id="main" tabindex="-1">
   {#key animKey}
-    <div class="ens-screen-in">
+    <div class="screen ens-screen-in">
       <Router {routes} />
     </div>
   {/key}
@@ -77,11 +77,20 @@
 <style>
   :global(html) {
     background: var(--bg);
-    padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0));
   }
   :global(body) {
     background: var(--bg);
     margin: 0;
+  }
+  /* Il guscio occupa esattamente lo schermo: lo spazio per la barra
+     fluttuante sta dentro i 100dvh (border-box), cosi' una pagina corta
+     non scorre e una lunga finisce subito sopra la barra, senza vuoti. */
+  :global(#app) {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: calc(var(--bottom-nav-h) + 20px + env(safe-area-inset-bottom, 0px));
   }
 
   .hdr {
@@ -136,6 +145,17 @@
 
   main {
     outline: none;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .screen > :global(*) {
+    flex-shrink: 0;
   }
 
   .hdr-actions { display: flex; align-items: center; gap: 4px; }

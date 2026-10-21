@@ -540,9 +540,9 @@
     color: var(--text-muted);
   }
   /* In fondo alla pagina, dopo la lista (non segue la barra di navigazione).
-     Margine sotto per non finire dietro alla barra fluttuante. */
+     Lo spazio per la barra fluttuante lo riserva App.svelte. */
   .send-bar {
-    padding: 22px 22px calc(96px + env(safe-area-inset-bottom, 0px));
+    padding: 22px 22px 8px;
   }
   .row-wrap {
     display: flex;
