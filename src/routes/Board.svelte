@@ -18,8 +18,8 @@
   import { fieldLabel, fill, fmtClock, fmtMin, fmtValue } from "$lib/components/board/format";
 
   type SheetState =
-    | { kind: "field"; key: string }
-    | { kind: "clock" }
+    | { kind: "field"; key: string; returnTo?: string }
+    | { kind: "clock"; returnTo?: string }
     | { kind: "trial"; name: string }
     | { kind: "compete"; names: string[] }
     | { kind: "all" }
@@ -73,8 +73,13 @@
     NOT_RECRUITING.map((n) => `${n.name} (${n.status === "paused" ? $t.board.pausedStatus : $t.board.closedStatus})`).join(", ")
   );
 
-  function openField(key: string) {
-    sheet = key === CLOCK ? { kind: "clock" } : { kind: "field", key };
+  function openField(key: string, returnTo?: string) {
+    sheet = key === CLOCK ? { kind: "clock", returnTo } : { kind: "field", key, returnTo };
+  }
+  // Dopo un dato inserito dalla scheda di uno studio si torna alla scheda.
+  function closeField() {
+    const back = sheet && (sheet.kind === "field" || sheet.kind === "clock") ? sheet.returnTo : undefined;
+    sheet = back ? { kind: "trial", name: back } : null;
   }
   const shortOf = (k: string) => (k === CLOCK ? fieldLabel($t, CLOCK) : fieldLabel($t, k, true));
 
@@ -85,6 +90,7 @@
   function reason(j: BoardJudgement): string {
     if (j.status === "out") {
       if (j.closed) return $t.board.windowClosed;
+      if (j.early && j.window) return fill($t.board.opensIn, { t: fmtMin(j.window.opensInMin) });
       const f = j.fails[0];
       if (!f) return "";
       return f.kind === "type" ? (f.label === "hemorrhagic" ? $t.board.ruleHemorrhagic : $t.board.ruleIschemic) : criterionLabel(f.label, $locale);
@@ -137,7 +143,7 @@
     <div class="grid">
       {#each grid as k (k)}
         {@const def = FIELD_BY_KEY[k]}
-        {@const v = fmtValue($t, k, values[k])}
+        {@const v = k === "targetVessels" && values.tandem === "yes" ? [fmtValue($t, k, values[k]), $t.board.extraShort].filter((x) => x && x !== $t.board.noneValue).join(" + ") : fmtValue($t, k, values[k])}
         {@const isNext = res.next?.field === k}
         <button type="button" class="cell" onclick={() => openField(k)} aria-label={`${fieldLabel($t, k)}: ${v ?? "—"}`}>
           <span class="cell-l" class:next={isNext}>{fieldLabel($t, k, true)}{#if isNext}<span class="next-dot" aria-hidden="true"></span>{/if}</span>
@@ -243,14 +249,15 @@
 
 {#if sheet?.kind === "field"}
   {#key sheet.key}
-    <BoardFieldSheet field={sheet.key} value={values[sheet.key]} onSet={setBoardField} onClose={() => (sheet = null)} />
+    <BoardFieldSheet field={sheet.key} value={values[sheet.key]} {values} onSet={setBoardField} onClose={closeField} />
   {/key}
 {:else if sheet?.kind === "clock"}
-  <BoardClockSheet {clock} onSet={setBoardClock} onClose={() => (sheet = null)} />
+  <BoardClockSheet {clock} onSet={setBoardClock} onClose={closeField} />
 {:else if sheet?.kind === "trial"}
   {@const j = trial(sheet.name)}
   {#if j}
-    <BoardTrialSheet trial={j} {values} alerts={selectionAlerts([j.name], $boardAlertInput)} onField={openField} onClose={() => (sheet = null)} />
+    {@const from = j.name}
+    <BoardTrialSheet trial={j} {values} alerts={selectionAlerts([j.name], $boardAlertInput)} onField={(k) => openField(k, from)} onClose={() => (sheet = null)} />
   {/if}
 {:else if sheet?.kind === "compete"}
   {@const names = sheet.names}

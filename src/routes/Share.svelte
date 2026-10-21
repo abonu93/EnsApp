@@ -29,9 +29,26 @@
   type YesNo = "Yes" | "No" | "";
   type MticiVal = "" | "0" | "1" | "2a" | "2b50" | "2b67" | "2c" | "3";
 
-  let tev = $state<YesNo>("");
+  // TEV/TIV gia' noti dalla candidatura (board o post-imaging): non si
+  // richiedono, si mostra solo il valore (e l'mTICI se c'e' trombectomia).
+  const fromCandidacy = (c: string | undefined): YesNo => (c === "eligible" ? "Yes" : c === "not eligible" ? "No" : "");
+  const tevGiven = $derived(fromCandidacy($postData.candidate));
+  const tivGiven = $derived(fromCandidacy($postData.ivtCandidate));
+  // svelte-ignore state_referenced_locally
+  let tev = $state<YesNo>(fromCandidacy($postData.candidate));
   let mtici = $state<MticiVal>("");
-  let tiv = $state<YesNo>("");
+  // svelte-ignore state_referenced_locally
+  let tiv = $state<YesNo>(fromCandidacy($postData.ivtCandidate));
+  const plain = (label: string) => label.replace(/[¿?]/g, "").trim();
+
+  // Emorragia: niente TEV/TIV, si chiede la reversione dell'anticoagulazione e con cosa.
+  const isHem = $derived($postData.strokeType === "hemorrhagic");
+  let reversal = $state<YesNo>("");
+  let reversalAgent = $state("");
+  const REVERSAL_AGENTS = ["idarucizumab", "andexanet", "pcc", "vitk", "ffp", "protamine", "other"] as const;
+
+  // Senza ID paziente non si invia (foglio e WhatsApp).
+  const idMissing = $derived(!$preData.patientId?.trim());
 
   const showMtici = $derived(tev === "Yes");
 
@@ -45,9 +62,22 @@
     selected: $selectedStudies,
     outcomes: $studyOutcomes,
     notes: $notesText,
-    tev,
-    mtici: showMtici ? mtici : "",
-    tiv,
+    tev: isHem ? "" : tev,
+    mtici: !isHem && showMtici ? mtici : "",
+    tiv: isHem ? "" : tiv,
+    reversal: isHem ? reversal : "",
+    reversalAgent: isHem && reversal === "Yes" ? reversalAgent : "",
+    wakeup: $preData.wakeupStroke === true,
+    targetVessels: $postData.targetVessels,
+    tandem: $postData.tandem,
+    aspects: $postData.aspects,
+    evtCandidate: $postData.candidate,
+    ivtCandidate: $postData.ivtCandidate,
+    gcs: $hemData.gcs,
+    hemVolume: $hemData.hemVolume,
+    anticoag: $hemData.anticoag,
+    secondaryCause: $hemData.secondaryCause,
+    spotSign: $hemData.spotSign,
   });
   const message = $derived(buildShareMessage(record));
 
@@ -61,12 +91,13 @@
   }
 
   function shareWhatsApp() {
+    if (idMissing) return;
     const url = "https://wa.me/?text=" + encodeURIComponent(message);
     window.open(url, "_blank", "noopener");
   }
 
   async function save() {
-    if (saving) return;
+    if (saving || idMissing) return;
     saving = true;
     const { payload, missed } = buildSheetPayload(record, $eligibleOpenTrials, $flowOrigin === "board" ? "board" : "guided");
     const result = await sendToSheet(payload);
@@ -183,7 +214,25 @@
   <Card title={$t.extras.acuteTreatments}>
     {#snippet children()}
       <div class="form-stack">
-        <RadioGroup id="share-tev" label={$t.trialPatient.tevLabel} name="tev" columns={2} bind:value={tev} options={ynOpts} />
+        {#if isHem}
+          <RadioGroup id="share-reversal" label={$t.share.reversalLabel} name="reversal" columns={2} bind:value={reversal} options={ynOpts} />
+          {#if reversal === "Yes"}
+            <div class="field">
+              <label for="share-reversal-agent" class="lbl">{$t.share.reversalAgentLabel}</label>
+              <select id="share-reversal-agent" class="select" bind:value={reversalAgent}>
+                <option value="">--</option>
+                {#each REVERSAL_AGENTS as a (a)}
+                  <option value={a}>{$t.share.reversalAgents[a]}</option>
+                {/each}
+              </select>
+            </div>
+          {/if}
+        {:else}
+        {#if tevGiven}
+          <p class="given"><span>{plain($t.trialPatient.tevLabel)}</span><strong>{tevGiven === "Yes" ? $t.common.yes : $t.common.no}</strong></p>
+        {:else}
+          <RadioGroup id="share-tev" label={$t.trialPatient.tevLabel} name="tev" columns={2} bind:value={tev} options={ynOpts} />
+        {/if}
         {#if showMtici}
           <div class="field">
             <label for="share-mtici" class="lbl">mTICI</label>
@@ -195,7 +244,12 @@
             </select>
           </div>
         {/if}
-        <RadioGroup id="share-tiv" label={$t.trialPatient.tivLabel} name="tiv" columns={2} bind:value={tiv} options={ynOpts} />
+        {#if tivGiven}
+          <p class="given"><span>{plain($t.trialPatient.tivLabel)}</span><strong>{tivGiven === "Yes" ? $t.common.yes : $t.common.no}</strong></p>
+        {:else}
+          <RadioGroup id="share-tiv" label={$t.trialPatient.tivLabel} name="tiv" columns={2} bind:value={tiv} options={ynOpts} />
+        {/if}
+        {/if}
       </div>
     {/snippet}
   </Card>
@@ -223,14 +277,17 @@
         <Button variant="secondary" onclick={copy}>
           {#snippet children()}{$t.share.copy}{/snippet}
         </Button>
-        <Button variant="secondary" onclick={shareWhatsApp}>
+        <Button variant="secondary" disabled={idMissing} onclick={shareWhatsApp}>
           {#snippet children()}WhatsApp{/snippet}
         </Button>
       </div>
+      {#if idMissing}
+        <p class="send-warn" role="alert">{$t.share.idRequired}</p>
+      {/if}
       {#if sendStatus && sendStatus !== "confirmed"}
         <p class="send-warn" role="alert">{sendMessage(sendStatus)}</p>
       {/if}
-      <Button variant="primary" fullWidth loading={saving} onclick={save}>
+      <Button variant="primary" fullWidth loading={saving} disabled={idMissing} onclick={save}>
         {#snippet children()}{sendStatus && sendStatus !== "confirmed" ? $t.share.retrySend : $t.share.sendToSheet}{/snippet}
       </Button>
     {:else}
@@ -274,6 +331,14 @@
     color: var(--text);
     font: inherit;
   }
+  .given {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+  }
+  .given strong { color: var(--text); }
   .pid {
     width: 100%;
     min-height: var(--touch-min);

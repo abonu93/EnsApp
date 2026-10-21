@@ -40,7 +40,7 @@
   // Mark: ✓ soddisfatto, ✕ fallito, ? da sapere, – da confermare.
   function mark(r: BoardRow): "ok" | "fail" | "unk" | "pend" {
     if (r.pending) return "pend";
-    if (r.kind === "time" && (trial.early || trial.closed)) return trial.closed ? "fail" : "unk";
+    if (r.kind === "time" && (trial.early || trial.closed)) return "fail";
     return r.res === true ? "ok" : r.res === false ? "fail" : "unk";
   }
 </script>

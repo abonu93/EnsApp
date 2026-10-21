@@ -405,8 +405,10 @@ export function judgeTrial(def: BoardTrialDef, board: BoardInput): BoardJudgemen
   const needs = [...new Set(unknown.map((r) => r.field!).filter(Boolean))].sort(byFieldOrder);
 
   let status: BoardStatus;
-  if (closed || fails.length) status = "out";
-  else if (unknown.length || early) status = "possible";
+  // Finestra non ancora aperta (es. DONE SYMPLE prima delle 24 h): i criteri
+  // vanno rispettati adesso, quindi lo studio e' fuori (con "apre fra...").
+  if (closed || early || fails.length) status = "out";
+  else if (unknown.length) status = "possible";
   // Le regole restano l'ultima parola: un esito diverso non diventa "eligible".
   else status = ruleOk(def, input) ? "eligible" : "possible";
 

@@ -130,11 +130,11 @@ describe("board: scenari al letto", () => {
     expect(p.window!.elapsedFrac).toBeCloseTo(95 / 480, 2);
   });
 
-  test("finestra non ancora aperta: DONE SYMPLE (24-72h) e' possibile, apre fra ~22h", () => {
+  test("finestra non ancora aperta: DONE SYMPLE (24-72h) e' fuori, apre fra ~22h", () => {
     const b: BoardInput = { acute: { ...pre, ltsw: 2 }, hem: pre, clockSet: true };
     const d = judgeTrial(def("DONE SYMPLE"), b);
     expect(d.early).toBe(true);
-    expect(d.status).toBe("possible");
+    expect(d.status).toBe("out");
     expect(Math.round(d.window!.opensInMin / 60)).toBe(22);
   });
 
