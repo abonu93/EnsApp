@@ -35,8 +35,10 @@
   from { opacity: 0; transform: translateX(26px); }
   to   { opacity: 1; transform: translateX(0); }
 }
+/* `backwards`, non `both`: finita l'animazione il transform non deve restare,
+   altrimenti i figli `position: fixed` si posizionano rispetto alla pagina. */
 .ens-screen-in {
-  animation: ens-screen-in 340ms cubic-bezier(.2, .8, .2, 1) both;
+  animation: ens-screen-in 340ms cubic-bezier(.2, .8, .2, 1) backwards;
 }
 
 /* rise: stagger per liste */

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
   import { focusTrap } from "$lib/a11y/focusTrap";
+  import { portal } from "$lib/actions/portal";
 
   interface Props {
     open: boolean;
@@ -36,6 +37,7 @@
     class="backdrop"
     onclick={onBackdrop}
     role="presentation"
+    use:portal
   >
     <div
       bind:this={dialog}
