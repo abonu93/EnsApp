@@ -1,7 +1,7 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
   import { hasPatientInProgress, clearPatient, ltswHours as ltswHoursStore, now } from "$lib/stores/patient";
-  import { adoptPreArrival, preArrival, sharedIncoming, watchShared, type SharedPreArrival } from "$lib/stores/preArrival";
+  import { adoptPreArrival, preArrivalsByEta, sharedIncoming, watchShared, type SharedPreArrival } from "$lib/stores/preArrival";
   import { fill, fmtClock, fmtMin } from "$lib/components/board/format";
   import { clearSelection } from "$lib/stores/trialSelection";
   import { fmtHoursAsClock } from "$lib/utils/time";
@@ -61,9 +61,8 @@
   };
 
   function adopt(s: SharedPreArrival) {
-    if ($preArrival && !confirm($t.preArrival.sharedReplace)) return;
     adoptPreArrival(s);
-    push("/incoming");
+    push(`/incoming/${s.id}`);
   }
 
   // Active session timer (mm:ss da LTSW)
@@ -93,24 +92,25 @@
     </span>
   </button>
 
-  {#if $preArrival}
-    {@const eta = $preArrival.arriveAt != null ? ($preArrival.arriveAt - $now) / 60_000 : null}
-    <button class="resume incoming" type="button" onclick={() => push("/incoming")}>
+  {#each $preArrivalsByEta as pa (pa.id)}
+    {@const eta = pa.arriveAt != null ? (pa.arriveAt - $now) / 60_000 : null}
+    <button class="resume incoming" type="button" onclick={() => push(`/incoming/${pa.id}`)}>
       <div class="resume-head">
         <span class="resume-status">
           <span class="dot warn" aria-hidden="true"></span>
           <span>{$t.preArrival.incoming}</span>
+          {#if pa.age != null || pa.cip}<span class="inc-who">{[pa.cip, pa.age != null ? `${pa.age} ${$t.preArrival.years}` : null].filter(Boolean).join(" · ")}</span>{/if}
         </span>
         <span class="resume-cta">→</span>
       </div>
       <div class="resume-meta">
         <span class="elapsed">{eta == null ? $t.preArrival.etaUnknown : eta > 0.5 ? fmtMin(eta) : $t.preArrival.due}</span>
-        {#if $preArrival.arriveAt != null}
-          <span class="since">{fill($t.preArrival.arrivesAt, { t: fmtClock($preArrival.arriveAt, $now, $t.board.yesterday, $locale) })}</span>
+        {#if pa.arriveAt != null}
+          <span class="since">{fill($t.preArrival.arrivesAt, { t: fmtClock(pa.arriveAt, $now, $t.board.yesterday, $locale) })}</span>
         {/if}
       </div>
     </button>
-  {/if}
+  {/each}
 
   {#if othersLive.length}
     <section class="shared" aria-labelledby="live-title">
@@ -308,6 +308,7 @@
     background: var(--success);
   }
   .dot.warn { background: var(--warn); }
+  .inc-who { font-weight: 400; color: var(--text-muted); font-size: 12.5px; }
   .resume-cta {
     font-size: 13.5px;
     font-weight: 600;

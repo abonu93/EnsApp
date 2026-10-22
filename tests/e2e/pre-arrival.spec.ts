@@ -36,7 +36,7 @@ test.describe("pre-arrival", () => {
     await page.getByRole("group", { name: "Arrival in" }).getByRole("button", { name: "15′", exact: true }).click();
     await page.getByRole("button", { name: "Save · incoming" }).click();
 
-    await expect(page).toHaveURL(/\/incoming$/);
+    await expect(page).toHaveURL(/\/incoming\/[\w-]+$/);
     await expect(page.locator(".eta")).toHaveText("15m");
     await expect(page.locator(".cip")).toHaveText("ROCA0480512001");
     await expect(page.locator("#inc-count")).toContainText("possible at arrival");
@@ -49,7 +49,7 @@ test.describe("pre-arrival", () => {
     // Si riprende dalla home
     await page.goto("/");
     await page.getByRole("button", { name: /Incoming · SEM/ }).click();
-    await expect(page).toHaveURL(/\/incoming$/);
+    await expect(page).toHaveURL(/\/incoming\/[\w-]+$/);
 
     await page.getByRole("button", { name: "Patient arrived · open board" }).click();
     await expect(page).toHaveURL(/\/board$/);
@@ -91,7 +91,7 @@ test.describe("pre-arrival", () => {
     await page.getByRole("dialog").getByRole("button", { name: "Set", exact: true }).click();
     await page.getByRole("group", { name: "Arrival in" }).getByRole("button", { name: "15′", exact: true }).click();
     await page.getByRole("button", { name: "Save · incoming" }).click();
-    await expect(page).toHaveURL(/\/incoming$/);
+    await expect(page).toHaveURL(/\/incoming\/[\w-]+$/);
     await expect(page.getByText("Not shared: the sheet script needs an update")).toBeVisible();
 
     await page.evaluate(() => {
@@ -108,6 +108,44 @@ test.describe("pre-arrival", () => {
     expect(msg).toContain("ETA 15m");
     expect(msg).toContain("Age 78");
     expect(msg).not.toContain("ROCA");
+  });
+});
+
+test.describe("piu' ambulanze", () => {
+  test("due pre-arrivi insieme, ognuno con il suo arrivo", async ({ page }) => {
+    await page.clock.setFixedTime(FIXED_NOW);
+    await page.route("**/script.google.com/**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+    await freshSession(page);
+
+    async function call(age: string, eta: string) {
+      await page.goto("/#/pre-arrival");
+      await page.getByRole("textbox", { name: "Age" }).fill(age);
+      await page.locator("button.clock-btn").click();
+      await page.getByRole("button", { name: "−1h", exact: true }).click();
+      await page.getByRole("dialog").getByRole("button", { name: "Set", exact: true }).click();
+      await page.getByRole("group", { name: "Arrival in" }).getByRole("button", { name: eta, exact: true }).click();
+      await page.getByRole("button", { name: "Save · incoming" }).click();
+      await expect(page).toHaveURL(/\/incoming\/[\w-]+$/);
+    }
+    await call("78", "30′");
+    await call("55", "10′");
+
+    // In Home tutte e due, la piu' vicina per prima.
+    await page.goto("/");
+    const cards = page.locator("button.resume.incoming");
+    await expect(cards).toHaveCount(2);
+    await expect(cards.nth(0)).toContainText("55 years");
+    await expect(cards.nth(0)).toContainText("10m");
+    await expect(cards.nth(1)).toContainText("78 years");
+
+    // Arriva quella da 78: l'altra resta in arrivo.
+    await cards.nth(1).click();
+    await expect(page.locator(".eta")).toHaveText("30m");
+    await page.getByRole("button", { name: "Patient arrived · open board" }).click();
+    await expect(page.getByRole("button", { name: /^Age: 78/ })).toBeVisible();
+    await page.goto("/");
+    await expect(page.locator("button.resume.incoming")).toHaveCount(1);
+    await expect(page.locator("button.resume.incoming")).toContainText("55 years");
   });
 });
 
@@ -135,7 +173,7 @@ test.describe("pre-arrival condiviso", () => {
     await expect(row).toContainText("20m");
     await expect(row).toContainText("71 years · mRS 0 · RACE 6");
     await row.click();
-    await expect(page).toHaveURL(/\/incoming$/);
+    await expect(page).toHaveURL(/\/incoming\/[\w-]+$/);
     await expect(page.locator(".eta")).toHaveText("20m");
     await expect(page.getByText("Shared with the team (no CIP)")).toBeVisible();
 

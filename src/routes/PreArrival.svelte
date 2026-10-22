@@ -4,7 +4,7 @@
   import { push } from "svelte-spa-router";
   import { t, locale } from "$lib/i18n";
   import { now } from "$lib/stores/patient";
-  import { preArrival, savePreArrival } from "$lib/stores/preArrival";
+  import { findPreArrival, savePreArrival } from "$lib/stores/preArrival";
   import type { BoardClock } from "$lib/stores/board";
   import BoardClockSheet from "$lib/components/board/BoardClockSheet.svelte";
   import { fill, fmtClock, fmtMin } from "$lib/components/board/format";
@@ -18,7 +18,11 @@
     type PreArrivalClock,
   } from "$lib/domain/pre-arrival";
 
-  const draft = $preArrival;
+  // /pre-arrival = nuova ambulanza; /pre-arrival/:id = modifica di una gia' in arrivo.
+  let { params }: { params?: { id?: string } } = $props();
+  // Il modulo parte dai valori salvati una volta sola (poi li modifica l'utente).
+  // svelte-ignore state_referenced_locally
+  const draft = findPreArrival(params?.id);
   let cip = $state(draft?.cip ?? "");
   let age = $state<number | undefined>(draft?.age);
   let premrs = $state<number | undefined>(draft?.premrs);
@@ -67,11 +71,11 @@
     // L'ora di arrivo si fissa al salvataggio; resta quella se l'ETA non cambia.
     const arriveAt = eta == null ? null : draft && draft.eta === eta && draft.arriveAt ? draft.arriveAt : Date.now() + eta * 60_000;
     const next: PreArrival = { id: draft?.id, cip: cip || undefined, age, premrs, race, anti, clock, eta, arriveAt };
-    savePreArrival(next);
-    push("/incoming");
+    const id = savePreArrival(next);
+    push(`/incoming/${id}`);
   }
   function cancel() {
-    push(draft ? "/incoming" : "/workflow");
+    push(draft ? `/incoming/${draft.id}` : "/workflow");
   }
 </script>
 

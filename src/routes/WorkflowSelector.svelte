@@ -3,7 +3,8 @@
   import AppHeader from "$lib/components/AppHeader.svelte";
   import { t } from "$lib/i18n";
   import Sheet from "$lib/components/Sheet.svelte";
-  import { preArrival, watchShared } from "$lib/stores/preArrival";
+  import { watchShared } from "$lib/stores/preArrival";
+  import { parkCurrent } from "$lib/stores/sessions";
 
   const choices = $derived([
     {
@@ -110,11 +111,11 @@
       <h2 class="sheet-title">{$t.board.entryTitle}</h2>
       <p class="sheet-desc">{$t.preArrival.chooseSub}</p>
       <div class="stroke-opts">
-        <button type="button" class="stroke-opt ens-press" onclick={() => go($preArrival ? "/incoming" : "/pre-arrival")}>
-          <span class="stroke-t">{$preArrival ? $t.preArrival.incoming : $t.preArrival.entryTitle}</span>
+        <button type="button" class="stroke-opt ens-press" onclick={() => go("/pre-arrival")}>
+          <span class="stroke-t">{$t.preArrival.entryTitle}</span>
           <span class="stroke-d">{$t.preArrival.entryDesc}</span>
         </button>
-        <button type="button" class="stroke-opt ens-press" onclick={() => go("/board")}>
+        <button type="button" class="stroke-opt ens-press" onclick={() => { parkCurrent(); go("/board"); }}>
           <span class="stroke-t">{$t.preArrival.inEd}</span>
           <span class="stroke-d">{$t.preArrival.inEdBoard}</span>
         </button>

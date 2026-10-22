@@ -9,7 +9,6 @@
   import { now, clearPatient, hasPatientInProgress } from "$lib/stores/patient";
   import { ensureLive, liveLocal, liveSupported } from "$lib/stores/liveBoard";
   import { parkCurrent, parkedSessions, resumeSession } from "$lib/stores/sessions";
-  import { preArrival } from "$lib/stores/preArrival";
   import { selectedStudies, toggleStudy, flowOrigin, clearSelection } from "$lib/stores/trialSelection";
   import { criterionLabel } from "$lib/i18n/criteria";
   import { push, replace } from "svelte-spa-router";
@@ -95,7 +94,7 @@
     const replaceSheet = sheetInHistory;
     sheetInHistory = false;
     sheet = null;
-    const route = $preArrival ? "/incoming" : "/pre-arrival";
+    const route = "/pre-arrival";
     if (replaceSheet) replace(route);
     else push(route);
   }
