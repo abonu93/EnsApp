@@ -26,6 +26,7 @@ test.describe("pre-arrival", () => {
     await page.getByRole("textbox", { name: "CIP" }).fill("roca 0480512001");
     await expect(page.getByRole("textbox", { name: "CIP" })).toHaveValue("ROCA0480512001");
     await page.getByRole("textbox", { name: "Age" }).fill("78");
+    await page.getByRole("textbox", { name: "NIHSS" }).fill("9");
     await page.locator("button.clock-btn").click();
     await page.getByRole("button", { name: "−1h", exact: true }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Set", exact: true }).click();
@@ -57,6 +58,7 @@ test.describe("pre-arrival", () => {
     await expect(page.locator(".elapsed")).toHaveText("1h 00m");
     await expect(page.getByRole("button", { name: /^Age: 78/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /^Pre-stroke mRS: 1/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^NIHSS: 9/ })).toBeVisible();
 
     // Sessione attiva in home: si torna al board, non a "nuovo paziente".
     await page.goto("/");
@@ -86,6 +88,7 @@ test.describe("pre-arrival", () => {
     await page.goto("/#/pre-arrival");
     await page.getByRole("textbox", { name: "CIP" }).fill("ROCA0480512001");
     await page.getByRole("textbox", { name: "Age" }).fill("78");
+    await page.getByRole("textbox", { name: "NIHSS" }).fill("12");
     await page.locator("button.clock-btn").click();
     await page.getByRole("button", { name: "−1h", exact: true }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Set", exact: true }).click();
@@ -106,7 +109,7 @@ test.describe("pre-arrival", () => {
     const msg = decodeURIComponent(url.slice("https://wa.me/?text=".length));
     expect(msg).toContain("Stroke code pre-arrival (SEM)");
     expect(msg).toContain("ETA 15m");
-    expect(msg).toContain("Age 78");
+    expect(msg).toContain("Age 78 · NIHSS 12");
     expect(msg).not.toContain("ROCA");
   });
 });
@@ -167,9 +170,9 @@ test.describe("pre-arrival condiviso", () => {
       ];
       return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ v: 1, items }) });
     });
-    await freshSession(page);
+    await freshSession(page, "en", { mockSheet: false });
 
-    const row = page.getByRole("region", { name: "Incoming from the team" }).getByRole("button");
+    const row = page.getByRole("region", { name: "Incoming from the team" }).locator(".shared-row");
     await expect(row).toContainText("20m");
     await expect(row).toContainText("71 years · mRS 0 · RACE 6");
     await row.click();

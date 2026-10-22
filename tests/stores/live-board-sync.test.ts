@@ -5,7 +5,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import { get } from "svelte/store";
 import { clearPatient, postData, preData } from "$lib/stores/patient";
 import { clearSelection } from "$lib/stores/trialSelection";
-import { closeLive, joinLive, liveBoards, liveLocal, liveSupported, pullLive, startLive } from "$lib/stores/liveBoard";
+import { closeLive, closeSharedBoard, joinLive, liveBoards, liveLocal, liveSupported, pullLive, startLive } from "$lib/stores/liveBoard";
 
 type Field = { v: unknown; t: number };
 let rows: Record<string, { id: string; updatedAt: string; status: string; fields: Record<string, Field> }>;
@@ -103,3 +103,24 @@ describe("stroke code condiviso", () => {
     expect(get(liveBoards)).toEqual([]);
   });
 });
+
+describe("lista degli stroke code", () => {
+  test("righe con modifiche vecchie (orologio sballato, test) non compaiono", async () => {
+    const old = Date.now() - 500 * 24 * 3_600_000;
+    rows["old-00001"] = { id: "old-00001", updatedAt: new Date().toISOString(), status: "open", fields: { "pre.age": { v: 70, t: old } } };
+    rows["new-00001"] = { id: "new-00001", updatedAt: new Date().toISOString(), status: "open", fields: { "pre.age": { v: 60, t: Date.now() } } };
+    await pullLive();
+    expect(get(liveBoards).map((r) => r.id)).toEqual(["new-00001"]);
+  });
+
+  test("chiudere per tutti dalla lista", async () => {
+    rows["new-00002"] = { id: "new-00002", updatedAt: new Date().toISOString(), status: "open", fields: { "pre.age": { v: 60, t: Date.now() } } };
+    await pullLive();
+    expect(get(liveBoards).map((r) => r.id)).toEqual(["new-00002"]);
+    await closeSharedBoard("new-00002");
+    expect(rows["new-00002"].status).toBe("closed");
+    await pullLive();
+    expect(get(liveBoards)).toEqual([]);
+  });
+});
+

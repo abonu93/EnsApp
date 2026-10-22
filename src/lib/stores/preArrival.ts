@@ -85,6 +85,12 @@ export function arrivePreArrival(p: PreArrival): void {
   void publish({ ...p, updatedAt: Date.now() }, "arrived");
 }
 
+/** Chiude per tutti un pre-arrivo condiviso da un collega (es. inserito per errore). */
+export function discardSharedPreArrival(s: SharedPreArrival): void {
+  sharedIncoming.update((list) => list.filter((x) => x.id !== s.id));
+  void publish({ ...s, updatedAt: Date.now() }, "discarded");
+}
+
 /** Prende sul dispositivo un paziente in arrivo condiviso da un collega. */
 export function adoptPreArrival(s: SharedPreArrival): void {
   const { status: _status, ...p } = s;

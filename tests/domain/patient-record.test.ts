@@ -66,6 +66,12 @@ describe("patient-record", () => {
     ].join("\n"));
   });
 
+  test("antitrombotici: dal SEM, oppure il DOAC", () => {
+    expect(buildShareMessage({ ...rec, antithrombotics: ["antiplatelet", "doac"] })).toContain("Antithrombotics: antiplatelet + DOAC");
+    expect(buildShareMessage({ ...rec, doac: "yes" })).toContain("DOAC: yes");
+    expect(buildShareMessage({ ...rec, anticoag: "doac", doac: "yes" })).not.toContain("DOAC: yes");
+  });
+
   test("emorragia: reversione nel messaggio e nel foglio", () => {
     const r = { age: 70, selected: [], outcomes: {}, notes: "", reversal: "Yes", reversalAgent: "pcc" };
     expect(buildShareMessage(r)).toBe("Age: 70\n\nAcute treatments:\n- Anticoagulation reversal: Yes (PCC)");

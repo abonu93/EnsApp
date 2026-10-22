@@ -22,6 +22,7 @@ export interface PreArrivalRow {
   found: string;
   arriveAt: string;
   eta: number | "";
+  nihss: number | "";
 }
 
 const iso = (ms: number | null | undefined) => (ms == null ? "" : new Date(ms).toISOString());
@@ -57,6 +58,7 @@ export function toPreArrivalRow(p: PreArrival & { id: string }, status: PreArriv
     found: iso(p.clock.found),
     arriveAt: iso(p.arriveAt),
     eta: p.eta ?? "",
+    nihss: p.nihss ?? "",
   };
 }
 
@@ -76,6 +78,7 @@ export function fromPreArrivalRow(r: Record<string, unknown>): (PreArrival & { i
     status,
     updatedAt: ms(r.updatedAt) ?? undefined,
     age: num(r.age),
+    nihss: num(r.nihss),
     premrs: num(r.premrs),
     race: num(r.race),
     anti,
@@ -115,6 +118,7 @@ export function buildPreArrivalMessage(p: PreArrival, res: BoardResult, nowMs: n
   }
   const facts: string[] = [];
   if (p.age != null) facts.push(`Age ${p.age}`);
+  if (p.nihss != null) facts.push(`NIHSS ${p.nihss}`);
   if (p.premrs != null) facts.push(`pre-mRS ${p.premrs}`);
   if (p.race != null) facts.push(`RACE ${p.race}${p.race >= RACE_LVO ? " (LVO suspected)" : ""}`);
   if (facts.length) lines.push(facts.join(" · "));

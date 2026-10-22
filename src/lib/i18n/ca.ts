@@ -407,6 +407,7 @@ export const ca: Dictionary = {
     otherCount: "+{n} pacients",
     keepsCurrent: "El pacient actual continua obert entre els altres pacients.",
     closeSession: "Tanca",
+    closeForAll: "Tancar-lo per a tot l'equip?",
     onsetAt: "inici",
     seenWellAt: "vist bé",
     foundAt: "trobat",

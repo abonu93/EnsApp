@@ -116,6 +116,7 @@
       <p class="clock-ref mono">{clockRef}{#if isWake}<span class="wake"> · {$t.board.wakeupTag}</span>{/if}</p>
       <dl class="cells">
         <div><dt>{$t.preArrival.age}</dt><dd class="mono" class:empty={pre.age == null}>{pre.age != null ? `${pre.age}` : "—"}</dd></div>
+        <div><dt>NIHSS</dt><dd class="mono" class:empty={pre.nihss == null}>{pre.nihss ?? "—"}</dd></div>
         <div><dt>mRS</dt><dd class="mono" class:empty={pre.premrs == null}>{pre.premrs ?? "—"}</dd></div>
         <div><dt>{$t.preArrival.race}</dt><dd class="mono" class:empty={pre.race == null}>{pre.race ?? "—"}</dd></div>
         <div class="wide"><dt>{$t.preArrival.anti}</dt><dd class:empty={!antiText}>{antiText ?? "—"}</dd></div>
@@ -266,11 +267,12 @@
   .wake { font-family: var(--font-sans); color: var(--warn); font-weight: 600; }
   .cells {
     display: grid;
-    grid-template-columns: 0.7fr 0.7fr 0.8fr 1.6fr;
+    grid-template-columns: 0.7fr 0.8fr 0.6fr 0.7fr;
     gap: 8px;
     margin: 14px 0 0;
   }
   .cells div { min-width: 0; }
+  .cells .wide { grid-column: 1 / -1; }
   .cells dt { font-size: 11px; color: var(--text-muted); }
   .cells dd {
     margin: 2px 0 0;

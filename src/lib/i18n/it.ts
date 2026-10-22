@@ -408,6 +408,7 @@ export const it = {
     otherCount: "+{n} pazienti",
     keepsCurrent: "Il paziente attuale resta aperto fra gli altri pazienti.",
     closeSession: "Chiudi",
+    closeForAll: "Chiudere per tutto il team?",
     onsetAt: "esordio",
     seenWellAt: "visto bene",
     foundAt: "trovato",

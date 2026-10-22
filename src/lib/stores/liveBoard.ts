@@ -177,9 +177,18 @@ export async function pullLive(): Promise<void> {
   const myId = get(liveLocal)?.id;
   liveBoards.set(
     res.rows
-      .filter((r) => r.status === "open" && r.id !== myId && t - r.updatedAt < LIST_MS && Object.keys(r.fields).length > 0)
+      // Anche l'ultima modifica dei campi (ora del dispositivo) dev'essere recente:
+      // esclude righe con orologi sballati o scritte da test con l'ora finta.
+      .filter((r) => r.status === "open" && r.id !== myId && t - r.updatedAt < LIST_MS && t - newestEdit(r) < LIST_MS)
       .sort((a, b) => b.updatedAt - a.updatedAt)
   );
+}
+
+/** Ultima modifica fra i campi di uno stroke code (0 se vuoto). */
+function newestEdit(r: LiveBoardRow): number {
+  let max = 0;
+  for (const f of Object.values(r.fields)) if (f && typeof f.t === "number" && f.t > max) max = f.t;
+  return max;
 }
 
 /**
@@ -199,6 +208,12 @@ export function joinLive(row: LiveBoardRow): void {
   for (const [k, f] of Object.entries(row.fields)) if (f && typeof f.t === "number") stamps[k] = f.t;
   liveLocal.set({ id: row.id, stamps, base: flattenLive(get(sources)), pending: [] });
   liveBoards.update((list) => list.filter((r) => r.id !== row.id));
+}
+
+/** Chiude per tutti uno stroke code della lista (es. aperto per errore o di prova). */
+export async function closeSharedBoard(id: string): Promise<void> {
+  liveBoards.update((list) => list.filter((r) => r.id !== id));
+  if (get(liveSupported) === true) await sendLiveBoard(id, "closed", {});
 }
 
 /** Paziente registrato nel foglio: lo stroke code si chiude per tutti. */

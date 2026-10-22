@@ -407,6 +407,7 @@ export const en: Dictionary = {
     otherCount: "+{n} patients",
     keepsCurrent: "The current patient stays open among the other patients.",
     closeSession: "Close",
+    closeForAll: "Close it for the whole team?",
     onsetAt: "onset",
     seenWellAt: "seen well",
     foundAt: "found",

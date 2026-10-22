@@ -1,12 +1,12 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
   import { hasPatientInProgress, clearPatient, ltswHours as ltswHoursStore, now } from "$lib/stores/patient";
-  import { adoptPreArrival, preArrivalsByEta, sharedIncoming, watchShared, type SharedPreArrival } from "$lib/stores/preArrival";
+  import { adoptPreArrival, discardSharedPreArrival, preArrivalsByEta, sharedIncoming, watchShared, type SharedPreArrival } from "$lib/stores/preArrival";
   import { fill, fmtClock, fmtMin } from "$lib/components/board/format";
   import { clearSelection } from "$lib/stores/trialSelection";
   import { fmtHoursAsClock } from "$lib/utils/time";
   import { t, locale } from "$lib/i18n";
-  import { joinLive, liveBoards } from "$lib/stores/liveBoard";
+  import { closeSharedBoard, joinLive, liveBoards } from "$lib/stores/liveBoard";
   import { discardSession, localLiveIds, parkCurrent, parkedSessions, resumeSession, type PatientSession } from "$lib/stores/sessions";
   import type { LiveBoardRow } from "$lib/domain/live-board";
 
@@ -59,6 +59,14 @@
       type === "ischemic" ? $t.board.opt.ischemic : type === "hemorrhagic" ? $t.board.opt.hemorrhagic : null,
     ].filter(Boolean).join(" · ");
   };
+
+  // Chiusura per tutti (stroke code o pre-arrivo di prova / per errore).
+  function closeLiveRow(r: LiveBoardRow) {
+    if (confirm($t.board.closeForAll)) void closeSharedBoard(r.id);
+  }
+  function closeShared(s: SharedPreArrival) {
+    if (confirm($t.board.closeForAll)) discardSharedPreArrival(s);
+  }
 
   function adopt(s: SharedPreArrival) {
     adoptPreArrival(s);
@@ -117,12 +125,15 @@
       <h2 id="live-title" class="shared-title">{$t.board.liveListTitle}</h2>
       {#each othersLive as r (r.id)}
         {@const since = liveSince(r)}
-        <button class="shared-row ens-press" type="button" onclick={() => join(r)}>
-          <span class="dot" aria-hidden="true"></span>
-          <span class="shared-eta">{since ?? "—"}</span>
-          <span class="shared-facts">{liveFacts(r) || (since ? "" : $t.board.liveNoClock)}</span>
-          <span class="resume-cta">→</span>
-        </button>
+        <div class="parked-row">
+          <button class="shared-row ens-press" type="button" onclick={() => join(r)}>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="shared-eta">{since ?? "—"}</span>
+            <span class="shared-facts">{liveFacts(r) || (since ? "" : $t.board.liveNoClock)}</span>
+            <span class="resume-cta">→</span>
+          </button>
+          <button class="parked-close" type="button" onclick={() => closeLiveRow(r)} aria-label="{$t.board.closeSession}: {liveFacts(r) || since || ''}">✕</button>
+        </div>
       {/each}
     </section>
   {/if}
@@ -132,14 +143,17 @@
       <h2 id="shared-title" class="shared-title">{$t.preArrival.sharedTitle}</h2>
       {#each $sharedIncoming as s (s.id)}
         {@const eta = s.arriveAt != null ? (s.arriveAt - $now) / 60_000 : null}
-        <button class="shared-row ens-press" type="button" onclick={() => adopt(s)}>
-          <span class="dot warn" aria-hidden="true"></span>
-          <span class="shared-eta">{eta == null ? $t.preArrival.etaUnknown : eta > 0.5 ? fmtMin(eta) : $t.preArrival.due}</span>
-          <span class="shared-facts">
-            {[s.age != null ? `${s.age} ${$t.preArrival.years}` : null, s.premrs != null ? `mRS ${s.premrs}` : null, s.race != null ? `RACE ${s.race}` : null].filter(Boolean).join(" · ")}
-          </span>
-          <span class="resume-cta">→</span>
-        </button>
+        <div class="parked-row">
+          <button class="shared-row ens-press" type="button" onclick={() => adopt(s)}>
+            <span class="dot warn" aria-hidden="true"></span>
+            <span class="shared-eta">{eta == null ? $t.preArrival.etaUnknown : eta > 0.5 ? fmtMin(eta) : $t.preArrival.due}</span>
+            <span class="shared-facts">
+              {[s.age != null ? `${s.age} ${$t.preArrival.years}` : null, s.nihss != null ? `NIHSS ${s.nihss}` : null, s.premrs != null ? `mRS ${s.premrs}` : null, s.race != null ? `RACE ${s.race}` : null].filter(Boolean).join(" · ")}
+            </span>
+            <span class="resume-cta">→</span>
+          </button>
+          <button class="parked-close" type="button" onclick={() => closeShared(s)} aria-label="{$t.board.closeSession}: {s.age != null ? `${s.age} ${$t.preArrival.years}` : $t.preArrival.incoming}">✕</button>
+        </div>
       {/each}
     </section>
   {/if}

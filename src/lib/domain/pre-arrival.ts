@@ -33,6 +33,8 @@ export interface PreArrival {
   updatedAt?: number;
   cip?: string;
   age?: number;
+  /** NIHSS se il SEM lo riporta (facoltativo). */
+  nihss?: number;
   premrs?: number;
   race?: number;
   /** Piu' voci insieme (es. antiaggregante + DOAC); "none" da solo. */
@@ -68,7 +70,7 @@ export function preArrivalBoardInput(pre: PreArrival, atMs: number): BoardInput 
   const ltsw = (atMs - pre.clock.at) / 3_600_000;
   const wakeup = pre.clock.mode === "wakeup";
   const hoursSinceDiscovery = wakeup && pre.clock.found != null ? (atMs - pre.clock.found) / 3_600_000 : undefined;
-  const common = { age: pre.age, premrs: pre.premrs, ltsw, hoursSinceDiscovery };
+  const common = { age: pre.age, nihss: pre.nihss, premrs: pre.premrs, ltsw, hoursSinceDiscovery };
   return {
     acute: { ...common, wakeupStroke: wakeup, doac: doacFlag(pre.anti) },
     hem: { ...common, anticoag: hemAnticoag(pre.anti) },
@@ -104,6 +106,7 @@ export function preArrivalToPatient(pre: PreArrival): {
   };
   if (wakeup && pre.clock.found != null) out.discoveryDate = localIso(pre.clock.found);
   if (pre.age != null) out.age = pre.age;
+  if (pre.nihss != null) out.nihss = pre.nihss;
   if (pre.premrs != null) out.premrs = pre.premrs;
   const doac = doacFlag(pre.anti);
   if (doac) out.doac = doac;

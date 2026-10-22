@@ -59,7 +59,7 @@ test("stroke code: due dispositivi sullo stesso paziente", async ({ browser }) =
 
   // B: lo vede in Home e ci entra.
   await b.clock.runFor(31_000);
-  const row = b.getByRole("region", { name: "Stroke codes in progress" }).getByRole("button");
+  const row = b.getByRole("region", { name: "Stroke codes in progress" }).locator(".shared-row");
   await expect(row).toContainText("64 years");
   await row.click();
   await expect(b).toHaveURL(/\/board$/);

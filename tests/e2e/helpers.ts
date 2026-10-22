@@ -14,7 +14,12 @@ export const FIXED_NOW = new Date("2025-06-15T12:00:00");
  * per garantire indipendenza dei test. Lo splash viene marcato come gia'
  * visto per non coprire la UI durante i test.
  */
-export async function freshSession(page: Page, locale: Locale = "en") {
+export async function freshSession(page: Page, locale: Locale = "en", opts: { mockSheet?: boolean } = {}) {
+  // I test non devono mai raggiungere il foglio vero (pazienti finti nel
+  // foglio e negli Stroke code condivisi del team). Un page.route() del test
+  // registrato dopo questo ha la precedenza; chi lo registra prima passa
+  // { mockSheet: false }.
+  if (opts.mockSheet !== false) await mockSheet(page);
   await page.goto("/");
   await page.evaluate((l) => {
     localStorage.clear();
@@ -23,6 +28,15 @@ export async function freshSession(page: Page, locale: Locale = "en") {
     sessionStorage.setItem("eligo:splash:seen", "1");
   }, locale);
   await page.goto("/");
+}
+
+/** Foglio finto: GET -> [] (come lo script vecchio, quindi niente condivisione), POST -> ok. */
+export async function mockSheet(page: Page) {
+  await page.route("**/script.google.com/**", (route) =>
+    route.request().method() === "GET"
+      ? route.fulfill({ status: 200, contentType: "application/json", body: "[]" })
+      : route.fulfill({ status: 200, contentType: "text/plain", body: "ok" })
+  );
 }
 
 /** Verifica il pattern di a11y di un'app shell SPA: lang attr + skip link + main landmark. */
