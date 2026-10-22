@@ -136,8 +136,6 @@
   const eligibleNames = $derived(new Set(res.eligible.map((j) => j.name)));
   const selectedHere = $derived($selectedStudies.filter((n) => eligibleNames.has(n)));
   // Avanti: alla schermata di invio (Share: ID paziente, TEV/mTICI/TIV, note).
-  // Paziente del board: "Riprendi" in Home torna qui.
-  flowOrigin.set("board");
   function next() {
     flowOrigin.set("board");
     push("/share");
