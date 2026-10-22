@@ -77,6 +77,8 @@
     gcs: $hemData.gcs,
     hemVolume: $hemData.hemVolume,
     anticoag: $hemData.anticoag,
+    doac: $preData.doac,
+    antithrombotics: $preData.antithrombotics,
     secondaryCause: $hemData.secondaryCause,
     spotSign: $hemData.spotSign,
   });

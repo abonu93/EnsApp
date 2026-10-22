@@ -143,7 +143,7 @@ function ensureTrialColumns_(sh, trialKeys) {
 // mai qui. La web app e' pubblica: solo campi noti, con limiti di lunghezza.
 
 const PRE_SHEET = "PreArrivals";
-const PRE_COLS = ["id","updatedAt","status","age","premrs","race","anti","clockMode","at","found","arriveAt","eta"];
+const PRE_COLS = ["id","updatedAt","status","age","premrs","race","anti","clockMode","at","found","arriveAt","eta","nihss"];
 const PRE_STATUS = ["incoming","arrived","discarded"];
 const PRE_ANTI = ["none","antiplatelet","doac","warfarin","lmwh"];
 const PRE_LIST_MS = 24 * 60 * 60 * 1000;  // doGet: solo le ultime 24h
@@ -158,6 +158,12 @@ function preSheet_() {
     sh.getRange(1, 1, sh.getMaxRows(), PRE_COLS.length).setNumberFormat("@");
     sh.getRange(1, 1, 1, PRE_COLS.length).setValues([PRE_COLS]).setFontWeight("bold");
     sh.setFrozenRows(1);
+  }
+  // Colonne aggiunte dopo (es. nihss): l'intestazione si allunga da sola.
+  const width = sh.getLastColumn();
+  if (width < PRE_COLS.length) {
+    sh.getRange(1, width + 1, sh.getMaxRows(), PRE_COLS.length - width).setNumberFormat("@");
+    sh.getRange(1, width + 1, 1, PRE_COLS.length - width).setValues([PRE_COLS.slice(width)]).setFontWeight("bold");
   }
   return sh;
 }
@@ -197,7 +203,8 @@ function preRow_(p) {
     at,
     preIso_(p.found),
     preIso_(p.arriveAt),
-    preNum_(p.eta, 0, 600)
+    preNum_(p.eta, 0, 600),
+    preNum_(p.nihss, 0, 42)
   ];
 }
 

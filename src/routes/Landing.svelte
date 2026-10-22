@@ -1,17 +1,18 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
   import { hasPatientInProgress, clearPatient, ltswHours as ltswHoursStore, now } from "$lib/stores/patient";
-  import { adoptPreArrival, preArrival, sharedIncoming, watchShared, type SharedPreArrival } from "$lib/stores/preArrival";
+  import { adoptPreArrival, discardSharedPreArrival, preArrivalsByEta, sharedIncoming, watchShared, type SharedPreArrival } from "$lib/stores/preArrival";
   import { fill, fmtClock, fmtMin } from "$lib/components/board/format";
   import { clearSelection } from "$lib/stores/trialSelection";
   import { fmtHoursAsClock } from "$lib/utils/time";
   import { t, locale } from "$lib/i18n";
-  import { joinLive, liveBoards } from "$lib/stores/liveBoard";
+  import { closeSharedBoard, joinLive, liveBoards } from "$lib/stores/liveBoard";
+  import { discardSession, localLiveIds, parkCurrent, parkedSessions, resumeSession, type PatientSession } from "$lib/stores/sessions";
   import type { LiveBoardRow } from "$lib/domain/live-board";
 
+  // Nuovo paziente: quello aperto resta fra gli altri pazienti.
   function startNew() {
-    clearPatient();
-    clearSelection();
+    parkCurrent();
     push("/workflow");
   }
   // Sessione attiva: si torna al board, il riepilogo del paziente (mostra
@@ -24,10 +25,26 @@
   $effect(() => watchShared());
   // Stroke code aperti dai colleghi: si entra nel paziente e lo si modifica insieme.
   function join(r: LiveBoardRow) {
-    if ($hasPatientInProgress && !confirm($t.board.liveReplace)) return;
+    parkCurrent();
     joinLive(r);
     push("/board");
   }
+  const othersLive = $derived($liveBoards.filter((r) => !$localLiveIds.has(r.id)));
+  function resumeParked(s: PatientSession) {
+    resumeSession(s.key);
+    push("/board");
+  }
+  const parkedSince = (s: PatientSession) => {
+    const at = s.pre.ltswDate ? new Date(s.pre.ltswDate).getTime() : NaN;
+    return Number.isFinite(at) ? fmtMin(($now - at) / 60_000) : null;
+  };
+  const parkedFacts = (s: PatientSession) =>
+    [
+      s.pre.patientId ? s.pre.patientId : s.pre.cip ? s.pre.cip : null,
+      s.pre.age != null ? `${s.pre.age} ${$t.preArrival.years}` : null,
+      s.pre.nihss != null ? `NIHSS ${s.pre.nihss}` : null,
+      s.post.strokeType === "ischemic" ? $t.board.opt.ischemic : s.post.strokeType === "hemorrhagic" ? $t.board.opt.hemorrhagic : null,
+    ].filter(Boolean).join(" · ");
   const liveSince = (r: LiveBoardRow) => {
     const iso = r.fields["pre.ltswDate"]?.v;
     const at = typeof iso === "string" ? new Date(iso).getTime() : NaN;
@@ -43,10 +60,17 @@
     ].filter(Boolean).join(" · ");
   };
 
+  // Chiusura per tutti (stroke code o pre-arrivo di prova / per errore).
+  function closeLiveRow(r: LiveBoardRow) {
+    if (confirm($t.board.closeForAll)) void closeSharedBoard(r.id);
+  }
+  function closeShared(s: SharedPreArrival) {
+    if (confirm($t.board.closeForAll)) discardSharedPreArrival(s);
+  }
+
   function adopt(s: SharedPreArrival) {
-    if ($preArrival && !confirm($t.preArrival.sharedReplace)) return;
     adoptPreArrival(s);
-    push("/incoming");
+    push(`/incoming/${s.id}`);
   }
 
   // Active session timer (mm:ss da LTSW)
@@ -76,36 +100,40 @@
     </span>
   </button>
 
-  {#if $preArrival}
-    {@const eta = $preArrival.arriveAt != null ? ($preArrival.arriveAt - $now) / 60_000 : null}
-    <button class="resume incoming" type="button" onclick={() => push("/incoming")}>
+  {#each $preArrivalsByEta as pa (pa.id)}
+    {@const eta = pa.arriveAt != null ? (pa.arriveAt - $now) / 60_000 : null}
+    <button class="resume incoming" type="button" onclick={() => push(`/incoming/${pa.id}`)}>
       <div class="resume-head">
         <span class="resume-status">
           <span class="dot warn" aria-hidden="true"></span>
           <span>{$t.preArrival.incoming}</span>
+          {#if pa.age != null || pa.cip}<span class="inc-who">{[pa.cip, pa.age != null ? `${pa.age} ${$t.preArrival.years}` : null].filter(Boolean).join(" · ")}</span>{/if}
         </span>
         <span class="resume-cta">→</span>
       </div>
       <div class="resume-meta">
         <span class="elapsed">{eta == null ? $t.preArrival.etaUnknown : eta > 0.5 ? fmtMin(eta) : $t.preArrival.due}</span>
-        {#if $preArrival.arriveAt != null}
-          <span class="since">{fill($t.preArrival.arrivesAt, { t: fmtClock($preArrival.arriveAt, $now, $t.board.yesterday, $locale) })}</span>
+        {#if pa.arriveAt != null}
+          <span class="since">{fill($t.preArrival.arrivesAt, { t: fmtClock(pa.arriveAt, $now, $t.board.yesterday, $locale) })}</span>
         {/if}
       </div>
     </button>
-  {/if}
+  {/each}
 
-  {#if $liveBoards.length}
+  {#if othersLive.length}
     <section class="shared" aria-labelledby="live-title">
       <h2 id="live-title" class="shared-title">{$t.board.liveListTitle}</h2>
-      {#each $liveBoards as r (r.id)}
+      {#each othersLive as r (r.id)}
         {@const since = liveSince(r)}
-        <button class="shared-row ens-press" type="button" onclick={() => join(r)}>
-          <span class="dot" aria-hidden="true"></span>
-          <span class="shared-eta">{since ?? "—"}</span>
-          <span class="shared-facts">{liveFacts(r) || (since ? "" : $t.board.liveNoClock)}</span>
-          <span class="resume-cta">→</span>
-        </button>
+        <div class="parked-row">
+          <button class="shared-row ens-press" type="button" onclick={() => join(r)}>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="shared-eta">{since ?? "—"}</span>
+            <span class="shared-facts">{liveFacts(r) || (since ? "" : $t.board.liveNoClock)}</span>
+            <span class="resume-cta">→</span>
+          </button>
+          <button class="parked-close" type="button" onclick={() => closeLiveRow(r)} aria-label="{$t.board.closeSession}: {liveFacts(r) || since || ''}">✕</button>
+        </div>
       {/each}
     </section>
   {/if}
@@ -115,14 +143,17 @@
       <h2 id="shared-title" class="shared-title">{$t.preArrival.sharedTitle}</h2>
       {#each $sharedIncoming as s (s.id)}
         {@const eta = s.arriveAt != null ? (s.arriveAt - $now) / 60_000 : null}
-        <button class="shared-row ens-press" type="button" onclick={() => adopt(s)}>
-          <span class="dot warn" aria-hidden="true"></span>
-          <span class="shared-eta">{eta == null ? $t.preArrival.etaUnknown : eta > 0.5 ? fmtMin(eta) : $t.preArrival.due}</span>
-          <span class="shared-facts">
-            {[s.age != null ? `${s.age} ${$t.preArrival.years}` : null, s.premrs != null ? `mRS ${s.premrs}` : null, s.race != null ? `RACE ${s.race}` : null].filter(Boolean).join(" · ")}
-          </span>
-          <span class="resume-cta">→</span>
-        </button>
+        <div class="parked-row">
+          <button class="shared-row ens-press" type="button" onclick={() => adopt(s)}>
+            <span class="dot warn" aria-hidden="true"></span>
+            <span class="shared-eta">{eta == null ? $t.preArrival.etaUnknown : eta > 0.5 ? fmtMin(eta) : $t.preArrival.due}</span>
+            <span class="shared-facts">
+              {[s.age != null ? `${s.age} ${$t.preArrival.years}` : null, s.nihss != null ? `NIHSS ${s.nihss}` : null, s.premrs != null ? `mRS ${s.premrs}` : null, s.race != null ? `RACE ${s.race}` : null].filter(Boolean).join(" · ")}
+            </span>
+            <span class="resume-cta">→</span>
+          </button>
+          <button class="parked-close" type="button" onclick={() => closeShared(s)} aria-label="{$t.board.closeSession}: {s.age != null ? `${s.age} ${$t.preArrival.years}` : $t.preArrival.incoming}">✕</button>
+        </div>
       {/each}
     </section>
   {/if}
@@ -147,6 +178,24 @@
     <button class="discard" type="button" onclick={() => { clearPatient(); clearSelection(); }}>
       {$t.landing.discard}
     </button>
+  {/if}
+
+  {#if $parkedSessions.length}
+    <section class="shared" aria-labelledby="parked-title">
+      <h2 id="parked-title" class="shared-title">{$t.board.otherPatients}</h2>
+      {#each $parkedSessions as p (p.key)}
+        {@const since = parkedSince(p)}
+        <div class="parked-row">
+          <button class="shared-row ens-press" type="button" onclick={() => resumeParked(p)}>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="shared-eta">{since ?? "—"}</span>
+            <span class="shared-facts">{parkedFacts(p) || (since ? "" : $t.board.liveNoClock)}</span>
+            <span class="resume-cta">→</span>
+          </button>
+          <button class="parked-close" type="button" onclick={() => discardSession(p.key)} aria-label="{$t.board.closeSession}: {parkedFacts(p) || since || ''}">✕</button>
+        </div>
+      {/each}
+    </section>
   {/if}
 
   <div class="spacer"></div>
@@ -273,6 +322,7 @@
     background: var(--success);
   }
   .dot.warn { background: var(--warn); }
+  .inc-who { font-weight: 400; color: var(--text-muted); font-size: 12.5px; }
   .resume-cta {
     font-size: 13.5px;
     font-weight: 600;
@@ -341,6 +391,16 @@
     cursor: pointer;
   }
   .shared-eta { font-family: var(--font-mono); font-size: 16px; font-weight: 500; min-width: 52px; }
+  .parked-row { display: flex; align-items: stretch; }
+  .parked-row .shared-row { flex: 1; min-width: 0; }
+  .parked-close {
+    padding: 0 6px 0 12px;
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+  }
   .shared-facts { flex: 1; font-size: 13px; color: var(--text-muted); }
 
   .spacer { flex: 1; min-height: 24px; }

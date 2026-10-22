@@ -4,7 +4,7 @@
   import { push } from "svelte-spa-router";
   import { t, locale } from "$lib/i18n";
   import { now } from "$lib/stores/patient";
-  import { preArrival, savePreArrival } from "$lib/stores/preArrival";
+  import { findPreArrival, savePreArrival } from "$lib/stores/preArrival";
   import type { BoardClock } from "$lib/stores/board";
   import BoardClockSheet from "$lib/components/board/BoardClockSheet.svelte";
   import { fill, fmtClock, fmtMin } from "$lib/components/board/format";
@@ -18,9 +18,14 @@
     type PreArrivalClock,
   } from "$lib/domain/pre-arrival";
 
-  const draft = $preArrival;
+  // /pre-arrival = nuova ambulanza; /pre-arrival/:id = modifica di una gia' in arrivo.
+  let { params }: { params?: { id?: string } } = $props();
+  // Il modulo parte dai valori salvati una volta sola (poi li modifica l'utente).
+  // svelte-ignore state_referenced_locally
+  const draft = findPreArrival(params?.id);
   let cip = $state(draft?.cip ?? "");
   let age = $state<number | undefined>(draft?.age);
+  let nihss = $state<number | undefined>(draft?.nihss);
   let premrs = $state<number | undefined>(draft?.premrs);
   let race = $state<number | undefined>(draft?.race);
   let anti = $state<Antithrombotic[]>(draft ? [...draft.anti] : []);
@@ -29,7 +34,7 @@
   let clockOpen = $state(false);
 
   const filled = $derived(
-    [cip || undefined, age, clock, premrs, race].filter((v) => v !== undefined && v !== null).length + (anti.length ? 1 : 0)
+    [cip || undefined, age, nihss, clock, premrs, race].filter((v) => v !== undefined && v !== null).length + (anti.length ? 1 : 0)
   );
   const antiLabel: Record<Antithrombotic, () => string> = {
     none: () => $t.preArrival.antiNone,
@@ -46,6 +51,10 @@
       const rest = anti.filter((x) => x !== "none");
       anti = rest.includes(v) ? rest.filter((x) => x !== v) : [...rest, v];
     }
+  }
+  function onNihss(e: Event) {
+    const raw = (e.currentTarget as HTMLInputElement).value.replace(/\D/g, "").slice(0, 2);
+    nihss = raw === "" ? undefined : Math.min(42, Number(raw));
   }
   function onAge(e: Event) {
     const raw = (e.currentTarget as HTMLInputElement).value.replace(/\D/g, "").slice(0, 3);
@@ -66,12 +75,12 @@
     if (!clock) return;
     // L'ora di arrivo si fissa al salvataggio; resta quella se l'ETA non cambia.
     const arriveAt = eta == null ? null : draft && draft.eta === eta && draft.arriveAt ? draft.arriveAt : Date.now() + eta * 60_000;
-    const next: PreArrival = { id: draft?.id, cip: cip || undefined, age, premrs, race, anti, clock, eta, arriveAt };
-    savePreArrival(next);
-    push("/incoming");
+    const next: PreArrival = { id: draft?.id, cip: cip || undefined, age, nihss, premrs, race, anti, clock, eta, arriveAt };
+    const id = savePreArrival(next);
+    push(`/incoming/${id}`);
   }
   function cancel() {
-    push(draft ? "/incoming" : "/workflow");
+    push(draft ? `/incoming/${draft.id}` : "/workflow");
   }
 </script>
 
@@ -102,6 +111,12 @@
   <div class="age-row">
     <input id="pa-age" class="input mono age" value={age ?? ""} oninput={onAge} inputmode="numeric" placeholder="—" />
     <span class="unit">{$t.preArrival.years}</span>
+  </div>
+
+  <div class="lbl"><label for="pa-nihss">NIHSS</label><span class="aside">{$t.preArrival.optional}</span></div>
+  <div class="age-row">
+    <input id="pa-nihss" class="input mono age" value={nihss ?? ""} oninput={onNihss} inputmode="numeric" placeholder="—" />
+    <span class="unit">0–42</span>
   </div>
 
   <div class="lbl">

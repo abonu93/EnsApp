@@ -5,17 +5,19 @@
   import { t, locale } from "$lib/i18n";
   import { criterionLabel } from "$lib/i18n/criteria";
   import { now } from "$lib/stores/patient";
-  import { arrivePreArrival, discardPreArrival, preArrival, preArrivalResult, shareSupported, watchShared } from "$lib/stores/preArrival";
+  import { arrivePreArrival, discardPreArrival, preArrivals, preArrivalsByEta, shareSupported, watchShared } from "$lib/stores/preArrival";
   import { buildPreArrivalMessage, whatsAppUrl } from "$lib/domain/pre-arrival-share";
   import { CLOCK, type BoardJudgement } from "$lib/domain/board";
-  import { RACE_LVO, evaluationTime, preArrivalBoardInput, type Antithrombotic } from "$lib/domain/pre-arrival";
+  import { RACE_LVO, evaluationTime, judgePreArrival, preArrivalBoardInput, type Antithrombotic } from "$lib/domain/pre-arrival";
   import BoardTrialSheet from "$lib/components/board/BoardTrialSheet.svelte";
   import { fieldLabel, fill, fmtClock, fmtMin } from "$lib/components/board/format";
 
-  // Senza un paziente in arrivo (scartato, scaduto) si torna alla scelta.
-  let arriving = false;
+  // /incoming/:id: una delle ambulanze in arrivo (/incoming = la prossima).
+  let { params }: { params?: { id?: string } } = $props();
+  // Senza il paziente (arrivato, scartato altrove, scaduto) si torna alla Home.
+  let leaving = false;
   $effect(() => {
-    if (!$preArrival && !arriving) push("/workflow");
+    if (!pre && !leaving) push("/");
   });
 
   // Lista condivisa: si segue anche il nostro (chiuso o modificato da un collega).
@@ -24,8 +26,8 @@
   let showOut = $state(false);
   let sheet = $state<string | null>(null);
 
-  const pre = $derived($preArrival);
-  const res = $derived($preArrivalResult);
+  const pre = $derived(params?.id ? $preArrivals.find((p) => p.id === params.id) : $preArrivalsByEta[0]);
+  const res = $derived(pre ? judgePreArrival(pre, $now) : null);
   const etaMin = $derived(pre?.arriveAt != null ? (pre.arriveAt - $now) / 60_000 : null);
   const tArr = $derived(pre ? evaluationTime(pre, $now) : $now);
   const isWake = $derived(pre?.clock.mode === "wakeup");
@@ -73,12 +75,12 @@
 
   function arrived() {
     if (!pre) return;
-    arriving = true;
+    leaving = true;
     arrivePreArrival(pre);
     push("/board");
   }
   function discard() {
-    discardPreArrival();
+    if (pre?.id) discardPreArrival(pre.id);
   }
   // Messaggio per i canali del team: gli studi possibili all'arrivo, mai il CIP.
   function whatsApp() {
@@ -92,7 +94,7 @@
     <div class="top">
       <div class="bar">
         <span class="cip mono" class:empty={!pre.cip}>{pre.cip || $t.preArrival.noCip}</span>
-        <button type="button" class="link" onclick={() => push("/pre-arrival")}>{$t.preArrival.edit}</button>
+        <button type="button" class="link" onclick={() => push(`/pre-arrival/${pre.id}`)}>{$t.preArrival.edit}</button>
       </div>
       <h1 class="since"><span class="live" aria-hidden="true"></span>{$t.preArrival.incoming}</h1>
       <div class="eta-row">
@@ -114,6 +116,7 @@
       <p class="clock-ref mono">{clockRef}{#if isWake}<span class="wake"> · {$t.board.wakeupTag}</span>{/if}</p>
       <dl class="cells">
         <div><dt>{$t.preArrival.age}</dt><dd class="mono" class:empty={pre.age == null}>{pre.age != null ? `${pre.age}` : "—"}</dd></div>
+        <div><dt>NIHSS</dt><dd class="mono" class:empty={pre.nihss == null}>{pre.nihss ?? "—"}</dd></div>
         <div><dt>mRS</dt><dd class="mono" class:empty={pre.premrs == null}>{pre.premrs ?? "—"}</dd></div>
         <div><dt>{$t.preArrival.race}</dt><dd class="mono" class:empty={pre.race == null}>{pre.race ?? "—"}</dd></div>
         <div class="wide"><dt>{$t.preArrival.anti}</dt><dd class:empty={!antiText}>{antiText ?? "—"}</dd></div>
@@ -264,11 +267,12 @@
   .wake { font-family: var(--font-sans); color: var(--warn); font-weight: 600; }
   .cells {
     display: grid;
-    grid-template-columns: 0.7fr 0.7fr 0.8fr 1.6fr;
+    grid-template-columns: 0.7fr 0.8fr 0.6fr 0.7fr;
     gap: 8px;
     margin: 14px 0 0;
   }
   .cells div { min-width: 0; }
+  .cells .wide { grid-column: 1 / -1; }
   .cells dt { font-size: 11px; color: var(--text-muted); }
   .cells dd {
     margin: 2px 0 0;

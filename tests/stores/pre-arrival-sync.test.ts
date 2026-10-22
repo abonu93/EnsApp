@@ -5,7 +5,8 @@ import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import { get } from "svelte/store";
 import {
   arrivePreArrival,
-  preArrival,
+  discardPreArrival,
+  preArrivals,
   refreshShared,
   savePreArrival,
   shareSupported,
@@ -43,7 +44,7 @@ let posts: Record<string, unknown>[];
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
 beforeEach(() => {
-  preArrival.clear();
+  preArrivals.set([]);
   shareSupported.set(null);
   sharedIncoming.set([]);
   posts = [];
@@ -69,7 +70,7 @@ describe("condivisione pre-arrivo", () => {
     await flush();
     expect(get(shareSupported)).toBe(false);
     expect(posts).toEqual([]);
-    expect(get(preArrival)?.id).toBeTruthy();
+    expect(get(preArrivals)[0]?.id).toBeTruthy();
   });
 
   test("script nuovo: salvataggio e arrivo inviati, senza CIP", async () => {
@@ -77,7 +78,7 @@ describe("condivisione pre-arrivo", () => {
     await vi.waitFor(() => expect(posts.length).toBe(1));
     expect(posts[0]).toMatchObject({ kind: "prearrival", status: "incoming", age: 80, anti: "doac" });
     expect(JSON.stringify(posts[0])).not.toContain("ROCA");
-    const p = get(preArrival)!;
+    const p = get(preArrivals)[0];
     arrivePreArrival(p);
     await vi.waitFor(() => expect(posts.length).toBe(2));
     expect(posts[1]).toMatchObject({ id: p.id, status: "arrived" });
@@ -98,17 +99,43 @@ describe("condivisione pre-arrivo", () => {
   });
 
   test("il nostro chiuso da un collega si chiude anche qui", async () => {
-    preArrival.set({ ...base, id: "local-00001", updatedAt: NOW - 1000 });
+    preArrivals.set([
+      { ...base, id: "local-00001", updatedAt: NOW - 1000 },
+      { ...base, id: "local-00002", updatedAt: NOW - 1000 },
+    ]);
     items = { v: 1, items: [row({ id: "local-00001", status: "arrived" })] };
     await refreshShared();
-    expect(get(preArrival)).toBeNull();
+    expect(get(preArrivals).map((p) => p.id)).toEqual(["local-00002"]);
   });
 
   test("modificato da un collega: si aggiorna e tiene il CIP locale", async () => {
-    preArrival.set({ ...base, id: "local-00001", updatedAt: NOW - 1000 });
+    preArrivals.set([{ ...base, id: "local-00001", updatedAt: NOW - 1000 }]);
     items = { v: 1, items: [row({ id: "local-00001", age: 81 })] };
     await refreshShared();
-    expect(get(preArrival)).toMatchObject({ id: "local-00001", age: 81, cip: "ROCA0480512001" });
+    expect(get(preArrivals)[0]).toMatchObject({ id: "local-00001", age: 81, cip: "ROCA0480512001" });
     expect(get(sharedIncoming)).toEqual([]);
   });
+
+  test("piu' ambulanze: si salvano, si modificano e si scartano una per una", async () => {
+    items = [];
+    const a = savePreArrival(base);
+    const b = savePreArrival({ ...base, age: 55 });
+    expect(get(preArrivals).map((p) => p.age)).toEqual([80, 55]);
+    savePreArrival({ ...get(preArrivals)[1], age: 56 });
+    expect(get(preArrivals).map((p) => [p.id, p.age])).toEqual([[a, 80], [b, 56]]);
+    discardPreArrival(a);
+    expect(get(preArrivals).map((p) => p.id)).toEqual([b]);
+  });
+
+  test("il vecchio pre-arrivo singolo diventa una lista", async () => {
+    // Salvato dalla versione precedente: un oggetto, senza id.
+    localStorage.setItem("ensapp:prearrival:v1", JSON.stringify({ v: 1, ts: Date.now(), data: { ...base } }));
+    vi.resetModules();
+    const fresh = await import("$lib/stores/preArrival");
+    const list = get(fresh.preArrivals);
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({ age: 80, cip: "ROCA0480512001" });
+    expect(list[0].id).toBeTruthy();
+  });
 });
+

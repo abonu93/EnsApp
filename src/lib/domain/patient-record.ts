@@ -38,6 +38,9 @@ export interface PatientRecord {
   gcs?: number;
   hemVolume?: number;
   anticoag?: string;
+  /** Ischemico: DOAC assunto (preData.doac) e antitrombotici riferiti dal SEM. */
+  doac?: string;
+  antithrombotics?: string[];
   secondaryCause?: string;
   spotSign?: string;
 }
@@ -52,6 +55,8 @@ export const REVERSAL_LABEL: Record<string, string> = {
   protamine: "protamine",
   other: "other",
 };
+
+const ANTI_TEXT: Record<string, string> = { none: "none", antiplatelet: "antiplatelet", doac: "DOAC", warfarin: "VKA", lmwh: "LMWH/heparin" };
 
 const yesNo = (v: string | undefined) => (v === "eligible" || v === "yes" ? "yes" : v === "not eligible" || v === "no" ? "no" : undefined);
 
@@ -74,6 +79,8 @@ function clinicalLines(r: PatientRecord): string[] {
   if (r.gcs != null) lines.push(`GCS: ${r.gcs}`);
   if (r.hemVolume != null) lines.push(`Hematoma volume: ${r.hemVolume} mL`);
   if (r.anticoag) lines.push(`Anticoagulation: ${r.anticoag}`);
+  else if (r.antithrombotics?.length) lines.push(`Antithrombotics: ${r.antithrombotics.map((a) => ANTI_TEXT[a] ?? a).join(" + ")}`);
+  else if (yesNo(r.doac)) lines.push(`DOAC: ${yesNo(r.doac)}`);
   if (r.secondaryCause) lines.push(`Secondary cause: ${r.secondaryCause}`);
   const spot = yesNo(r.spotSign);
   if (spot) lines.push(`Spot sign: ${spot}`);

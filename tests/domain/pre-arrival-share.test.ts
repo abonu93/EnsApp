@@ -92,3 +92,12 @@ describe("messaggio WhatsApp", () => {
     expect(whatsAppUrl("a b\nc")).toBe("https://wa.me/?text=a%20b%0Ac");
   });
 });
+
+describe("NIHSS del SEM", () => {
+  test("nel messaggio, nella riga e al board", () => {
+    const p = sem({ nihss: 12 });
+    expect(buildPreArrivalMessage(p, judgePreArrival(p, NOW), NOW)).toContain("Age 78 · NIHSS 12 · pre-mRS 1");
+    expect(toPreArrivalRow(p, "incoming", NOW).nihss).toBe(12);
+    expect(fromPreArrivalRow({ ...toPreArrivalRow(p, "incoming", NOW) })?.nihss).toBe(12);
+  });
+});

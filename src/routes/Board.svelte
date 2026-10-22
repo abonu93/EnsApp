@@ -8,7 +8,7 @@
   import BoardAlerts from "$lib/components/board/BoardAlerts.svelte";
   import { now, clearPatient, hasPatientInProgress } from "$lib/stores/patient";
   import { ensureLive, liveLocal, liveSupported } from "$lib/stores/liveBoard";
-  import { preArrival } from "$lib/stores/preArrival";
+  import { parkCurrent, parkedSessions, resumeSession } from "$lib/stores/sessions";
   import { selectedStudies, toggleStudy, flowOrigin, clearSelection } from "$lib/stores/trialSelection";
   import { criterionLabel } from "$lib/i18n/criteria";
   import { push, replace } from "svelte-spa-router";
@@ -27,6 +27,7 @@
     | { kind: "all" }
     | { kind: "colimits" }
     | { kind: "new" }
+    | { kind: "switch" }
     | null;
   let sheet = $state<SheetState>(null);
   let showOut = $state(false);
@@ -93,15 +94,26 @@
     const replaceSheet = sheetInHistory;
     sheetInHistory = false;
     sheet = null;
-    const route = $preArrival ? "/incoming" : "/pre-arrival";
+    const route = "/pre-arrival";
     if (replaceSheet) replace(route);
     else push(route);
   }
+  // Il paziente attuale resta aperto fra gli altri pazienti.
   function newInEd() {
-    clearPatient();
-    clearSelection();
+    parkCurrent();
     sheet = null;
   }
+  function switchTo(key: string) {
+    resumeSession(key);
+    sheet = null;
+  }
+  const parkedLabel = (p: (typeof $parkedSessions)[number]) =>
+    [
+      p.pre.patientId || p.pre.cip || null,
+      p.pre.age != null ? `${p.pre.age} ${$t.preArrival.years}` : null,
+      p.pre.nihss != null ? `NIHSS ${p.pre.nihss}` : null,
+      p.pre.ltswDate ? fmtMin(($now - new Date(p.pre.ltswDate).getTime()) / 60_000) : null,
+    ].filter(Boolean).join(" · ") || "—";
   const extraSet = $derived(res.extra.filter((k) => !isMissing(values[k])).length);
   const notRecruiting = $derived(
     NOT_RECRUITING.map((n) => `${n.name} (${n.status === "paused" ? $t.board.pausedStatus : $t.board.closedStatus})`).join(", ")
@@ -162,7 +174,12 @@
           <span class="shared-live">{fromSem ? " · " : ""}{$t.board.liveOn}</span>
         {/if}
       </span>
-      <button type="button" class="link new" onclick={() => (sheet = { kind: "new" })}>{$t.preArrival.newPatient}</button>
+      <span class="bar-actions">
+        {#if $parkedSessions.length}
+          <button type="button" class="link others" onclick={() => (sheet = { kind: "switch" })}>{fill($t.board.otherCount, { n: $parkedSessions.length })}</button>
+        {/if}
+        <button type="button" class="link new" onclick={() => (sheet = { kind: "new" })}>{$t.preArrival.newPatient}</button>
+      </span>
     </div>
     <button type="button" class="clock" onclick={() => (sheet = { kind: "clock" })}>
       <span class="since">
@@ -358,6 +375,20 @@
           <span class="new-d">{$t.preArrival.inEdDesc}</span>
         </button>
       </div>
+      {#if $hasPatientInProgress}<p class="sheet-desc keep">{$t.board.keepsCurrent}</p>{/if}
+    {/snippet}
+  </Sheet>
+{:else if sheet?.kind === "switch"}
+  <Sheet open={true} ariaLabel={$t.board.otherPatients} onClose={() => (sheet = null)}>
+    {#snippet children()}
+      <h2 class="sheet-title">{$t.board.otherPatients}</h2>
+      <div class="new-opts">
+        {#each $parkedSessions as p (p.key)}
+          <button type="button" class="new-opt ens-press" onclick={() => switchTo(p.key)}>
+            <span class="new-t">{parkedLabel(p)}</span>
+          </button>
+        {/each}
+      </div>
     {/snippet}
   </Sheet>
 {:else if sheet?.kind === "colimits"}
@@ -377,6 +408,8 @@
     color: var(--text);
   }
   .top { padding: 8px 22px 0; }
+  .bar-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .keep { margin-top: 12px; }
   .shared-live { color: var(--success); font-weight: 600; }
   .bar {
     display: flex;
