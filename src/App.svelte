@@ -7,6 +7,7 @@
   import InstallPrompt from "$lib/components/InstallPrompt.svelte";
   import { t, locale, cycleLocale } from "$lib/i18n";
   import { OPEN_QUESTIONS } from "$lib/domain/open-questions";
+  import { startLiveSync } from "$lib/stores/liveBoard";
 
   // Splash visibile al primo load di sessione. Lo skip persiste in
   // sessionStorage (cosi' tornando indietro non si rivede di continuo,
@@ -23,6 +24,9 @@
   }
 
   setupRouterA11y();
+
+  // Stroke code condiviso fra i dispositivi (attivo con lo script nuovo).
+  $effect(() => startLiveSync());
 
   // animKey forza il re-mount della sezione main ad ogni cambio di route
   // per scatenare l'animazione ens-screen-in

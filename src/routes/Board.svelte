@@ -6,7 +6,8 @@
   import { boardAlertInput, boardClock, boardElapsedMin, boardResult, boardValues, setBoardClock, setBoardField } from "$lib/stores/board";
   import { selectionAlerts } from "$lib/domain/open-questions";
   import BoardAlerts from "$lib/components/board/BoardAlerts.svelte";
-  import { now, clearPatient } from "$lib/stores/patient";
+  import { now, clearPatient, hasPatientInProgress } from "$lib/stores/patient";
+  import { ensureLive, liveLocal, liveSupported } from "$lib/stores/liveBoard";
   import { preArrival } from "$lib/stores/preArrival";
   import { selectedStudies, toggleStudy, flowOrigin, clearSelection } from "$lib/stores/trialSelection";
   import { criterionLabel } from "$lib/i18n/criteria";
@@ -80,6 +81,11 @@
   );
   const fromSem = $derived(typeof values.cip === "string" || semAnti != null || typeof values.race === "number");
 
+  // Il paziente del board si condivide con il team appena ha un dato.
+  $effect(() => {
+    if ($hasPatientInProgress) ensureLive();
+  });
+
   // Nuovo paziente: pre-arrivo (chiamata del SEM) o gia' in PS (board vuoto).
   function newPreArrival() {
     // La voce di cronologia del foglio diventa la pagina del pre-arrivo
@@ -151,6 +157,9 @@
         {#if fromSem}
           <span class="mono">{typeof values.cip === "string" ? values.cip : $t.preArrival.noCip}</span>
           <span class="sem"> · {$t.preArrival.semTag}{semAnti ? ` · ${semAnti}` : ""}</span>
+        {/if}
+        {#if $liveLocal && $liveSupported}
+          <span class="shared-live">{fromSem ? " · " : ""}{$t.board.liveOn}</span>
         {/if}
       </span>
       <button type="button" class="link new" onclick={() => (sheet = { kind: "new" })}>{$t.preArrival.newPatient}</button>
@@ -368,6 +377,7 @@
     color: var(--text);
   }
   .top { padding: 8px 22px 0; }
+  .shared-live { color: var(--success); font-weight: 600; }
   .bar {
     display: flex;
     align-items: center;
