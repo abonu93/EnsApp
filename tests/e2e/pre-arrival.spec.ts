@@ -57,6 +57,11 @@ test.describe("pre-arrival", () => {
     await expect(page.locator(".elapsed")).toHaveText("1h 00m");
     await expect(page.getByRole("button", { name: /^Age: 78/ })).toBeVisible();
     await expect(page.getByRole("button", { name: /^Pre-stroke mRS: 1/ })).toBeVisible();
+
+    // Sessione attiva in home: si torna al board, non a "nuovo paziente".
+    await page.goto("/");
+    await page.getByRole("button", { name: /active session/i }).click();
+    await expect(page).toHaveURL(/\/board$/);
   });
 
   test("dal board: + New patient -> In the ED svuota il board", async ({ page }) => {

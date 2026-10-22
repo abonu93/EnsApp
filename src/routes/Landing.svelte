@@ -1,9 +1,9 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
-  import { hasPatientInProgress, clearPatient, ltswHours as ltswHoursStore, now } from "$lib/stores/patient";
+  import { hasPatientInProgress, clearPatient, ltswHours as ltswHoursStore, now, postData } from "$lib/stores/patient";
   import { adoptPreArrival, preArrival, sharedIncoming, watchShared, type SharedPreArrival } from "$lib/stores/preArrival";
   import { fill, fmtClock, fmtMin } from "$lib/components/board/format";
-  import { clearSelection } from "$lib/stores/trialSelection";
+  import { clearSelection, flowOrigin } from "$lib/stores/trialSelection";
   import { fmtHoursAsClock } from "$lib/utils/time";
   import { t, locale } from "$lib/i18n";
 
@@ -12,7 +12,12 @@
     clearSelection();
     push("/workflow");
   }
-  function resume() { push("/workflow"); }
+  // Sessione attiva: si torna al riepilogo del paziente (il board, o il
+  // Riepilogo del flusso guidato se il tipo di ictus c'e' gia').
+  function resume() {
+    if ($flowOrigin === "board") push("/board");
+    else push($postData.strokeType ? "/summary" : "/pre-imaging");
+  }
   function goCatalog() { push("/trials"); }
   function goPast() { push("/saved"); }
 

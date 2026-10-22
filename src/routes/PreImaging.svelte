@@ -10,6 +10,10 @@
   import { preData, hoursSince, now } from "$lib/stores/patient";
   import { fmtHoursAsClock } from "$lib/utils/time";
   import { t } from "$lib/i18n";
+  import { flowOrigin } from "$lib/stores/trialSelection";
+
+  // Paziente del flusso guidato: "Riprendi" in Home torna al Riepilogo.
+  flowOrigin.set("guided");
 
   type YN = "yes" | "no" | "";
 
