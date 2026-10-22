@@ -2,6 +2,8 @@
   import { push } from "svelte-spa-router";
   import AppHeader from "$lib/components/AppHeader.svelte";
   import { t } from "$lib/i18n";
+  import Sheet from "$lib/components/Sheet.svelte";
+  import { preArrival } from "$lib/stores/preArrival";
 
   const choices = $derived([
     {
@@ -40,7 +42,17 @@
     },
   ]);
 
-  function pick(route: string) { push(route); }
+  // Codice ictus: prima si sceglie se il paziente e' ancora in arrivo
+  // (pre-arrivo dal SEM, poi il board all'arrivo) o gia' in PS (board).
+  let chooseStroke = $state(false);
+  function pick(route: string) {
+    if (route === "/board") chooseStroke = true;
+    else push(route);
+  }
+  function go(route: string) {
+    chooseStroke = false;
+    push(route);
+  }
 </script>
 
 <AppHeader />
@@ -89,6 +101,25 @@
     {/each}
   </div>
 </div>
+
+{#if chooseStroke}
+  <Sheet open={true} ariaLabel={$t.board.entryTitle} onClose={() => (chooseStroke = false)}>
+    {#snippet children()}
+      <h2 class="sheet-title">{$t.board.entryTitle}</h2>
+      <p class="sheet-desc">{$t.preArrival.chooseSub}</p>
+      <div class="stroke-opts">
+        <button type="button" class="stroke-opt ens-press" onclick={() => go($preArrival ? "/incoming" : "/pre-arrival")}>
+          <span class="stroke-t">{$preArrival ? $t.preArrival.incoming : $t.preArrival.entryTitle}</span>
+          <span class="stroke-d">{$t.preArrival.entryDesc}</span>
+        </button>
+        <button type="button" class="stroke-opt ens-press" onclick={() => go("/board")}>
+          <span class="stroke-t">{$t.preArrival.inEd}</span>
+          <span class="stroke-d">{$t.preArrival.inEdBoard}</span>
+        </button>
+      </div>
+    {/snippet}
+  </Sheet>
+{/if}
 
 <style>
   .page {
@@ -186,6 +217,36 @@
     background: var(--primary);
     color: var(--text-inverted);
   }
+  .sheet-title {
+    margin: 0 6px;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .sheet-desc {
+    margin: 4px 6px 0;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .stroke-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 14px 0 4px;
+  }
+  .stroke-opt {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px 16px;
+    text-align: left;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .stroke-t { font-size: 16px; font-weight: 600; }
+  .stroke-d { font-size: 12.5px; line-height: 1.4; color: var(--text-muted); }
   .opt-desc {
     font-size: 13.5px;
     color: var(--text-muted);
