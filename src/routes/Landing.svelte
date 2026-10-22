@@ -6,18 +6,43 @@
   import { clearSelection } from "$lib/stores/trialSelection";
   import { fmtHoursAsClock } from "$lib/utils/time";
   import { t, locale } from "$lib/i18n";
+  import { joinLive, liveBoards } from "$lib/stores/liveBoard";
+  import type { LiveBoardRow } from "$lib/domain/live-board";
 
   function startNew() {
     clearPatient();
     clearSelection();
     push("/workflow");
   }
-  function resume() { push("/workflow"); }
+  // Sessione attiva: si torna al board, il riepilogo del paziente (mostra
+  // anche i dati inseriti con il flusso guidato).
+  function resume() { push("/board"); }
   function goCatalog() { push("/trials"); }
   function goPast() { push("/saved"); }
 
   // Pazienti in arrivo inseriti dai colleghi (foglio condiviso).
   $effect(() => watchShared());
+  // Stroke code aperti dai colleghi: si entra nel paziente e lo si modifica insieme.
+  function join(r: LiveBoardRow) {
+    if ($hasPatientInProgress && !confirm($t.board.liveReplace)) return;
+    joinLive(r);
+    push("/board");
+  }
+  const liveSince = (r: LiveBoardRow) => {
+    const iso = r.fields["pre.ltswDate"]?.v;
+    const at = typeof iso === "string" ? new Date(iso).getTime() : NaN;
+    return Number.isFinite(at) ? fmtMin(($now - at) / 60_000) : null;
+  };
+  const liveFacts = (r: LiveBoardRow) => {
+    const v = (k: string) => r.fields[k]?.v;
+    const type = v("post.strokeType");
+    return [
+      typeof v("pre.age") === "number" ? `${v("pre.age")} ${$t.preArrival.years}` : null,
+      typeof v("pre.nihss") === "number" ? `NIHSS ${v("pre.nihss")}` : null,
+      type === "ischemic" ? $t.board.opt.ischemic : type === "hemorrhagic" ? $t.board.opt.hemorrhagic : null,
+    ].filter(Boolean).join(" · ");
+  };
+
   function adopt(s: SharedPreArrival) {
     if ($preArrival && !confirm($t.preArrival.sharedReplace)) return;
     adoptPreArrival(s);
@@ -68,6 +93,21 @@
         {/if}
       </div>
     </button>
+  {/if}
+
+  {#if $liveBoards.length}
+    <section class="shared" aria-labelledby="live-title">
+      <h2 id="live-title" class="shared-title">{$t.board.liveListTitle}</h2>
+      {#each $liveBoards as r (r.id)}
+        {@const since = liveSince(r)}
+        <button class="shared-row ens-press" type="button" onclick={() => join(r)}>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="shared-eta">{since ?? "—"}</span>
+          <span class="shared-facts">{liveFacts(r) || (since ? "" : $t.board.liveNoClock)}</span>
+          <span class="resume-cta">→</span>
+        </button>
+      {/each}
+    </section>
   {/if}
 
   {#if $sharedIncoming.length}

@@ -118,6 +118,10 @@ test.describe("ischemic flow - golden patient", () => {
     // Banner di resume su landing
     await page.goto("/#/");
     await expect(page.getByText(/active session/i)).toBeVisible();
+    // Riprendi: si torna al board con i dati del paziente.
+    await page.getByRole("button", { name: /active session/i }).click();
+    await expect(page).toHaveURL(/\/board$/);
+    await expect(page.getByRole("button", { name: /^Age: 55/ })).toBeVisible();
   });
 
   test("saved patients list persists across refresh", async ({ page }) => {

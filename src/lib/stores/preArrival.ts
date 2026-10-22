@@ -7,6 +7,7 @@ import { derived, get, writable } from "svelte/store";
 import { persisted } from "./persistence";
 import { clearPatient, hemData, now, preData } from "./patient";
 import { clearSelection } from "./trialSelection";
+import { startLive } from "./liveBoard";
 import { judgePreArrival, preArrivalToPatient, type PreArrival } from "$lib/domain/pre-arrival";
 import {
   fetchPreArrivals,
@@ -69,6 +70,8 @@ export function arrivePreArrival(p: PreArrival): void {
   const seed = preArrivalToPatient(p);
   preData.set(seed.pre);
   hemData.set(seed.hem);
+  // Lo stroke code resta condiviso con lo stesso id del pre-arrivo.
+  if (p.id) startLive(p.id);
   preArrival.clear();
   void publish({ ...p, updatedAt: Date.now() }, "arrived");
 }

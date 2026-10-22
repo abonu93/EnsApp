@@ -251,11 +251,104 @@ function preList_() {
   return jsonOut({ v: 1, items: items });
 }
 
+// ---------- STROKE CODE CONDIVISO (scheda LiveBoards) ----------
+//
+// Il paziente del board aperto su piu' dispositivi. Una riga per id; la
+// colonna fields e' un JSON { "pre.age": { v, t }, ... } unito campo per
+// campo: per ogni campo vince l'ora di modifica (t) piu' recente.
+// ID paziente e CIP non sono accettati.
+
+const LIVE_SHEET = "LiveBoards";
+const LIVE_COLS = ["id","updatedAt","status","fields"];
+const LIVE_KEY_RE = /^(pre|post|hem|sel)\.[A-Za-z0-9_]{1,40}$/;
+const LIVE_LOCAL_ONLY = ["pre.patientId", "pre.cip"];
+const LIVE_MAX_VALUE = 2000;   // caratteri JSON per campo
+const LIVE_MAX_FIELDS = 150;
+const LIVE_LIST_MS = 24 * 60 * 60 * 1000;
+const LIVE_KEEP_MS = 7 * 24 * 60 * 60 * 1000;
+
+function liveSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(LIVE_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(LIVE_SHEET);
+    sh.getRange(1, 1, sh.getMaxRows(), LIVE_COLS.length).setNumberFormat("@");
+    sh.getRange(1, 1, 1, LIVE_COLS.length).setValues([LIVE_COLS]).setFontWeight("bold");
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function liveParse_(v) {
+  try {
+    const o = JSON.parse(String(v || "{}"));
+    return o && typeof o === "object" && !Array.isArray(o) ? o : {};
+  } catch (err) {
+    return {};
+  }
+}
+
+function livePost_(payload) {
+  const id = String(payload.id || "");
+  if (!/^[A-Za-z0-9-]{8,64}$/.test(id)) return ContentService.createTextOutput("error: board");
+  const incoming = payload.fields && typeof payload.fields === "object" ? payload.fields : {};
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sh = liveSheet_();
+    const last = sh.getLastRow();
+    const data = last > 1 ? sh.getRange(2, 1, last - 1, LIVE_COLS.length).getValues() : [];
+    const now = Date.now();
+    let found = -1;
+    for (let i = data.length - 1; i >= 0; i--) {
+      if (String(data[i][0]) === id) { found = i; break; }
+    }
+    const fields = found >= 0 ? liveParse_(data[found][3]) : {};
+    Object.keys(incoming).forEach(k => {
+      if (!LIVE_KEY_RE.test(k) || LIVE_LOCAL_ONLY.indexOf(k) >= 0) return;
+      const f = incoming[k];
+      const t = f && Number(f.t);
+      if (!t || isNaN(t)) return;
+      const v = f.v === undefined ? null : f.v;
+      if (JSON.stringify(v).length > LIVE_MAX_VALUE) return;
+      if (!fields[k] && Object.keys(fields).length >= LIVE_MAX_FIELDS) return;
+      if (!fields[k] || Number(fields[k].t) < t) fields[k] = { v: v, t: t };
+    });
+    // Chiuso (paziente registrato) resta chiuso.
+    const status = payload.status === "closed" || (found >= 0 && data[found][2] === "closed") ? "closed" : "open";
+    const row = [id, new Date(now).toISOString(), status, JSON.stringify(fields)];
+    if (found >= 0) sh.getRange(found + 2, 1, 1, LIVE_COLS.length).setValues([row]);
+    else sh.appendRow(row);
+    for (let i = data.length - 1; i >= 0; i--) {
+      const t = preTime_(data[i][1]);
+      if (i !== found && t != null && now - t > LIVE_KEEP_MS) sh.deleteRow(i + 2);
+    }
+    return ContentService.createTextOutput("ok");
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function liveList_() {
+  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(LIVE_SHEET);
+  const items = [];
+  if (sh && sh.getLastRow() > 1) {
+    const now = Date.now();
+    sh.getRange(2, 1, sh.getLastRow() - 1, LIVE_COLS.length).getValues().forEach(r => {
+      const t = preTime_(r[1]);
+      if (t == null || now - t > LIVE_LIST_MS) return;
+      items.push({ id: String(r[0]), updatedAt: new Date(t).toISOString(), status: r[2] === "closed" ? "closed" : "open", fields: liveParse_(r[3]) });
+    });
+  }
+  return jsonOut({ v: 1, items: items });
+}
+
 // ---------- WRITE ----------
 function doPost(e) {
   try {
     const payload = JSON.parse(e.parameter.payload || "{}");
     if (e.parameter.op === "prearrival" || payload.kind === "prearrival") return prePost_(payload);
+    if (e.parameter.op === "board" || payload.kind === "board") return livePost_(payload);
     const sh = getSheet_();
     const trialKeys = knownTrialKeys_(payload);
     const lastCol = sh.getLastColumn();
@@ -325,6 +418,7 @@ function doPost(e) {
 function doGet(e) {
   const op = (e && e.parameter && e.parameter.op) || "list";
   if (op === "prearrivals") return preList_();
+  if (op === "boards") return liveList_();
   if (op !== "list") return jsonOut([]);
 
   const sh = getSheet_();

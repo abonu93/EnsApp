@@ -14,6 +14,7 @@
   } from "$lib/stores/trialSelection";
   import { addSavedPatient } from "$lib/stores/savedPatients";
   import { sendToSheet, hasKnownStudyArm, type SendStatus } from "$lib/domain/sheet-payload";
+  import { closeLive } from "$lib/stores/liveBoard";
   import { buildShareMessage, buildSheetPayload, type PatientRecord } from "$lib/domain/patient-record";
   import { eligibleOpenTrials } from "$lib/stores/eligibility";
   import { announce } from "$lib/a11y/liveRegion";
@@ -129,6 +130,9 @@
       },
     });
     }
+
+    // Registrato: lo stroke code condiviso si chiude per tutti.
+    if (result.status === "confirmed" || result.status === "unverified") void closeLive();
 
     saving = false;
     saved = result.status === "confirmed";
