@@ -1,7 +1,7 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
   import { hasPatientInProgress, clearPatient, ltswHours as ltswHoursStore, now } from "$lib/stores/patient";
-  import { preArrival } from "$lib/stores/preArrival";
+  import { adoptPreArrival, preArrival, sharedIncoming, watchShared, type SharedPreArrival } from "$lib/stores/preArrival";
   import { fill, fmtClock, fmtMin } from "$lib/components/board/format";
   import { clearSelection } from "$lib/stores/trialSelection";
   import { fmtHoursAsClock } from "$lib/utils/time";
@@ -15,6 +15,14 @@
   function resume() { push("/workflow"); }
   function goCatalog() { push("/trials"); }
   function goPast() { push("/saved"); }
+
+  // Pazienti in arrivo inseriti dai colleghi (foglio condiviso).
+  $effect(() => watchShared());
+  function adopt(s: SharedPreArrival) {
+    if ($preArrival && !confirm($t.preArrival.sharedReplace)) return;
+    adoptPreArrival(s);
+    push("/incoming");
+  }
 
   // Active session timer (mm:ss da LTSW)
   const ltswHours = $derived($ltswHoursStore);
@@ -60,6 +68,23 @@
         {/if}
       </div>
     </button>
+  {/if}
+
+  {#if $sharedIncoming.length}
+    <section class="shared" aria-labelledby="shared-title">
+      <h2 id="shared-title" class="shared-title">{$t.preArrival.sharedTitle}</h2>
+      {#each $sharedIncoming as s (s.id)}
+        {@const eta = s.arriveAt != null ? (s.arriveAt - $now) / 60_000 : null}
+        <button class="shared-row ens-press" type="button" onclick={() => adopt(s)}>
+          <span class="dot warn" aria-hidden="true"></span>
+          <span class="shared-eta">{eta == null ? $t.preArrival.etaUnknown : eta > 0.5 ? fmtMin(eta) : $t.preArrival.due}</span>
+          <span class="shared-facts">
+            {[s.age != null ? `${s.age} ${$t.preArrival.years}` : null, s.premrs != null ? `mRS ${s.premrs}` : null, s.race != null ? `RACE ${s.race}` : null].filter(Boolean).join(" · ")}
+          </span>
+          <span class="resume-cta">→</span>
+        </button>
+      {/each}
+    </section>
   {/if}
 
   {#if $hasPatientInProgress}
@@ -252,6 +277,31 @@
     align-self: flex-end;
   }
   .discard:hover { color: var(--danger); }
+
+  .shared { margin-top: 18px; }
+  .shared-title {
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .shared-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    text-align: left;
+    color: var(--text);
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .shared-eta { font-family: var(--font-mono); font-size: 16px; font-weight: 500; min-width: 52px; }
+  .shared-facts { flex: 1; font-size: 13px; color: var(--text-muted); }
 
   .spacer { flex: 1; min-height: 24px; }
 

@@ -136,10 +136,126 @@ function ensureTrialColumns_(sh, trialKeys) {
     .setFontWeight("bold");
 }
 
+// ---------- PRE-ARRIVO (scheda PreArrivals) ----------
+//
+// Pazienti annunciati dal SEM, condivisi fra i dispositivi. Una riga per id
+// (upsert): vince la versione con updatedAt piu' recente. Il CIP non arriva
+// mai qui. La web app e' pubblica: solo campi noti, con limiti di lunghezza.
+
+const PRE_SHEET = "PreArrivals";
+const PRE_COLS = ["id","updatedAt","status","age","premrs","race","anti","clockMode","at","found","arriveAt","eta"];
+const PRE_STATUS = ["incoming","arrived","discarded"];
+const PRE_ANTI = ["none","antiplatelet","doac","warfarin","lmwh"];
+const PRE_LIST_MS = 24 * 60 * 60 * 1000;  // doGet: solo le ultime 24h
+const PRE_KEEP_MS = 7 * 24 * 60 * 60 * 1000;  // righe piu' vecchie: cancellate
+
+function preSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(PRE_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(PRE_SHEET);
+    // Testo semplice: le date ISO non diventano Date del foglio.
+    sh.getRange(1, 1, sh.getMaxRows(), PRE_COLS.length).setNumberFormat("@");
+    sh.getRange(1, 1, 1, PRE_COLS.length).setValues([PRE_COLS]).setFontWeight("bold");
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function preTime_(v) {
+  if (v instanceof Date) return v.getTime();
+  const t = Date.parse(String(v || ""));
+  return isNaN(t) ? null : t;
+}
+function preIso_(v) {
+  const t = preTime_(v);
+  return t == null ? "" : new Date(t).toISOString();
+}
+function preNum_(v, min, max) {
+  if (v === "" || v == null) return "";
+  const n = Number(v);
+  return isNaN(n) || n < min || n > max ? "" : Math.round(n);
+}
+
+/** Riga pulita dal payload, o null se non valida. */
+function preRow_(p) {
+  const id = String(p.id || "");
+  if (!/^[A-Za-z0-9-]{8,64}$/.test(id)) return null;
+  if (PRE_STATUS.indexOf(p.status) < 0) return null;
+  const at = preIso_(p.at);
+  if (!at) return null;
+  const anti = String(p.anti || "").split(",").filter(a => PRE_ANTI.indexOf(a) >= 0).join(",");
+  return [
+    id,
+    preIso_(p.updatedAt) || new Date().toISOString(),
+    p.status,
+    preNum_(p.age, 0, 120),
+    preNum_(p.premrs, 0, 6),
+    preNum_(p.race, 0, 9),
+    anti,
+    p.clockMode === "wakeup" ? "wakeup" : "known",
+    at,
+    preIso_(p.found),
+    preIso_(p.arriveAt),
+    preNum_(p.eta, 0, 600)
+  ];
+}
+
+function prePost_(payload) {
+  const row = preRow_(payload);
+  if (!row) return ContentService.createTextOutput("error: prearrival");
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sh = preSheet_();
+    const last = sh.getLastRow();
+    const data = last > 1 ? sh.getRange(2, 1, last - 1, PRE_COLS.length).getValues() : [];
+    const now = Date.now();
+    let found = -1;
+    for (let i = data.length - 1; i >= 0; i--) {
+      if (String(data[i][0]) === row[0]) { found = i; break; }
+    }
+    if (found >= 0) {
+      // Una versione piu' vecchia (arrivata in ritardo) non sovrascrive.
+      if ((preTime_(data[found][1]) || 0) <= preTime_(row[1])) {
+        sh.getRange(found + 2, 1, 1, PRE_COLS.length).setValues([row]);
+      }
+    } else {
+      sh.appendRow(row);
+    }
+    // Pulizia: via le righe ferme da piu' di 7 giorni (dal fondo).
+    for (let i = data.length - 1; i >= 0; i--) {
+      const t = preTime_(data[i][1]);
+      if (i !== found && t != null && now - t > PRE_KEEP_MS) sh.deleteRow(i + 2);
+    }
+    return ContentService.createTextOutput("ok");
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function preList_() {
+  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(PRE_SHEET);
+  const items = [];
+  if (sh && sh.getLastRow() > 1) {
+    const now = Date.now();
+    sh.getRange(2, 1, sh.getLastRow() - 1, PRE_COLS.length).getValues().forEach(r => {
+      const t = preTime_(r[1]);
+      if (t == null || now - t > PRE_LIST_MS) return;
+      const obj = {};
+      PRE_COLS.forEach((c, i) => { obj[c] = r[i] instanceof Date ? r[i].toISOString() : r[i]; });
+      items.push(obj);
+    });
+  }
+  // L'oggetto { v, items } dice all'app che questo script gestisce i pre-arrivi.
+  return jsonOut({ v: 1, items: items });
+}
+
 // ---------- WRITE ----------
 function doPost(e) {
   try {
     const payload = JSON.parse(e.parameter.payload || "{}");
+    if (e.parameter.op === "prearrival" || payload.kind === "prearrival") return prePost_(payload);
     const sh = getSheet_();
     const trialKeys = knownTrialKeys_(payload);
     const lastCol = sh.getLastColumn();
@@ -208,6 +324,7 @@ function doPost(e) {
 // ---------- READ ----------
 function doGet(e) {
   const op = (e && e.parameter && e.parameter.op) || "list";
+  if (op === "prearrivals") return preList_();
   if (op !== "list") return jsonOut([]);
 
   const sh = getSheet_();

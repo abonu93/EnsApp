@@ -5,7 +5,8 @@
   import { t, locale } from "$lib/i18n";
   import { criterionLabel } from "$lib/i18n/criteria";
   import { now } from "$lib/stores/patient";
-  import { arrivePreArrival, clearPreArrival, preArrival, preArrivalResult } from "$lib/stores/preArrival";
+  import { arrivePreArrival, discardPreArrival, preArrival, preArrivalResult, shareSupported, watchShared } from "$lib/stores/preArrival";
+  import { buildPreArrivalMessage, whatsAppUrl } from "$lib/domain/pre-arrival-share";
   import { CLOCK, type BoardJudgement } from "$lib/domain/board";
   import { RACE_LVO, evaluationTime, preArrivalBoardInput, type Antithrombotic } from "$lib/domain/pre-arrival";
   import BoardTrialSheet from "$lib/components/board/BoardTrialSheet.svelte";
@@ -16,6 +17,9 @@
   $effect(() => {
     if (!$preArrival && !arriving) push("/workflow");
   });
+
+  // Lista condivisa: si segue anche il nostro (chiuso o modificato da un collega).
+  $effect(() => watchShared());
 
   let showOut = $state(false);
   let sheet = $state<string | null>(null);
@@ -74,7 +78,12 @@
     push("/board");
   }
   function discard() {
-    clearPreArrival();
+    discardPreArrival();
+  }
+  // Messaggio per i canali del team: gli studi possibili all'arrivo, mai il CIP.
+  function whatsApp() {
+    if (!pre || !res) return;
+    window.open(whatsAppUrl(buildPreArrivalMessage(pre, res, Date.now())), "_blank", "noopener");
   }
 </script>
 
@@ -143,8 +152,12 @@
     </section>
 
     <div class="actions">
+      <button type="button" class="wa ens-press" onclick={whatsApp}>{$t.preArrival.whatsapp}</button>
       <button type="button" class="arrived ens-press" onclick={arrived}>{$t.preArrival.arrived}</button>
       <button type="button" class="link muted discard" onclick={discard}>{$t.preArrival.discard}</button>
+      {#if $shareSupported != null}
+        <p class="shared" class:off={!$shareSupported}>{$shareSupported ? $t.preArrival.sharedOn : $t.preArrival.sharedOff}</p>
+      {/if}
     </div>
   </div>
 
@@ -325,6 +338,18 @@
     background: var(--primary-hover);
     color: var(--text-inverted);
   }
+  .wa {
+    width: 100%;
+    padding: 13px 0;
+    border-radius: 14px;
+    font-size: 14.5px;
+    font-weight: 600;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .shared { margin: 2px 0 0; font-size: 11.5px; color: var(--text-muted); text-align: center; }
+  .shared.off { color: var(--warn); }
   @media (prefers-reduced-motion: reduce) {
     .live { animation: none; }
   }

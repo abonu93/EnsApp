@@ -27,6 +27,10 @@ export interface PreArrivalClock {
 }
 
 export interface PreArrival {
+  /** Identificativo condiviso fra i dispositivi (foglio PreArrivals). */
+  id?: string;
+  /** Ultima modifica (ms), per capire quale versione e' la piu' recente. */
+  updatedAt?: number;
   cip?: string;
   age?: number;
   premrs?: number;

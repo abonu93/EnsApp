@@ -3,7 +3,7 @@
 
 import { canonicalTrialName } from "./trials-info";
 
-const GAS_URL =
+export const GAS_URL =
   "https://script.google.com/macros/s/AKfycbxt9NhlJbn5n6d06_aKFW-a76pYqpe-86xedfNKI6MIkexDOSjLnTSZd56Nau9y12Lf/exec";
 
 export const SHEET_TRIAL_KEYS = [

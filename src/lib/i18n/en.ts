@@ -393,7 +393,7 @@ export const en: Dictionary = {
   },
   board: {
     title: "Bedside board",
-    entryTitle: "Code stroke",
+    entryTitle: "Stroke code",
     entryDesc: "From the SEM call to the bedside: every open trial on one screen.",
     entryTag: "Overview",
     sinceOnset: "since onset",
@@ -530,7 +530,7 @@ export const en: Dictionary = {
   },
   preArrival: {
     title: "Pre-arrival",
-    sub: "SEM call · code stroke",
+    sub: "SEM call · stroke code",
     entryTitle: "Pre-arrival",
     entryDesc: "SEM call: CIP, age, last seen well, mRS, RACE, antithrombotics.",
     entryTag: "SEM call",
@@ -579,6 +579,11 @@ export const en: Dictionary = {
     antiDoac: "DOAC",
     antiWarfarin: "VKA",
     antiLmwh: "LMWH / heparin",
+    whatsapp: "Send to WhatsApp",
+    sharedOn: "Shared with the team (no CIP)",
+    sharedOff: "Not shared: the sheet script needs an update",
+    sharedTitle: "Incoming from the team",
+    sharedReplace: "Replace the incoming patient on this device?",
   },
   registered: {
     title: "Deferred entry",

@@ -579,6 +579,11 @@ export const es: Dictionary = {
     antiDoac: "ACOD",
     antiWarfarin: "AVK",
     antiLmwh: "HBPM / heparina",
+    whatsapp: "Enviar por WhatsApp",
+    sharedOn: "Compartido con el equipo (sin CIP)",
+    sharedOff: "No compartido: hay que actualizar el script de la hoja",
+    sharedTitle: "En camino desde el equipo",
+    sharedReplace: "¿Sustituir el paciente en camino en este dispositivo?",
   },
   registered: {
     title: "Registro diferido",
