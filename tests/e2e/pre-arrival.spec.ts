@@ -14,7 +14,8 @@ test.describe("pre-arrival", () => {
 
   test("chiamata SEM -> in arrivo -> board", async ({ page }) => {
     await page.getByRole("button", { name: /new patient/i }).click();
-    await page.getByRole("button", { name: /pre-arrival/i }).click();
+    await page.getByRole("button", { name: /code stroke/i }).click();
+    await page.getByRole("dialog").getByRole("button", { name: /Pre-arrival/ }).click();
     await expect(page).toHaveURL(/\/pre-arrival$/);
 
     // Senza l'ultima volta visto bene non si salva.
@@ -58,7 +59,8 @@ test.describe("pre-arrival", () => {
 
   test("dal board: + New patient -> In the ED svuota il board", async ({ page }) => {
     await page.getByRole("button", { name: /new patient/i }).click();
-    await page.getByRole("button", { name: /bedside board/i }).click();
+    await page.getByRole("button", { name: /code stroke/i }).click();
+    await page.getByRole("dialog").getByRole("button", { name: /In the ED/ }).click();
     await page.getByRole("button", { name: /^Age:/ }).click();
     await page.getByRole("slider", { name: "Age" }).fill("70");
     await page.getByRole("button", { name: "Set 70" }).click();
