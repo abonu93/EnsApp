@@ -2,8 +2,21 @@
   import { push } from "svelte-spa-router";
   import AppHeader from "$lib/components/AppHeader.svelte";
   import { t } from "$lib/i18n";
+  import { preArrival } from "$lib/stores/preArrival";
 
   const choices = $derived([
+    {
+      key: "pre-arrival",
+      title: $t.preArrival.entryTitle,
+      desc: $t.preArrival.entryDesc,
+      tag: $t.preArrival.entryTag,
+      accent: "var(--warn)",
+      bg: "var(--warn-soft)",
+      // Un paziente gia' annunciato si riprende da dove era.
+      route: $preArrival ? "/incoming" : "/pre-arrival",
+      icon: "phone" as const,
+      isNew: true,
+    },
     {
       key: "board",
       title: $t.board.entryTitle,
@@ -66,6 +79,10 @@
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
                 <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" />
+              </svg>
+            {:else if o.icon === "phone"}
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" />
               </svg>
             {:else}
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

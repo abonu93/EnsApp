@@ -1,5 +1,6 @@
 // State del paziente in lavorazione. Persistito con TTL 24h.
-// IMPORTANTE: nessun PII oltre a patientId (inserito manualmente).
+// IMPORTANTE: nessun PII oltre a patientId e al CIP del pre-arrivo (inseriti
+// manualmente, solo sul dispositivo: il CIP non va ne' nei messaggi ne' nel foglio).
 // Reset esplicito via clearPatient() o startNewPatient().
 
 import { derived, readable } from "svelte/store";
@@ -25,6 +26,10 @@ export type PreData = Partial<{
   angiograph: "yes" | "no" | "";
   doac: "yes" | "no" | "";
   acei: "yes" | "no" | "";
+  /** Pre-arrivo: dati della chiamata del SEM (solo da mostrare, nessuna regola li usa). */
+  cip: string;
+  race: number;
+  antithrombotics: string[];
 }>;
 
 export type StrokeType = "ischemic" | "hemorrhagic" | "";

@@ -6,10 +6,11 @@
   import { boardAlertInput, boardClock, boardElapsedMin, boardResult, boardValues, setBoardClock, setBoardField } from "$lib/stores/board";
   import { selectionAlerts } from "$lib/domain/open-questions";
   import BoardAlerts from "$lib/components/board/BoardAlerts.svelte";
-  import { now } from "$lib/stores/patient";
-  import { selectedStudies, toggleStudy, flowOrigin } from "$lib/stores/trialSelection";
+  import { now, clearPatient } from "$lib/stores/patient";
+  import { preArrival } from "$lib/stores/preArrival";
+  import { selectedStudies, toggleStudy, flowOrigin, clearSelection } from "$lib/stores/trialSelection";
   import { criterionLabel } from "$lib/i18n/criteria";
-  import { push } from "svelte-spa-router";
+  import { push, replace } from "svelte-spa-router";
   import { t, locale } from "$lib/i18n";
   import BoardFieldSheet from "$lib/components/board/BoardFieldSheet.svelte";
   import BoardClockSheet from "$lib/components/board/BoardClockSheet.svelte";
@@ -24,6 +25,7 @@
     | { kind: "compete"; names: string[] }
     | { kind: "all" }
     | { kind: "colimits" }
+    | { kind: "new" }
     | null;
   let sheet = $state<SheetState>(null);
   let showOut = $state(false);
@@ -68,6 +70,32 @@
   const coLimits = $derived(
     selectionAlerts(res.eligible.map((j) => j.name), $boardAlertInput).filter((a) => a.kind === "coenrolment")
   );
+  // Paziente arrivato dal pre-arrivo: CIP e antitrombotici detti dal SEM.
+  const semAnti = $derived(
+    Array.isArray(values.antithrombotics) && values.antithrombotics.length
+      ? (values.antithrombotics as string[])
+          .map((a) => ({ none: $t.preArrival.antiNone, antiplatelet: $t.preArrival.antiAntiplatelet, doac: $t.preArrival.antiDoac, warfarin: $t.preArrival.antiWarfarin, lmwh: $t.preArrival.antiLmwh })[a] ?? a)
+          .join(" + ")
+      : null
+  );
+  const fromSem = $derived(typeof values.cip === "string" || semAnti != null || typeof values.race === "number");
+
+  // Nuovo paziente: pre-arrivo (chiamata del SEM) o gia' in PS (board vuoto).
+  function newPreArrival() {
+    // La voce di cronologia del foglio diventa la pagina del pre-arrivo
+    // (chiudere il foglio con history.back() annullerebbe la navigazione).
+    const replaceSheet = sheetInHistory;
+    sheetInHistory = false;
+    sheet = null;
+    const route = $preArrival ? "/incoming" : "/pre-arrival";
+    if (replaceSheet) replace(route);
+    else push(route);
+  }
+  function newInEd() {
+    clearPatient();
+    clearSelection();
+    sheet = null;
+  }
   const extraSet = $derived(res.extra.filter((k) => !isMissing(values[k])).length);
   const notRecruiting = $derived(
     NOT_RECRUITING.map((n) => `${n.name} (${n.status === "paused" ? $t.board.pausedStatus : $t.board.closedStatus})`).join(", ")
@@ -118,6 +146,15 @@
   <h1 class="sr-only">{$t.board.title}</h1>
 
   <div class="top">
+    <div class="bar">
+      <span class="cip">
+        {#if fromSem}
+          <span class="mono">{typeof values.cip === "string" ? values.cip : $t.preArrival.noCip}</span>
+          <span class="sem"> · {$t.preArrival.semTag}{semAnti ? ` · ${semAnti}` : ""}</span>
+        {/if}
+      </span>
+      <button type="button" class="link new" onclick={() => (sheet = { kind: "new" })}>{$t.preArrival.newPatient}</button>
+    </div>
     <button type="button" class="clock" onclick={() => (sheet = { kind: "clock" })}>
       <span class="since">
         <span class="live" aria-hidden="true"></span>
@@ -298,6 +335,22 @@
       </ul>
     {/snippet}
   </Sheet>
+{:else if sheet?.kind === "new"}
+  <Sheet open={true} ariaLabel={$t.preArrival.newTitle} onClose={() => (sheet = null)}>
+    {#snippet children()}
+      <h2 class="sheet-title">{$t.preArrival.newTitle}</h2>
+      <div class="new-opts">
+        <button type="button" class="new-opt ens-press" onclick={newPreArrival}>
+          <span class="new-t">{$t.preArrival.entryTitle}</span>
+          <span class="new-d">{$t.preArrival.entryDesc}</span>
+        </button>
+        <button type="button" class="new-opt ens-press" onclick={newInEd}>
+          <span class="new-t">{$t.preArrival.inEd}</span>
+          <span class="new-d">{$t.preArrival.inEdDesc}</span>
+        </button>
+      </div>
+    {/snippet}
+  </Sheet>
 {:else if sheet?.kind === "colimits"}
   <Sheet open={true} tall ariaLabel={fill($t.board.coLimits, { n: coLimits.length })} onClose={() => (sheet = null)}>
     {#snippet children()}
@@ -315,6 +368,42 @@
     color: var(--text);
   }
   .top { padding: 8px 22px 0; }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 36px;
+  }
+  .cip {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .cip .mono { font-family: var(--font-mono); }
+  .link.new { flex-shrink: 0; font-weight: 600; color: var(--primary-hover); }
+  .new-opts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 14px 0 4px;
+  }
+  .new-opt {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px 16px;
+    text-align: left;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .new-t { font-size: 16px; font-weight: 600; }
+  .new-d { font-size: 12.5px; line-height: 1.4; color: var(--text-muted); }
   .clock {
     width: 100%;
     text-align: left;

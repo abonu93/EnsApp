@@ -1,9 +1,11 @@
 <script lang="ts">
   import { push } from "svelte-spa-router";
-  import { hasPatientInProgress, clearPatient, ltswHours as ltswHoursStore } from "$lib/stores/patient";
+  import { hasPatientInProgress, clearPatient, ltswHours as ltswHoursStore, now } from "$lib/stores/patient";
+  import { preArrival } from "$lib/stores/preArrival";
+  import { fill, fmtClock, fmtMin } from "$lib/components/board/format";
   import { clearSelection } from "$lib/stores/trialSelection";
   import { fmtHoursAsClock } from "$lib/utils/time";
-  import { t } from "$lib/i18n";
+  import { t, locale } from "$lib/i18n";
 
   function startNew() {
     clearPatient();
@@ -40,6 +42,25 @@
       </svg>
     </span>
   </button>
+
+  {#if $preArrival}
+    {@const eta = $preArrival.arriveAt != null ? ($preArrival.arriveAt - $now) / 60_000 : null}
+    <button class="resume incoming" type="button" onclick={() => push("/incoming")}>
+      <div class="resume-head">
+        <span class="resume-status">
+          <span class="dot warn" aria-hidden="true"></span>
+          <span>{$t.preArrival.incoming}</span>
+        </span>
+        <span class="resume-cta">→</span>
+      </div>
+      <div class="resume-meta">
+        <span class="elapsed">{eta == null ? $t.preArrival.etaUnknown : eta > 0.5 ? fmtMin(eta) : $t.preArrival.due}</span>
+        {#if $preArrival.arriveAt != null}
+          <span class="since">{fill($t.preArrival.arrivesAt, { t: fmtClock($preArrival.arriveAt, $now, $t.board.yesterday, $locale) })}</span>
+        {/if}
+      </div>
+    </button>
+  {/if}
 
   {#if $hasPatientInProgress}
     <button class="resume" type="button" onclick={resume}>
@@ -186,6 +207,7 @@
     border-radius: 999px;
     background: var(--success);
   }
+  .dot.warn { background: var(--warn); }
   .resume-cta {
     font-size: 13.5px;
     font-weight: 600;
