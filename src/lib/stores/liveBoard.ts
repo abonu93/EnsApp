@@ -27,7 +27,7 @@ const LIST_MS = 12 * 60 * 60 * 1000;
 const LIVE_POLL_MS = 5_000;
 const IDLE_POLL_MS = 30_000;
 
-interface LiveLocal {
+export interface LiveLocal {
   id: string;
   /** Ora dell'ultima modifica nota di ogni campo. */
   stamps: Record<string, number>;
@@ -103,6 +103,12 @@ export function startLive(id?: string): void {
   schedulePush();
 }
 
+/** Riprende la condivisione di un paziente messo da parte (con le modifiche non inviate). */
+export function restoreLive(l: LiveLocal | null): void {
+  liveLocal.set(l);
+  if (l?.pending.length) schedulePush();
+}
+
 /** Il board ha un paziente: lo condivide (una volta). */
 export function ensureLive(): void {
   if (!get(liveLocal) && get(hasPatientInProgress)) startLive();
@@ -176,7 +182,10 @@ export async function pullLive(): Promise<void> {
   );
 }
 
-/** Entra nello stroke code di un collega (sostituisce il paziente di questo dispositivo). */
+/**
+ * Entra nello stroke code di un collega. Il paziente di questo dispositivo
+ * va prima messo da parte (parkCurrent in sessions.ts).
+ */
 export function joinLive(row: LiveBoardRow): void {
   applying = true;
   try {

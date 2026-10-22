@@ -5,9 +5,9 @@
 
 import { derived, get, writable } from "svelte/store";
 import { persisted } from "./persistence";
-import { clearPatient, hemData, now, preData } from "./patient";
-import { clearSelection } from "./trialSelection";
+import { hemData, now, preData } from "./patient";
 import { startLive } from "./liveBoard";
+import { parkCurrent } from "./sessions";
 import { judgePreArrival, preArrivalToPatient, type PreArrival } from "$lib/domain/pre-arrival";
 import {
   fetchPreArrivals,
@@ -65,8 +65,8 @@ export function clearPreArrival(): void {
  * (stessi campi del Board e del flusso guidato), pre-arrivo chiuso per tutti.
  */
 export function arrivePreArrival(p: PreArrival): void {
-  clearPatient();
-  clearSelection();
+  // Il paziente gia' aperto resta fra gli altri pazienti.
+  parkCurrent();
   const seed = preArrivalToPatient(p);
   preData.set(seed.pre);
   hemData.set(seed.hem);

@@ -7,11 +7,12 @@
   import { fmtHoursAsClock } from "$lib/utils/time";
   import { t, locale } from "$lib/i18n";
   import { joinLive, liveBoards } from "$lib/stores/liveBoard";
+  import { discardSession, localLiveIds, parkCurrent, parkedSessions, resumeSession, type PatientSession } from "$lib/stores/sessions";
   import type { LiveBoardRow } from "$lib/domain/live-board";
 
+  // Nuovo paziente: quello aperto resta fra gli altri pazienti.
   function startNew() {
-    clearPatient();
-    clearSelection();
+    parkCurrent();
     push("/workflow");
   }
   // Sessione attiva: si torna al board, il riepilogo del paziente (mostra
@@ -24,10 +25,26 @@
   $effect(() => watchShared());
   // Stroke code aperti dai colleghi: si entra nel paziente e lo si modifica insieme.
   function join(r: LiveBoardRow) {
-    if ($hasPatientInProgress && !confirm($t.board.liveReplace)) return;
+    parkCurrent();
     joinLive(r);
     push("/board");
   }
+  const othersLive = $derived($liveBoards.filter((r) => !$localLiveIds.has(r.id)));
+  function resumeParked(s: PatientSession) {
+    resumeSession(s.key);
+    push("/board");
+  }
+  const parkedSince = (s: PatientSession) => {
+    const at = s.pre.ltswDate ? new Date(s.pre.ltswDate).getTime() : NaN;
+    return Number.isFinite(at) ? fmtMin(($now - at) / 60_000) : null;
+  };
+  const parkedFacts = (s: PatientSession) =>
+    [
+      s.pre.patientId ? s.pre.patientId : s.pre.cip ? s.pre.cip : null,
+      s.pre.age != null ? `${s.pre.age} ${$t.preArrival.years}` : null,
+      s.pre.nihss != null ? `NIHSS ${s.pre.nihss}` : null,
+      s.post.strokeType === "ischemic" ? $t.board.opt.ischemic : s.post.strokeType === "hemorrhagic" ? $t.board.opt.hemorrhagic : null,
+    ].filter(Boolean).join(" · ");
   const liveSince = (r: LiveBoardRow) => {
     const iso = r.fields["pre.ltswDate"]?.v;
     const at = typeof iso === "string" ? new Date(iso).getTime() : NaN;
@@ -95,10 +112,10 @@
     </button>
   {/if}
 
-  {#if $liveBoards.length}
+  {#if othersLive.length}
     <section class="shared" aria-labelledby="live-title">
       <h2 id="live-title" class="shared-title">{$t.board.liveListTitle}</h2>
-      {#each $liveBoards as r (r.id)}
+      {#each othersLive as r (r.id)}
         {@const since = liveSince(r)}
         <button class="shared-row ens-press" type="button" onclick={() => join(r)}>
           <span class="dot" aria-hidden="true"></span>
@@ -147,6 +164,24 @@
     <button class="discard" type="button" onclick={() => { clearPatient(); clearSelection(); }}>
       {$t.landing.discard}
     </button>
+  {/if}
+
+  {#if $parkedSessions.length}
+    <section class="shared" aria-labelledby="parked-title">
+      <h2 id="parked-title" class="shared-title">{$t.board.otherPatients}</h2>
+      {#each $parkedSessions as p (p.key)}
+        {@const since = parkedSince(p)}
+        <div class="parked-row">
+          <button class="shared-row ens-press" type="button" onclick={() => resumeParked(p)}>
+            <span class="dot" aria-hidden="true"></span>
+            <span class="shared-eta">{since ?? "—"}</span>
+            <span class="shared-facts">{parkedFacts(p) || (since ? "" : $t.board.liveNoClock)}</span>
+            <span class="resume-cta">→</span>
+          </button>
+          <button class="parked-close" type="button" onclick={() => discardSession(p.key)} aria-label="{$t.board.closeSession}: {parkedFacts(p) || since || ''}">✕</button>
+        </div>
+      {/each}
+    </section>
   {/if}
 
   <div class="spacer"></div>
@@ -341,6 +376,16 @@
     cursor: pointer;
   }
   .shared-eta { font-family: var(--font-mono); font-size: 16px; font-weight: 500; min-width: 52px; }
+  .parked-row { display: flex; align-items: stretch; }
+  .parked-row .shared-row { flex: 1; min-width: 0; }
+  .parked-close {
+    padding: 0 6px 0 12px;
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+  }
   .shared-facts { flex: 1; font-size: 13px; color: var(--text-muted); }
 
   .spacer { flex: 1; min-height: 24px; }
