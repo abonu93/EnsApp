@@ -9,12 +9,14 @@ import { FIXED_NOW, freshSession } from "./helpers";
 test.describe("pre-arrival", () => {
   test.beforeEach(async ({ page }) => {
     await page.clock.setFixedTime(FIXED_NOW);
+    // Script del foglio senza pre-arrivi (risponde [] come quello vecchio).
+    await page.route("**/script.google.com/**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
     await freshSession(page);
   });
 
   test("chiamata SEM -> in arrivo -> board", async ({ page }) => {
     await page.getByRole("button", { name: /new patient/i }).click();
-    await page.getByRole("button", { name: /code stroke/i }).click();
+    await page.getByRole("button", { name: /stroke code/i }).click();
     await page.getByRole("dialog").getByRole("button", { name: /Pre-arrival/ }).click();
     await expect(page).toHaveURL(/\/pre-arrival$/);
 
@@ -59,7 +61,7 @@ test.describe("pre-arrival", () => {
 
   test("dal board: + New patient -> In the ED svuota il board", async ({ page }) => {
     await page.getByRole("button", { name: /new patient/i }).click();
-    await page.getByRole("button", { name: /code stroke/i }).click();
+    await page.getByRole("button", { name: /stroke code/i }).click();
     await page.getByRole("dialog").getByRole("button", { name: /In the ED/ }).click();
     await page.getByRole("button", { name: /^Age:/ }).click();
     await page.getByRole("slider", { name: "Age" }).fill("70");
@@ -74,4 +76,67 @@ test.describe("pre-arrival", () => {
     await page.getByRole("dialog").getByRole("button", { name: /Pre-arrival/ }).click();
     await expect(page).toHaveURL(/\/pre-arrival$/);
   });
+
+  test("WhatsApp: studi all'arrivo, senza CIP", async ({ page }) => {
+    await page.goto("/#/pre-arrival");
+    await page.getByRole("textbox", { name: "CIP" }).fill("ROCA0480512001");
+    await page.getByRole("textbox", { name: "Age" }).fill("78");
+    await page.locator("button.clock-btn").click();
+    await page.getByRole("button", { name: "−1h", exact: true }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Set", exact: true }).click();
+    await page.getByRole("group", { name: "Arrival in" }).getByRole("button", { name: "15′", exact: true }).click();
+    await page.getByRole("button", { name: "Save · incoming" }).click();
+    await expect(page).toHaveURL(/\/incoming$/);
+    await expect(page.getByText("Not shared: the sheet script needs an update")).toBeVisible();
+
+    await page.evaluate(() => {
+      window.open = ((u: string) => {
+        (window as unknown as { __wa: string }).__wa = u;
+        return null;
+      }) as typeof window.open;
+    });
+    await page.getByRole("button", { name: "Send to WhatsApp" }).click();
+    const url = await page.evaluate(() => (window as unknown as { __wa: string }).__wa);
+    expect(url.startsWith("https://wa.me/?text=")).toBe(true);
+    const msg = decodeURIComponent(url.slice("https://wa.me/?text=".length));
+    expect(msg).toContain("Stroke code pre-arrival (SEM)");
+    expect(msg).toContain("ETA 15m");
+    expect(msg).toContain("Age 78");
+    expect(msg).not.toContain("ROCA");
+  });
 });
+
+test.describe("pre-arrival condiviso", () => {
+  test("lista del team in home -> si prende -> arrivato", async ({ page }) => {
+    await page.clock.setFixedTime(FIXED_NOW);
+    const at = new Date(FIXED_NOW.getTime() - 3_600_000).toISOString();
+    const arriveAt = new Date(FIXED_NOW.getTime() + 20 * 60_000).toISOString();
+    const posts: Record<string, unknown>[] = [];
+    await page.route("**/script.google.com/**", async (route) => {
+      const req = route.request();
+      if (req.method() === "POST") {
+        posts.push(JSON.parse(new URLSearchParams(req.postData() ?? "").get("payload")!));
+        return route.fulfill({ status: 200, body: "ok" });
+      }
+      const items = [
+        { id: "remote-0001", updatedAt: new Date(FIXED_NOW).toISOString(), status: "incoming", age: 71, premrs: 0, race: 6,
+          anti: "none", clockMode: "known", at, found: "", arriveAt, eta: 20 },
+      ];
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ v: 1, items }) });
+    });
+    await freshSession(page);
+
+    const row = page.getByRole("region", { name: "Incoming from the team" }).getByRole("button");
+    await expect(row).toContainText("20m");
+    await expect(row).toContainText("71 years · mRS 0 · RACE 6");
+    await row.click();
+    await expect(page).toHaveURL(/\/incoming$/);
+    await expect(page.locator(".eta")).toHaveText("20m");
+    await expect(page.getByText("Shared with the team (no CIP)")).toBeVisible();
+
+    await page.getByRole("button", { name: "Patient arrived · open board" }).click();
+    await expect(page).toHaveURL(/\/board$/);
+    await expect.poll(() => posts.map((p) => `${p.id}:${p.status}`)).toContain("remote-0001:arrived");
+  });
+});
+

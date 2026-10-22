@@ -14,7 +14,7 @@ test.describe("bedside board", () => {
 
   test("dati parziali -> selezione -> riepilogo -> invio al foglio", async ({ page }) => {
     await page.getByRole("button", { name: /new patient/i }).click();
-    await page.getByRole("button", { name: /code stroke/i }).click();
+    await page.getByRole("button", { name: /stroke code/i }).click();
     await page.getByRole("dialog").getByRole("button", { name: /In the ED/ }).click();
     await expect(page).toHaveURL(/\/board$/);
     await expect(page.locator("main h1")).toHaveText("Bedside board");

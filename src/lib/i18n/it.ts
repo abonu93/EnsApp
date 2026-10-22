@@ -580,6 +580,11 @@ export const it = {
     antiDoac: "DOAC",
     antiWarfarin: "AVK",
     antiLmwh: "EBPM / eparina",
+    whatsapp: "Invia su WhatsApp",
+    sharedOn: "Condiviso con il team (senza CIP)",
+    sharedOff: "Non condiviso: lo script del foglio va aggiornato",
+    sharedTitle: "In arrivo dal team",
+    sharedReplace: "Sostituire il paziente in arrivo su questo dispositivo?",
   },
   registered: {
     title: "Inserimento differito",

@@ -3,7 +3,7 @@
   import AppHeader from "$lib/components/AppHeader.svelte";
   import { t } from "$lib/i18n";
   import Sheet from "$lib/components/Sheet.svelte";
-  import { preArrival } from "$lib/stores/preArrival";
+  import { preArrival, watchShared } from "$lib/stores/preArrival";
 
   const choices = $derived([
     {
@@ -45,6 +45,8 @@
   // Codice ictus: prima si sceglie se il paziente e' ancora in arrivo
   // (pre-arrivo dal SEM, poi il board all'arrivo) o gia' in PS (board).
   let chooseStroke = $state(false);
+  // Un pre-arrivo chiuso o modificato da un collega si aggiorna anche qui.
+  $effect(() => watchShared());
   function pick(route: string) {
     if (route === "/board") chooseStroke = true;
     else push(route);

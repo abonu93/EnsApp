@@ -4,7 +4,7 @@
   import { push } from "svelte-spa-router";
   import { t, locale } from "$lib/i18n";
   import { now } from "$lib/stores/patient";
-  import { preArrival } from "$lib/stores/preArrival";
+  import { preArrival, savePreArrival } from "$lib/stores/preArrival";
   import type { BoardClock } from "$lib/stores/board";
   import BoardClockSheet from "$lib/components/board/BoardClockSheet.svelte";
   import { fill, fmtClock, fmtMin } from "$lib/components/board/format";
@@ -66,8 +66,8 @@
     if (!clock) return;
     // L'ora di arrivo si fissa al salvataggio; resta quella se l'ETA non cambia.
     const arriveAt = eta == null ? null : draft && draft.eta === eta && draft.arriveAt ? draft.arriveAt : Date.now() + eta * 60_000;
-    const next: PreArrival = { cip: cip || undefined, age, premrs, race, anti, clock, eta, arriveAt };
-    preArrival.set(next);
+    const next: PreArrival = { id: draft?.id, cip: cip || undefined, age, premrs, race, anti, clock, eta, arriveAt };
+    savePreArrival(next);
     push("/incoming");
   }
   function cancel() {
