@@ -2,6 +2,7 @@
 // (Apps Script GAS_URL). Snapshot test in tests/domain/sheet-payload.test.ts.
 
 import { canonicalTrialName } from "./trials-info";
+import { maskPatientId } from "$lib/utils/mask";
 
 export const GAS_URL =
   "https://script.google.com/macros/s/AKfycbxt9NhlJbn5n6d06_aKFW-a76pYqpe-86xedfNKI6MIkexDOSjLnTSZd56Nau9y12Lf/exec";
@@ -177,7 +178,11 @@ export function rowMatchesPayload(row: SheetPatientRow, payload: SheetPayload): 
     return false;
   }
   const id = String(payload.N_patient ?? "").trim();
-  if (id) return String(row.N_patient ?? "").trim() === id;
+  // Lo script nuovo rilegge l'ID mascherato (xxxx123), quello vecchio completo.
+  if (id) {
+    const got = String(row.N_patient ?? "").trim();
+    return got === id || got === maskPatientId(id);
+  }
   return String(row.Age ?? "") === String(payload.Age ?? "") && String(row.NIHSS ?? "") === String(payload.NIHSS ?? "");
 }
 

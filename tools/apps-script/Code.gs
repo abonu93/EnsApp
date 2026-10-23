@@ -38,6 +38,14 @@ function sheetId_(v) {
   return s ? "'" + s : "";
 }
 
+// La lettura (doGet) e' pubblica: l'ID paziente esce mascherato come nei
+// messaggi WhatsApp (ultime 3 cifre visibili, il resto "x"). Nel foglio resta
+// completo. Stessa regola di maskPatientId() nell'app.
+function maskId_(v) {
+  const s = v == null ? "" : String(v).trim();
+  return s.length <= 3 ? s : "x".repeat(s.length - 3) + s.slice(-3);
+}
+
 // Ora dichiarata dal client: mai nel futuro, altrimenti una riga (o un campo)
 // non si potrebbe piu' aggiornare ne' cancellare.
 function notFuture_(t, now) {
@@ -471,6 +479,8 @@ function doGet(e) {
   const rows = data.map((r, idx) => {
     const obj = {};
     headers.forEach((h, i) => { if (h) obj[h] = r[i]; });
+    if (obj.N_patient != null && obj.N_patient !== "") obj.N_patient = maskId_(obj.N_patient);
+    if (obj.patientId != null && obj.patientId !== "") obj.patientId = maskId_(obj.patientId);
 
     // id univoco per la sync
     if (!obj.id) {

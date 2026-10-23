@@ -18,6 +18,10 @@ describe("invio al foglio: verifica della riga scritta", () => {
     expect(rowMatchesPayload({ timestamp: "2026-10-21T10:03:00Z", N_patient: "P1" }, SENT)).toBe(true);
     expect(rowMatchesPayload({ timestamp: "2026-10-21T10:00:00.000Z", N_patient: "P2" }, SENT)).toBe(false);
     expect(rowMatchesPayload({ timestamp: "2026-10-20T10:00:00.000Z", N_patient: "P1" }, SENT)).toBe(false);
+    // Script nuovo: l'ID torna mascherato.
+    const long = { ...SENT, N_patient: "2025-00123" };
+    expect(rowMatchesPayload({ timestamp: SENT.Timestamp, N_patient: "xxxxxxx123" }, long)).toBe(true);
+    expect(rowMatchesPayload({ timestamp: SENT.Timestamp, N_patient: "xxxxxxx124" }, long)).toBe(false);
     // Senza ID paziente si confrontano eta' e NIHSS.
     const anon = { ...SENT, N_patient: "" };
     expect(rowMatchesPayload({ timestamp: SENT.Timestamp, Age: 70, NIHSS: 12 }, anon)).toBe(true);
@@ -111,5 +115,12 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     expect(col("TENACITY")).toBe("intervention"); // colonna creata dallo script
     expect(col("missed")).toBe("ATHENA");
     expect(col("source")).toBe("guided");
+
+    // Lettura pubblica: l'ID esce mascherato (nel foglio resta completo).
+    row[h.indexOf("N_patient")] = "2025-00123";
+    const doGet = ctx.doGet as (e: unknown) => { text: string };
+    const listed = JSON.parse(doGet({ parameter: { op: "list" } }).text);
+    expect(listed[0].N_patient).toBe("xxxxxxx123");
+    expect(JSON.stringify(listed)).not.toContain("2025-00123");
   });
 });
