@@ -7,7 +7,7 @@ import { derived, get } from "svelte/store";
 import { persisted } from "./persistence";
 import { clearPatient, hasPatientInProgress, hemData, postData, preData, type HemData, type PostData, type PreData } from "./patient";
 import { clearSelection, notesText, selectedChronic, selectedStudies, studyOutcomes } from "./trialSelection";
-import { liveLocal, restoreLive, type LiveLocal } from "./liveBoard";
+import { liveEnded, liveLocal, restoreLive, type LiveLocal } from "./liveBoard";
 
 const TTL_24H = 24 * 60 * 60 * 1000;
 
@@ -22,6 +22,8 @@ export interface PatientSession {
   chronic: string[];
   notes: string;
   live: LiveLocal | null;
+  /** Stroke code gia' chiuso: non si ricondivide alla ripresa. */
+  liveEnded?: boolean;
 }
 
 export const parkedSessions = persisted<PatientSession[]>({
@@ -52,6 +54,7 @@ function snapshot(): PatientSession {
     chronic: [...get(selectedChronic)],
     notes: get(notesText),
     live: get(liveLocal),
+    liveEnded: get(liveEnded),
   };
 }
 
@@ -60,6 +63,7 @@ export function parkCurrent(): void {
   if (get(hasPatientInProgress)) parkedSessions.update((list) => [snapshot(), ...list]);
   // Prima di svuotare: la condivisione resta nel paziente messo da parte.
   liveLocal.set(null);
+  liveEnded.set(false);
   clearPatient();
   clearSelection();
 }
@@ -78,6 +82,7 @@ export function resumeSession(key: string): void {
   selectedChronic.set([...s.chronic]);
   notesText.set(s.notes);
   restoreLive(s.live);
+  liveEnded.set(!!s.liveEnded && !s.live);
 }
 
 /** Toglie un paziente messo da parte (per i colleghi lo stroke code resta aperto). */

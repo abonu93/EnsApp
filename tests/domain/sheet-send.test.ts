@@ -83,6 +83,7 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
       PropertiesService: {
         getScriptProperties: () => ({ getProperty: (k: string) => props[k] ?? null, setProperty: (k: string, v: string) => (props[k] = v) }),
       },
+      LockService: { getScriptLock: () => ({ waitLock: () => {}, releaseLock: () => {} }) },
       ContentService: { createTextOutput: (text: string) => ({ text, setMimeType() { return this; } }), MimeType: { JSON: "json" } },
     };
     vm.createContext(ctx);
@@ -91,7 +92,7 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     const trials = buildTrialsForSheet(["TWIN-2-WIN 2", "DO-IT", "TENACITY"], { "TWIN-2-WIN 2": "control" });
     const payload = {
       ...SENT, LTSW_h: 3.25, pre_mRS: 1, ...trials, "DO  IT": trials.DOIT, NiVO: trials.NIVO,
-      trialKeys: SHEET_TRIAL_KEYS_CSV, TEV: "si", Notes: "n", missed_trials: "ATHENA",
+      trialKeys: SHEET_TRIAL_KEYS_CSV, TEV: "si", Notes: "-> TC =A1", missed_trials: "ATHENA",
       eligible_at_submit: "ATHENA,TWIN-2-WIN 2", source: "guided",
     };
     const doPost = ctx.doPost as (e: unknown) => { text: string };
@@ -100,7 +101,9 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     const h = sh.rows[0] as string[];
     const row = sh.rows[1];
     const col = (k: string) => row[h.indexOf(k)];
-    expect(col("N_patient")).toBe("P1");
+    // Testo forzato (apostrofo): niente formule, niente zeri iniziali persi.
+    expect(col("N_patient")).toBe("'P1");
+    expect(col("Notes")).toBe("'-> TC =A1");
     expect(col("LTSW_h")).toBe(3.25);
     expect(col("TWIN2WIN")).toBe("control");
     expect(col("DO  IT")).toBe("intervention");
