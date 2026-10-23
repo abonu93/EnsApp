@@ -18,6 +18,10 @@ describe("invio al foglio: verifica della riga scritta", () => {
     expect(rowMatchesPayload({ timestamp: "2026-10-21T10:03:00Z", N_patient: "P1" }, SENT)).toBe(true);
     expect(rowMatchesPayload({ timestamp: "2026-10-21T10:00:00.000Z", N_patient: "P2" }, SENT)).toBe(false);
     expect(rowMatchesPayload({ timestamp: "2026-10-20T10:00:00.000Z", N_patient: "P1" }, SENT)).toBe(false);
+    // Script nuovo: l'ID torna mascherato.
+    const long = { ...SENT, N_patient: "2025-00123" };
+    expect(rowMatchesPayload({ timestamp: SENT.Timestamp, N_patient: "xxxxxxx123" }, long)).toBe(true);
+    expect(rowMatchesPayload({ timestamp: SENT.Timestamp, N_patient: "xxxxxxx124" }, long)).toBe(false);
     // Senza ID paziente si confrontano eta' e NIHSS.
     const anon = { ...SENT, N_patient: "" };
     expect(rowMatchesPayload({ timestamp: SENT.Timestamp, Age: 70, NIHSS: 12 }, anon)).toBe(true);
@@ -83,6 +87,7 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
       PropertiesService: {
         getScriptProperties: () => ({ getProperty: (k: string) => props[k] ?? null, setProperty: (k: string, v: string) => (props[k] = v) }),
       },
+      LockService: { getScriptLock: () => ({ waitLock: () => {}, releaseLock: () => {} }) },
       ContentService: { createTextOutput: (text: string) => ({ text, setMimeType() { return this; } }), MimeType: { JSON: "json" } },
     };
     vm.createContext(ctx);
@@ -91,7 +96,7 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     const trials = buildTrialsForSheet(["TWIN-2-WIN 2", "DO-IT", "TENACITY"], { "TWIN-2-WIN 2": "control" });
     const payload = {
       ...SENT, LTSW_h: 3.25, pre_mRS: 1, ...trials, "DO  IT": trials.DOIT, NiVO: trials.NIVO,
-      trialKeys: SHEET_TRIAL_KEYS_CSV, TEV: "si", Notes: "n", missed_trials: "ATHENA",
+      trialKeys: SHEET_TRIAL_KEYS_CSV, TEV: "si", Notes: "-> TC =A1", missed_trials: "ATHENA",
       eligible_at_submit: "ATHENA,TWIN-2-WIN 2", source: "guided",
     };
     const doPost = ctx.doPost as (e: unknown) => { text: string };
@@ -100,7 +105,9 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     const h = sh.rows[0] as string[];
     const row = sh.rows[1];
     const col = (k: string) => row[h.indexOf(k)];
-    expect(col("N_patient")).toBe("P1");
+    // Testo forzato (apostrofo): niente formule, niente zeri iniziali persi.
+    expect(col("N_patient")).toBe("'P1");
+    expect(col("Notes")).toBe("'-> TC =A1");
     expect(col("LTSW_h")).toBe(3.25);
     expect(col("TWIN2WIN")).toBe("control");
     expect(col("DO  IT")).toBe("intervention");
@@ -108,5 +115,12 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     expect(col("TENACITY")).toBe("intervention"); // colonna creata dallo script
     expect(col("missed")).toBe("ATHENA");
     expect(col("source")).toBe("guided");
+
+    // Lettura pubblica: l'ID esce mascherato (nel foglio resta completo).
+    row[h.indexOf("N_patient")] = "2025-00123";
+    const doGet = ctx.doGet as (e: unknown) => { text: string };
+    const listed = JSON.parse(doGet({ parameter: { op: "list" } }).text);
+    expect(listed[0].N_patient).toBe("xxxxxxx123");
+    expect(JSON.stringify(listed)).not.toContain("2025-00123");
   });
 });

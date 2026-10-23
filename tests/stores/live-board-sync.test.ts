@@ -5,7 +5,8 @@ import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import { get } from "svelte/store";
 import { clearPatient, postData, preData } from "$lib/stores/patient";
 import { clearSelection } from "$lib/stores/trialSelection";
-import { closeLive, closeSharedBoard, joinLive, liveBoards, liveLocal, liveSupported, pullLive, startLive } from "$lib/stores/liveBoard";
+import { closeLive, closeSharedBoard, ensureLive, joinLive, liveBoards, liveEnded, liveLocal, liveSupported, pullLive, startLive } from "$lib/stores/liveBoard";
+import { parkCurrent, parkedSessions, resumeSession } from "$lib/stores/sessions";
 
 type Field = { v: unknown; t: number };
 let rows: Record<string, { id: string; updatedAt: string; status: string; fields: Record<string, Field> }>;
@@ -15,6 +16,8 @@ beforeEach(() => {
   rows = {};
   supported = true;
   liveLocal.set(null);
+  liveEnded.set(false);
+  parkedSessions.set([]);
   liveSupported.set(null);
   liveBoards.set([]);
   clearPatient();
@@ -101,6 +104,29 @@ describe("stroke code condiviso", () => {
     expect(get(liveLocal)).toBeNull();
     expect(get(preData)).toEqual({ age: 70 });
     expect(get(liveBoards)).toEqual([]);
+  });
+
+  test("chiuso: il board non lo ricondivide con un id nuovo", async () => {
+    preData.set({ age: 71 });
+    startLive("board-0003");
+    await sent();
+    await closeLive();
+    // Tornando sul board, il paziente registrato non riappare ai colleghi.
+    ensureLive();
+    expect(get(liveLocal)).toBeNull();
+    // Nemmeno dopo averlo messo da parte e ripreso.
+    preData.set({ age: 71, nihss: 4 });
+    parkCurrent();
+    preData.set({ age: 50 });
+    resumeSession(get(parkedSessions).find((s) => s.pre.age === 71)!.key);
+    ensureLive();
+    expect(get(liveLocal)).toBeNull();
+    // Un paziente nuovo invece si condivide.
+    clearPatient();
+    preData.set({ age: 55 });
+    ensureLive();
+    expect(get(liveLocal)).not.toBeNull();
+    expect(Object.keys(rows)).toEqual(["board-0003"]);
   });
 });
 

@@ -46,6 +46,16 @@ export const liveLocal = persisted<LiveLocal | null>({
     return l && typeof l.id === "string" && l.stamps && l.base && Array.isArray(l.pending) ? l : null;
   },
 });
+/**
+ * Stroke code del paziente attivo gia' chiuso (registrato qui o da un collega):
+ * il board non deve ricondividerlo con un id nuovo finche' il paziente resta.
+ */
+export const liveEnded = persisted<boolean>({
+  key: "ensapp:live-ended:v1",
+  initial: false,
+  ttlMs: TTL_24H,
+  validate: (raw) => raw === true,
+});
 /** null = non ancora verificato; false = script del foglio non aggiornato. */
 export const liveSupported = writable<boolean | null>(null);
 /** Stroke code aperti dai colleghi (non quello di questo dispositivo). */
@@ -81,7 +91,9 @@ sources.subscribe((s) => {
 // Paziente cancellato su questo dispositivo: si esce dallo stroke code
 // condiviso (per i colleghi resta aperto).
 hasPatientInProgress.subscribe((has) => {
-  if (!has && !applying && get(liveLocal)) liveLocal.set(null);
+  if (has || applying) return;
+  if (get(liveLocal)) liveLocal.set(null);
+  if (get(liveEnded)) liveEnded.set(false);
 });
 
 let pushTimer: ReturnType<typeof setTimeout> | null = null;
@@ -96,6 +108,7 @@ function schedulePush() {
 /** Inizia a condividere il paziente del board (id del pre-arrivo, se c'era). */
 export function startLive(id?: string): void {
   if (get(liveLocal)) return;
+  liveEnded.set(false);
   const base = flattenLive(get(sources));
   const t = Date.now();
   const keys = Object.keys(base);
@@ -109,9 +122,9 @@ export function restoreLive(l: LiveLocal | null): void {
   if (l?.pending.length) schedulePush();
 }
 
-/** Il board ha un paziente: lo condivide (una volta). */
+/** Il board ha un paziente: lo condivide (una volta, non dopo la chiusura). */
 export function ensureLive(): void {
-  if (!get(liveLocal) && get(hasPatientInProgress)) startLive();
+  if (!get(liveLocal) && !get(liveEnded) && get(hasPatientInProgress)) startLive();
 }
 
 async function pushLive(): Promise<void> {
@@ -159,6 +172,7 @@ export async function pullLive(): Promise<void> {
     if (mine.status === "closed") {
       // Registrato da un collega: i dati restano qui, la condivisione finisce.
       liveLocal.set(null);
+      liveEnded.set(true);
     } else {
       const newer = newerRemote(mine.fields, cur.stamps);
       // Un campo cambiato qui e non ancora inviato resta il nostro.
@@ -207,6 +221,7 @@ export function joinLive(row: LiveBoardRow): void {
   const stamps: Record<string, number> = {};
   for (const [k, f] of Object.entries(row.fields)) if (f && typeof f.t === "number") stamps[k] = f.t;
   liveLocal.set({ id: row.id, stamps, base: flattenLive(get(sources)), pending: [] });
+  liveEnded.set(false);
   liveBoards.update((list) => list.filter((r) => r.id !== row.id));
 }
 
@@ -221,6 +236,7 @@ export async function closeLive(): Promise<void> {
   const cur = get(liveLocal);
   if (!cur) return;
   liveLocal.set(null);
+  liveEnded.set(true);
   if (get(liveSupported) !== true) return;
   const fields: StampedFields = {};
   for (const k of cur.pending) fields[k] = { v: cur.base[k] ?? null, t: cur.stamps[k] ?? Date.now() };

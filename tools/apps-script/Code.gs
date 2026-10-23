@@ -24,6 +24,34 @@ function getSheet_() {
   return ss.getSheets()[0];
 }
 
+// La web app e' pubblica: un testo che inizia con = + - @ verrebbe preso dal
+// foglio come formula (es. Notes "-> TC" = #ERROR!, o una formula iniettata).
+// L'apostrofo iniziale lo tiene come testo e non compare nel valore letto.
+function sheetText_(v) {
+  return typeof v === "string" && /^[=+\-@]/.test(v) ? "'" + v : v;
+}
+
+// ID paziente sempre come testo: "00123" resterebbe 123 e la riga non si
+// ritroverebbe piu' (verifica dell'invio, sync dei pazienti).
+function sheetId_(v) {
+  const s = v == null ? "" : String(v);
+  return s ? "'" + s : "";
+}
+
+// La lettura (doGet) e' pubblica: l'ID paziente esce mascherato come nei
+// messaggi WhatsApp (ultime 3 cifre visibili, il resto "x"). Nel foglio resta
+// completo. Stessa regola di maskPatientId() nell'app.
+function maskId_(v) {
+  const s = v == null ? "" : String(v).trim();
+  return s.length <= 3 ? s : "x".repeat(s.length - 3) + s.slice(-3);
+}
+
+// Ora dichiarata dal client: mai nel futuro, altrimenti una riga (o un campo)
+// non si potrebbe piu' aggiornare ne' cancellare.
+function notFuture_(t, now) {
+  return t > now ? now : t;
+}
+
 // Trial keys di base (24). Non serve piu' aggiornarla per i trial nuovi:
 // arrivano da payload.trialKeys e vengono ricordati in knownTrialKeys_().
 const TRIAL_KEYS = ["WeTrust","MARSS","ATHENA","VANISH","PIVOTAL","MOSTE","FASTEST",
@@ -193,7 +221,7 @@ function preRow_(p) {
   const anti = String(p.anti || "").split(",").filter(a => PRE_ANTI.indexOf(a) >= 0).join(",");
   return [
     id,
-    preIso_(p.updatedAt) || new Date().toISOString(),
+    new Date(notFuture_(preTime_(p.updatedAt) || Date.now(), Date.now())).toISOString(),
     p.status,
     preNum_(p.age, 0, 120),
     preNum_(p.premrs, 0, 6),
@@ -314,7 +342,7 @@ function livePost_(payload) {
     Object.keys(incoming).forEach(k => {
       if (!LIVE_KEY_RE.test(k) || LIVE_LOCAL_ONLY.indexOf(k) >= 0) return;
       const f = incoming[k];
-      const t = f && Number(f.t);
+      const t = f && notFuture_(Number(f.t), now);
       if (!t || isNaN(t)) return;
       const v = f.v === undefined ? null : f.v;
       if (JSON.stringify(v).length > LIVE_MAX_VALUE) return;
@@ -356,69 +384,80 @@ function doPost(e) {
     const payload = JSON.parse(e.parameter.payload || "{}");
     if (e.parameter.op === "prearrival" || payload.kind === "prearrival") return prePost_(payload);
     if (e.parameter.op === "board" || payload.kind === "board") return livePost_(payload);
-    const sh = getSheet_();
-    const trialKeys = knownTrialKeys_(payload);
-    const lastCol = sh.getLastColumn();
-    if (lastCol === 0) {
-      // Foglio totalmente vuoto: crea header iniziale completo
-      const initialHeaders = [
-        "Timestamp","N_patient","Age","NIHSS","LTSW_h","pre_mRS",
-        ...trialKeys,
-        "TEV","mTICI","TIV","Notes",
-        "missed","eligible","source"
-      ];
-      sh.getRange(1, 1, 1, initialHeaders.length).setValues([initialHeaders]).setFontWeight("bold");
-      sh.setFrozenRows(1);
+    // Lock: due invii insieme non creano due volte le stesse colonne trial.
+    const lock = LockService.getScriptLock();
+    lock.waitLock(10000);
+    try {
+      return patientPost_(payload);
+    } finally {
+      lock.releaseLock();
     }
-
-    // Colonne trial nuove (dichiarate dall'app) create al volo prima di scrivere.
-    ensureTrialColumns_(sh, trialKeys);
-
-    const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(h => String(h || "").trim());
-
-    const row = headers.map(col => {
-      const key = String(col || "").trim();
-      if (!key) return "";
-
-      // Timestamp
-      if (key === "Timestamp" || key === "timestamp") {
-        return payload.timestamp || payload.Timestamp || new Date().toISOString();
-      }
-      // Patient id (N_patient column)
-      if (key === "N_patient") return payload.patientId ?? payload.N_patient ?? "";
-      // Lower-snake clinical fields
-      if (key === "LTSW_h") return payload.ltsw ?? payload.LTSW_h ?? "";
-      if (key === "pre_mRS") return payload.premrs ?? payload.pre_mRS ?? "";
-      if (key === "Age") return payload.age ?? payload.Age ?? "";
-      if (key === "NIHSS") return payload.nihss ?? payload.NIHSS ?? "";
-
-      // Missed / Eligible / Source (accetta CSV o array)
-      if (key === "missed" || key === "missed_trials" || key === "missedTrials") {
-        const v = payload.missed ?? payload.missed_trials ?? payload.missedTrials ?? "";
-        return Array.isArray(v) ? v.join(",") : String(v || "");
-      }
-      if (key === "eligible" || key === "eligible_at_submit" || key === "eligibleAtSubmit") {
-        const v = payload.eligible ?? payload.eligible_at_submit ?? payload.eligibleAtSubmit ?? "";
-        return Array.isArray(v) ? v.join(",") : String(v || "");
-      }
-      if (key === "source") return payload.source || "";
-
-      // Colonne trial: risoluzione uniforme via alias (NORAHOME, DOIT, NIVO,
-      // TENACITY, ...). Default "no" se il paziente non e' arruolato.
-      const canonical = canonicalTrialKey_(key);
-      if (trialKeys.indexOf(canonical) >= 0) {
-        return trialValue_(payload, canonical, key);
-      }
-
-      // Default: payload[key]
-      const v = payload[key];
-      return v == null ? "" : v;
-    });
-    sh.appendRow(row);
-    return ContentService.createTextOutput("ok");
   } catch (err) {
     return ContentService.createTextOutput("error: " + err.message);
   }
+}
+
+function patientPost_(payload) {
+  const sh = getSheet_();
+  const trialKeys = knownTrialKeys_(payload);
+  const lastCol = sh.getLastColumn();
+  if (lastCol === 0) {
+    // Foglio totalmente vuoto: crea header iniziale completo
+    const initialHeaders = [
+      "Timestamp","N_patient","Age","NIHSS","LTSW_h","pre_mRS",
+      ...trialKeys,
+      "TEV","mTICI","TIV","Notes",
+      "missed","eligible","source"
+    ];
+    sh.getRange(1, 1, 1, initialHeaders.length).setValues([initialHeaders]).setFontWeight("bold");
+    sh.setFrozenRows(1);
+  }
+
+  // Colonne trial nuove (dichiarate dall'app) create al volo prima di scrivere.
+  ensureTrialColumns_(sh, trialKeys);
+
+  const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(h => String(h || "").trim());
+
+  const row = headers.map(col => {
+    const key = String(col || "").trim();
+    if (!key) return "";
+
+    // Timestamp
+    if (key === "Timestamp" || key === "timestamp") {
+      return payload.timestamp || payload.Timestamp || new Date().toISOString();
+    }
+    // Patient id (N_patient column)
+    if (key === "N_patient") return sheetId_(payload.patientId ?? payload.N_patient);
+    // Lower-snake clinical fields
+    if (key === "LTSW_h") return payload.ltsw ?? payload.LTSW_h ?? "";
+    if (key === "pre_mRS") return payload.premrs ?? payload.pre_mRS ?? "";
+    if (key === "Age") return payload.age ?? payload.Age ?? "";
+    if (key === "NIHSS") return payload.nihss ?? payload.NIHSS ?? "";
+
+    // Missed / Eligible / Source (accetta CSV o array)
+    if (key === "missed" || key === "missed_trials" || key === "missedTrials") {
+      const v = payload.missed ?? payload.missed_trials ?? payload.missedTrials ?? "";
+      return Array.isArray(v) ? v.join(",") : String(v || "");
+    }
+    if (key === "eligible" || key === "eligible_at_submit" || key === "eligibleAtSubmit") {
+      const v = payload.eligible ?? payload.eligible_at_submit ?? payload.eligibleAtSubmit ?? "";
+      return Array.isArray(v) ? v.join(",") : String(v || "");
+    }
+    if (key === "source") return payload.source || "";
+
+    // Colonne trial: risoluzione uniforme via alias (NORAHOME, DOIT, NIVO,
+    // TENACITY, ...). Default "no" se il paziente non e' arruolato.
+    const canonical = canonicalTrialKey_(key);
+    if (trialKeys.indexOf(canonical) >= 0) {
+      return trialValue_(payload, canonical, key);
+    }
+
+    // Default: payload[key]
+    const v = payload[key];
+    return v == null ? "" : v;
+  });
+  sh.appendRow(row.map(sheetText_));
+  return ContentService.createTextOutput("ok");
 }
 
 // ---------- READ ----------
@@ -440,6 +479,8 @@ function doGet(e) {
   const rows = data.map((r, idx) => {
     const obj = {};
     headers.forEach((h, i) => { if (h) obj[h] = r[i]; });
+    if (obj.N_patient != null && obj.N_patient !== "") obj.N_patient = maskId_(obj.N_patient);
+    if (obj.patientId != null && obj.patientId !== "") obj.patientId = maskId_(obj.patientId);
 
     // id univoco per la sync
     if (!obj.id) {
