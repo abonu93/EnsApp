@@ -32,7 +32,7 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     // Testi dal protocollo Rev 09 e CI Rev 07: vedi vault/ensayos/WETRUST.md.
     status: "active",
     category: "Imaging / Workflow",
-    key: { window: "< 6 h at arrival OR wake-up stroke: LSW < 12 h with symptoms discovered < 6 h before arrival", age: ">= 18 y", mrs: "0-2", nihss: ">= 10", aspects: "-" },
+    key: { window: "< 6 h at arrival OR wake-up stroke: LSW < 12 h with symptoms discovered < 6 h before arrival", age: ">= 18 y", mrs: "0-2", nihss: ">= 10 (item 1a <= 1: coma excluded)", aspects: "-" },
     consent: "Deferred: representative or relative first, then the patient (CI Rev 07).",
     imaging: "Randomized before imaging: direct-to-angio (cone-beam CT) OR multimodal CT pathway. Primary analysis only in intracranial ICA, M1 or basilar occlusions.",
     thrombolytic: "Optional.",
