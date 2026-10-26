@@ -101,6 +101,7 @@ test.describe("bedside board", () => {
     await expect(page.locator(".given", { hasText: "Thrombectomy (TEV)" })).toContainText("Yes");
     await page.locator("#share-mtici").selectOption("2b67");
     await expect(page.locator("pre.preview")).toContainText("Occlusion: M1 + extracranial ICA/CCA (tandem)");
+    await expect(page.locator("pre.preview")).toContainText("mTICI: 2b67");
     await page.locator("textarea.notes").fill("board e2e");
     await page.getByRole("button", { name: /send to sheet/i }).click();
     await expect.poll(() => capturedBody.length, { timeout: 5_000 }).toBeGreaterThan(0);
