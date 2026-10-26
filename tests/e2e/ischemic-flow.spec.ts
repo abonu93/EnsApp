@@ -85,6 +85,10 @@ test.describe("ischemic flow - golden patient", () => {
       await route.fulfill({ status: 200, contentType: "text/plain", body: "OK" });
     });
 
+    // EVT eleggibile: l'mTICI e' obbligatorio prima dell'invio
+    await expect(page.getByRole("button", { name: /send to sheet/i })).toBeDisabled();
+    await page.locator("#share-mtici").selectOption("3");
+    await expect(page.locator("pre.preview")).toContainText("mTICI: 3");
     await page.getByRole("button", { name: /send to sheet/i }).click();
 
     // Attende che la fetch sia partita e abbia popolato capturedBody.

@@ -52,6 +52,9 @@
   const idMissing = $derived(!$preData.patientId?.trim());
 
   const showMtici = $derived(tev === "Yes");
+  // Con trombectomia l'mTICI e' obbligatorio (foglio e WhatsApp).
+  const mticiMissing = $derived(!isHem && showMtici && !mtici);
+  const blocked = $derived(idMissing || mticiMissing);
 
   const record = $derived<PatientRecord>({
     patientId: $preData.patientId,
@@ -94,13 +97,13 @@
   }
 
   function shareWhatsApp() {
-    if (idMissing) return;
+    if (blocked) return;
     const url = "https://wa.me/?text=" + encodeURIComponent(message);
     window.open(url, "_blank", "noopener");
   }
 
   async function save() {
-    if (saving || idMissing) return;
+    if (saving || blocked) return;
     saving = true;
     const { payload, missed } = buildSheetPayload(record, $eligibleOpenTrials, $flowOrigin === "board" ? "board" : "guided");
     const result = await sendToSheet(payload);
@@ -283,17 +286,20 @@
         <Button variant="secondary" onclick={copy}>
           {#snippet children()}{$t.share.copy}{/snippet}
         </Button>
-        <Button variant="secondary" disabled={idMissing} onclick={shareWhatsApp}>
+        <Button variant="secondary" disabled={blocked} onclick={shareWhatsApp}>
           {#snippet children()}WhatsApp{/snippet}
         </Button>
       </div>
       {#if idMissing}
         <p class="send-warn" role="alert">{$t.share.idRequired}</p>
       {/if}
+      {#if mticiMissing}
+        <p class="send-warn" role="alert">{$t.share.mticiRequired}</p>
+      {/if}
       {#if sendStatus && sendStatus !== "confirmed"}
         <p class="send-warn" role="alert">{sendMessage(sendStatus)}</p>
       {/if}
-      <Button variant="primary" fullWidth loading={saving} disabled={idMissing} onclick={save}>
+      <Button variant="primary" fullWidth loading={saving} disabled={blocked} onclick={save}>
         {#snippet children()}{sendStatus && sendStatus !== "confirmed" ? $t.share.retrySend : $t.share.sendToSheet}{/snippet}
       </Button>
     {:else}

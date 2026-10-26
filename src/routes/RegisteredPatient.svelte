@@ -60,6 +60,8 @@
       if (isMissing(value)) delete n[key];
       else n[key] = value;
       if (key === "tev" && value !== "Yes") delete n.mtici;
+      // Con trombectomia l'mTICI e' obbligatorio: il campo compare subito.
+      if (key === "tev" && value === "Yes") n.shown = [...new Set([...(s.shown ?? []), "mtici"])];
       if (key === "reversal" && value !== "Yes") delete n.reversalAgent;
       if (isMissing(value)) n.shown = (s.shown ?? []).filter((x) => x !== key);
       return n as QuickPatientData;
@@ -114,6 +116,7 @@
     [
       !p.patientId?.trim() && $t.registered.needId,
       isMissing(p.age) && $t.registered.needAge,
+      p.strokeType !== "hemorrhagic" && p.tev === "Yes" && !p.mtici && $t.registered.needMtici,
       missingArm.length > 0 && fill($t.registered.needArm, { names: missingArm.map((x) => x.name).join(", ") }),
     ].filter(Boolean) as string[]
   );
