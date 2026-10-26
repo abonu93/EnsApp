@@ -68,6 +68,42 @@ test.describe("deferred entry (ex registered patient)", () => {
     await expect(saved.locator("pre.msg")).toContainText("LTSW at evaluation: 4h 30m (reported)");
   });
 
+  test("con trombectomia l'mTICI e' obbligatorio e va nel messaggio", async ({ page }) => {
+    await page.goto("/#/registered");
+    await page.getByRole("button", { name: /^Patient ID:/ }).click();
+    await page.getByRole("textbox", { name: "Patient ID" }).fill("REG-TICI");
+    await page.getByRole("dialog").getByRole("button", { name: "Set", exact: true }).click();
+    await page.getByRole("button", { name: /^Age:/ }).click();
+    await page.getByRole("slider", { name: "Age" }).fill("70");
+    await page.getByRole("button", { name: "Set 70" }).click();
+    await page.getByRole("button", { name: "+ Add data" }).click();
+    await page.getByRole("button", { name: /Thrombectomy \(TEV\)/ }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Yes", exact: true }).click();
+    await expect(page.getByText(/Needs.*mTICI/)).toBeVisible();
+    await expect(page.locator(".save")).toBeDisabled();
+    // Il campo mTICI compare da solo
+    await page.getByRole("button", { name: /^Final mTICI:/ }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "2b67", exact: true }).click();
+    await expect(page.locator(".save")).toBeEnabled();
+
+    let capturedBody = "";
+    await page.route("**/script.google.com/**", async (route) => {
+      if (route.request().method() === "GET") {
+        const sent = JSON.parse(new URLSearchParams(capturedBody).get("payload") ?? "{}");
+        const rows = capturedBody ? [{ timestamp: sent.Timestamp, N_patient: sent.N_patient }] : [];
+        await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(rows) });
+        return;
+      }
+      capturedBody = route.request().postData() ?? "";
+      await route.fulfill({ status: 200, contentType: "text/plain", body: "OK" });
+    });
+    await page.locator(".save").click();
+    const saved = page.getByRole("dialog", { name: "Saved to the sheet" });
+    await expect(saved).toBeVisible({ timeout: 10_000 });
+    expect(JSON.parse(new URLSearchParams(capturedBody).get("payload") ?? "{}").mTICI).toBe("2b67");
+    await expect(saved.locator("pre.msg")).toContainText("mTICI: 2b67");
+  });
+
   test("studio in doppio cieco: nessun braccio richiesto", async ({ page }) => {
     await page.goto("/#/registered");
     await page.getByRole("button", { name: "+ Add trial" }).click();
