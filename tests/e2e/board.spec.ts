@@ -97,8 +97,11 @@ test.describe("bedside board", () => {
     await expect(page.getByRole("button", { name: /send to sheet/i })).toBeDisabled();
     await expect(page.getByText("Enter the patient ID to send.")).toBeVisible();
     await page.getByRole("textbox", { name: "Patient ID" }).fill("E2E-BOARD-1");
-    // EVT gia' indicata nel board: niente domanda TEV, solo mTICI
-    await expect(page.locator(".given", { hasText: "Thrombectomy (TEV)" })).toContainText("Yes");
+    // EVT gia' indicata nel board: TEV precompilato ma modificabile
+    await expect(page.locator("#share-tev-Yes")).toBeChecked();
+    await page.locator("label[for=share-tev-No]").click();
+    await expect(page.locator("#share-mtici")).toHaveCount(0);
+    await page.locator("label[for=share-tev-Yes]").click();
     // Con trombectomia l'mTICI e' obbligatorio: senza non si invia ne' su WhatsApp
     await expect(page.getByText("Select the mTICI to send.")).toBeVisible();
     await expect(page.getByRole("button", { name: /send to sheet/i })).toBeDisabled();
