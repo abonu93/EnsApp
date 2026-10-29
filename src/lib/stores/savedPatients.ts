@@ -37,7 +37,18 @@ export interface SavedPatient {
   };
 }
 
-const MAX_ENTRIES = 500;
+/**
+ * Limite ai soli record locali (non ancora visti dal backend). I record
+ * remoti non hanno limite: il Sheet e' la fonte completa e statistiche e
+ * conteggi devono riflettere tutti i pazienti, non solo gli ultimi N.
+ */
+const MAX_LOCAL_ENTRIES = 500;
+
+/** Tiene tutti i remoti e al massimo MAX_LOCAL_ENTRIES locali (i piu' recenti). */
+export function capSaved(list: SavedPatient[]): SavedPatient[] {
+  let local = 0;
+  return list.filter((p) => p.remote || ++local <= MAX_LOCAL_ENTRIES);
+}
 
 export const savedPatients = persisted<SavedPatient[]>({
   key: "ensapp:saved:v1",
@@ -53,8 +64,7 @@ export function addSavedPatient(entry: Omit<SavedPatient, "id" | "savedAt">): Sa
     savedAt: new Date().toISOString(),
   };
   savedPatients.update((list) => {
-    const next = [record, ...list];
-    return next.slice(0, MAX_ENTRIES);
+    return capSaved([record, ...list]);
   });
   return record;
 }
@@ -80,6 +90,6 @@ export function mergeRemote(remote: SavedPatient[]): void {
     for (const r of remote) byId.set(r.id, { ...r, remote: true });
     const merged = Array.from(byId.values());
     merged.sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
-    return merged.slice(0, MAX_ENTRIES);
+    return capSaved(merged);
   });
 }
