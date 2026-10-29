@@ -30,10 +30,10 @@
   type YesNo = "Yes" | "No" | "";
   type MticiVal = "" | "0" | "1" | "2a" | "2b50" | "2b67" | "2c" | "3";
 
-  // TEV/TIV gia' noti dalla candidatura (board o post-imaging): non si
-  // richiedono, si mostra solo il valore (e l'mTICI se c'e' trombectomia).
+  // TEV/TIV precompilati dalla candidatura (board o post-imaging). Il TEV
+  // resta modificabile: la trombectomia puo' esserci anche se la candidatura
+  // era No o vuota, e serve per inserire l'mTICI.
   const fromCandidacy = (c: string | undefined): YesNo => (c === "eligible" ? "Yes" : c === "not eligible" ? "No" : "");
-  const tevGiven = $derived(fromCandidacy($postData.candidate));
   const tivGiven = $derived(fromCandidacy($postData.ivtCandidate));
   // svelte-ignore state_referenced_locally
   let tev = $state<YesNo>(fromCandidacy($postData.candidate));
@@ -237,11 +237,7 @@
             </div>
           {/if}
         {:else}
-        {#if tevGiven}
-          <p class="given"><span>{plain($t.trialPatient.tevLabel)}</span><strong>{tevGiven === "Yes" ? $t.common.yes : $t.common.no}</strong></p>
-        {:else}
-          <RadioGroup id="share-tev" label={$t.trialPatient.tevLabel} name="tev" columns={2} bind:value={tev} options={ynOpts} />
-        {/if}
+        <RadioGroup id="share-tev" label={$t.trialPatient.tevLabel} name="tev" columns={2} bind:value={tev} options={ynOpts} />
         {#if showMtici}
           <div class="field">
             <label for="share-mtici" class="lbl">mTICI</label>
