@@ -4,6 +4,10 @@
 // EnsApp_Data. Sorgente di verita' operativa = editor Apps Script; questo
 // file serve a versionare le modifiche insieme al client.
 //
+// Tipo di ictus (ischemic / hemorrhagic): scritto nella colonna esistente
+// "Ischemic/Haemorragic" (o "Stroke_type", creata se manca) e riletto come
+// strokeType da doGet.
+//
 // Trial supportati: quelli di TRIAL_KEYS piu' quelli che l'app dichiara nel
 // payload (campo `trialKeys`, CSV di SHEET_TRIAL_KEYS lato client).
 //
@@ -162,6 +166,37 @@ function ensureTrialColumns_(sh, trialKeys) {
   sh.getRange(1, lastCol + 1, 1, missing.length)
     .setValues([missing])
     .setFontWeight("bold");
+}
+
+// Tipo di ictus. Il foglio DB ha gia' la colonna "Ischemic/Haemorragic":
+// si scrive li'. Se nessuna delle intestazioni note c'e', lo script crea
+// "Stroke_type" in coda al primo doPost.
+const STROKE_COLS = ["Ischemic/Haemorragic", "Ischemic/Hemorrhagic", "Stroke_type"];
+const STROKE_TYPES = ["ischemic", "hemorrhagic"];
+
+function ensureStrokeColumn_(sh) {
+  const lastCol = sh.getLastColumn();
+  if (lastCol === 0) return;
+  const headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(h => String(h || "").trim());
+  if (headers.some(h => STROKE_COLS.indexOf(h) >= 0)) return;
+  sh.getRange(1, lastCol + 1, 1, 1)
+    .setValues([["Stroke_type"]])
+    .setFontWeight("bold");
+}
+
+/** Tipo di ictus valido ("ischemic" | "hemorrhagic"), altrimenti "". */
+function strokeType_(v) {
+  const s = String(v == null ? "" : v).trim().toLowerCase();
+  return STROKE_TYPES.indexOf(s) >= 0 ? s : "";
+}
+
+/** Tipo di ictus da una riga letta (qualunque intestazione nota). */
+function rowStrokeType_(obj) {
+  for (let i = 0; i < STROKE_COLS.length; i++) {
+    const t = strokeType_(obj[STROKE_COLS[i]]);
+    if (t) return t;
+  }
+  return strokeType_(obj.strokeType);
 }
 
 // ---------- PRE-ARRIVO (scheda PreArrivals) ----------
@@ -407,7 +442,8 @@ function patientPost_(payload) {
       "Timestamp","N_patient","Age","NIHSS","LTSW_h","pre_mRS",
       ...trialKeys,
       "TEV","mTICI","TIV","Notes",
-      "missed","eligible","source"
+      "missed","eligible","source",
+      "Stroke_type"
     ];
     sh.getRange(1, 1, 1, initialHeaders.length).setValues([initialHeaders]).setFontWeight("bold");
     sh.setFrozenRows(1);
@@ -415,6 +451,7 @@ function patientPost_(payload) {
 
   // Colonne trial nuove (dichiarate dall'app) create al volo prima di scrivere.
   ensureTrialColumns_(sh, trialKeys);
+  ensureStrokeColumn_(sh);
 
   const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(h => String(h || "").trim());
 
@@ -433,6 +470,7 @@ function patientPost_(payload) {
     if (key === "pre_mRS") return payload.premrs ?? payload.pre_mRS ?? "";
     if (key === "Age") return payload.age ?? payload.Age ?? "";
     if (key === "NIHSS") return payload.nihss ?? payload.NIHSS ?? "";
+    if (STROKE_COLS.indexOf(key) >= 0) return strokeType_(payload.Stroke_type ?? payload.strokeType);
 
     // Missed / Eligible / Source (accetta CSV o array)
     if (key === "missed" || key === "missed_trials" || key === "missedTrials") {
@@ -505,6 +543,9 @@ function doGet(e) {
     } else if (typeof obj.trials === "string") {
       obj.trials = obj.trials.split(",").map(s => s.trim()).filter(Boolean);
     }
+
+    // Tipo di ictus per l'app (statistiche ischemici / emorragici).
+    obj.strokeType = rowStrokeType_(obj);
 
     // Missed CSV -> array
     const rawMissed = obj.missed ?? obj.missed_trials ?? obj.missedTrials ?? "";

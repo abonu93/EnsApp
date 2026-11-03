@@ -143,6 +143,7 @@ export function buildSheetPayload(
   const sheetTrials = buildTrialsForSheet(r.selected, r.outcomes);
   const enrolledSet = new Set(r.selected);
   const missed = eligibleNow.filter((name) => !enrolledSet.has(name));
+  const strokeType = r.strokeType === "ischemic" || r.strokeType === "hemorrhagic" ? r.strokeType : "";
   const payload = {
     // Le chiavi DEVONO combaciare ESATTAMENTE (case-sensitive) con le
     // intestazioni di colonna del foglio EnsApp_Data: il backend Apps
@@ -155,6 +156,11 @@ export function buildSheetPayload(
     NIHSS: r.nihss,
     LTSW_h: r.ltswHours,
     pre_mRS: r.premrs,
+    // Tipo di ictus: "ischemic" | "hemorrhagic" ("" se non indicato). Nel foglio
+    // DB la colonna e' "Ischemic/Haemorragic"; "Stroke_type" e' il nome usato
+    // dallo script quando la colonna manca e deve crearla.
+    Stroke_type: strokeType,
+    "Ischemic/Haemorragic": strokeType,
     ...sheetTrials,
     // Colonne trial con intestazioni non normalizzate nel foglio:
     "DO  IT": sheetTrials.DOIT,
