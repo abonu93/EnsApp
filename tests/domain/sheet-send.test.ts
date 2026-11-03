@@ -5,8 +5,11 @@ import {
   buildTrialsForSheet,
   rowMatchesPayload,
   sendToSheet,
+  SHEET_TRIAL_KEYS,
   SHEET_TRIAL_KEYS_CSV,
 } from "$lib/domain/sheet-payload";
+import { buildSheetPayload } from "$lib/domain/patient-record";
+import { SHEET_CLINICAL_COLS } from "$lib/domain/sheet-columns";
 
 const SENT = { Timestamp: "2026-10-21T10:00:00.000Z", N_patient: "P1", Age: 70, NIHSS: 12 };
 
@@ -93,6 +96,7 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     return {
       doPost: ctx.doPost as (e: unknown) => { text: string },
       doGet: ctx.doGet as (e: unknown) => { text: string },
+      setupColumns: ctx.setupColumns as () => void,
     };
   }
 
@@ -146,5 +150,34 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     expect(h).not.toContain("Stroke_type");
     expect(sh.rows[1][h.indexOf("Ischemic/Haemorragic")]).toBe("ischemic");
     expect(JSON.parse(doGet({ parameter: { op: "list" } }).text)[0].strokeType).toBe("ischemic");
+  });
+
+  it("foglio DB reale: le colonne cliniche si aggiungono in coda, una volta sola", () => {
+    const db = ["Timestamp", "N_patient", "Age", "NIHSS", "LTSW_h", "pre_mRS", "Ischemic/Haemorragic", ...SHEET_TRIAL_KEYS.filter((k) => k !== "DOIT" && k !== "NIVO"), "DO  IT", "NiVO", "TEV", "mTICI", "TIV", "Notes", "missed_trials", "eligible_at_submit", "source"];
+    const sh = makeSheet(db);
+    const { doPost, setupColumns } = loadScript(sh);
+    // A mano dall'editor: le colonne compaiono subito, senza invii.
+    setupColumns();
+    expect((sh.rows[0] as string[]).slice(db.length)).toEqual([...SHEET_CLINICAL_COLS]);
+    const { payload } = buildSheetPayload(
+      { patientId: "P9", strokeType: "hemorrhagic", selected: [], outcomes: {}, notes: "", reversal: "Yes", reversalAgent: "pcc",
+        sheetData: { pre: { cip: "SECRET99" }, hem: { gcs: 11, hemVolume: 25, anticoag: "warfarin" } } },
+      [],
+      "board",
+      "2026-11-03T12:00:00.000Z"
+    );
+    expect(doPost({ parameter: { payload: JSON.stringify(payload) } }).text).toBe("ok");
+    doPost({ parameter: { payload: JSON.stringify(payload) } });
+    const h = sh.rows[0] as string[];
+    expect(h.slice(0, db.length)).toEqual(db);
+    expect(h.slice(db.length)).toEqual([...SHEET_CLINICAL_COLS]);
+    const row = sh.rows[1];
+    const col = (k: string) => row[h.indexOf(k)];
+    expect(col("Ischemic/Haemorragic")).toBe("hemorrhagic");
+    expect(col("GCS")).toBe(11);
+    expect(col("Hematoma_mL")).toBe(25);
+    expect(col("Anticoagulation")).toBe("warfarin");
+    expect(col("Reversal_agent")).toBe("PCC");
+    expect(JSON.stringify(sh.rows)).not.toContain("SECRET99");
   });
 });

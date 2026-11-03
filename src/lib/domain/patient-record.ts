@@ -4,6 +4,7 @@
 
 import { buildTrialsForSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV, type StudyOutcomes } from "./sheet-payload";
 import { VESSEL_OPTIONS } from "./vessels";
+import { buildClinicalColumns, type SheetSources } from "./sheet-columns";
 import { fmtHoursAsClock } from "$lib/utils/time";
 import { maskPatientId } from "$lib/utils/mask";
 
@@ -43,6 +44,8 @@ export interface PatientRecord {
   antithrombotics?: string[];
   secondaryCause?: string;
   spotSign?: string;
+  /** Dati completi degli store (pre / post / hem) per le colonne cliniche del foglio. */
+  sheetData?: SheetSources;
 }
 
 /** Farmaci di reversione (etichette per messaggio e foglio, come nei protocolli). */
@@ -170,11 +173,13 @@ export function buildSheetPayload(
     TEV: r.tev ?? "",
     mTICI: r.mtici ?? "",
     TIV: r.tiv ?? "",
-    // Salvate quando il foglio ha le colonne "Reversal" e "Reversal_agent".
-    Reversal: r.reversal ?? "",
-    Reversal_agent: r.reversalAgent ? REVERSAL_LABEL[r.reversalAgent] ?? r.reversalAgent : "",
-    // Paziente registrato: data della valutazione (colonna "Seen_at" nel foglio).
-    Seen_at: r.seenAt ?? "",
+    // Colonne cliniche in coda (SHEET_CLINICAL_COLS): lo script le crea se mancano.
+    ...buildClinicalColumns(r.sheetData ?? {}, r.strokeType, {
+      Reversal: r.reversal ?? "",
+      Reversal_agent: r.reversalAgent ? REVERSAL_LABEL[r.reversalAgent] ?? r.reversalAgent : "",
+      // Paziente registrato: data della valutazione.
+      Seen_at: r.seenAt ?? "",
+    }),
     Notes: r.notes,
     missed_trials: missed.join(","),
     eligible_at_submit: eligibleNow.join(","),

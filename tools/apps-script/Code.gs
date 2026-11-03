@@ -8,6 +8,9 @@
 // "Ischemic/Haemorragic" (o "Stroke_type", creata se manca) e riletto come
 // strokeType da doGet.
 //
+// Colonne cliniche (CLINICAL_COLS: reversione, vasi, ASPECTS, GCS, ...):
+// create in coda se mancano, come i trial.
+//
 // Trial supportati: quelli di TRIAL_KEYS piu' quelli che l'app dichiara nel
 // payload (campo `trialKeys`, CSV di SHEET_TRIAL_KEYS lato client).
 //
@@ -182,6 +185,51 @@ function ensureStrokeColumn_(sh) {
   sh.getRange(1, lastCol + 1, 1, 1)
     .setValues([["Stroke_type"]])
     .setFontWeight("bold");
+}
+
+// Colonne cliniche aggiuntive: create in coda al primo doPost se mancano.
+// Elenco fisso (la web app e' pubblica): deve restare uguale a
+// SHEET_CLINICAL_COLS nell'app (sheet-columns.ts), lo controlla un test.
+const CLINICAL_COLS = [
+  "Reversal", "Reversal_agent", "Seen_at",
+  "LTSW_datetime", "Wakeup", "Discovery_datetime", "Wakeup_within_6h", "Angiograph", "DOAC", "ACEI",
+  "Antithrombotics", "RACE",
+  "Occlusion", "Tandem", "ASPECTS", "EVT_candidate", "IVT_candidate", "LVO", "Tortuosity",
+  "Lesion_confirmed", "Contra_tPA", "Perfusion_mismatch", "Large_core_70", "Diabetes",
+  "VANISH_core_mismatch", "EVT_within_1h", "AI_core_lt10", "Tmax_gt30", "Pregnancy",
+  "Life_expectancy_lt3m", "Contrast_allergy", "IVT_except_DOAC", "NIHSS_1a_ge2", "Posterior_fossa",
+  "Core_gt70", "DOAC_reversal",
+  "GCS", "Hematoma_mL", "Anticoagulation", "Secondary_cause", "Spot_sign", "Brainstem",
+  "Procoagulant", "ECG_ST", "Thrombosis", "Hem_pregnancy", "Angioplasty", "IVH_large", "IVH", "Seizure"
+];
+const CLINICAL_MAX_LEN = 200;
+
+function ensureClinicalColumns_(sh) {
+  const lastCol = sh.getLastColumn();
+  if (lastCol === 0) return;
+  const headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(h => String(h || "").trim());
+  const missing = CLINICAL_COLS.filter(k => headers.indexOf(k) < 0);
+  if (missing.length === 0) return;
+  sh.getRange(1, lastCol + 1, 1, missing.length)
+    .setValues([missing])
+    .setFontWeight("bold");
+}
+
+/**
+ * Da lanciare a mano dall'editor (Esegui): crea subito in coda al foglio DB
+ * le colonne cliniche che mancano, senza aspettare il primo invio.
+ */
+function setupColumns() {
+  const sh = getSheet_();
+  ensureStrokeColumn_(sh);
+  ensureClinicalColumns_(sh);
+}
+
+/** Valore di una colonna clinica: numero o testo corto. */
+function clinicalValue_(v) {
+  if (v == null) return "";
+  if (typeof v === "number") return isFinite(v) ? v : "";
+  return String(v).slice(0, CLINICAL_MAX_LEN);
 }
 
 /** Tipo di ictus valido ("ischemic" | "hemorrhagic"), altrimenti "". */
@@ -443,7 +491,8 @@ function patientPost_(payload) {
       ...trialKeys,
       "TEV","mTICI","TIV","Notes",
       "missed","eligible","source",
-      "Stroke_type"
+      "Stroke_type",
+      ...CLINICAL_COLS
     ];
     sh.getRange(1, 1, 1, initialHeaders.length).setValues([initialHeaders]).setFontWeight("bold");
     sh.setFrozenRows(1);
@@ -452,6 +501,7 @@ function patientPost_(payload) {
   // Colonne trial nuove (dichiarate dall'app) create al volo prima di scrivere.
   ensureTrialColumns_(sh, trialKeys);
   ensureStrokeColumn_(sh);
+  ensureClinicalColumns_(sh);
 
   const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(h => String(h || "").trim());
 
@@ -470,6 +520,7 @@ function patientPost_(payload) {
     if (key === "pre_mRS") return payload.premrs ?? payload.pre_mRS ?? "";
     if (key === "Age") return payload.age ?? payload.Age ?? "";
     if (key === "NIHSS") return payload.nihss ?? payload.NIHSS ?? "";
+    if (CLINICAL_COLS.indexOf(key) >= 0) return clinicalValue_(payload[key]);
     if (STROKE_COLS.indexOf(key) >= 0) return strokeType_(payload.Stroke_type ?? payload.strokeType);
 
     // Missed / Eligible / Source (accetta CSV o array)
@@ -560,7 +611,7 @@ function doGet(e) {
       : Array.isArray(rawEligible) ? rawEligible : [];
 
     // Numeric coercion
-    ["Age","NIHSS","LTSW_h","pre_mRS","age","nihss","ltsw","premrs"].forEach(k => {
+    ["Age","NIHSS","LTSW_h","pre_mRS","age","nihss","ltsw","premrs","ASPECTS","GCS","Hematoma_mL","RACE"].forEach(k => {
       if (obj[k] === "" || obj[k] == null) return;
       const n = Number(obj[k]);
       if (!isNaN(n)) obj[k] = n;
