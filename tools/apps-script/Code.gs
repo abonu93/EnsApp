@@ -215,6 +215,16 @@ function ensureClinicalColumns_(sh) {
     .setFontWeight("bold");
 }
 
+/**
+ * Da lanciare a mano dall'editor (Esegui): crea subito in coda al foglio DB
+ * le colonne cliniche che mancano, senza aspettare il primo invio.
+ */
+function setupColumns() {
+  const sh = getSheet_();
+  ensureStrokeColumn_(sh);
+  ensureClinicalColumns_(sh);
+}
+
 /** Valore di una colonna clinica: numero o testo corto. */
 function clinicalValue_(v) {
   if (v == null) return "";

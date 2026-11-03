@@ -96,6 +96,7 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     return {
       doPost: ctx.doPost as (e: unknown) => { text: string },
       doGet: ctx.doGet as (e: unknown) => { text: string },
+      setupColumns: ctx.setupColumns as () => void,
     };
   }
 
@@ -154,7 +155,10 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
   it("foglio DB reale: le colonne cliniche si aggiungono in coda, una volta sola", () => {
     const db = ["Timestamp", "N_patient", "Age", "NIHSS", "LTSW_h", "pre_mRS", "Ischemic/Haemorragic", ...SHEET_TRIAL_KEYS.filter((k) => k !== "DOIT" && k !== "NIVO"), "DO  IT", "NiVO", "TEV", "mTICI", "TIV", "Notes", "missed_trials", "eligible_at_submit", "source"];
     const sh = makeSheet(db);
-    const { doPost } = loadScript(sh);
+    const { doPost, setupColumns } = loadScript(sh);
+    // A mano dall'editor: le colonne compaiono subito, senza invii.
+    setupColumns();
+    expect((sh.rows[0] as string[]).slice(db.length)).toEqual([...SHEET_CLINICAL_COLS]);
     const { payload } = buildSheetPayload(
       { patientId: "P9", strokeType: "hemorrhagic", selected: [], outcomes: {}, notes: "", reversal: "Yes", reversalAgent: "pcc",
         sheetData: { pre: { cip: "SECRET99" }, hem: { gcs: 11, hemVolume: 25, anticoag: "warfarin" } } },
