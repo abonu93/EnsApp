@@ -155,6 +155,9 @@ export function buildSheetPayload(
     NIHSS: r.nihss,
     LTSW_h: r.ltswHours,
     pre_mRS: r.premrs,
+    // Tipo di ictus: "ischemic" | "hemorrhagic" ("" se non indicato).
+    // Lo script crea la colonna "Stroke_type" se manca.
+    Stroke_type: r.strokeType === "ischemic" || r.strokeType === "hemorrhagic" ? r.strokeType : "",
     ...sheetTrials,
     // Colonne trial con intestazioni non normalizzate nel foglio:
     "DO  IT": sheetTrials.DOIT,

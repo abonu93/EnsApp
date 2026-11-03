@@ -80,6 +80,14 @@ describe("patient-record", () => {
     expect(payload.Reversal_agent).toBe("PCC");
   });
 
+  test("tipo di ictus nel foglio: ischemico, emorragico o vuoto", () => {
+    const base = { selected: [], outcomes: {}, notes: "" };
+    expect(buildSheetPayload({ ...base, strokeType: "ischemic" }, [], "guided").payload.Stroke_type).toBe("ischemic");
+    expect(buildSheetPayload({ ...base, strokeType: "hemorrhagic" }, [], "board").payload.Stroke_type).toBe("hemorrhagic");
+    expect(buildSheetPayload({ ...base, strokeType: "" }, [], "quick-patient").payload.Stroke_type).toBe("");
+    expect(buildSheetPayload(base, [], "quick-patient").payload.Stroke_type).toBe("");
+  });
+
   test("paziente registrato: visto il, LTSW alla valutazione", () => {
     const m = buildShareMessage({ age: 70, ltswHours: 3.5, seen: "20 Oct 2026 14:00", ltswDetail: "reported", selected: [], outcomes: {}, notes: "" });
     expect(m).toBe("Age: 70\nSeen: 20 Oct 2026 14:00\nLTSW at evaluation: 3h 30m (reported)");
@@ -96,6 +104,7 @@ describe("patient-record", () => {
       NIHSS: 14,
       LTSW_h: 2.5,
       pre_mRS: 1,
+      Stroke_type: "ischemic",
       ...trials,
       "DO  IT": trials.DOIT,
       NiVO: trials.NIVO,

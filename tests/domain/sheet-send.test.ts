@@ -96,7 +96,7 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     const trials = buildTrialsForSheet(["TWIN-2-WIN 2", "DO-IT", "TENACITY"], { "TWIN-2-WIN 2": "control" });
     const payload = {
       ...SENT, LTSW_h: 3.25, pre_mRS: 1, ...trials, "DO  IT": trials.DOIT, NiVO: trials.NIVO,
-      trialKeys: SHEET_TRIAL_KEYS_CSV, TEV: "si", Notes: "-> TC =A1", missed_trials: "ATHENA",
+      Stroke_type: "hemorrhagic", trialKeys: SHEET_TRIAL_KEYS_CSV, TEV: "si", Notes: "-> TC =A1", missed_trials: "ATHENA",
       eligible_at_submit: "ATHENA,TWIN-2-WIN 2", source: "guided",
     };
     const doPost = ctx.doPost as (e: unknown) => { text: string };
@@ -115,12 +115,19 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     expect(col("TENACITY")).toBe("intervention"); // colonna creata dallo script
     expect(col("missed")).toBe("ATHENA");
     expect(col("source")).toBe("guided");
+    expect(col("Stroke_type")).toBe("hemorrhagic"); // colonna creata dallo script
 
     // Lettura pubblica: l'ID esce mascherato (nel foglio resta completo).
     row[h.indexOf("N_patient")] = "2025-00123";
     const doGet = ctx.doGet as (e: unknown) => { text: string };
     const listed = JSON.parse(doGet({ parameter: { op: "list" } }).text);
     expect(listed[0].N_patient).toBe("xxxxxxx123");
+    expect(listed[0].strokeType).toBe("hemorrhagic");
     expect(JSON.stringify(listed)).not.toContain("2025-00123");
+
+    // Secondo invio: la colonna non si duplica, valori non previsti restano vuoti.
+    doPost({ parameter: { payload: JSON.stringify({ ...SENT, Stroke_type: "=A1", trialKeys: SHEET_TRIAL_KEYS_CSV }) } });
+    expect(h.filter((k) => k === "Stroke_type")).toHaveLength(1);
+    expect(sh.rows[2][h.indexOf("Stroke_type")]).toBe("");
   });
 });
