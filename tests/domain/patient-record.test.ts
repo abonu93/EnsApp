@@ -4,6 +4,7 @@
 import { describe, test, expect } from "vitest";
 import { buildShareMessage, buildSheetPayload, type PatientRecord } from "$lib/domain/patient-record";
 import { buildTrialsForSheet, SHEET_TRIAL_KEYS_CSV } from "$lib/domain/sheet-payload";
+import { SHEET_CLINICAL_COLS } from "$lib/domain/sheet-columns";
 
 const rec: PatientRecord = {
   patientId: "2025-00123",
@@ -113,21 +114,7 @@ describe("patient-record", () => {
       TEV: "Yes",
       mTICI: "2b67",
       TIV: "No",
-      Reversal: "",
-      Reversal_agent: "",
-      Seen_at: "",
-      Wakeup: "",
-      Occlusion: "",
-      Tandem: "",
-      ASPECTS: "",
-      EVT_candidate: "",
-      IVT_candidate: "",
-      Antithrombotics: "",
-      GCS: "",
-      Hematoma_mL: "",
-      Anticoagulation: "",
-      Secondary_cause: "",
-      Spot_sign: "",
+      ...Object.fromEntries(SHEET_CLINICAL_COLS.map((c) => [c, ""])),
       Notes: "  note  ",
       missed_trials: "PIVOTAL",
       eligible_at_submit: "ATHENA,PIVOTAL",

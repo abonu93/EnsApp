@@ -4,6 +4,7 @@
 
 import { buildTrialsForSheet, hasKnownStudyArm, SHEET_TRIAL_KEYS_CSV, type StudyOutcomes } from "./sheet-payload";
 import { VESSEL_OPTIONS } from "./vessels";
+import { buildClinicalColumns, type SheetSources } from "./sheet-columns";
 import { fmtHoursAsClock } from "$lib/utils/time";
 import { maskPatientId } from "$lib/utils/mask";
 
@@ -43,6 +44,8 @@ export interface PatientRecord {
   antithrombotics?: string[];
   secondaryCause?: string;
   spotSign?: string;
+  /** Dati completi degli store (pre / post / hem) per le colonne cliniche del foglio. */
+  sheetData?: SheetSources;
 }
 
 /** Farmaci di reversione (etichette per messaggio e foglio, come nei protocolli). */
@@ -131,39 +134,6 @@ export function buildShareMessage(r: PatientRecord): string {
 }
 
 /**
- * Colonne cliniche aggiuntive del foglio DB. Lo script (Code.gs, CLINICAL_COLS)
- * le crea in coda se mancano: i due elenchi devono restare uguali (test).
- */
-export const SHEET_CLINICAL_COLS = [
-  "Reversal", "Reversal_agent", "Seen_at",
-  "Wakeup", "Occlusion", "Tandem", "ASPECTS", "EVT_candidate", "IVT_candidate",
-  "Antithrombotics", "GCS", "Hematoma_mL", "Anticoagulation", "Secondary_cause", "Spot_sign",
-] as const;
-
-/** Dati clinici per le colonne aggiuntive ("" se non indicati). */
-function clinicalSheetFields(r: PatientRecord): Record<string, string | number> {
-  const hem = r.strokeType === "hemorrhagic";
-  const vessels = Array.isArray(r.targetVessels)
-    ? r.targetVessels.map((v) => VESSEL_OPTIONS.find((o) => o.value === v)?.label ?? v).join(" + ") || "none"
-    : "";
-  const anti = r.antithrombotics?.length ? r.antithrombotics.map((a) => ANTI_TEXT[a] ?? a).join(" + ") : yesNo(r.doac) === "yes" ? "DOAC" : "";
-  return {
-    Wakeup: r.wakeup === true ? "yes" : r.wakeup === false ? "no" : "",
-    Occlusion: hem ? "" : vessels,
-    Tandem: hem ? "" : yesNo(r.tandem) ?? "",
-    ASPECTS: hem ? "" : r.aspects ?? "",
-    EVT_candidate: hem ? "" : yesNo(r.evtCandidate) ?? "",
-    IVT_candidate: hem ? "" : yesNo(r.ivtCandidate) ?? "",
-    Antithrombotics: hem ? "" : anti,
-    GCS: hem ? r.gcs ?? "" : "",
-    Hematoma_mL: hem ? r.hemVolume ?? "" : "",
-    Anticoagulation: hem ? (r.anticoag ? ANTI_TEXT[r.anticoag] ?? r.anticoag : "") : "",
-    Secondary_cause: hem ? r.secondaryCause ?? "" : "",
-    Spot_sign: hem ? yesNo(r.spotSign) ?? "" : "",
-  };
-}
-
-/**
  * Riga per il foglio EnsApp_Data. `eligibleNow`: trial eleggibili e aperti al
  * momento dell'invio; quelli non selezionati diventano "missed".
  */
@@ -203,12 +173,13 @@ export function buildSheetPayload(
     TEV: r.tev ?? "",
     mTICI: r.mtici ?? "",
     TIV: r.tiv ?? "",
-    // Colonne aggiuntive (SHEET_CLINICAL_COLS): lo script le crea se mancano.
-    Reversal: r.reversal ?? "",
-    Reversal_agent: r.reversalAgent ? REVERSAL_LABEL[r.reversalAgent] ?? r.reversalAgent : "",
-    // Paziente registrato: data della valutazione (colonna "Seen_at" nel foglio).
-    Seen_at: r.seenAt ?? "",
-    ...clinicalSheetFields(r),
+    // Colonne cliniche in coda (SHEET_CLINICAL_COLS): lo script le crea se mancano.
+    ...buildClinicalColumns(r.sheetData ?? {}, r.strokeType, {
+      Reversal: r.reversal ?? "",
+      Reversal_agent: r.reversalAgent ? REVERSAL_LABEL[r.reversalAgent] ?? r.reversalAgent : "",
+      // Paziente registrato: data della valutazione.
+      Seen_at: r.seenAt ?? "",
+    }),
     Notes: r.notes,
     missed_trials: missed.join(","),
     eligible_at_submit: eligibleNow.join(","),

@@ -144,6 +144,11 @@
     seen: fmtFull(seenAt),
     seenAt: new Date(seenAt).toISOString(),
     ltswDetail: p.ltswH == null ? undefined : p.ltswMode === "clock" && lswAt != null ? `last seen well ${fmtFull(lswAt)}` : "reported",
+    sheetData: {
+      pre: { wakeupStroke: p.wakeup, ltswDate: p.ltswMode === "clock" ? p.lsw : undefined },
+      post: { targetVessels: p.targetVessels, aspects: p.aspects },
+      hem: { gcs: p.gcs, hemVolume: p.hemVolume },
+    },
   });
   const message = $derived(buildShareMessage(record));
 

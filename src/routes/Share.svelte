@@ -84,6 +84,7 @@
     antithrombotics: $preData.antithrombotics,
     secondaryCause: $hemData.secondaryCause,
     spotSign: $hemData.spotSign,
+    sheetData: { pre: $preData, post: $postData, hem: $hemData },
   });
   const message = $derived(buildShareMessage(record));
 

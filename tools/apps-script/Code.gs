@@ -189,11 +189,18 @@ function ensureStrokeColumn_(sh) {
 
 // Colonne cliniche aggiuntive: create in coda al primo doPost se mancano.
 // Elenco fisso (la web app e' pubblica): deve restare uguale a
-// SHEET_CLINICAL_COLS nell'app (patient-record.ts), lo controlla un test.
+// SHEET_CLINICAL_COLS nell'app (sheet-columns.ts), lo controlla un test.
 const CLINICAL_COLS = [
   "Reversal", "Reversal_agent", "Seen_at",
-  "Wakeup", "Occlusion", "Tandem", "ASPECTS", "EVT_candidate", "IVT_candidate",
-  "Antithrombotics", "GCS", "Hematoma_mL", "Anticoagulation", "Secondary_cause", "Spot_sign"
+  "LTSW_datetime", "Wakeup", "Discovery_datetime", "Wakeup_within_6h", "Angiograph", "DOAC", "ACEI",
+  "Antithrombotics", "RACE",
+  "Occlusion", "Tandem", "ASPECTS", "EVT_candidate", "IVT_candidate", "LVO", "Tortuosity",
+  "Lesion_confirmed", "Contra_tPA", "Perfusion_mismatch", "Large_core_70", "Diabetes",
+  "VANISH_core_mismatch", "EVT_within_1h", "AI_core_lt10", "Tmax_gt30", "Pregnancy",
+  "Life_expectancy_lt3m", "Contrast_allergy", "IVT_except_DOAC", "NIHSS_1a_ge2", "Posterior_fossa",
+  "Core_gt70", "DOAC_reversal",
+  "GCS", "Hematoma_mL", "Anticoagulation", "Secondary_cause", "Spot_sign", "Brainstem",
+  "Procoagulant", "ECG_ST", "Thrombosis", "Hem_pregnancy", "Angioplasty", "IVH_large", "IVH", "Seizure"
 ];
 const CLINICAL_MAX_LEN = 200;
 
@@ -594,7 +601,7 @@ function doGet(e) {
       : Array.isArray(rawEligible) ? rawEligible : [];
 
     // Numeric coercion
-    ["Age","NIHSS","LTSW_h","pre_mRS","age","nihss","ltsw","premrs","ASPECTS","GCS","Hematoma_mL"].forEach(k => {
+    ["Age","NIHSS","LTSW_h","pre_mRS","age","nihss","ltsw","premrs","ASPECTS","GCS","Hematoma_mL","RACE"].forEach(k => {
       if (obj[k] === "" || obj[k] == null) return;
       const n = Number(obj[k]);
       if (!isNaN(n)) obj[k] = n;
