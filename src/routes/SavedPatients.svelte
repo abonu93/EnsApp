@@ -85,7 +85,7 @@
     const ts = rec.Timestamp ?? rec.timestamp;
     const savedAt = ts instanceof Date ? ts.toISOString() : (typeof ts === "string" ? ts : new Date().toISOString());
     const id = String(rec.id ?? ts ?? Math.random().toString(36).slice(2));
-    const rawType = rec.strokeType ?? rec.Stroke_type;
+    const rawType = rec.strokeType || rec["Ischemic/Haemorragic"] || rec.Stroke_type;
     const strokeType: SavedPatient["strokeType"] = rawType === "ischemic" || rawType === "hemorrhagic" ? rawType : "";
     const trials = (r.trials && r.trials.length > 0 ? r.trials : readTrialsFromRow(r))
       .map((t) => SHEET_TO_DISPLAY[t] ?? t);

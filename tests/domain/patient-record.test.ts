@@ -105,6 +105,7 @@ describe("patient-record", () => {
       LTSW_h: 2.5,
       pre_mRS: 1,
       Stroke_type: "ischemic",
+      "Ischemic/Haemorragic": "ischemic",
       ...trials,
       "DO  IT": trials.DOIT,
       NiVO: trials.NIVO,

@@ -78,9 +78,7 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     };
   }
 
-  it("riga del flusso guidato con trial, braccio e colonne nuove", () => {
-    const headers = ["Timestamp", "N_patient", "Age", "NIHSS", "LTSW_h", "pre_mRS", "WeTrust", "TWIN2WIN", "DO  IT", "NiVO", "TEV", "Notes", "missed", "eligible", "source"];
-    const sh = makeSheet(headers);
+  function loadScript(sh: ReturnType<typeof makeSheet>) {
     const props: Record<string, string> = {};
     const ctx: Record<string, unknown> = {
       SpreadsheetApp: { getActiveSpreadsheet: () => ({ getSheets: () => [sh], getSheetByName: () => sh }) },
@@ -92,6 +90,16 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     };
     vm.createContext(ctx);
     vm.runInContext(readFileSync("tools/apps-script/Code.gs", "utf8"), ctx);
+    return {
+      doPost: ctx.doPost as (e: unknown) => { text: string },
+      doGet: ctx.doGet as (e: unknown) => { text: string },
+    };
+  }
+
+  it("riga del flusso guidato con trial, braccio e colonne nuove", () => {
+    const headers = ["Timestamp", "N_patient", "Age", "NIHSS", "LTSW_h", "pre_mRS", "WeTrust", "TWIN2WIN", "DO  IT", "NiVO", "TEV", "Notes", "missed", "eligible", "source"];
+    const sh = makeSheet(headers);
+    const { doPost, doGet } = loadScript(sh);
 
     const trials = buildTrialsForSheet(["TWIN-2-WIN 2", "DO-IT", "TENACITY"], { "TWIN-2-WIN 2": "control" });
     const payload = {
@@ -99,7 +107,6 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
       Stroke_type: "hemorrhagic", trialKeys: SHEET_TRIAL_KEYS_CSV, TEV: "si", Notes: "-> TC =A1", missed_trials: "ATHENA",
       eligible_at_submit: "ATHENA,TWIN-2-WIN 2", source: "guided",
     };
-    const doPost = ctx.doPost as (e: unknown) => { text: string };
     expect(doPost({ parameter: { payload: JSON.stringify(payload) } }).text).toBe("ok");
 
     const h = sh.rows[0] as string[];
@@ -119,7 +126,6 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
 
     // Lettura pubblica: l'ID esce mascherato (nel foglio resta completo).
     row[h.indexOf("N_patient")] = "2025-00123";
-    const doGet = ctx.doGet as (e: unknown) => { text: string };
     const listed = JSON.parse(doGet({ parameter: { op: "list" } }).text);
     expect(listed[0].N_patient).toBe("xxxxxxx123");
     expect(listed[0].strokeType).toBe("hemorrhagic");
@@ -129,5 +135,16 @@ describe("Apps Script: il payload dell'app finisce nelle colonne giuste", () => 
     doPost({ parameter: { payload: JSON.stringify({ ...SENT, Stroke_type: "=A1", trialKeys: SHEET_TRIAL_KEYS_CSV }) } });
     expect(h.filter((k) => k === "Stroke_type")).toHaveLength(1);
     expect(sh.rows[2][h.indexOf("Stroke_type")]).toBe("");
+  });
+
+  it("tipo di ictus nella colonna esistente Ischemic/Haemorragic del foglio DB", () => {
+    const sh = makeSheet(["Timestamp", "N_patient", "Age", "NIHSS", "LTSW_h", "pre_mRS", "Ischemic/Haemorragic", "WeTrust", "source"]);
+    const { doPost, doGet } = loadScript(sh);
+    const payload = { ...SENT, Stroke_type: "ischemic", "Ischemic/Haemorragic": "ischemic", trialKeys: SHEET_TRIAL_KEYS_CSV, source: "board" };
+    expect(doPost({ parameter: { payload: JSON.stringify(payload) } }).text).toBe("ok");
+    const h = sh.rows[0] as string[];
+    expect(h).not.toContain("Stroke_type");
+    expect(sh.rows[1][h.indexOf("Ischemic/Haemorragic")]).toBe("ischemic");
+    expect(JSON.parse(doGet({ parameter: { op: "list" } }).text)[0].strokeType).toBe("ischemic");
   });
 });
