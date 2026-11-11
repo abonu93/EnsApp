@@ -114,7 +114,7 @@ export const CRITERIA: Record<string, Tr> = {
   "no IVH estesa": { en: "no extensive IVH", es: "sin HIV extensa", ca: "sense HIV extensa" },
   "spot sign positivo (obbligatorio oltre 90 min)": { en: "positive spot sign (required beyond 90 min)", es: "spot sign positivo (obligatorio a partir de 90 min)", ca: "spot sign positiu (obligatori a partir de 90 min)" },
   "no AVK/DOAC negli ultimi 7 giorni, no eparina/EBPM": { en: "no VKA/DOAC in the last 7 days, no heparin/LMWH", es: "sin AVK/ACOD en los últimos 7 días, sin heparina/HBPM", ca: "sense AVK/ACOD els últims 7 dies, sense heparina/HBPM" },
-  "< 4.5h (risveglio: dalla scoperta dei sintomi)": { en: "< 4.5 h (wake-up: from symptom discovery)", es: "< 4,5 h (del despertar: desde el descubrimiento de los síntomas)", ca: "< 4,5 h (del despertar: des del descobriment dels símptomes)" },
+  "< 4.5h dall'ultima volta visto bene": { en: "< 4.5 h from last seen well", es: "< 4,5 h desde la última vez visto bien", ca: "< 4,5 h des de l'última vegada vist bé" },
   "volume ematoma < 60 mL": { en: "hematoma volume < 60 mL", es: "volumen del hematoma < 60 mL", ca: "volum de l'hematoma < 60 mL" },
   "emorragia non isolata a IVH": { en: "hemorrhage not limited to IVH", es: "hemorragia no limitada a HIV", ca: "hemorràgia no limitada a HIV" },
   "GCS >= 5": { en: "GCS ≥ 5", es: "GCS ≥ 5", ca: "GCS ≥ 5" },

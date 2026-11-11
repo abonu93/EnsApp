@@ -19,8 +19,8 @@
   let premrs = $state<number | null>($preData.premrs ?? null);
   let ltswDate = $state<string>($preData.ltswDate ?? "");
   let wakeupStroke = $state<boolean>($preData.wakeupStroke ?? false);
-  // Ictus al risveglio: ora della scoperta dei sintomi. TICH-3 conta la
-  // finestra da qui, VANISH dal punto medio fra LSW e scoperta.
+  // Ictus al risveglio: ora della scoperta dei sintomi. VANISH conta dal
+  // punto medio fra LSW e scoperta; TICH-3 conta dall'LSW (decisione con l'IP).
   let discoveryDate = $state<string>($preData.discoveryDate ?? "");
   const discoveryBeforeLsw = $derived(
     wakeupStroke && discoveryDate !== "" && ltswDate !== "" &&

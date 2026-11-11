@@ -130,8 +130,8 @@ export const ltswHours = derived([preData, now], ([$pre, $now]) => {
 });
 
 /**
- * Ictus al risveglio: ore dalla scoperta dei sintomi (TICH-3 conta da qui;
- * VANISH dal punto medio fra LSW e scoperta). Undefined se non e' un
+ * Ictus al risveglio: ore dalla scoperta dei sintomi (VANISH conta dal punto
+ * medio fra LSW e scoperta; TICH-3 invece dall'LSW). Undefined se non e' un
  * risveglio o l'ora non e' stata inserita.
  */
 export const discoveryHours = derived([preData, now], ([$pre, $now]) =>

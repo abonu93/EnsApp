@@ -133,17 +133,21 @@ describe("TICH-3 - criteri del protocollo Final v3.1", () => {
   });
 });
 
-describe("TICH-3 al risveglio: finestra dalla scoperta dei sintomi", () => {
+describe("TICH-3 al risveglio: finestra dall'ultima volta visto bene", () => {
   const base = {
     age: 70, premrs: 1, gcs: 12, hemVolume: 20, ivh: "no", seizure: "no",
     secondaryCause: "None", anticoag: "none",
   };
-  test("LSW 9 h fa ma sintomi scoperti 2 h fa: in finestra", async () => {
+  test("LSW 9 h fa e sintomi scoperti 2 h fa: fuori finestra", async () => {
     const { tich3 } = await import("$lib/domain/hemorrhagic-rules");
     const { reasonTich3 } = await import("$lib/domain/hem-reasons");
     const input = { ...base, ltsw: 9, wakeupStroke: true, hoursSinceDiscovery: 2 } as unknown as Parameters<typeof tich3>[0];
+    expect(tich3(input)).toBe(false);
+    expect(reasonTich3(input).eligible).toBe(false);
+  });
+  test("LSW 4 h fa al risveglio: in finestra", async () => {
+    const { tich3 } = await import("$lib/domain/hemorrhagic-rules");
+    const input = { ...base, ltsw: 4, wakeupStroke: true, hoursSinceDiscovery: 1 } as unknown as Parameters<typeof tich3>[0];
     expect(tich3(input)).toBe(true);
-    expect(reasonTich3(input).eligible).toBe(true);
-    expect(tich3({ ...input, hoursSinceDiscovery: undefined })).toBe(false);
   });
 });
