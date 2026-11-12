@@ -237,7 +237,7 @@ describe("invio della modifica dall'app", () => {
   const payload = { ...buildUpdatePayload(draftFromSaved(local()), { timestamp: TS, patientId: "2025-00123" }, []), matchTimestamp: TS, N_patient: "2025-00123" };
 
   it("script vecchio (caps -> []): non manda nulla, la modifica resta sul telefono", async () => {
-    const f = vi.fn((url: string) => Promise.resolve(Response.json(url.includes("caps") ? [] : [])));
+    const f = vi.fn((url: string, _init?: RequestInit) => Promise.resolve(Response.json(url.includes("caps") ? [] : [])));
     vi.stubGlobal("fetch", f);
     expect((await sendUpdateToSheet(payload, [0])).status).toBe("unsupported");
     expect(f.mock.calls.some(([, init]) => (init as RequestInit | undefined)?.method === "POST")).toBe(false);
