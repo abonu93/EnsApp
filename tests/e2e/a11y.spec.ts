@@ -15,6 +15,7 @@ const ROUTES = [
   { name: "post-acute", path: "/post-acute" },
   { name: "registered", path: "/registered" },
   { name: "open-questions", path: "/open-questions" },
+  { name: "protocol-review", path: "/review" },
   { name: "board", path: "/board" },
 ];
 
