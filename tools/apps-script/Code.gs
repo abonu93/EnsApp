@@ -461,6 +461,149 @@ function liveList_() {
   return jsonOut({ v: 1, items: items });
 }
 
+/** Valore da scrivere nella colonna `key` per un payload paziente. */
+function cellValue_(key, payload, trialKeys) {
+  // Timestamp
+  if (key === "Timestamp" || key === "timestamp") {
+    return payload.timestamp || payload.Timestamp || new Date().toISOString();
+  }
+  // Patient id (N_patient column)
+  if (key === "N_patient") return sheetId_(payload.patientId ?? payload.N_patient);
+  // Lower-snake clinical fields
+  if (key === "LTSW_h") return payload.ltsw ?? payload.LTSW_h ?? "";
+  if (key === "pre_mRS") return payload.premrs ?? payload.pre_mRS ?? "";
+  if (key === "Age") return payload.age ?? payload.Age ?? "";
+  if (key === "NIHSS") return payload.nihss ?? payload.NIHSS ?? "";
+  if (CLINICAL_COLS.indexOf(key) >= 0) return clinicalValue_(payload[key]);
+  if (STROKE_COLS.indexOf(key) >= 0) return strokeType_(payload.Stroke_type ?? payload.strokeType);
+
+  // Missed / Eligible / Source (accetta CSV o array)
+  if (key === "missed" || key === "missed_trials" || key === "missedTrials") {
+    const v = payload.missed ?? payload.missed_trials ?? payload.missedTrials ?? "";
+    return Array.isArray(v) ? v.join(",") : String(v || "");
+  }
+  if (key === "eligible" || key === "eligible_at_submit" || key === "eligibleAtSubmit") {
+    const v = payload.eligible ?? payload.eligible_at_submit ?? payload.eligibleAtSubmit ?? "";
+    return Array.isArray(v) ? v.join(",") : String(v || "");
+  }
+  if (key === "source") return payload.source || "";
+
+  // Colonne trial: risoluzione uniforme via alias (NORAHOME, DOIT, NIVO,
+  // TENACITY, ...). Default "no" se il paziente non e' arruolato.
+  const canonical = canonicalTrialKey_(key);
+  if (trialKeys.indexOf(canonical) >= 0) {
+    return trialValue_(payload, canonical, key);
+  }
+
+  // Default: payload[key]
+  const v = payload[key];
+  return v == null ? "" : v;
+}
+
+// ---------- MODIFICA DI UN PAZIENTE GIA' INVIATO (op=update) ----------
+//
+// L'app corregge la riga esistente invece di aggiungerne una nuova. La riga si
+// trova dal Timestamp originale + ID paziente COMPLETO: la lettura pubblica
+// (doGet) espone solo l'ID mascherato, quindi chi non conosce l'ID non puo'
+// modificare la riga. Si scrivono solo le colonne modificabili dall'app (dati
+// base, tipo di ictus, studi, trattamenti acuti, note, missed); le altre
+// colonne cliniche restano come al primo invio. Ogni cella cambiata finisce
+// nella scheda "Edits" (vecchio e nuovo valore), e "Updated_at" dice quando.
+
+const UPDATED_COL = "Updated_at";
+const EDITS_SHEET = "Edits";
+const EDITS_COLS = ["edited_at", "row_timestamp", "column", "old", "new"];
+const UPDATE_BASE_COLS = ["N_patient", "Age", "NIHSS", "LTSW_h", "pre_mRS",
+  "TEV", "mTICI", "TIV", "Notes", "Reversal", "Reversal_agent",
+  "missed", "missed_trials", "missedTrials"];
+
+function updatableCol_(key, trialKeys) {
+  return UPDATE_BASE_COLS.indexOf(key) >= 0 || STROKE_COLS.indexOf(key) >= 0 ||
+    trialKeys.indexOf(canonicalTrialKey_(key)) >= 0;
+}
+
+/** Testo di una cella come lo vede l'app (date in ISO, niente apostrofo). */
+function cellText_(v) {
+  if (v instanceof Date) return v.toISOString();
+  return String(v == null ? "" : v).replace(/^'/, "");
+}
+
+/** Stesso istante (tolleranza 1 s: il foglio puo' perdere i millisecondi). */
+function sameTime_(a, b) {
+  const ta = a instanceof Date ? a.getTime() : Date.parse(String(a || ""));
+  const tb = b instanceof Date ? b.getTime() : Date.parse(String(b || ""));
+  return isFinite(ta) && isFinite(tb) && Math.abs(ta - tb) < 1000;
+}
+
+function ensureUpdatedColumn_(sh) {
+  const lastCol = sh.getLastColumn();
+  const headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(h => String(h || "").trim());
+  if (headers.indexOf(UPDATED_COL) >= 0) return;
+  sh.getRange(1, lastCol + 1, 1, 1).setValues([[UPDATED_COL]]).setFontWeight("bold");
+}
+
+function editsSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(EDITS_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(EDITS_SHEET);
+    sh.getRange(1, 1, 1, EDITS_COLS.length).setValues([EDITS_COLS]).setFontWeight("bold");
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function patientUpdate_(p) {
+  const matchTs = String(p.matchTimestamp || "");
+  const matchId = String(p.matchId == null ? "" : p.matchId).trim();
+  if (!matchTs || !matchId) return ContentService.createTextOutput("error: update");
+  // Un ID nuovo deve essere completo (mai la versione mascherata della lettura).
+  const newId = String(p.N_patient == null ? "" : p.N_patient).trim();
+  if (!newId || /^x{2,}/.test(newId)) return ContentService.createTextOutput("error: update");
+
+  const sh = getSheet_();
+  const trialKeys = knownTrialKeys_(p);
+  ensureTrialColumns_(sh, trialKeys);
+  ensureStrokeColumn_(sh);
+  ensureUpdatedColumn_(sh);
+
+  const lastCol = sh.getLastColumn();
+  const lastRow = sh.getLastRow();
+  if (lastRow < 2) return ContentService.createTextOutput("error: not found");
+  const headers = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(h => String(h || "").trim());
+  const tsCol = headers.indexOf("Timestamp") >= 0 ? headers.indexOf("Timestamp") : headers.indexOf("timestamp");
+  const idCol = headers.indexOf("N_patient");
+  if (tsCol < 0 || idCol < 0) return ContentService.createTextOutput("error: not found");
+
+  const data = sh.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  let rowIdx = -1;
+  for (let i = 0; i < data.length; i++) {
+    if (sameTime_(data[i][tsCol], matchTs) && cellText_(data[i][idCol]).trim() === matchId) { rowIdx = i; break; }
+  }
+  if (rowIdx < 0) return ContentService.createTextOutput("error: not found");
+
+  const now = new Date().toISOString();
+  const rowTs = cellText_(data[rowIdx][tsCol]);
+  const edits = [];
+  headers.forEach((key, c) => {
+    if (!key) return;
+    let next;
+    if (key === UPDATED_COL) next = now;
+    else if (updatableCol_(key, trialKeys)) next = cellValue_(key, p, trialKeys);
+    else return;
+    const oldText = cellText_(data[rowIdx][c]);
+    const nextText = cellText_(next);
+    if (oldText === nextText) return;
+    sh.getRange(rowIdx + 2, c + 1).setValue(sheetText_(next));
+    if (key !== UPDATED_COL) edits.push([now, rowTs, key, oldText, nextText].map(sheetText_));
+  });
+  if (edits.length) {
+    const log = editsSheet_();
+    log.getRange(log.getLastRow() + 1, 1, edits.length, EDITS_COLS.length).setValues(edits);
+  }
+  return ContentService.createTextOutput("ok");
+}
+
 // ---------- WRITE ----------
 function doPost(e) {
   try {
@@ -471,6 +614,7 @@ function doPost(e) {
     const lock = LockService.getScriptLock();
     lock.waitLock(10000);
     try {
+      if (e.parameter.op === "update" || payload.kind === "update") return patientUpdate_(payload);
       return patientPost_(payload);
     } finally {
       lock.releaseLock();
@@ -507,43 +651,7 @@ function patientPost_(payload) {
 
   const row = headers.map(col => {
     const key = String(col || "").trim();
-    if (!key) return "";
-
-    // Timestamp
-    if (key === "Timestamp" || key === "timestamp") {
-      return payload.timestamp || payload.Timestamp || new Date().toISOString();
-    }
-    // Patient id (N_patient column)
-    if (key === "N_patient") return sheetId_(payload.patientId ?? payload.N_patient);
-    // Lower-snake clinical fields
-    if (key === "LTSW_h") return payload.ltsw ?? payload.LTSW_h ?? "";
-    if (key === "pre_mRS") return payload.premrs ?? payload.pre_mRS ?? "";
-    if (key === "Age") return payload.age ?? payload.Age ?? "";
-    if (key === "NIHSS") return payload.nihss ?? payload.NIHSS ?? "";
-    if (CLINICAL_COLS.indexOf(key) >= 0) return clinicalValue_(payload[key]);
-    if (STROKE_COLS.indexOf(key) >= 0) return strokeType_(payload.Stroke_type ?? payload.strokeType);
-
-    // Missed / Eligible / Source (accetta CSV o array)
-    if (key === "missed" || key === "missed_trials" || key === "missedTrials") {
-      const v = payload.missed ?? payload.missed_trials ?? payload.missedTrials ?? "";
-      return Array.isArray(v) ? v.join(",") : String(v || "");
-    }
-    if (key === "eligible" || key === "eligible_at_submit" || key === "eligibleAtSubmit") {
-      const v = payload.eligible ?? payload.eligible_at_submit ?? payload.eligibleAtSubmit ?? "";
-      return Array.isArray(v) ? v.join(",") : String(v || "");
-    }
-    if (key === "source") return payload.source || "";
-
-    // Colonne trial: risoluzione uniforme via alias (NORAHOME, DOIT, NIVO,
-    // TENACITY, ...). Default "no" se il paziente non e' arruolato.
-    const canonical = canonicalTrialKey_(key);
-    if (trialKeys.indexOf(canonical) >= 0) {
-      return trialValue_(payload, canonical, key);
-    }
-
-    // Default: payload[key]
-    const v = payload[key];
-    return v == null ? "" : v;
+    return key ? cellValue_(key, payload, trialKeys) : "";
   });
   sh.appendRow(row.map(sheetText_));
   return ContentService.createTextOutput("ok");
@@ -554,6 +662,10 @@ function doGet(e) {
   const op = (e && e.parameter && e.parameter.op) || "list";
   if (op === "prearrivals") return preList_();
   if (op === "boards") return liveList_();
+  // Lo script sa modificare un paziente gia' inviato (op=update): l'app lo
+  // chiede prima di mandare una modifica, uno script vecchio aggiungerebbe
+  // una riga nuova invece di correggere quella esistente.
+  if (op === "caps") return jsonOut({ v: 1, update: true });
   if (op !== "list") return jsonOut([]);
 
   const sh = getSheet_();
@@ -577,6 +689,7 @@ function doGet(e) {
     }
     // Timestamp ISO
     if (obj.Timestamp instanceof Date) obj.Timestamp = obj.Timestamp.toISOString();
+    if (obj[UPDATED_COL] instanceof Date) obj[UPDATED_COL] = obj[UPDATED_COL].toISOString();
     obj.timestamp = obj.Timestamp || obj.timestamp || null;
 
     // Trial arruolati: deriva dalle colonne se non c'e' un campo trials esplicito.
