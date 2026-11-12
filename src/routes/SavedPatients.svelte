@@ -4,7 +4,7 @@
   import Card from "$lib/components/Card.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import { savedPatients, removeSavedPatient, mergeRemote, type SavedPatient } from "$lib/stores/savedPatients";
-  import { fetchPatientsFromSheet, type SheetPatientRow } from "$lib/domain/sheet-payload";
+  import { fetchPatientsFromSheet, SHEET_UPDATED_COL, type SheetPatientRow } from "$lib/domain/sheet-payload";
   import { t } from "$lib/i18n";
 
   let syncing = $state(false);
@@ -89,6 +89,13 @@
     const strokeType: SavedPatient["strokeType"] = rawType === "ischemic" || rawType === "hemorrhagic" ? rawType : "";
     const trials = (r.trials && r.trials.length > 0 ? r.trials : readTrialsFromRow(r))
       .map((t) => SHEET_TO_DISPLAY[t] ?? t);
+    // Braccio: le colonne trial contengono "intervention" | "control" | "si".
+    const outcomes: Record<string, "intervention" | "control"> = {};
+    for (const [sheetCol, display] of Object.entries(SHEET_TO_DISPLAY)) {
+      const v = String(rec[sheetCol] ?? "").trim().toLowerCase();
+      if ((v === "intervention" || v === "control") && trials.includes(display)) outcomes[display] = v;
+    }
+    const updatedRaw = str(rec[SHEET_UPDATED_COL]);
     return {
       id,
       savedAt,
@@ -99,6 +106,9 @@
       trials,
       missed: parseMissed(rec),
       remote: true,
+      sheetTs: savedAt,
+      ltswH: num(rec.LTSW_h ?? rec.ltsw),
+      updatedAt: updatedRaw && Number.isFinite(Date.parse(updatedRaw)) ? updatedRaw : undefined,
       snapshot: {
         pre: {
           patientId: str(rec.N_patient ?? rec.patientId),
@@ -110,13 +120,15 @@
         post: { strokeType: strokeType || undefined },
         hem: {},
         studies: trials,
-        outcomes: {},
+        outcomes,
         chronic: [],
         notes: str(rec.Notes) ?? "",
         extras: {
           tev: (rec.TEV as "Yes" | "No" | undefined) || undefined,
           mtici: str(rec.mTICI),
           tiv: (rec.TIV as "Yes" | "No" | undefined) || undefined,
+          reversal: (rec.Reversal as "Yes" | "No" | undefined) || undefined,
+          reversalAgent: str(rec.Reversal_agent),
         },
       },
     };

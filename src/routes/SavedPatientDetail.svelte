@@ -1,13 +1,12 @@
 <script lang="ts">
-  // Dettaglio paziente salvato (read-only) + tasto Modifica che riapre
-  // il record nel flusso /share con i dati pre-popolati.
+  // Dettaglio paziente salvato (read-only) + tasto Modifica che apre la
+  // pagina di modifica (/saved/:id/edit): corregge il record e la sua riga nel foglio.
   import { push } from "svelte-spa-router";
   import AppHeader from "$lib/components/AppHeader.svelte";
   import Card from "$lib/components/Card.svelte";
   import Pill from "$lib/components/Pill.svelte";
   import { savedPatients, removeSavedPatient, type SavedPatient } from "$lib/stores/savedPatients";
-  import { preData, postData, hemData } from "$lib/stores/patient";
-  import { selectedStudies, studyOutcomes, notesText, selectedChronic } from "$lib/stores/trialSelection";
+  import { savedLtswHours } from "$lib/domain/patient-edit";
   import { t } from "$lib/i18n";
   import { fmtHoursAsClock } from "$lib/utils/time";
 
@@ -22,15 +21,9 @@
 
   function modify() {
     if (!patient) return;
-    preData.set(patient.snapshot.pre);
-    postData.set(patient.snapshot.post);
-    hemData.set(patient.snapshot.hem);
-    selectedStudies.set(patient.snapshot.studies);
-    studyOutcomes.set(patient.snapshot.outcomes);
-    selectedChronic.set(patient.snapshot.chronic);
-    notesText.set(patient.snapshot.notes);
-    push("/share");
+    push("/saved/" + encodeURIComponent(patient.id) + "/edit");
   }
+  const ltsw = $derived(patient ? savedLtswHours(patient) : undefined);
 
   function remove() {
     if (!patient) return;
@@ -67,6 +60,11 @@
       {#if patient.remote}
         <Pill tone="info">{#snippet children()}cloud{/snippet}</Pill>
       {/if}
+      {#if patient.pendingSync}
+        <Pill tone="warn">{#snippet children()}{$t.editPatient.pending}{/snippet}</Pill>
+      {:else if patient.updatedAt}
+        <Pill tone="info">{#snippet children()}{$t.editPatient.edited} {formatDate(patient.updatedAt ?? "")}{/snippet}</Pill>
+      {/if}
     </div>
 
     <Card title={$t.preImaging.anamnesis}>
@@ -81,8 +79,8 @@
           {#if patient.snapshot.pre.premrs != null}
             <div><dt>pre-mRS</dt><dd>{patient.snapshot.pre.premrs}</dd></div>
           {/if}
-          {#if patient.snapshot.pre.ltsw != null}
-            <div><dt>LTSW</dt><dd>{fmtHoursAsClock(patient.snapshot.pre.ltsw)}</dd></div>
+          {#if ltsw != null}
+            <div><dt>LTSW</dt><dd>{fmtHoursAsClock(ltsw)}</dd></div>
           {/if}
         </dl>
       {/snippet}
@@ -93,7 +91,7 @@
         {#snippet children()}
           <ul class="chip-list">
             {#each patient.trials as name}
-              <li class="chip enrolled">{name}</li>
+              <li class="chip enrolled">{name}{patient.snapshot.outcomes[name] ? ` · ${patient.snapshot.outcomes[name] === "control" ? $t.share.control : $t.share.intervention}` : ""}</li>
             {/each}
           </ul>
         {/snippet}
@@ -112,7 +110,7 @@
       </Card>
     {/if}
 
-    {#if patient.snapshot.extras.tev || patient.snapshot.extras.mtici || patient.snapshot.extras.tiv}
+    {#if patient.snapshot.extras.tev || patient.snapshot.extras.mtici || patient.snapshot.extras.tiv || patient.snapshot.extras.reversal}
       <Card title={$t.extras.acuteTreatments}>
         {#snippet children()}
           <dl class="kv">
@@ -124,6 +122,9 @@
             {/if}
             {#if patient.snapshot.extras.tiv}
               <div><dt>TIV</dt><dd>{patient.snapshot.extras.tiv}</dd></div>
+            {/if}
+            {#if patient.snapshot.extras.reversal}
+              <div><dt>{$t.share.reversalLabel.replace(/[¿?]/g, "")}</dt><dd>{patient.snapshot.extras.reversal}{patient.snapshot.extras.reversalAgent ? ` (${patient.snapshot.extras.reversalAgent})` : ""}</dd></div>
             {/if}
           </dl>
         {/snippet}

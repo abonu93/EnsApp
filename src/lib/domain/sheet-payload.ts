@@ -276,3 +276,67 @@ export async function fetchPatientsFromSheet(): Promise<FetchResult> {
     return { ok: false, reason: msg };
   }
 }
+
+/**
+ * Lo script del foglio sa modificare una riga esistente (doGet op=caps)?
+ * Uno script vecchio risponde [] e a un POST di modifica aggiungerebbe una
+ * riga nuova: in quel caso la modifica resta solo sul dispositivo.
+ */
+export async function sheetSupportsUpdate(): Promise<boolean | null> {
+  try {
+    const res = await fetch(GAS_URL + "?op=caps", { method: "GET" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return !!data && typeof data === "object" && !Array.isArray(data) && data.update === true;
+  } catch {
+    return null;
+  }
+}
+
+/** "unsupported": lo script va aggiornato (nuova versione del deployment). */
+export type UpdateStatus = SendStatus | "unsupported";
+
+/** Chiave del foglio per l'ora dell'ultima modifica (Code.gs, UPDATED_COL). */
+export const SHEET_UPDATED_COL = "Updated_at";
+
+/**
+ * Manda la modifica di un paziente gia' inviato (Code.gs, patientUpdate_) e
+ * rilegge il foglio: confermata se la riga ha il Timestamp originale, l'ID
+ * nuovo e un Updated_at successivo all'invio.
+ */
+export async function sendUpdateToSheet(
+  payload: Record<string, unknown> & { matchTimestamp: string; N_patient: string },
+  verifyDelaysMs: number[] = VERIFY_DELAYS_MS
+): Promise<{ status: UpdateStatus; updatedAt?: string }> {
+  const caps = await sheetSupportsUpdate();
+  if (caps === null) return { status: "failed" };
+  if (!caps) return { status: "unsupported" };
+  const sentAt = Date.now();
+  try {
+    await fetch(GAS_URL + "?op=update", {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+      body: new URLSearchParams({ payload: JSON.stringify(payload) }),
+    });
+  } catch {
+    return { status: "failed" };
+  }
+  const ts = Date.parse(payload.matchTimestamp);
+  const id = String(payload.N_patient).trim();
+  let readOk = false;
+  for (const ms of verifyDelaysMs) {
+    await new Promise((r) => setTimeout(r, ms));
+    const res = await fetchPatientsFromSheet();
+    if (!res.ok) continue;
+    readOk = true;
+    const row = res.rows.find((r) => {
+      const got = Date.parse(String(r.timestamp ?? r.Timestamp ?? ""));
+      const upd = Date.parse(String(r[SHEET_UPDATED_COL] ?? ""));
+      const rid = String(r.N_patient ?? "").trim();
+      return Math.abs(got - ts) < 1000 && (rid === id || rid === maskPatientId(id)) && upd >= sentAt - 60_000;
+    });
+    if (row) return { status: "confirmed", updatedAt: String(row[SHEET_UPDATED_COL]) };
+  }
+  return { status: readOk ? "not-found" : "unverified" };
+}

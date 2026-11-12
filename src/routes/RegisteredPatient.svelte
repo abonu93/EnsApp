@@ -170,6 +170,8 @@
     if (!savedLocally) {
       savedLocally = true;
       addSavedPatient({
+        sheetTs: String(payload.Timestamp),
+        ltswH: record.ltswHours,
         patientId: p.patientId,
         strokeType: p.strokeType,
         age: p.age,
@@ -183,7 +185,13 @@
           outcomes: record.outcomes as Record<string, "intervention" | "control">,
           chronic: [],
           notes: p.notes ?? "",
-          extras: { tev: (p.tev || undefined) as "Yes" | "No" | undefined, mtici: p.mtici, tiv: (p.tiv || undefined) as "Yes" | "No" | undefined },
+          extras: {
+            tev: (p.tev || undefined) as "Yes" | "No" | undefined,
+            mtici: p.mtici,
+            tiv: (p.tiv || undefined) as "Yes" | "No" | undefined,
+            reversal: (record.reversal || undefined) as "Yes" | "No" | undefined,
+            reversalAgent: record.reversalAgent || undefined,
+          },
         },
       });
     }

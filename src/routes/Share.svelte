@@ -114,6 +114,8 @@
     if (!savedLocally) {
     savedLocally = true;
     addSavedPatient({
+      sheetTs: String(payload.Timestamp),
+      ltswH: $ltswHours ?? undefined,
       patientId: $preData.patientId,
       strokeType: $postData.strokeType,
       age: $preData.age,
@@ -132,6 +134,8 @@
           tev: tev || undefined,
           mtici: showMtici ? mtici : undefined,
           tiv: tiv || undefined,
+          reversal: isHem && reversal ? reversal : undefined,
+          reversalAgent: isHem && reversal === "Yes" && reversalAgent ? reversalAgent : undefined,
         },
       },
     });
