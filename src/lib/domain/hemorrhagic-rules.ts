@@ -114,11 +114,12 @@ export function fastest(input: HemorrhagicInput): FastestResult {
 // a dose terapeutica; l'IVH primaria isolata e' esclusa.
 const TICH3_EXCLUDED_ANTICOAG: AnticoagStatus[] = ["warfarin", "heparin"];
 
-// TICH-3, p. 25-26: con esordio ignoto (anche al risveglio) la finestra di
-// 4,5 h parte dalla scoperta dei sintomi.
+// TICH-3: la finestra di 4,5 h parte sempre dall'ultima volta visto bene,
+// anche con esordio ignoto o ictus al risveglio. Il protocollo (p. 25-26)
+// conterebbe dalla scoperta dei sintomi, ma il team ha deciso con l'IP
+// (2026-11-11) di usare l'LTSW.
 export function tich3Hours(input: HemorrhagicInput): number {
-  const d = input.hoursSinceDiscovery;
-  return input.wakeupStroke === true && typeof d === "number" && Number.isFinite(d) ? d : input.ltsw;
+  return input.ltsw;
 }
 
 export function tich3(input: HemorrhagicInput): boolean {

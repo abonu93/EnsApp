@@ -45,7 +45,7 @@ jobs:
 
   e2e:
     name: E2E + a11y (Playwright)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # Playwright 1.60 non supporta ubuntu-latest (26.04)
     steps:
       - uses: actions/checkout@v4
 

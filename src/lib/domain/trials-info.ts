@@ -288,7 +288,7 @@ export const TRIALS_INFO: Record<string, TrialInfo> = {
     // Testi dal protocollo Final v3.1 (25-04-2024): vedi vault/ensayos/TICH-3.md.
     status: "active",
     category: "ICH hemostatic",
-    key: { window: "< 4.5 h (unknown onset: from discovery)", age: ">= 18 y, no upper limit", mrs: "-", nihss: "GCS >= 5", aspects: "-" },
+    key: { window: "< 4.5 h from last seen well (also wake-up)", age: ">= 18 y, no upper limit", mrs: "-", nihss: "GCS >= 5", aspects: "-" },
     consent: "Emergency oral consent from patient or relative (phone allowed), then written within ~24 h; independent physician if nobody available.",
     imaging: "Routine CT or MRI. Volume < 60 mL (ABC/2) or max diameter <= 5 cm. IVH is not an exclusion.",
     thrombolytic: "—",

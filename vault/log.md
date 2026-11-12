@@ -43,3 +43,4 @@ Una riga per operazione, la più recente in fondo.
 - 2026-10-21 — Risposte del team a 8 dei 13 dubbi aperti (VANISH, TENACITY, ORION, TICH-3), applicate in `081270e`. Restano 5 dubbi (DONE SYMPLE mRS e M2, TWIN2WIN-2 M1 prossimale, NiVO protocollo, WETRUST §14).
 - 2026-10-21 — Blocco successivo (`d8cfe9a`): ora della scoperta dei sintomi al risveglio (TICH-3, VANISH), REMEDY dopo trombolisi, consenso e visite di TENACITY e NiVO, 4 nuovi dubbi aperti (SAIL-MeVO mRS e co-arruolamento con NiVO, SAFER-DOAC, NORA HOME).
 - 2026-10-21 — Decisioni del team (`a99924f`): REMEDY selezionabile dopo trombolisi con avviso TC a 6 h; SAIL-MeVO e NiVO esclusivi; SAFER-DOAC e NORA HOME restano. VANISH confermato ASPECTS > 4. Restano 6 dubbi aperti.
+- 2026-11-11 — Decisione del team con l'IP: [[TICH-3]] conta la finestra di 4,5 h dall'ultima volta visto bene anche al risveglio (non dalla scoperta, come invece dice il protocollo p. 25–26). Applicata nell'app.
