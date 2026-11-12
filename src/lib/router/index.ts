@@ -19,6 +19,7 @@ import Components from "../../routes/Components.svelte";
 import FormDemo from "../../routes/FormDemo.svelte";
 import NotFound from "../../routes/NotFound.svelte";
 import OpenQuestions from "../../routes/OpenQuestions.svelte";
+import ProtocolReview from "../../routes/ProtocolReview.svelte";
 import Board from "../../routes/Board.svelte";
 import PreArrival from "../../routes/PreArrival.svelte";
 import Incoming from "../../routes/Incoming.svelte";
@@ -48,6 +49,7 @@ export const routes = {
   "/components": Components,
   "/form-demo": FormDemo,
   "/open-questions": OpenQuestions,
+  "/review": ProtocolReview,
   "*": NotFound,
 };
 
