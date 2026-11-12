@@ -461,12 +461,76 @@ function liveList_() {
   return jsonOut({ v: 1, items: items });
 }
 
+// ---------- REVISIONE DEI PROTOCOLLI (scheda Review) ----------
+//
+// Stato e nota del team per ogni punto della pagina "Revisione dei
+// protocolli" dell'app. Una riga per id del punto; vince la modifica piu'
+// recente. Nessun dato di paziente.
+
+const REVIEW_SHEET = "Review";
+const REVIEW_COLS = ["id","updatedAt","status","note","by"];
+const REVIEW_STATUS = ["pending","agree","done","disagree"];
+
+function reviewSheet_() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(REVIEW_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(REVIEW_SHEET);
+    sh.getRange(1, 1, sh.getMaxRows(), REVIEW_COLS.length).setNumberFormat("@");
+    sh.getRange(1, 1, 1, REVIEW_COLS.length).setValues([REVIEW_COLS]).setFontWeight("bold");
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function reviewPost_(p) {
+  const id = String(p.id || "");
+  if (!/^[a-z0-9-]{3,64}$/.test(id)) return ContentService.createTextOutput("error: review");
+  if (REVIEW_STATUS.indexOf(p.status) < 0) return ContentService.createTextOutput("error: review");
+  const t = notFuture_(preTime_(p.updatedAt) || Date.now(), Date.now());
+  const row = [id, new Date(t).toISOString(), p.status,
+    sheetText_(String(p.note || "").slice(0, 500)), sheetText_(String(p.by || "").slice(0, 40))];
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sh = reviewSheet_();
+    const last = sh.getLastRow();
+    const data = last > 1 ? sh.getRange(2, 1, last - 1, REVIEW_COLS.length).getValues() : [];
+    for (let i = 0; i < data.length; i++) {
+      if (String(data[i][0]) === id) {
+        // Una modifica piu' vecchia (arrivata in ritardo) non sovrascrive.
+        if ((preTime_(data[i][1]) || 0) <= t) sh.getRange(i + 2, 1, 1, REVIEW_COLS.length).setValues([row]);
+        return ContentService.createTextOutput("ok");
+      }
+    }
+    sh.appendRow(row);
+    return ContentService.createTextOutput("ok");
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function reviewList_() {
+  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(REVIEW_SHEET);
+  const items = [];
+  if (sh && sh.getLastRow() > 1) {
+    sh.getRange(2, 1, sh.getLastRow() - 1, REVIEW_COLS.length).getValues().forEach(r => {
+      const obj = {};
+      REVIEW_COLS.forEach((c, i) => { obj[c] = r[i] instanceof Date ? r[i].toISOString() : r[i]; });
+      items.push(obj);
+    });
+  }
+  // { v, items } dice all'app che questo script gestisce la revisione condivisa.
+  return jsonOut({ v: 1, items: items });
+}
+
 // ---------- WRITE ----------
 function doPost(e) {
   try {
     const payload = JSON.parse(e.parameter.payload || "{}");
     if (e.parameter.op === "prearrival" || payload.kind === "prearrival") return prePost_(payload);
     if (e.parameter.op === "board" || payload.kind === "board") return livePost_(payload);
+    if (e.parameter.op === "review" || payload.kind === "review") return reviewPost_(payload);
     // Lock: due invii insieme non creano due volte le stesse colonne trial.
     const lock = LockService.getScriptLock();
     lock.waitLock(10000);
@@ -554,6 +618,7 @@ function doGet(e) {
   const op = (e && e.parameter && e.parameter.op) || "list";
   if (op === "prearrivals") return preList_();
   if (op === "boards") return liveList_();
+  if (op === "reviews") return reviewList_();
   if (op !== "list") return jsonOut([]);
 
   const sh = getSheet_();

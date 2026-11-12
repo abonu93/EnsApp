@@ -6,6 +6,7 @@
   import { OPEN_QUESTIONS, COENROLMENT_RULES } from "$lib/domain/open-questions";
   import { EXCLUSIVE_GROUPS, findTrialKey } from "$lib/domain/trials-info";
   import { t } from "$lib/i18n";
+  import { REVIEW_ITEMS } from "$lib/domain/protocol-review";
 
   // Raggruppati per studio, nell'ordine in cui compaiono.
   const byTrial = $derived.by(() => {
@@ -24,6 +25,11 @@
 
 <div class="body">
   <p class="intro">{$t.extras.openQuestionsIntro}</p>
+
+  <a href="/review" use:link class="review-link">
+    <strong>{$t.protocolReview.entry}</strong>
+    <span>{REVIEW_ITEMS.length} · {$t.protocolReview.entryDesc}</span>
+  </a>
 
   {#each byTrial as [trial, questions] (trial)}
     {@const key = findTrialKey(trial)}
@@ -76,5 +82,16 @@
   .qs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
   .qs p { margin: 4px 0 0; font-size: 13.5px; color: var(--text-muted); }
   .q-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .review-link {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--surface);
+    text-decoration: none;
+    color: var(--text);
+  }
+  .review-link span { font-size: 13px; color: var(--text-muted); }
   .trial-link { display: inline-block; margin-top: 12px; font-size: 13.5px; font-weight: 600; }
 </style>

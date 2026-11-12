@@ -20,6 +20,7 @@
   function resume() { push("/board"); }
   function goCatalog() { push("/trials"); }
   function goPast() { push("/saved"); }
+  function goReview() { push("/review"); }
 
   // Pazienti in arrivo inseriti dai colleghi (foglio condiviso).
   $effect(() => watchShared());
@@ -214,6 +215,13 @@
         <path d="M5 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2" />
       </svg>
       <span>{$t.landing.pastPatients}</span>
+    </button>
+    <button class="footer-link" type="button" onclick={goReview}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 11l3 3L22 4" />
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+      </svg>
+      <span>{$t.protocolReview.entry}</span>
     </button>
   </div>
 </div>
